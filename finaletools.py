@@ -16,7 +16,7 @@ from multiprocessing.pool import Pool
 import time
 
 def frag_length():
-    return None
+    return "none"
 
 # TODO: Read about pile-up
 # TODO: finish frag coverage
