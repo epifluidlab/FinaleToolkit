@@ -4,7 +4,7 @@ Created: 6/2/23
 PI: Yaping Liu
 
 Description:
-Python script to calculate coverage of a window given a BAM file.
+Python script to calculate fragment features given a BAM file.
 
 """
 
