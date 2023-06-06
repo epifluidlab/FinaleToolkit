@@ -37,6 +37,8 @@ def frag_length(input_file, contig=None, output_file=None, threads=1, quality_th
 
 def frag_coverage(input_file, contig, output_file=None, reference=None, start=None, stop=None, region=None, quality_threshold=15, read_callback='all', verbose=False):
     # TODO: verify that reference is necessary, since it is based on a backward compatible synonym from pysam
+    if (verbose):
+        start_time = time.time()
     coverage = 0 # initializing variable for coverage tuple outside of with statement
 
     with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
@@ -48,7 +50,9 @@ def frag_coverage(input_file, contig, output_file=None, reference=None, start=No
                 center = read1.reference_start + read1.template_length // 2
                 if ((center >= start) and (center < stop)):
                     coverage += 1
-
+    if (verbose):
+        end_time = time.time()
+        print(f'frag_coverage took {end_time - start_time} s to complete')
 
     return coverage
 
