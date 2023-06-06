@@ -16,7 +16,7 @@ from multiprocessing.pool import Pool
 import time
 from tempfile import TemporaryDirectory
 
-def low_quality_read_pairs(read, min_mapq): # min_mapq is synonymous to quality_threshold
+def low_quality_read_pairs(read, min_mapq): # min_mapq is synonymous to quality_threshold, copied from https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary_in_intervals.py
     return read.is_unmapped or read.is_secondary or (not read.is_paired) \
            or read.mate_is_unmapped or read.is_duplicate or read.mapping_quality < min_mapq \
            or read.is_qcfail or read.is_supplementary or (not read.is_proper_pair) \
@@ -26,7 +26,7 @@ def frag_length(input_file, contig=None, output_file=None, threads=1, quality_th
     lengths = []    # list of fragment lengths
     with pysam.AlignmentFile(input_file) as sam_file:   # Import
         for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
-            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Filter out non-paired-end reads and low-quality reads
+            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                 pass
             else:
                 lengths.append(abs(read1.template_length))  # append length of fragment to list
@@ -36,15 +36,27 @@ def frag_length(input_file, contig=None, output_file=None, threads=1, quality_th
 # TODO: Read about pile-up
 
 # TODO: finish frag coverage
-def frag_coverage(input_file, contig, output_file=None, reference=None, start=None, stop=None, end=None, region=None, quality_threshold=15, read_callback='all', verbose=False):
-    coverage = None # initializing variable for coverage tuple outside of with statement
-    with pysam.AlignmentFile(input_file, 'r') as sam_file:
-        False
+def frag_coverage(input_file, contig, output_file=None, reference=None, start=None, stop=None, region=None, quality_threshold=15, read_callback='all', verbose=False):
+    # TODO: verify that reference is necessary, since it is based on a backward compatible synonym from pysam
+    coverage = 0 # initializing variable for coverage tuple outside of with statement
+
+    with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
+        for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
+            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                pass
+            else:
+                # calculate mid-point of fragment
+                center = read1.reference_start + read1.template_length * 0.5
+                if ((center >= start) and (center < stop)):
+                    coverage += 1
+
+
     return coverage
 
 def wps():
     return None
 
+# TODO: look through argparse args and fix them all
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='finaletools',
                     description='Calculates fragmentation features given a CRAM/BAM/SAM file',
@@ -63,7 +75,6 @@ if __name__ == '__main__':
                                             description='Calculates fragmentation coverage over a region given a CRAM/BAM/SAM file')
     parser_command1.add_argument('--start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
     parser_command1.add_argument('--stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
-    parser_command1.add_argument('--end', type=int)   # synonymous to stop
     parser_command1.add_argument('--region')   # samtools region string
     parser_command1.add_argument('--method', default="frag-center")
     # parser_command1.add_argument('--quality_threshold', default=15, type=int)   # minimum phred score for a base to be counted TODO: implement threshold
@@ -79,7 +90,6 @@ if __name__ == '__main__':
                                             description='Calculates Windowed Protection Score over a region given a CRAM/BAM/SAM file')
     parser_command3.add_argument('--start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
     parser_command3.add_argument('--stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
-    parser_command3.add_argument('--end', type=int)   # synonymous to stop
     parser_command3.add_argument('--region')   # samtools region string
 
 
