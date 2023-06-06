@@ -14,11 +14,28 @@ import gzip
 import numpy as np
 from multiprocessing.pool import Pool
 import time
+from tempfile import TemporaryDirectory
 
-def frag_length():
-    return "none"
+def frag_length(input_file, contig=None, output_file=None, threads=1, verbose=False):
+    # TODO: Import
+    lengths = []    # list of fragment lengths
+    with TemporaryDirectory() as temp_dir:
+        pysam.view('-o', f'{temp_dir}/filtered.tmp.bam', '-b', '-f', '0x2', '-@', str(threads), input_file)
+        pysam.sort('-o', f'{temp_dir}/sorted.tmp.bam', '-n', '-b', '-@', str(threads), f'{temp_dir}/filtered.tmp.bam') # TODO: verify that this won't break a bunch of stuff
+        with pysam.AlignmentFile(f'{temp_dir}/sorted.tmp.bam') as sorted_sam:
+            for segment in sorted_sam.head(n = 10):
+                print(segment)
+                # NOTE: reference_positions and aligned pairs returns a list of all nt in the read. TODO: somehow extract the start
+                # and stop coordinate for each read and pair and use these values to calculate length.
+    # TODO: Filter out non-paired-end reads into sam_file type
+    # TODO: create array with shape (number of aligned pairs, 1)
+    # TODO: maybe create dictionary of reads to size
+    # TODO: optionally output information to a text file
+    # TODO: return either array or dictionary
+    return lengths
 
 # TODO: Read about pile-up
+
 # TODO: finish frag coverage
 def frag_coverage(input_file, contig, output_file=None, reference=None, start=None, stop=None, end=None, region=None, quality_threshold=15, read_callback='all', verbose=False):
     coverage = None # initializing variable for coverage tuple outside of with statement
