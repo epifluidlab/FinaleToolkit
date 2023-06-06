@@ -16,23 +16,22 @@ from multiprocessing.pool import Pool
 import time
 from tempfile import TemporaryDirectory
 
-def frag_length(input_file, contig=None, output_file=None, threads=1, verbose=False):
-    # TODO: Import
+def low_quality_read_pairs(read, min_mapq): # min_mapq is synonymous to quality_threshold
+    return read.is_unmapped or read.is_secondary or (not read.is_paired) \
+           or read.mate_is_unmapped or read.is_duplicate or read.mapping_quality < min_mapq \
+           or read.is_qcfail or read.is_supplementary or (not read.is_proper_pair) \
+           or read.reference_name != read.next_reference_name
+
+def frag_length(input_file, contig=None, output_file=None, threads=1, quality_threshold=15, verbose=False):
     lengths = []    # list of fragment lengths
-    with TemporaryDirectory() as temp_dir:
-        pysam.view('-o', f'{temp_dir}/filtered.tmp.bam', '-b', '-f', '0x2', '-@', str(threads), input_file)
-        pysam.sort('-o', f'{temp_dir}/sorted.tmp.bam', '-n', '-b', '-@', str(threads), f'{temp_dir}/filtered.tmp.bam') # TODO: verify that this won't break a bunch of stuff
-        with pysam.AlignmentFile(f'{temp_dir}/sorted.tmp.bam') as sorted_sam:
-            for segment in sorted_sam.head(n = 10):
-                print(segment)
-                # NOTE: reference_positions and aligned pairs returns a list of all nt in the read. TODO: somehow extract the start
-                # and stop coordinate for each read and pair and use these values to calculate length.
-    # TODO: Filter out non-paired-end reads into sam_file type
-    # TODO: create array with shape (number of aligned pairs, 1)
-    # TODO: maybe create dictionary of reads to size
-    # TODO: optionally output information to a text file
-    # TODO: return either array or dictionary
-    return lengths
+    with pysam.AlignmentFile(input_file) as sam_file:   # Import
+        for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
+            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Filter out non-paired-end reads and low-quality reads
+                pass
+            else:
+                lengths.append(abs(read1.template_length))  # append length of fragment to list
+    # TODO: when given output file, print to file
+    return np.array(lengths)
 
 # TODO: Read about pile-up
 
@@ -57,6 +56,7 @@ if __name__ == '__main__':
     parser.add_argument('input_file')    # input bam file to calculate coverage from
     parser.add_argument('--output_file') # optional output text file to print coverage in
     parser.add_argument('--reference')   # synonymous to contig
+    parser.add_argument('--quality_threshold', default=15, type=int)
 
     # Subcommand 1: frag-coverage
     parser_command1 = subparsers.add_parser(prog='frag-converage',
