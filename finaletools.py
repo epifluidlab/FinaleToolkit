@@ -35,7 +35,6 @@ def frag_length(input_file, contig=None, output_file=None, threads=1, quality_th
 
 # TODO: Read about pile-up
 
-# TODO: finish frag coverage
 def frag_coverage(input_file, contig, output_file=None, reference=None, start=None, stop=None, region=None, quality_threshold=15, read_callback='all', verbose=False):
     # TODO: verify that reference is necessary, since it is based on a backward compatible synonym from pysam
     coverage = 0 # initializing variable for coverage tuple outside of with statement
@@ -46,7 +45,7 @@ def frag_coverage(input_file, contig, output_file=None, reference=None, start=No
                 pass
             else:
                 # calculate mid-point of fragment
-                center = read1.reference_start + read1.template_length * 0.5
+                center = read1.reference_start + read1.template_length // 2
                 if ((center >= start) and (center < stop)):
                     coverage += 1
 
