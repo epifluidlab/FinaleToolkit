@@ -16,7 +16,23 @@ from multiprocessing.pool import Pool
 import time
 from tempfile import TemporaryDirectory
 
-def low_quality_read_pairs(read, min_mapq): # min_mapq is synonymous to quality_threshold, copied from https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary_in_intervals.py
+def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quality_threshold, copied from https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary_in_intervals.py
+    """
+    Return `True` if the sequenced read described in `read` is not a mapped properly paired read with a Phred score exceeding `min_mapq`.
+
+    Parameters
+    ----------
+    read : pysam.AlignedSegment
+        Sequenced read to check for quality, perfect pairing and if it is mapped.
+    min_mapq : int, optional
+        Minimum Phred score for map quality of read. Defaults to 15.
+
+    Returns
+    -------
+    is_low_quality : bool
+        True if read is low quality, unmapped, not properly paired.
+    """
+
     return read.is_unmapped or read.is_secondary or (not read.is_paired) \
            or read.mate_is_unmapped or read.is_duplicate or read.mapping_quality < min_mapq \
            or read.is_qcfail or read.is_supplementary or (not read.is_proper_pair) \
@@ -35,12 +51,35 @@ def frag_length(input_file, contig=None, output_file=None, threads=1, quality_th
 
 # TODO: Read about pile-up
 
-def frag_coverage(input_file, contig, output_file=None, reference=None, start=None, stop=None, region=None, quality_threshold=15, read_callback='all', verbose=False):
-    # TODO: verify that reference is necessary, since it is based on a backward compatible synonym from pysam
+def frag_center_coverage(input_file, contig, start, stop, output_file=None, quality_threshold=15, verbose=False):
+    """
+    Return estimated fragment coverage over specified `contig` and region of 
+    `input_file`. Uses an algorithm where the midpoints of fragments are calculated
+    and coverage is tabulated from the midpoints that fall into the specified
+    region. Not suitable for fragments of size approaching region size.
+
+    Parameters
+    ----------
+    input_file : string
+        Path to BAM, SAM, or CRAM file containing paired-end fragment reads.
+    contig : string
+    start : int
+    stop : int
+    output_file : string, optional
+    quality_threshold : int, optional
+    verbose : bool
+
+    Returns
+    -------
+    coverage : int
+        Estimated fragment coverage over contig and region.
+    """
+    # TODO: determine if reference (like as found in pysam) is necessary
+    # TODO: consider including region string (like in pysam)
+
     if (verbose):
         start_time = time.time()
     coverage = 0 # initializing variable for coverage tuple outside of with statement
-
     with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
         for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
             if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
@@ -56,7 +95,24 @@ def frag_coverage(input_file, contig, output_file=None, reference=None, start=No
 
     return coverage
 
-def wps():
+def wps(input_file, quality_threshold=15, verbose=False):
+    """
+    Return Windowed Protection Score as specified in Snyder et al (2016).
+
+    Parameters
+    ----------
+    input_file : string
+        Path to BAM, SAM, or CRAM file containing paired-end fragment reads.
+    output_file : string, optional
+    quality_threshold : int, optional
+    verbose : bool
+
+    Returns
+    -------
+    scores : numpy.ndarray
+    """
+    # TODO: implement wps
+
     return None
 
 # TODO: look through argparse args and fix them all
