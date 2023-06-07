@@ -144,17 +144,48 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
 
     return coverage
 
-def wps(input_file, quality_threshold=15, verbose=False):
+def single_wps(alignment_file, contig, location, window_size=120, quality_threshold=15, verbose=False):
     """
-    Return Windowed Protection Score as specified in Snyder et al (2016).
+    Return Windowed Protection Scores as specified in Snyder et al (2016).
 
     Parameters
     ----------
-    input_file : string
-        Path to BAM, SAM, or CRAM file containing paired-end fragment reads.
-    output_file : string, optional
+    input_file : pysam.AlignmentFile
+        BAM, SAM, or CRAM file containing paired-end fragment reads.
+    contig : str
+        Contig that bp is on.
+    location : int
+        Location of bp at center of window.
+    window_size : int, optional
+        Size of window to calculate WPS. Defaults to k=120, corresponding to
+        L-WPS.
     quality_threshold : int, optional
-    verbose : bool
+        Minimum read mapping quality. Defaults to 15.
+    verbose : bool, optional
+
+    Returns
+    -------
+    score : int
+    """
+    pass
+
+def wps(input_file, contig, start, stop, output_file=None, window_size=120, quality_threshold=15, verbose=False):
+    """
+    Return Windowed Protection Scores as specified in Snyder et al (2016) over a
+    region [start,stop).
+
+    Parameters
+    ----------
+    input_file : str or pysam.AlignmentFile
+        BAM, SAM, or CRAM file containing paired-end fragment reads or its 
+        path. `AlignmentFile` must be opened in read mode.
+    contig : str
+    start : int
+    stop : int
+    output_file : string, optional
+    window_size : int, optional
+    quality_threshold : int, optional
+    verbose : bool, optional
 
     Returns
     -------
