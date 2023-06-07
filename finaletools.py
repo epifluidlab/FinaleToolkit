@@ -108,7 +108,7 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
     Returns
     -------
     coverage : int
-        Estimated fragment coverage over contig and region.
+        Fragment coverage over contig and region.
     """
     # TODO: determine if reference (like as found in pysam) is necessary
     # TODO: consider including region string (like in pysam)
@@ -144,31 +144,6 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
 
     return coverage
 
-def single_wps(alignment_file, contig, location, window_size=120, quality_threshold=15, verbose=False):
-    """
-    Return Windowed Protection Scores as specified in Snyder et al (2016).
-
-    Parameters
-    ----------
-    input_file : pysam.AlignmentFile
-        BAM, SAM, or CRAM file containing paired-end fragment reads.
-    contig : str
-        Contig that bp is on.
-    location : int
-        Location of bp at center of window.
-    window_size : int, optional
-        Size of window to calculate WPS. Defaults to k=120, corresponding to
-        L-WPS.
-    quality_threshold : int, optional
-        Minimum read mapping quality. Defaults to 15.
-    verbose : bool, optional
-
-    Returns
-    -------
-    score : int
-    """
-    pass
-
 def wps(input_file, contig, start, stop, output_file=None, window_size=120, quality_threshold=15, verbose=False):
     """
     Return Windowed Protection Scores as specified in Snyder et al (2016) over a
@@ -190,10 +165,63 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
     Returns
     -------
     scores : numpy.ndarray
+        np array of shape (n, 2) where column 1 is the coordinate and column 2 is the score
+        and n is the number of coordinates in region [start,stop)
     """
-    # TODO: implement wps
 
-    return None
+    if (verbose):
+        start_time = time.time()
+
+    # lists tuples containing coordinates of fragment ends.
+    frag_ends = []
+
+    if (type(input_file) == pysam.AlignmentFile):
+        sam_file = input_file
+        # TODO: allow for input_file to be an AlignmentFile
+    else:
+        with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
+            for read1 in sam_file.fetch(contig=contig):
+                if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                    pass
+                else:
+                    frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
+
+    frag_ends = np.array(frag_ends)
+
+    # if (verbose):
+    #     print(frag_ends)
+
+    scores = np.append(np.vstack(np.arange(start, stop, dtype=np.int64)), np.zeros((stop-start, 1), dtype=np.int64), axis=1)    # matrix to store wps for each position in range
+    
+    for i in range(stop-start):
+        # get window position associated with index i from first column
+        window_pos = scores[i, 0]
+
+        # start and stop coordinates of the window
+        window_start = window_pos - window_size // 2
+        window_stop = window_pos + window_size // 2 - 1 # inclusive
+
+        # count number of totally spanning fragments
+        is_spanning = (frag_ends[:, 0] < window_start) * (frag_ends[:, 1] > window_stop)
+        num_spanning = np.sum(is_spanning)
+
+        # count number of fragments with end in window
+        is_start_in = (frag_ends[:, 0] >= window_start) * (frag_ends[:, 0] <= window_stop)
+        is_stop_in = (frag_ends[:, 0] >= window_start) * (frag_ends[:, 0] <= window_stop)
+        is_end_in = np.logical_or(is_start_in, is_stop_in)
+        num_end_in = np.sum(is_end_in)
+
+        # calculate score and put in second column
+        scores[i, 1] = num_spanning - num_end_in
+
+        # if (verbose):
+        #     print(f'window pos {window_pos}, window ends {window_start} {window_stop}, spanning {num_spanning}, end in {num_end_in}, WPS {scores[i, 1]}')
+
+    if (verbose):
+        end_time = time.time()
+        print(f'frag_coverage took {end_time - start_time} s to complete')
+        
+    return scores
 
 # TODO: look through argparse args and fix them all
 if __name__ == '__main__':
