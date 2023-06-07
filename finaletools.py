@@ -198,8 +198,8 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
         window_pos = scores[i, 0]
 
         # start and stop coordinates of the window
-        window_start = window_pos - window_size // 2
-        window_stop = window_pos + window_size // 2 - 1 # inclusive
+        window_start = round(window_pos - window_size * 0.5)
+        window_stop = round(window_pos + window_size * 0.5 - 1) # inclusive
 
         # count number of totally spanning fragments
         is_spanning = (frag_ends[:, 0] < window_start) * (frag_ends[:, 1] > window_stop)
