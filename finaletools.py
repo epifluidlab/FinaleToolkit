@@ -60,8 +60,9 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
 
     Parameters
     ----------
-    input_file : string
-        Path to BAM, SAM, or CRAM file containing paired-end fragment reads.
+    input_file : str or pysam.AlignmentFile
+        BAM, SAM, or CRAM file containing paired-end fragment reads or its 
+        path. `AlignmentFile` must be opened in read mode.
     contig : string
     start : int
     stop : int
@@ -80,7 +81,9 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
     if (verbose):
         start_time = time.time()
     coverage = 0 # initializing variable for coverage tuple outside of with statement
-    with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
+
+    if (type(input_file) == pysam.AlignmentFile):
+        sam_file = input_file
         for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
             if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                 pass
@@ -89,6 +92,16 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
                 center = read1.reference_start + read1.template_length // 2
                 if ((center >= start) and (center < stop)):
                     coverage += 1
+    else:
+        with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
+            for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
+                if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                    pass
+                else:
+                    # calculate mid-point of fragment
+                    center = read1.reference_start + read1.template_length // 2
+                    if ((center >= start) and (center < stop)):
+                        coverage += 1
     if (verbose):
         end_time = time.time()
         print(f'frag_coverage took {end_time - start_time} s to complete')
@@ -153,6 +166,6 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    print(frag_coverage(**vars(args)))
+    print(frag_center_coverage(**vars(args)))
 
 
