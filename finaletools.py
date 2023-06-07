@@ -39,14 +39,49 @@ def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quali
            or read.reference_name != read.next_reference_name
 
 def frag_length(input_file, contig=None, output_file=None, threads=1, quality_threshold=15, verbose=False):
+    """
+    Return `np.ndarray` containing lengths of fragments in `input_file` that are
+    above the quality threshold and are proper-paired reads.
+
+    Parameters
+    ----------
+    input_file : str or pysam.AlignmentFile
+        BAM, SAM, or CRAM file containing paired-end fragment reads or its 
+        path. `AlignmentFile` must be opened in read mode.
+    contig : string, optional
+    output_file : string, optional
+    quality_threshold : int, optional
+    verbose : bool, optional
+
+    Returns
+    -------
+    lengths : numpy.ndarray
+        `ndarray` of fragment lengths from file and contig if 
+        specified.
+    """
+    if (verbose):
+        start_time = time.time()
+
     lengths = []    # list of fragment lengths
-    with pysam.AlignmentFile(input_file) as sam_file:   # Import
+    if (type(input_file) == pysam.AlignmentFile):
+        sam_file = input_file
         for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
             if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                 pass
             else:
                 lengths.append(abs(read1.template_length))  # append length of fragment to list
+    else:
+        with pysam.AlignmentFile(input_file) as sam_file:   # Import
+            for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
+                if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                    pass
+                else:
+                    lengths.append(abs(read1.template_length))  # append length of fragment to list
     # TODO: when given output file, print to file
+
+    if (verbose):
+        end_time = time.time()
+        print(f'frag_coverage took {end_time - start_time} s to complete')
     return np.array(lengths)
 
 # TODO: Read about pile-up
@@ -68,7 +103,7 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
     stop : int
     output_file : string, optional
     quality_threshold : int, optional
-    verbose : bool
+    verbose : bool, optional
 
     Returns
     -------
@@ -80,6 +115,7 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
 
     if (verbose):
         start_time = time.time()
+
     coverage = 0 # initializing variable for coverage tuple outside of with statement
 
     if (type(input_file) == pysam.AlignmentFile):
