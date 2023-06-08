@@ -177,7 +177,12 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
 
     if (type(input_file) == pysam.AlignmentFile):
         sam_file = input_file
-        # TODO: allow for input_file to be an AlignmentFile
+        for read1 in sam_file.fetch(contig=contig):
+            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                pass
+            else:
+                frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
+
     else:
         with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
             for read1 in sam_file.fetch(contig=contig):
