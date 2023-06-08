@@ -14,7 +14,6 @@ import gzip
 import numpy as np
 from multiprocessing.pool import Pool
 import time
-from tempfile import TemporaryDirectory
 
 def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quality_threshold, copied from https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary_in_intervals.py
     """
@@ -37,6 +36,7 @@ def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quali
            or read.mate_is_unmapped or read.is_duplicate or read.mapping_quality < min_mapq \
            or read.is_qcfail or read.is_supplementary or (not read.is_proper_pair) \
            or read.reference_name != read.next_reference_name
+
 
 def frag_length(input_file, contig=None, output_file=None, threads=1, quality_threshold=15, verbose=False):
     """
@@ -191,16 +191,43 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
                 else:
                     frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
 
+    # convert to ndarray
     frag_ends = np.array(frag_ends)
 
     # if (verbose):
     #     print(frag_ends)
 
-    scores = np.append(np.vstack(np.arange(start, stop, dtype=np.int64)), np.zeros((stop-start, 1), dtype=np.int64), axis=1)    # matrix to store wps for each position in range
+    # array to store positions and scores
+    scores = np.zeros((stop-start, 2))
+    window_centers = np.arange(start, stop, dtype=np.int64)
+    scores[:, 0] = window_centers
+
+    """
+    # Attempt at using vectorization to eliminate explicit for loop, stil O(N) but somehow slower
+    # window positions and ends
+    window_starts = np.rint(window_centers - window_size * 0.5).astype(np.int64)
+    window_stops = np.rint(window_centers + window_size * 0.5).astype(np.int64)
+
+    # calculate number of spanning fragments
+    are_spanning = (frag_ends[:, 0].reshape((-1, 1)) < window_starts.reshape((1, -1))) * (frag_ends[:, 1].reshape((-1, 1)) > window_stops.reshape((1, -1)))   # this uses numpy broadcasting to resize arrays
     
+    num_spanning = np.sum(are_spanning, axis=0)
+
+    # calculate number of fragments with an end in window
+    are_start_in = (frag_ends[:, 0].reshape((-1, 1)) >= window_starts.reshape((1, -1))) * (frag_ends[:, 0].reshape((-1, 1)) <= window_stops.reshape((1, -1)))
+    are_stop_in = (frag_ends[:, 1].reshape((-1, 1)) >= window_starts.reshape((1, -1))) * (frag_ends[:, 1].reshape((-1, 1)) <= window_stops.reshape((1, -1)))
+    are_end_in = np.logical_or(are_start_in, are_stop_in)
+
+    num_end_in = np.sum(are_end_in, axis=0)
+
+    # calculate wps
+    scores[:, 1] = num_spanning - num_end_in
+    """
+
+
     for i in range(stop-start):
         # get window position associated with index i from first column
-        window_pos = scores[i, 0]
+        window_pos = window_centers[i]
 
         # start and stop coordinates of the window
         window_start = round(window_pos - window_size * 0.5)
