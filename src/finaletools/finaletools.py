@@ -15,6 +15,51 @@ import numpy as np
 from multiprocessing.pool import Pool
 import time
 
+def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, verbose=False):
+    """
+    Take paired-end reads from bam_file and write to a BED file.
+
+    Parameters
+    ----------
+    input_file : pysam.AlignedFile or str
+    out_file : str
+    contig : str, optional
+    quality_threshold : int, optional
+    verbose : bool, optional
+    """
+    sam_file = None
+    try:
+        # Open file or asign AlignmentFile to sam_file
+        if (type(input_file) == pysam.AlignmentFile):
+            sam_file = input_file            
+        elif (type(input_file) == str):
+            sam_file = pysam.AlignmentFile(input_file)
+        else:
+            raise TypeError("bam_file should be a SAM or BAM file or a string containing a path to the file.")
+        
+        # Open output file
+        if output_file.endswith('.gz'):
+            out = gzip.open(output_file, 'wt')
+        else:
+            out = open(output_file, 'w')
+
+        # iterate through reads and send to BED
+        for read1 in sam_file.fetch(contig=contig):
+            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                pass
+            else:
+                out.write(f'{read1.reference_name}\t{read1.reference_start}\t{read1.reference_start + read1.template_length}\n')
+    except Exception as e:
+        print("An error occurred:", str(e))
+    
+    finally:
+        # Close everything when done
+        if (type(input_file) == str):
+            sam_file.close()
+        out.close()
+
+
+
 def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quality_threshold, copied from https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary_in_intervals.py
     """
     Return `True` if the sequenced read described in `read` is not a mapped properly paired read with a Phred score exceeding `min_mapq`.
