@@ -14,6 +14,7 @@ import gzip
 import numpy as np
 from multiprocessing.pool import Pool
 import time
+from typing import Union
 
 def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, verbose=False):
     """
@@ -189,7 +190,7 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
 
     return coverage
 
-def wps(input_file, contig, start, stop, output_file=None, window_size=120, quality_threshold=15, verbose=False):
+def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[int, str], stop: Union[int, str], output_file: str=None, window_size: int=120, quality_threshold: int=15, verbose: bool=False) -> np.ndarray[np.int64, np.int64]: # Using Union instead of bitwise | to allow backward compatability if needed
     """
     Return Windowed Protection Scores as specified in Snyder et al (2016) over a
     region [start,stop).
@@ -216,6 +217,10 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
 
     if (verbose):
         start_time = time.time()
+    
+    # set start and stop to ints
+    start = int(start)
+    stop = int(stop)
 
     # lists tuples containing coordinates of fragment ends.
     frag_ends = []
