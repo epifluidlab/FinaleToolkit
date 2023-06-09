@@ -197,7 +197,7 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, or CRAM file containing paired-end fragment reads or its 
+        BAM or SAM file containing paired-end fragment reads or its 
         path. `AlignmentFile` must be opened in read mode.
     contig : str
     start : int
@@ -220,7 +220,7 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
     # lists tuples containing coordinates of fragment ends.
     frag_ends = []
 
-    if (type(input_file) == pysam.AlignmentFile):
+    if (type(input_file) == pysam.AlignmentFile):   # input_file is AllignmentFile
         sam_file = input_file
         for read1 in sam_file.fetch(contig=contig):
             if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
@@ -228,13 +228,16 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
             else:
                 frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
 
-    else:
+    elif (type(input_file) == str): # input_file is a path string
         with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
             for read1 in sam_file.fetch(contig=contig):
                 if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                     pass
                 else:
                     frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
+    
+    else:
+        raise TypeError(f'input_file is unsupported type "{type(input_file)}". input_file should be a pysam.AlignmentFile or a string containing the path to a SAM or BAM file.')
 
     # convert to ndarray
     frag_ends = np.array(frag_ends)
@@ -293,6 +296,29 @@ def wps(input_file, contig, start, stop, output_file=None, window_size=120, qual
 
         # if (verbose):
         #     print(f'window pos {window_pos}, window ends {window_start} {window_stop}, spanning {num_spanning}, end in {num_end_in}, WPS {scores[i, 1]}')
+
+    # TODO: consider switch-case statements and determine if they shouldn't be used for backwards compatability
+    if (type(output_file) == str):   # check if output specified
+
+        if output_file.endswith(".wig.gz"): # zipped wiggle
+            with gzip.open(output_file, 'wt') as out:
+                # declaration line
+                out.write(f'fixedStep\tchrom={contig}\tstart={start}\tstep={1}\tspan={stop-start}\n')
+                for score in scores[:, 1]:
+                    out.write(f'{score}\n')
+
+        elif output_file.endswith(".wig"):  # wiggle
+            with open(output_file, 'wt') as out:
+                # declaration line
+                out.write(f'fixedStep\tchrom={contig}\tstart={start}\tstep={1}\tspan={stop-start}\n')
+                for score in scores[:, 1]:
+                    out.write(f'{score}\n')
+
+        else:   # unaccepted file type
+            raise ValueError('output_file can only have suffixes .wig or .wig.gz.')
+
+    elif (output_file != None):
+        raise TypeError(f'output_file is unsupported type "{type(input_file)}". output_file should be a string specifying the path of the file to output scores to.')
 
     if (verbose):
         end_time = time.time()
