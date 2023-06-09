@@ -29,6 +29,9 @@ def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, 
     quality_threshold : int, optional
     verbose : bool, optional
     """
+    if (verbose):
+        start_time = time.time()
+
     sam_file = None
     try:
         # Open file or asign AlignmentFile to sam_file
@@ -60,7 +63,64 @@ def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, 
             sam_file.close()
         out.close()
 
+    if (verbose):
+        end_time = time.time()
+        print(f'frag_bam_to_bed took {end_time - start_time} s to complete')
 
+def frag_array(input_file: Union[str, pysam.AlignmentFile], contig:str, quality_threshold:int=15) -> np.ndarray[np.int64, np.int64]:
+    """
+    Reads from BAM, SAM, or BED file and returns a two column matrix with fragment start and stop positions.
+
+    Parameters
+    ----------
+    input_file : str or AlignmentFile
+    contig : str
+    quality_threshold : int, optional
+    """
+    # lists tuples containing coordinates of fragment ends.
+    frag_ends = []
+
+    if (type(input_file) == pysam.AlignmentFile):   # input_file is AllignmentFile
+        sam_file = input_file
+        for read1 in sam_file.fetch(contig=contig):
+            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                pass
+            else:
+                frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
+
+    elif (type(input_file) == str): # input_file is a path string
+
+        if (input_file.endswith('.bam') or input_file.endswith('.sam')):   # BAM or SAM file
+            with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
+                for read1 in sam_file.fetch(contig=contig):
+                    if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+                        pass
+                    else:
+                        frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
+        elif (input_file.endswith('.bed')): # BED file
+            with open(input_file, 'rt') as bed_file:
+                for line in bed_file:
+                    frag_info = line.split('\t')
+                    if (frag_info[0] == contig):
+                        frag_ends.append((int(frag_info[1]), int(frag_info[2])))
+
+        elif (input_file.endswith('.bed.gz')):
+            with gzip.open(input_file, 'rt') as bed_file:
+                for line in bed_file:
+                    frag_info = line.split('\t')
+                    if (frag_info[0] == contig):
+                        frag_ends.append((int(frag_info[1]), int(frag_info[2])))
+
+        else:
+            raise ValueError('input_file can only have suffixes .bam, .sam, .bed, or .bed.gz')
+    
+    else:
+        raise TypeError(f'input_file is unsupported type "{type(input_file)}". input_file should be a pysam.AlignmentFile or a string containing the path to a SAM or BAM file.')
+
+    # convert to ndarray
+    frag_ends = np.array(frag_ends)
+
+    return frag_ends
 
 def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quality_threshold, copied from https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary_in_intervals.py
     """
@@ -129,6 +189,7 @@ def frag_length(input_file, contig=None, output_file=None, threads=1, quality_th
     if (verbose):
         end_time = time.time()
         print(f'frag_coverage took {end_time - start_time} s to complete')
+
     return np.array(lengths)
 
 # TODO: Read about pile-up
@@ -223,30 +284,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
     start = int(start)
     stop = int(stop)
 
-    # lists tuples containing coordinates of fragment ends.
-    frag_ends = []
-
-    if (type(input_file) == pysam.AlignmentFile):   # input_file is AllignmentFile
-        sam_file = input_file
-        for read1 in sam_file.fetch(contig=contig):
-            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
-                pass
-            else:
-                frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
-
-    elif (type(input_file) == str): # input_file is a path string
-        with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
-            for read1 in sam_file.fetch(contig=contig):
-                if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
-                    pass
-                else:
-                    frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
-    
-    else:
-        raise TypeError(f'input_file is unsupported type "{type(input_file)}". input_file should be a pysam.AlignmentFile or a string containing the path to a SAM or BAM file.')
-
-    # convert to ndarray
-    frag_ends = np.array(frag_ends)
+    # read fragments from file
+    frag_ends = frag_array(input_file, contig, quality_threshold)
 
     # if (verbose):
     #     print(frag_ends)
