@@ -252,7 +252,22 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
 
     return coverage
 
-def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[int, str], stop: Union[int, str], output_file: str=None, window_size: int=120, quality_threshold: int=15, verbose: bool=False) -> np.ndarray[np.int64, np.int64]: # Using Union instead of bitwise | to allow backward compatability if needed
+def _single_wps(window_start: int, window_stop: int, window_position: int, frag_ends: np.ndarray[int, int]) -> int:
+    # count number of totally spanning fragments
+    is_spanning = (frag_ends[:, 0] < window_start) * (frag_ends[:, 1] > window_stop)
+    num_spanning = np.sum(is_spanning)
+
+    # count number of fragments with end in window
+    is_start_in = (frag_ends[:, 0] >= window_start) * (frag_ends[:, 0] <= window_stop)
+    is_stop_in = (frag_ends[:, 1] >= window_start) * (frag_ends[:, 1] <= window_stop)
+    is_end_in = np.logical_or(is_start_in, is_stop_in)
+    num_end_in = np.sum(is_end_in)
+
+    # calculate wps and return
+    return (window_position, num_spanning - num_end_in)
+
+
+def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[int, str], stop: Union[int, str], output_file: str=None, window_size: int=120, quality_threshold: int=15, workers: int=1, verbose: bool=False) -> np.ndarray[np.int64, np.int64]: # Using Union instead of bitwise | to allow backward compatability if needed
     """
     Return Windowed Protection Scores as specified in Snyder et al (2016) over a
     region [start,stop).
@@ -267,6 +282,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
     stop : int
     output_file : string, optional
     window_size : int, optional
+        Size of window to calculate WPS. Default is k = 120, equivalent to L-WPS.
     quality_threshold : int, optional
     verbose : bool, optional
 
@@ -279,6 +295,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
 
     if (verbose):
         start_time = time.time()
+        print("Reading fragments")
     
     # set start and stop to ints
     start = int(start)
@@ -286,38 +303,44 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
 
     # read fragments from file
     frag_ends = frag_array(input_file, contig, quality_threshold)
-
-    # if (verbose):
-    #     print(frag_ends)
+    
+    if (verbose):
+        print("Done reading fragments, preparing for WPS calculation.")
 
     # array to store positions and scores
     scores = np.zeros((stop-start, 2))
     window_centers = np.arange(start, stop, dtype=np.int64)
-    scores[:, 0] = window_centers
+    window_starts = np.round(window_centers - window_size * 0.5)
+    window_stops = np.round(window_centers + window_size * 0.5 - 1) # inclusive
 
+    # create list of soft copies of frag_ends for multiprocessing
+    input_frag_ends = [frag_ends] * (stop - start)
+
+    # input for starmap
+    input_tuples = zip(window_starts, window_stops, window_centers, input_frag_ends)
+
+    if (verbose):
+        print("Calculating WPS")
+
+    with Pool(workers) as pool:
+        scores = np.array(pool.starmap(_single_wps, input_tuples))
+    
+    assert scores.shape == (stop-start, 2)
+    """
     for i in range(stop-start):
-        # get window position associated with index i from first column
-        window_pos = window_centers[i]
-
         # start and stop coordinates of the window
-        window_start = round(window_pos - window_size * 0.5)
-        window_stop = round(window_pos + window_size * 0.5 - 1) # inclusive
+        window_position = window_centers[i]
+        window_start = window_starts[i]
+        window_stop = window_stops[i]
 
-        # count number of totally spanning fragments
-        is_spanning = (frag_ends[:, 0] < window_start) * (frag_ends[:, 1] > window_stop)
-        num_spanning = np.sum(is_spanning)
-
-        # count number of fragments with end in window
-        is_start_in = (frag_ends[:, 0] >= window_start) * (frag_ends[:, 0] <= window_stop)
-        is_stop_in = (frag_ends[:, 0] >= window_start) * (frag_ends[:, 0] <= window_stop)
-        is_end_in = np.logical_or(is_start_in, is_stop_in)
-        num_end_in = np.sum(is_end_in)
+        assert window_stop - window_start == window_size - 1, f'window is actually size k = {window_stop - window_start + 1}'
 
         # calculate score and put in second column
-        scores[i, 1] = num_spanning - num_end_in
+        scores[i, :] = _single_wps(window_start, window_stop, window_position, frag_ends)
 
         # if (verbose):
         #     print(f'window pos {window_pos}, window ends {window_start} {window_stop}, spanning {num_spanning}, end in {num_end_in}, WPS {scores[i, 1]}')
+    """
 
     # TODO: consider switch-case statements and determine if they shouldn't be used for backwards compatability
     if (type(output_file) == str):   # check if output specified
@@ -344,7 +367,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
 
     if (verbose):
         end_time = time.time()
-        print(f'frag_coverage took {end_time - start_time} s to complete')
+        print(f'wps took {end_time - start_time} s to complete')
         
     return scores
 
