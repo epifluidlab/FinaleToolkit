@@ -284,6 +284,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
     window_size : int, optional
         Size of window to calculate WPS. Default is k = 120, equivalent to L-WPS.
     quality_threshold : int, optional
+    workers : int, optional
     verbose : bool, optional
 
     Returns
@@ -379,14 +380,9 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers(title='subcommands', description="Subcommands of finaletools", dest='subcommand')
 
     # Common arguments
-    parser.add_argument('contig')   # chromosome of window
-    parser.add_argument('input_file')    # input bam file to calculate coverage from
-    parser.add_argument('--output_file') # optional output text file to print coverage in
-    parser.add_argument('--reference')   # synonymous to contig
-    parser.add_argument('--quality_threshold', default=15, type=int)
 
     # Subcommand 1: frag-coverage
-    parser_command1 = subparsers.add_parser(prog='frag-converage',
+    parser_command1 = subparsers.add_parser('frag-center-coverage', prog='frag-converage',
                                             description='Calculates fragmentation coverage over a region given a CRAM/BAM/SAM file')
     parser_command1.add_argument('--start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
     parser_command1.add_argument('--stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
@@ -395,20 +391,35 @@ if __name__ == '__main__':
     # parser_command1.add_argument('--quality_threshold', default=15, type=int)   # minimum phred score for a base to be counted TODO: implement threshold
     # parser_command1.add_argument('--read_callback', default='all')    # TODO: implement read callback
     parser_command1.add_argument('-v', '--verbose', default=False, type=bool)    # TODO: add verbose mode
+    parser_command1.set_defaults(func=frag_center_coverage)
     
     # Subcommand 2: frag-length
-    parser_command2 = subparsers.add_parser(prog='frag-length',
+    parser_command2 = subparsers.add_parser('frag-length', prog='frag-length',
                                             description='Calculates fragment lengths given a CRAM/BAM/SAM file')
+    parser_command2.set_defaults(func=frag_length)
     
-    # Subcommand 2: wps()
-    parser_command3 = subparsers.add_parser(prog='frag-length',
+    # Subcommand 3: wps()
+    parser_command3 = subparsers.add_parser('wps', prog='wps',
                                             description='Calculates Windowed Protection Score over a region given a CRAM/BAM/SAM file')
-    parser_command3.add_argument('--start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
-    parser_command3.add_argument('--stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
-    parser_command3.add_argument('--region')   # samtools region string
+    parser_command3.add_argument('input_file')    # input bam file to calculate coverage from
+    parser_command3.add_argument('contig')   # chromosome of window
+    parser_command3.add_argument('start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
+    parser_command3.add_argument('stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
+    parser_command3.add_argument('--output_file') # optional output text file to print coverage in
+    parser_command3.add_argument('--window_size', default=120, type=int)
+    parser_command3.add_argument('--workers', default=1, type=int)
+    parser_command3.add_argument('-v', '--verbose', action='store_true')    # TODO: add verbose mode
+    parser_command3.set_defaults(func=wps)
+
 
 
     args = parser.parse_args()
-    print(frag_center_coverage(**vars(args)))
+    function = args.func
+    funcargs = vars(args)
+    funcargs.pop('func')
+    funcargs.pop('subcommand')
+    print(funcargs)
+    function(**funcargs)
+
 
 
