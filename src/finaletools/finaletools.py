@@ -372,6 +372,46 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
         
     return scores
 
+def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, output_file: str=None, window_size: int=120, size_around_sites: int=4000, quality_threshold: int=15, workers: int=1, verbose: bool=False) -> np.ndarray[np.int64, np.int64]:
+    """
+    Function that aggregates WPS over sites in BED file
+    """
+    scores = np.zeros((size_around_sites, 2))
+    left_of_site = round(-size_around_sites / 2) 
+    right_of_site = round(size_around_sites / 2)
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    with pysam.AlignmentFile(input_file) as file:
+        with open(site_bed, 'rt') as sites:
+            for line in sites:
+                line_items = line.split()
+                scores[:, 1] = scores[:, 1] + wps(file, line_items[0], int(line_items[1]) + left_of_site, int(line_items[1]) + right_of_site, output_file=None, window_size=window_size, quality_threshold=quality_threshold, workers=workers, verbose=verbose)[:, 1]
+
+    if (type(output_file) == str):   # check if output specified
+
+        if output_file.endswith(".wig.gz"): # zipped wiggle
+            with gzip.open(output_file, 'wt') as out:
+                # declaration line
+                out.write(f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan={window_size}\n')
+                for score in scores[:, 1]:
+                    out.write(f'{score}\n')
+
+        elif output_file.endswith(".wig"):  # wiggle
+            with open(output_file, 'wt') as out:
+                # declaration line
+                out.write(f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan={window_size}\n')
+                for score in scores[:, 1]:
+                    out.write(f'{score}\n')
+
+        else:   # unaccepted file type
+            raise ValueError('output_file can only have suffixes .wig or .wig.gz.')
+
+    elif (output_file != None):
+        raise TypeError(f'output_file is unsupported type "{type(input_file)}". output_file should be a string specifying the path of the file to output scores to.')
+    
+    return scores
+
 # TODO: look through argparse args and fix them all
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='finaletools',
@@ -410,6 +450,18 @@ if __name__ == '__main__':
     parser_command3.add_argument('--workers', default=1, type=int)
     parser_command3.add_argument('-v', '--verbose', action='store_true')    # TODO: add verbose mode
     parser_command3.set_defaults(func=wps)
+
+    # Subcommand 4: aggregate-wps
+    parser_command4 = subparsers.add_parser('aggregate-wps', prog='aggregate-wps',
+                                            description='Calculates Windowed Protection Score over a region around sites specified in a BED file from alignments in a CRAM/BAM/SAM file')
+    parser_command4.add_argument('input_file')    # input bam file to calculate coverage from
+    parser_command4.add_argument('site_bed')    # input bam file to calculate coverage from
+    parser_command4.add_argument('--output_file') # optional output text file to print coverage in
+    parser_command4.add_argument('--size_around_sites', default=4000, type=int)    # input bam file to calculate coverage from
+    parser_command4.add_argument('--window_size', default=120, type=int)
+    parser_command4.add_argument('--workers', default=1, type=int)
+    parser_command4.add_argument('-v', '--verbose', action='store_true')    # TODO: add verbose mode
+    parser_command4.set_defaults(func=aggregate_wps)
 
 
 
