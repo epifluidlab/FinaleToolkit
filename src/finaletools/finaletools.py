@@ -32,6 +32,7 @@ def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, 
     """
     if (verbose):
         start_time = time.time()
+        print('Opening file')
 
     sam_file = None
     try:
@@ -163,7 +164,7 @@ def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quali
            or read.reference_name != read.next_reference_name
 
 
-def frag_length(input_file, contig=None, output_file=None, threads=1, quality_threshold=15, verbose=False):
+def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, output_file: str=None, threads: int=1, quality_threshold: int=15, verbose: bool=False) -> np.ndarray[np.int64]:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file` that are
     above the quality threshold and are proper-paired reads.
@@ -186,29 +187,45 @@ def frag_length(input_file, contig=None, output_file=None, threads=1, quality_th
     """
     if (verbose):
         start_time = time.time()
+        print("Finding frag lengths.")
 
     lengths = []    # list of fragment lengths
     if (type(input_file) == pysam.AlignmentFile):
         sam_file = input_file
-        for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
+        count = sam_file.count(contig=contig) if verbose else None
+        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)): # Iterating on each read in file in specified contig/chromosome
             if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                 pass
             else:
                 lengths.append(abs(read1.template_length))  # append length of fragment to list
     else:
         with pysam.AlignmentFile(input_file) as sam_file:   # Import
-            for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
+            count = sam_file.count(contig=contig) if verbose else None
+            for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)): # Iterating on each read in file in specified contig/chromosome
                 if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                     pass
                 else:
                     lengths.append(abs(read1.template_length))  # append length of fragment to list
-    # TODO: when given output file, print to file
+
+    # convert to array
+    lengths = np.array(lengths)
+
+    # check if output specified
+    if (type(output_file) == str):   
+        if output_file.endswith(".bin"): # binary file
+            with open(output_file, 'wt') as out:
+                lengths.tofile(out) 
+        else:   # unaccepted file type
+            raise ValueError('output_file can only have suffixes .wig or .wig.gz.')
+
+    elif (output_file != None):
+        raise TypeError(f'output_file is unsupported type "{type(input_file)}". output_file should be a string specifying the path of the file to output scores to.')
 
     if (verbose):
         end_time = time.time()
-        print(f'frag_coverage took {end_time - start_time} s to complete')
+        print(f'frag_length took {end_time - start_time} s to complete')
 
-    return np.array(lengths)
+    return lengths
 
 # TODO: Read about pile-up
 
@@ -455,12 +472,18 @@ if __name__ == '__main__':
     parser_command1.add_argument('--method', default="frag-center")
     # parser_command1.add_argument('--quality_threshold', default=15, type=int)   # minimum phred score for a base to be counted TODO: implement threshold
     # parser_command1.add_argument('--read_callback', default='all')    # TODO: implement read callback
-    parser_command1.add_argument('-v', '--verbose', default=False, type=bool)    # TODO: add verbose mode
+    parser_command1.add_argument('-v', '--verbose', default=False, type=bool)
     parser_command1.set_defaults(func=frag_center_coverage)
     
     # Subcommand 2: frag-length
     parser_command2 = subparsers.add_parser('frag-length', prog='frag-length',
                                             description='Calculates fragment lengths given a CRAM/BAM/SAM file')
+    parser_command2.add_argument('input_file')    # input bam file to calculate coverage from
+    parser_command2.add_argument('--contig')   # chromosome of window
+    parser_command2.add_argument('--output_file') # optional output text file to print coverage in
+    parser_command2.add_argument('--threads', default=1, type=int)
+    parser_command2.add_argument('--quality_threshold', default=15, type=int)
+    parser_command2.add_argument('-v', '--verbose', action='store_true')
     parser_command2.set_defaults(func=frag_length)
     
     # Subcommand 3: wps()
@@ -473,9 +496,8 @@ if __name__ == '__main__':
     parser_command3.add_argument('--output_file') # optional output text file to print coverage in
     parser_command3.add_argument('--window_size', default=120, type=int)
     parser_command3.add_argument('--workers', default=1, type=int)
-    parser_command3.add_argument('-v', '--verbose', action='store_true')    # TODO: add verbose mode
-    parser_command3.set_defaults(func=wps)
-
+    parser_command3.add_argument('--quality_threshold', default=15, type=int)
+    parser_command3.add_argument('-v', '--verbose', action='store_true')
     # Subcommand 4: aggregate-wps
     parser_command4 = subparsers.add_parser('aggregate-wps', prog='aggregate-wps',
                                             description='Calculates Windowed Protection Score over a region around sites specified in a BED file from alignments in a CRAM/BAM/SAM file')
@@ -485,7 +507,7 @@ if __name__ == '__main__':
     parser_command4.add_argument('--size_around_sites', default=4000, type=int)    # input bam file to calculate coverage from
     parser_command4.add_argument('--window_size', default=120, type=int)
     parser_command4.add_argument('--workers', default=1, type=int)
-    parser_command4.add_argument('-v', '--verbose', action='store_true')    # TODO: add verbose mode
+    parser_command4.add_argument('-v', '--verbose', action='store_true')
     parser_command4.set_defaults(func=aggregate_wps)
 
 
