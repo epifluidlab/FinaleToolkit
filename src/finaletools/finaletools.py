@@ -192,15 +192,25 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, 
     lengths = []    # list of fragment lengths
     if (type(input_file) == pysam.AlignmentFile):
         sam_file = input_file
+        if (verbose):
+            print('Counting reads')
         count = sam_file.count(contig=contig) if verbose else None
+        if (verbose):
+            print(f'{count} reads counted')
         for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)): # Iterating on each read in file in specified contig/chromosome
             if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                 pass
             else:
                 lengths.append(abs(read1.template_length))  # append length of fragment to list
     else:
+        if (verbose):
+            print(f'Opening {input_file}')
         with pysam.AlignmentFile(input_file) as sam_file:   # Import
+            if (verbose):
+                print('Counting reads')
             count = sam_file.count(contig=contig) if verbose else None
+            if (verbose):
+                print(f'{count} reads counted')
             for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)): # Iterating on each read in file in specified contig/chromosome
                 if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
                     pass
