@@ -79,7 +79,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile, contig: str, has_min_max: boo
             else:
                 read_start = read1.reference_start
                 read_stop = read1.reference_start + read1.template_length
-                if ((read_stop >= minimum) or (read_start < maximum)):
+                if ((read_stop >= minimum) and (read_start < maximum)):
                     frag_ends.append((read_start, read_stop))
     else:
         for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)):
@@ -92,10 +92,18 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile, contig: str, has_min_max: boo
 # TODO: implement min_max for _bed_frag_array
 def _bed_frag_array(bed_file, contig: str, has_min_max: bool, quality_threshold:int=15, minimum: int=None, maximum: int=None, verbose: bool=False):
     frag_ends = []
-    for line in (tqdm(bed_file) if verbose else bed_file):
-        frag_info = line.split('\t')
-        if (frag_info[0] == contig):
-            frag_ends.append((int(frag_info[1]), int(frag_info[2])))
+    if (has_min_max):
+        for line in (tqdm(bed_file) if verbose else bed_file):
+            frag_info = line.split('\t')
+            read_start = int(frag_info[1])
+            read_stop = int(frag_info[2])
+            if ((frag_info[0] == contig) and ((read_stop >= minimum) and (read_start < maximum))):
+                frag_ends.append((read_start, read_stop))
+    else:
+        for line in (tqdm(bed_file) if verbose else bed_file):
+            frag_info = line.split('\t')
+            if (frag_info[0] == contig):
+                frag_ends.append((int(frag_info[1]), int(frag_info[2])))
     return frag_ends
 
 
@@ -112,7 +120,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile], contig:str, quality_
     maximum : int, optional
     verbose : bool, optional
     """
-    has_min_max = (minimum != None) and (maximum != None)
+    has_min_max = (minimum != None) and (maximum != None)   # boolean flag indicating whether or not a minimum and maximum location for one fragment end is specified.
     if (minimum == None) != (maximum == None):
         raise ValueError('Both minimum and maximum must either be present or absent.')
 
@@ -164,7 +172,7 @@ def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quali
            or read.reference_name != read.next_reference_name
 
 
-def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, output_file: str=None, threads: int=1, quality_threshold: int=15, verbose: bool=False) -> np.ndarray[np.int64]:
+def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, output_file: str=None, workers: int=1, quality_threshold: int=15, verbose: bool=False) -> np.ndarray[np.int64]:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file` that are
     above the quality threshold and are proper-paired reads.
@@ -491,7 +499,7 @@ if __name__ == '__main__':
     parser_command2.add_argument('input_file')    # input bam file to calculate coverage from
     parser_command2.add_argument('--contig')   # chromosome of window
     parser_command2.add_argument('--output_file') # optional output text file to print coverage in
-    parser_command2.add_argument('--threads', default=1, type=int)
+    parser_command2.add_argument('--workers', default=1, type=int)
     parser_command2.add_argument('--quality_threshold', default=15, type=int)
     parser_command2.add_argument('-v', '--verbose', action='store_true')
     parser_command2.set_defaults(func=frag_length)
