@@ -119,6 +119,14 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile], contig:str, quality_
     minimum : int, optional
     maximum : int, optional
     verbose : bool, optional
+
+    Returns
+    -------
+    frag_ends : ndarray
+        'ndarray' with shape (n, 2) where column 1 contains fragment start positions
+        and column 2 contains fragment stop positions. If no fragments exist in the
+        specified minimum-maximum interval, the returned 'ndarray' will have a shape
+        of (0, 2)
     """
     has_min_max = (minimum != None) and (maximum != None)   # boolean flag indicating whether or not a minimum and maximum location for one fragment end is specified.
     if (minimum == None) != (maximum == None):
@@ -146,6 +154,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile], contig:str, quality_
 
     # convert to ndarray
     frag_ends = np.array(frag_ends)
+
+    if frag_ends.ndim == 1:
+        frag_ends = frag_ends.reshape((0, 2))
+
+    assert frag_ends.ndim == 2, f'frag_ends has dims {frag_ends.ndim} and shape {frag_ends.shape}'
+    assert frag_ends.shape == (0, 2) or frag_ends.shape[1] == 2, f'frag_ends has shape {frag_ends.shape}'
 
     return frag_ends
 
@@ -365,23 +379,27 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
     if (verbose):
         print("Done reading fragments, preparing for WPS calculation.")
 
-    # array to store positions and scores
-    scores = np.zeros((stop-start, 2))
-    window_centers = np.arange(start, stop, dtype=np.int64)
-    window_starts = np.round(window_centers - window_size * 0.5)
-    window_stops = np.round(window_centers + window_size * 0.5 - 1) # inclusive
+    if (frag_ends.shape == (0, 2)): # check if no fragments exist on this interval
+        scores = np.zeros((stop-start, 2))
+        scores [:, 0] = np.arange(start, stop, dtype=np.int64)
+    else:
+        # array to store positions and scores
+        scores = np.zeros((stop-start, 2))
+        window_centers = np.arange(start, stop, dtype=np.int64)
+        window_starts = np.round(window_centers - window_size * 0.5)
+        window_stops = np.round(window_centers + window_size * 0.5 - 1) # inclusive
 
-    # create list of soft copies of frag_ends for multiprocessing
-    input_frag_ends = [frag_ends] * (stop - start)
+        # create list of soft copies of frag_ends for multiprocessing
+        input_frag_ends = [frag_ends] * (stop - start)
 
-    # input for starmap
-    input_tuples = zip(window_starts, window_stops, window_centers, input_frag_ends)
+        # input for starmap
+        input_tuples = zip(window_starts, window_stops, window_centers, input_frag_ends)
 
-    if (verbose):
-        print("Calculating WPS")
+        if (verbose):
+            print("Calculating WPS")
 
-    with Pool(workers) as pool:
-        scores = np.array(pool.starmap(_single_wps, input_tuples))
+        with Pool(workers) as pool:
+            scores = np.array(pool.starmap(_single_wps, input_tuples))
     
     assert scores.shape == (stop-start, 2)
     """
