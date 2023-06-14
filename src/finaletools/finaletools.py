@@ -454,7 +454,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
     """
     if (verbose):
         start_time = time.time()
-        print(f'Calculating aggregate WPS \ninput_file: {input_file} \nsite_bed: {site_bed} \noutput_file: {output_file} \nwindow_size: {window_size}\nsize_around_sites: {size_around_sites}\nquality_threshold: {quality_threshold}\nverbose{verbose}')
+        print(f'Calculating aggregate WPS \ninput_file: {input_file} \nsite_bed: {site_bed} \noutput_file: {output_file} \nwindow_size: {window_size}\nsize_around_sites: {size_around_sites}\nquality_threshold: {quality_threshold}\nverbose: {verbose}')
 
     scores = np.zeros((size_around_sites, 2))
     left_of_site = round(-size_around_sites / 2) 
@@ -466,14 +466,16 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
         print(f'Opening {input_file}...')
 
     with pysam.AlignmentFile(input_file) as file:
+        if (verbose >= 2):
+            with open(site_bed, 'rt') as sites:
+                print('File opened! counting lines')
+                bed_length = 0
+                for line in sites:
+                    bed_length += 1
         with open(site_bed, 'rt') as sites:
             # verbose stuff
             if (verbose):
                 print(f'File opened! Iterating through sites...')
-            if (verbose >= 2):
-                bed_length = 0
-                for line in sites:
-                    bed_length += 1
 
             # aggregate wps over sites in bed file
             for line in (tqdm(sites, total=bed_length) if verbose>=2 else sites):
