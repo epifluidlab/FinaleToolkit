@@ -448,7 +448,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
         
     return scores
 
-def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, output_file: str=None, window_size: int=120, size_around_sites: int=4000, quality_threshold: int=15, workers: int=1, verbose: Union[bool, int]=0) -> np.ndarray[np.int64, np.int64]:
+def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, output_file: str=None, window_size: int=120, size_around_sites: int=4000, quality_threshold: int=15, agg_workers: int=1, wps_workers: int=1, verbose: Union[bool, int]=0) -> np.ndarray[np.int64, np.int64]:
     """
     Function that aggregates WPS over sites in BED file
     """
@@ -457,10 +457,15 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
         print(f'Calculating aggregate WPS \ninput_file: {input_file} \nsite_bed: {site_bed} \noutput_file: {output_file} \nwindow_size: {window_size}\nsize_around_sites: {size_around_sites}\nquality_threshold: {quality_threshold}\nverbose: {verbose}')
 
     scores = np.zeros((size_around_sites, 2))
+
+    # Values to add to center of each site to get start and stop of each wps function
     left_of_site = round(-size_around_sites / 2) 
     right_of_site = round(size_around_sites / 2)
+
     assert right_of_site - left_of_site == size_around_sites
     scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    unaggregated_scores = []
 
     if (verbose):
         print(f'Opening {input_file}...')
@@ -480,7 +485,17 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
             # aggregate wps over sites in bed file
             for line in (tqdm(sites, total=bed_length) if verbose>=2 else sites):
                 line_items = line.split()
-                scores[:, 1] = scores[:, 1] + wps(file, line_items[0], int(line_items[1]) + left_of_site, int(line_items[1]) + right_of_site, output_file=None, window_size=window_size, quality_threshold=quality_threshold, workers=workers, verbose=(verbose-2 if verbose-2>0 else 0))[:, 1]
+                if ('.' in line_items[5]):
+                    continue
+                single_scores = wps(file, line_items[0], int(line_items[1]) + left_of_site, int(line_items[1]) + right_of_site, output_file=None, window_size=window_size, quality_threshold=quality_threshold, workers=wps_workers, verbose=(verbose-2 if verbose-2>0 else 0))[:, 1]
+                if ('+' in line_items[5]):
+                    unaggregated_scores.append(single_scores)
+                elif ('-' in line_items[5]):
+                    single_scores = np.flip(single_scores)
+                    unaggregated_scores.append(single_scores)
+                else:   # sites without strand direction are ignored
+                    pass
+            scores[:, 1] = np.sum(unaggregated_scores, axis=0)
 
     if (verbose):
         print(f'Aggregation complete!')
@@ -571,7 +586,8 @@ if __name__ == '__main__':
     parser_command4.add_argument('--output_file') # optional output text file to print coverage in
     parser_command4.add_argument('--size_around_sites', default=4000, type=int)    # input bam file to calculate coverage from
     parser_command4.add_argument('--window_size', default=120, type=int)
-    parser_command4.add_argument('--workers', default=1, type=int)
+    parser_command4.add_argument('--agg_workers', default=1, type=int)
+    parser_command4.add_argument('--wps_workers', default=1, type=int)
     parser_command4.add_argument('-v', '--verbose', action='count')
     parser_command4.set_defaults(func=aggregate_wps)
 
