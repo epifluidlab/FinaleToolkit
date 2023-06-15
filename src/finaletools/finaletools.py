@@ -367,9 +367,9 @@ def wps(input_file: Union[str, pysam.AlignmentFile], contig:str, start: Union[in
     start = int(start)
     stop = int(stop)
 
-    # set minimum and maximum values for fragments
-    minimum = round(start - window_size * 0.5)
-    maximum = round(stop + window_size * 0.5) # exclusive
+    # set minimum and maximum values for fragments. These extend farther than needed
+    minimum = round(start - window_size)
+    maximum = round(stop + window_size)
 
     # read fragments from file
     frag_ends = frag_array(input_file, contig, quality_threshold, minimum=minimum, maximum=maximum, verbose=(verbose>=2))
