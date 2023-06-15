@@ -25,7 +25,7 @@ def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, 
     Parameters
     ----------
     input_file : pysam.AlignedFile or str
-    out_file : str
+    output_file : str
     contig : str, optional
     quality_threshold : int, optional
     verbose : bool, optional
@@ -606,7 +606,7 @@ if __name__ == '__main__':
                                             description='Calculates Windowed Protection Score over a region around sites specified in a BED file from alignments in a CRAM/BAM/SAM file')
     parser_command4.add_argument('input_file')    # input bam file to calculate coverage from
     parser_command4.add_argument('site_bed')    # input bam file to calculate coverage from
-    parser_command4.add_argument('--output_file') # optional output text file to print coverage in
+    parser_command4.add_argument('-o', '--output_file') # optional output text file to print coverage in
     parser_command4.add_argument('--size_around_sites', default=4000, type=int)    # input bam file to calculate coverage from
     parser_command4.add_argument('--window_size', default=120, type=int)
     parser_command4.add_argument('--agg_workers', default=1, type=int)
