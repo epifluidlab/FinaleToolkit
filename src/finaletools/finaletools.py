@@ -578,6 +578,8 @@ if __name__ == '__main__':
     parser_command3.add_argument('--workers', default=1, type=int)
     parser_command3.add_argument('--quality_threshold', default=15, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count')
+    parser_command3.set_defaults(func=wps)
+
     # Subcommand 4: aggregate-wps
     parser_command4 = subparsers.add_parser('aggregate-wps', prog='aggregate-wps',
                                             description='Calculates Windowed Protection Score over a region around sites specified in a BED file from alignments in a CRAM/BAM/SAM file')
