@@ -607,7 +607,7 @@ if __name__ == '__main__':
     parser_command4.add_argument('input_file')    # input bam file to calculate coverage from
     parser_command4.add_argument('site_bed')    # input bam file to calculate coverage from
     parser_command4.add_argument('-o', '--output_file') # optional output text file to print coverage in
-    parser_command4.add_argument('--size_around_sites', default=4000, type=int)    # input bam file to calculate coverage from
+    parser_command4.add_argument('--size_around_sites', default=5000, type=int)    # input bam file to calculate coverage from
     parser_command4.add_argument('--window_size', default=120, type=int)
     parser_command4.add_argument('--agg_workers', default=1, type=int)
     parser_command4.add_argument('--wps_workers', default=1, type=int)
