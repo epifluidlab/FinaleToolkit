@@ -83,6 +83,32 @@ def frag_bam_to_bed(input_file,
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete')
 
 
+def frags_in_region(frag_array: np.ndarray[int, int],
+                   minimum: int,
+                   maximum: int) -> np.ndarray[int, int]:
+    """
+    Takes an array of coordinates for ends of fragments and returns an
+    array of fragments with coverage in the specified region. That is, a
+    fragment is included if at least one base is in [minimum, maximum).
+
+    Parameters
+    ----------
+    frag_array : ndarray
+    minimum : int
+    maximum : int
+
+    Returns
+    -------
+    filtered_frags : ndarray
+    """
+    in_region = np.logical_and(
+        np.less(frag_array[:, 0], maximum),
+        np.greater_equal(frag_array[:, 1], minimum)
+        )
+    filtered_frags = frag_array[in_region]
+    return filtered_frags
+
+
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
                     has_min_max: bool,
