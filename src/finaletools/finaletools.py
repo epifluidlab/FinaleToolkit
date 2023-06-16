@@ -689,6 +689,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   output_file: str=None,
                   window_size: int=120,
                   size_around_sites: int=4000,
+                  fraction_low: int=120,
+                  fraction_high: int=180,
                   quality_threshold: int=15,
                   agg_workers: int=1,
                   wps_workers: int=1,
@@ -752,10 +754,13 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                                     int(line_items[1]) + right_of_site,
                                     output_file=None,
                                     window_size=window_size,
+                                    fraction_low=fraction_low,
+                                    fraction_high=fraction_high,
                                     quality_threshold=quality_threshold,
                                     workers=wps_workers,
                                     verbose=(verbose-2 if verbose-2>0 else 0)
                                     )[:, 1]
+
                 if ('+' in line_items[5]):
                     unaggregated_scores.append(single_scores)
                 elif ('-' in line_items[5]):
@@ -899,6 +904,10 @@ if __name__ == '__main__':
     parser_command4.add_argument('-o', '--output_file')
     parser_command4.add_argument('--size_around_sites', default=5000, type=int)
     parser_command4.add_argument('--window_size', default=120, type=int)
+    parser_command4.add_argument('-lo', '--fraction_low', default=120,
+                                 type=int)
+    parser_command4.add_argument('-hi', '--fraction_high', default=180,
+                                 type=int)
     parser_command4.add_argument('--agg_workers', default=1, type=int)
     parser_command4.add_argument('--wps_workers', default=1, type=int)
     parser_command4.add_argument('-v', '--verbose', action='count')
