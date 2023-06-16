@@ -14,9 +14,10 @@ import argparse
 import gzip
 import numpy as np
 import time
+import tempfile as tf
 from tqdm import tqdm
 from multiprocessing.pool import Pool
-from typing import Union, TextIO
+from typing import Union, TextIO, BinaryIO
 
 
 def frag_bam_to_bed(input_file,
@@ -707,7 +708,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     return scores
 
 
-def _agg_wps_single_contig(input_file: Union[str, pysam.AlignmentFile],
+def _agg_wps_single_contig(input_file: Union[str, str],
                            contig_site_bed: TextIO,
                            contig: str,
                            window_size: int=120,
@@ -745,6 +746,25 @@ def _agg_wps_single_contig(input_file: Union[str, pysam.AlignmentFile],
                               )
     # TODO: implement
     return None
+
+
+def contig_site_bams(site_bed: str,
+                      genome_path: str
+                      ) -> dict[str, BinaryIO]:
+    with open(genome_path) as genome:
+        contigs = [line.split()[0] for line in genome.readlines()]
+    tempdir = tf.TemporaryDirectory()
+    tempfiles = [f'{tempdir.name}/{contig}.bed' for contig in contigs]
+    contig_dict = dict(zip(contigs, tempfiles))
+    # TODO: this is known to be broken
+    with open(site_bed) as sites:
+        for line in sites:
+            contig = line.split()[0]
+            contig_dict[contig].write(line)
+        print(contig_dict.values())
+    for file in contig_dict.values():
+        file.seek(0)
+    return contig_dict
 
 
 def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
