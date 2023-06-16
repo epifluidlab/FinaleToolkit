@@ -18,7 +18,11 @@ from tqdm import tqdm
 from multiprocessing.pool import Pool
 from typing import Union
 
-def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, verbose=False):
+def frag_bam_to_bed(input_file, 
+                    output_file, 
+                    contig=None, 
+                    quality_threshold=15, 
+                    verbose=False):
     """
     Take paired-end reads from bam_file and write to a BED file.
 
@@ -42,7 +46,9 @@ def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, 
         elif (type(input_file) == str):
             sam_file = pysam.AlignmentFile(input_file)
         else:
-            raise TypeError("bam_file should be a SAM or BAM file or a string containing a path to the file.")
+            raise TypeError(
+                ("bam_file should be an AlignmentFile or path string.")
+                )
         
         # Open output file
         if output_file.endswith('.gz'):
@@ -52,10 +58,16 @@ def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, 
 
         # iterate through reads and send to BED
         for read1 in sam_file.fetch(contig=contig):
-            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+            # Only select forward strand and filter out non-paired-end 
+            # reads and low-quality reads
+            if (read1.is_read2
+                or low_quality_read_pairs(read1, quality_threshold)):  
                 pass
             else:
-                out.write(f'{read1.reference_name}\t{read1.reference_start}\t{read1.reference_start + read1.template_length}\n')
+                out.write(
+                    f'{read1.reference_name}\t{read1.reference_start}\t'
+                    '{read1.reference_start + read1.template_length}\n'
+                    )
     except Exception as e:
         print("An error occurred:", str(e))
     
@@ -69,29 +81,61 @@ def frag_bam_to_bed(input_file, output_file, contig=None, quality_threshold=15, 
         end_time = time.time()
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete')
 
-def _sam_frag_array(sam_file: pysam.AlignmentFile, contig: str, has_min_max: bool, quality_threshold:int=15, minimum: int=None, maximum: int=None, fraction_low: int=120, fraction_high: int=180, verbose: bool=False):
+def _sam_frag_array(sam_file: pysam.AlignmentFile, 
+                    contig: str, 
+                    has_min_max: bool, 
+                    quality_threshold:int=15, 
+                    minimum: int=None, 
+                    maximum: int=None, 
+                    fraction_low: int=120, 
+                    fraction_high: int=180, 
+                    verbose: bool=False):
     frag_ends = []
     count = sam_file.count(contig=contig) if verbose else None
     if (has_min_max):
-        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)):
-            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) 
+                      if verbose 
+                      else sam_file.fetch(contig=contig)):
+            # Only select forward strand and filter out non-paired-end
+            # reads and low-quality reads
+            if (read1.is_read2
+                or low_quality_read_pairs(read1, quality_threshold)):  
                 pass
             else:
                 read_length = read1.template_length
                 read_start = read1.reference_start
                 read_stop = read1.reference_start + read_length
-                if ((read_stop >= minimum) and (read_start < maximum) and (read_length >= fraction_low) and (read_length <= fraction_high)):
+                if ((read_stop >= minimum)
+                    and (read_start < maximum)
+                    and (read_length >= fraction_low)
+                    and (read_length <= fraction_high)):
                     frag_ends.append((read_start, read_stop))
     else:
-        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)):
-            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) 
+                      if verbose 
+                      else sam_file.fetch(contig=contig)):
+            # Only select forward strand and filter out non-paired-end
+            # reads and low-quality reads
+            if (read1.is_read2 
+                or low_quality_read_pairs(read1, quality_threshold)):  
                 pass
             else:
-                frag_ends.append((read1.reference_start, read1.reference_start + read1.template_length))
+                frag_ends.append(
+                    (read1.reference_start,
+                     read1.reference_start + read1.template_length)
+                     )
     return frag_ends
 
 # TODO: implement min_max for _bed_frag_array
-def _bed_frag_array(bed_file, contig: str, has_min_max: bool, quality_threshold:int=15, minimum: int=None, maximum: int=None, fraction_low: int=120, fraction_high: int=180, verbose: bool=False):
+def _bed_frag_array(bed_file,
+                    contig: str,
+                    has_min_max: bool,
+                    quality_threshold:int=15,
+                    minimum: int=None,
+                    maximum: int=None,
+                    fraction_low: int=120,
+                    fraction_high: int=180,
+                    verbose: bool=False):
     frag_ends = []
     if (has_min_max):
         for line in (tqdm(bed_file) if verbose else bed_file):
@@ -99,7 +143,13 @@ def _bed_frag_array(bed_file, contig: str, has_min_max: bool, quality_threshold:
             read_start = int(frag_info[1])
             read_stop = int(frag_info[2])
             read_length = read_stop - read_start
-            if ((frag_info[0] == contig) and ((read_stop >= minimum) and (read_start < maximum) and (read_length >= fraction_low) and (read_length <= fraction_high))):
+            if ((frag_info[0] == contig)
+                and ((read_stop >= minimum)
+                     and (read_start < maximum)
+                     and (read_length >= fraction_low)
+                     and (read_length <= fraction_high)
+                     )
+                ):
                 frag_ends.append((read_start, read_stop))
     else:
         for line in (tqdm(bed_file) if verbose else bed_file):
@@ -109,9 +159,18 @@ def _bed_frag_array(bed_file, contig: str, has_min_max: bool, quality_threshold:
     return frag_ends
 
 
-def frag_array(input_file: Union[str, pysam.AlignmentFile], contig:str, quality_threshold:int=15, minimum: int=None, maximum: int=None, fraction_low: int=120, fraction_high: int=180, verbose: bool=False) -> np.ndarray[np.int64, np.int64]:
+def frag_array(input_file: Union[str, pysam.AlignmentFile],
+               contig:str,
+               quality_threshold:int=15,
+               minimum: int=None,
+               maximum: int=None,
+               fraction_low: int=120,
+               fraction_high: int=180,
+               verbose: bool=False
+               ) -> np.ndarray[np.int64, np.int64]:
     """
-    Reads from BAM, SAM, or BED file and returns a two column matrix with fragment start and stop positions.
+    Reads from BAM, SAM, or BED file and returns a two column matrix
+    with fragment start and stop positions.
 
     Parameters
     ----------
@@ -121,42 +180,94 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile], contig:str, quality_
     minimum : int, optional
     maximum : int, optional
     fraction_low : int, optional
-        Specifies lowest fragment length included in array. Default is 120, equivalent to long fraction.
+        Specifies lowest fragment length included in array. Default is
+        120, equivalent to long fraction.
     fraction_high : int, optional
-        Specifies highest fragment length included in array. Default is 120, equivalent to long fraction.
+        Specifies highest fragment length included in array. Default is
+        120, equivalent to long fraction.
     verbose : bool, optional
 
     Returns
     -------
     frag_ends : ndarray
-        'ndarray' with shape (n, 2) where column 1 contains fragment start positions
-        and column 2 contains fragment stop positions. If no fragments exist in the
-        specified minimum-maximum interval, the returned 'ndarray' will have a shape
-        of (0, 2)
+        'ndarray' with shape (n, 2) where column 1 contains fragment
+        start positions and column 2 contains fragment stop positions.
+        If no fragments exist in the specified minimum-maximum interval,
+        the returned 'ndarray' will have a shape of (0, 2)
     """
-    has_min_max = (minimum != None) and (maximum != None)   # boolean flag indicating whether or not a minimum and maximum location for one fragment end is specified.
+    # boolean flag indicating whether or not a minimum and maximum
+    # location for one fragment end is specified.
+    has_min_max = (minimum != None) and (maximum != None)
     if (minimum == None) != (maximum == None):
-        raise ValueError('Both minimum and maximum must either be present or absent.')
+        raise ValueError(
+            'Both minimum and maximum must either be present or absent.'
+            )
 
-    if (type(input_file) == pysam.AlignmentFile):   # input_file is AllignmentFile
+    # input_file is AllignmentFile
+    if (type(input_file) == pysam.AlignmentFile):   
         sam_file = input_file
-        frag_ends = _sam_frag_array(sam_file, contig, has_min_max, quality_threshold=quality_threshold, minimum=minimum, maximum=maximum, fraction_low=fraction_low, fraction_high=fraction_high, verbose=verbose)
+        frag_ends = _sam_frag_array(sam_file,
+                                    contig,
+                                    has_min_max,
+                                    quality_threshold=quality_threshold,
+                                    minimum=minimum, maximum=maximum,
+                                    fraction_low=fraction_low,
+                                    fraction_high=fraction_high,
+                                    verbose=verbose)
 
-    elif (type(input_file) == str): # input_file is a path string
-        if (input_file.endswith('.bam') or input_file.endswith('.sam')):   # BAM or SAM file
-            with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
-                frag_ends = _sam_frag_array(sam_file, contig, has_min_max, quality_threshold=quality_threshold, minimum=minimum, maximum=maximum, fraction_low=fraction_low, fraction_high=fraction_high, verbose=verbose)
-        elif (input_file.endswith('.bed')): # BED file
+    # input_file is a path string
+    elif (type(input_file) == str):
+        # BAM or SAM file
+        if (input_file.endswith('.bam') or input_file.endswith('.sam')):   
+            with pysam.AlignmentFile(input_file, 'r') as sam_file:
+                frag_ends = _sam_frag_array(sam_file, 
+                                            contig, 
+                                            has_min_max, 
+                                            quality_threshold
+                                            =quality_threshold, 
+                                            minimum=minimum, 
+                                            maximum=maximum, 
+                                            fraction_low=fraction_low, 
+                                            fraction_high=fraction_high, 
+                                            verbose=verbose)
+        # BED file
+        elif (input_file.endswith('.bed')): 
             with open(input_file, 'rt') as bed_file:
-                frag_ends = _bed_frag_array(bed_file, contig, has_min_max, quality_threshold=quality_threshold, minimum=minimum, maximum=maximum, fraction_low=fraction_low, fraction_high=fraction_high, verbose=verbose)
-        elif (input_file.endswith('.bed.gz')):  # BED.gz file
+                frag_ends = _bed_frag_array(bed_file, 
+                                            contig, 
+                                            has_min_max, 
+                                            quality_threshold
+                                            =quality_threshold, 
+                                            minimum=minimum, 
+                                            maximum=maximum, 
+                                            fraction_low=fraction_low, 
+                                            fraction_high=fraction_high, 
+                                            verbose=verbose)
+        # BED.gz file
+        elif (input_file.endswith('.bed.gz')):  
             with gzip.open(input_file, 'rt') as bed_file:
-                frag_ends = _bed_frag_array(bed_file, contig, has_min_max, quality_threshold=quality_threshold, minimum=minimum, maximum=maximum, fraction_low=fraction_low, fraction_high=fraction_high, verbose=verbose)
+                frag_ends = _bed_frag_array(bed_file, 
+                                            contig, 
+                                            has_min_max, 
+                                            quality_threshold
+                                            =quality_threshold, 
+                                            minimum=minimum, 
+                                            maximum=maximum, 
+                                            fraction_low=fraction_low, 
+                                            fraction_high=fraction_high, 
+                                            verbose=verbose)
         else:
-            raise ValueError('input_file can only have suffixes .bam, .sam, .bed, or .bed.gz')
+            raise ValueError(
+                'input_file can only have suffixes .bam, .sam, .bed, or '
+                '.bed.gz'
+                )
     
     else:
-        raise TypeError(f'input_file is unsupported type "{type(input_file)}". input_file should be a pysam.AlignmentFile or a string containing the path to a SAM or BAM file.')
+        raise TypeError(
+            f'input_file is unsupported type "{type(input_file)}". Input_file '
+            'should be a pysam.AlignmentFile or a string containing the path '
+            'to a SAM or BAM file.'
+            )
 
     # convert to ndarray
     frag_ends = np.array(frag_ends)
@@ -164,19 +275,27 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile], contig:str, quality_
     if frag_ends.ndim == 1:
         frag_ends = frag_ends.reshape((0, 2))
 
-    assert frag_ends.ndim == 2, f'frag_ends has dims {frag_ends.ndim} and shape {frag_ends.shape}'
-    assert frag_ends.shape == (0, 2) or frag_ends.shape[1] == 2, f'frag_ends has shape {frag_ends.shape}'
-
+    assert frag_ends.ndim == 2, (f'frag_ends has dims {frag_ends.ndim} and '
+                                 f'shape {frag_ends.shape}')
+    assert (frag_ends.shape == (0, 2) 
+            or frag_ends.shape[1] == 2), ('frag_ends has shape'
+                                          f'{frag_ends.shape}')
     return frag_ends
 
-def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quality_threshold, copied from https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary_in_intervals.py
+# min_mapq is synonymous to quality_threshold, copied from
+# https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary
+# _in_intervals.py
+
+def low_quality_read_pairs(read, min_mapq=15): 
     """
-    Return `True` if the sequenced read described in `read` is not a mapped properly paired read with a Phred score exceeding `min_mapq`.
+    Return `True` if the sequenced read described in `read` is not a
+    properly paired read with a Phred score exceeding `min_mapq`.
 
     Parameters
     ----------
     read : pysam.AlignedSegment
-        Sequenced read to check for quality, perfect pairing and if it is mapped.
+        Sequenced read to check for quality, perfect pairing and if it
+        is mapped.
     min_mapq : int, optional
         Minimum Phred score for map quality of read. Defaults to 15.
 
@@ -186,22 +305,55 @@ def low_quality_read_pairs(read, min_mapq=15): # min_mapq is synonymous to quali
         True if read is low quality, unmapped, not properly paired.
     """
 
-    return read.is_unmapped or read.is_secondary or (not read.is_paired) \
-           or read.mate_is_unmapped or read.is_duplicate or read.mapping_quality < min_mapq \
-           or read.is_qcfail or read.is_supplementary or (not read.is_proper_pair) \
-           or read.reference_name != read.next_reference_name
+    return (read.is_unmapped
+            or read.is_secondary
+            or (not read.is_paired)
+            or read.mate_is_unmapped
+            or read.is_duplicate
+            or read.mapping_quality < min_mapq
+            or read.is_qcfail
+            or read.is_supplementary
+            or (not read.is_proper_pair)
+            or read.reference_name != read.next_reference_name)
 
 
-def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, output_file: str=None, workers: int=1, quality_threshold: int=15, verbose: bool=False) -> np.ndarray[np.int64]:
+def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=15):
     """
-    Return `np.ndarray` containing lengths of fragments in `input_file` that are
-    above the quality threshold and are proper-paired reads.
+    Return `True` if the sequenced read described in `read` is not read1
+    and a properly paired read with a Phred score exceeding `min_mapq`.
+
+    Parameters
+    ----------
+    read : pysam.AlignedSegment
+        Sequenced read to check for quality, perfect pairing and if it
+        is mapped.
+    min_mapq : int, optional
+        Minimum Phred score for map quality of read. Defaults to 15.
+
+    Returns
+    -------
+    is_low_quality : bool
+        True if read is either not read1, is low quality, is unmapped, 
+        or is not properly paired.
+    """
+    return (low_quality_read_pairs(read, min_mapq=min_mapq)
+            or not read.is_read1)
+
+def frag_length(input_file: Union[str, pysam.AlignedSegment],
+                contig: str=None,
+                output_file: str=None, workers: int=1,
+                quality_threshold: int=15,
+                verbose: bool=False
+                ) -> np.ndarray[np.int64]:
+    """
+    Return `np.ndarray` containing lengths of fragments in `input_file`
+    that are above the quality threshold and are proper-paired reads.
 
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, or CRAM file containing paired-end fragment reads or its 
-        path. `AlignmentFile` must be opened in read mode.
+        BAM, SAM, or CRAM file containing paired-end fragment reads or 
+        its path. `AlignmentFile` must be opened in read mode.
     contig : string, optional
     output_file : string, optional
     quality_threshold : int, optional
@@ -225,11 +377,17 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, 
         count = sam_file.count(contig=contig) if verbose else None
         if (verbose):
             print(f'{count} reads counted')
-        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)): # Iterating on each read in file in specified contig/chromosome
-            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+        # Iterating on each read in file in specified contig/chromosome
+        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) 
+                      if verbose 
+                      else sam_file.fetch(contig=contig)):
+            # Only select forward strand and filter out non-paired-end
+            # reads and low-quality reads
+            if (not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
-                lengths.append(abs(read1.template_length))  # append length of fragment to list
+                # append length of fragment to list
+                lengths.append(abs(read1.template_length))
     else:
         if (verbose):
             print(f'Opening {input_file}')
@@ -239,11 +397,18 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, 
             count = sam_file.count(contig=contig) if verbose else None
             if (verbose):
                 print(f'{count} reads counted')
-            for read1 in (tqdm(sam_file.fetch(contig=contig), total=count) if verbose else sam_file.fetch(contig=contig)): # Iterating on each read in file in specified contig/chromosome
-                if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+            # Iterating on each read in file in specified
+            # contig/chromosome
+            for read1 in (tqdm(sam_file.fetch(contig=contig), total=count)
+                          if verbose
+                          else sam_file.fetch(contig=contig)):
+                # Only select forward strand and filter out
+                # non-paired-end reads and low-quality reads
+                if (not_read1_or_low_quality(read1, quality_threshold)):
                     pass
                 else:
-                    lengths.append(abs(read1.template_length))  # append length of fragment to list
+                    # append length of fragment to list
+                    lengths.append(abs(read1.template_length))
 
     # convert to array
     lengths = np.array(lengths)
@@ -254,10 +419,16 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, 
             with open(output_file, 'wt') as out:
                 lengths.tofile(out) 
         else:   # unaccepted file type
-            raise ValueError('output_file can only have suffixes .wig or .wig.gz.')
+            raise ValueError(
+                'output_file can only have suffixes .wig or .wig.gz.'
+                )
 
     elif (output_file != None):
-        raise TypeError(f'output_file is unsupported type "{type(input_file)}". output_file should be a string specifying the path of the file to output scores to.')
+        raise TypeError(
+            f'output_file is unsupported type "{type(input_file)}". '
+            'output_file should be a string specifying the path of the file '
+            'to write output scores to.'
+            )
 
     if (verbose):
         end_time = time.time()
@@ -265,18 +436,25 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment], contig: str=None, 
 
     return lengths
 
-def frag_center_coverage(input_file, contig, start, stop, output_file=None, quality_threshold=15, verbose=False):
+def frag_center_coverage(input_file,
+                         contig,
+                         start,
+                         stop,
+                         output_file=None,
+                         quality_threshold=15,
+                         verbose=False):
     """
-    Return estimated fragment coverage over specified `contig` and region of 
-    `input_file`. Uses an algorithm where the midpoints of fragments are calculated
-    and coverage is tabulated from the midpoints that fall into the specified
-    region. Not suitable for fragments of size approaching region size.
+    Return estimated fragment coverage over specified `contig` and
+    region of`input_file`. Uses an algorithm where the midpoints of
+    fragments are calculated and coverage is tabulated from the
+    midpoints that fall into the specified region. Not suitable for
+    fragments of size approaching region size.
 
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, or CRAM file containing paired-end fragment reads or its 
-        path. `AlignmentFile` must be opened in read mode.
+        BAM, SAM, or CRAM file containing paired-end fragment reads or
+        its path. `AlignmentFile` must be opened in read mode.
     contig : string
     start : int
     stop : int
@@ -295,12 +473,16 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
     if (verbose):
         start_time = time.time()
 
-    coverage = 0 # initializing variable for coverage tuple outside of with statement
+    # initializing variable for coverage tuple outside of with statement
+    coverage = 0 
 
     if (type(input_file) == pysam.AlignmentFile):
         sam_file = input_file
-        for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
-            if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+        # Iterating on each read in file in specified contig/chromosome
+        for read1 in sam_file.fetch(contig=contig): 
+            # Only select forward strand and filter out non-paired-end
+            # reads and low-quality reads
+            if (not_read1_or_low_quality(read1, quality_threshold)):  
                 pass
             else:
                 # calculate mid-point of fragment
@@ -308,9 +490,13 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
                 if ((center >= start) and (center < stop)):
                     coverage += 1
     else:
-        with pysam.AlignmentFile(input_file, 'r') as sam_file:   # Import
-            for read1 in sam_file.fetch(contig=contig): # Iterating on each read in file in specified contig/chromosome
-                if read1.is_read2 or low_quality_read_pairs(read1, quality_threshold):  # Only select forward strand and filter out non-paired-end reads and low-quality reads
+        with pysam.AlignmentFile(input_file, 'r') as sam_file:
+            # Iterating on each read in file in
+            # specified contig/chromosome
+            for read1 in sam_file.fetch(contig=contig):
+                # Only select forward strand and filter out
+                # non-paired-end reads and low-quality reads
+                if not_read1_or_low_quality(read1, quality_threshold):
                     pass
                 else:
                     # calculate mid-point of fragment
@@ -323,14 +509,21 @@ def frag_center_coverage(input_file, contig, start, stop, output_file=None, qual
 
     return coverage
 
-def _single_wps(window_start: int, window_stop: int, window_position: int, frag_ends: np.ndarray[int, int]) -> int:
+def _single_wps(window_start: int,
+                window_stop: int,
+                window_position: int,
+                frag_ends: np.ndarray[int, int]
+                ) -> int:
     # count number of totally spanning fragments
-    is_spanning = (frag_ends[:, 0] < window_start) * (frag_ends[:, 1] > window_stop)
+    is_spanning = ((frag_ends[:, 0] < window_start)
+                   * (frag_ends[:, 1] > window_stop))
     num_spanning = np.sum(is_spanning)
 
     # count number of fragments with end in window
-    is_start_in = (frag_ends[:, 0] >= window_start) * (frag_ends[:, 0] <= window_stop)
-    is_stop_in = (frag_ends[:, 1] >= window_start) * (frag_ends[:, 1] <= window_stop)
+    is_start_in = ((frag_ends[:, 0] >= window_start)
+                   * (frag_ends[:, 0] <= window_stop))
+    is_stop_in = ((frag_ends[:, 1] >= window_start)
+                  * (frag_ends[:, 1] <= window_stop))
     is_end_in = np.logical_or(is_start_in, is_stop_in)
     num_end_in = np.sum(is_end_in)
 
@@ -347,10 +540,10 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         fraction_high: int=180, 
         quality_threshold: int=15, 
         workers: int=1, 
-        verbose: Union[bool, int]=0) -> np.ndarray[np.int64, np.int64]: # Using Union instead of bitwise | to allow backward compatability if needed
+        verbose: Union[bool, int]=0) -> np.ndarray[np.int64, np.int64]:
     """
-    Return Windowed Protection Scores as specified in Snyder et al (2016) over a
-    region [start,stop).
+    Return Windowed Protection Scores as specified in Snyder et al
+    (2016) over a region [start,stop).
 
     Parameters
     ----------
@@ -362,11 +555,14 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     stop : int
     output_file : string, optional
     window_size : int, optional
-        Size of window to calculate WPS. Default is k = 120, equivalent to L-WPS.
+        Size of window to calculate WPS. Default is k = 120, equivalent
+        to L-WPS.
     fraction_low : int, optional
-        Specifies lowest fragment length included in calculation. Default is 120, equivalent to long fraction.
+        Specifies lowest fragment length included in calculation.
+        Default is 120, equivalent to long fraction.
     fraction_high : int, optional
-        Specifies highest fragment length included in calculation. Default is 120, equivalent to long fraction.
+        Specifies highest fragment length included in calculation.
+        Default is 120, equivalent to long fraction.
     quality_threshold : int, optional
     workers : int, optional
     verbose : bool, optional
@@ -374,8 +570,9 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     Returns
     -------
     scores : numpy.ndarray
-        np array of shape (n, 2) where column 1 is the coordinate and column 2 is the score
-        and n is the number of coordinates in region [start,stop)
+        np array of shape (n, 2) where column 1 is the coordinate and
+        column 2 is the score and n is the number of coordinates in
+        region [start,stop)
     """
 
     if (verbose):
@@ -386,17 +583,26 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     start = int(start)
     stop = int(stop)
 
-    # set minimum and maximum values for fragments. These extend farther than needed
+    # set minimum and maximum values for fragments. These extend farther
+    # than needed
     minimum = round(start - window_size)
     maximum = round(stop + window_size)
 
     # read fragments from file
-    frag_ends = frag_array(input_file, contig, quality_threshold, minimum=minimum, maximum=maximum, fraction_low=fraction_low, fraction_high=fraction_high, verbose=(verbose>=2))
+    frag_ends = frag_array(input_file,
+                           contig,
+                           quality_threshold,
+                           minimum=minimum,
+                           maximum=maximum,
+                           fraction_low=fraction_low,
+                           fraction_high=fraction_high,
+                           verbose=(verbose>=2))
     
     if (verbose):
         print("Done reading fragments, preparing for WPS calculation.")
-
-    if (frag_ends.shape == (0, 2)): # check if no fragments exist on this interval
+    # check if no fragments exist on this interval
+    if (frag_ends.shape == (0, 2)):
+        
         scores = np.zeros((stop-start, 2))
         scores [:, 0] = np.arange(start, stop, dtype=np.int64)
     else:
@@ -404,13 +610,17 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         scores = np.zeros((stop-start, 2))
         window_centers = np.arange(start, stop, dtype=np.int64)
         window_starts = np.round(window_centers - window_size * 0.5)
-        window_stops = np.round(window_centers + window_size * 0.5 - 1) # inclusive
+        window_stops = np.round(window_centers + window_size * 0.5 - 1)
+        # inclusive
 
         # create list of soft copies of frag_ends for multiprocessing
         input_frag_ends = [frag_ends] * (stop - start)
 
         # input for starmap
-        input_tuples = zip(window_starts, window_stops, window_centers, input_frag_ends)
+        input_tuples = zip(window_starts,
+                           window_stops,
+                           window_centers,
+                           input_frag_ends)
 
         if (verbose):
             print("Calculating WPS")
@@ -419,23 +629,9 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
             scores = np.array(pool.starmap(_single_wps, input_tuples))
     
     assert scores.shape == (stop-start, 2)
-    """
-    for i in range(stop-start):
-        # start and stop coordinates of the window
-        window_position = window_centers[i]
-        window_start = window_starts[i]
-        window_stop = window_stops[i]
-
-        assert window_stop - window_start == window_size - 1, f'window is actually size k = {window_stop - window_start + 1}'
-
-        # calculate score and put in second column
-        scores[i, :] = _single_wps(window_start, window_stop, window_position, frag_ends)
-
-        # if (verbose):
-        #     print(f'window pos {window_pos}, window ends {window_start} {window_stop}, spanning {num_spanning}, end in {num_end_in}, WPS {scores[i, 1]}')
-    """
-
-    # TODO: consider switch-case statements and determine if they shouldn't be used for backwards compatability
+    
+    # TODO: consider switch-case statements and determine if they 
+    # shouldn't be used for backwards compatability
     if (type(output_file) == str):   # check if output specified
         
         if (verbose):
@@ -444,22 +640,34 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         if output_file.endswith(".wig.gz"): # zipped wiggle
             with gzip.open(output_file, 'wt') as out:
                 # declaration line
-                out.write(f'fixedStep\tchrom={contig}\tstart={start}\tstep={1}\tspan={stop-start}\n')
+                out.write(
+                    f'fixedStep\tchrom={contig}\tstart={start}\t'
+                    f'step={1}\tspan={stop-start}\n'
+                    )
                 for score in scores[:, 1]:
                     out.write(f'{score}\n')
 
         elif output_file.endswith(".wig"):  # wiggle
             with open(output_file, 'wt') as out:
                 # declaration line
-                out.write(f'fixedStep\tchrom={contig}\tstart={start}\tstep={1}\tspan={stop-start}\n')
+                out.write(
+                    f'fixedStep\tchrom={contig}\tstart={start}\tstep='
+                    f'{1}\tspan={stop-start}\n'
+                    )
                 for score in scores[:, 1]:
                     out.write(f'{score}\n')
 
         else:   # unaccepted file type
-            raise ValueError('output_file can only have suffixes .wig or .wig.gz.')
+            raise ValueError(
+                'output_file can only have suffixes .wig or .wig.gz.'
+                )
 
     elif (output_file != None):
-        raise TypeError(f'output_file is unsupported type "{type(input_file)}". output_file should be a string specifying the path of the file to output scores to.')
+        raise TypeError(
+            f'output_file is unsupported type "{type(input_file)}". '
+            'output_file should be a string specifying the path of the file '
+            'to output scores to.'
+            )
 
     if (verbose):
         end_time = time.time()
@@ -467,17 +675,38 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         
     return scores
 
-def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, output_file: str=None, window_size: int=120, size_around_sites: int=4000, quality_threshold: int=15, agg_workers: int=1, wps_workers: int=1, verbose: Union[bool, int]=0) -> np.ndarray[np.int64, np.int64]:
+def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
+                  site_bed: str,
+                  output_file: str=None,
+                  window_size: int=120,
+                  size_around_sites: int=4000,
+                  quality_threshold: int=15,
+                  agg_workers: int=1,
+                  wps_workers: int=1,
+                  verbose: Union[bool, int]=0
+                  ) -> np.ndarray[np.int64, np.int64]:
     """
     Function that aggregates WPS over sites in BED file
     """
     if (verbose):
         start_time = time.time()
-        print(f'Calculating aggregate WPS \ninput_file: {input_file} \nsite_bed: {site_bed} \noutput_file: {output_file} \nwindow_size: {window_size}\nsize_around_sites: {size_around_sites}\nquality_threshold: {quality_threshold}\nverbose: {verbose}')
+        print(
+            f"""
+            Calculating aggregate WPS
+            input_file: {input_file}
+            site_bed: {site_bed}
+            output_file: {output_file}
+            window_size: {window_size}
+            size_around_sites: {size_around_sites}
+            quality_threshold: {quality_threshold}
+            verbose: {verbose}
+            """
+            )
 
     scores = np.zeros((size_around_sites, 2))
 
-    # Values to add to center of each site to get start and stop of each wps function
+    # Values to add to center of each site to get start and stop of each
+    # wps function
     left_of_site = round(-size_around_sites / 2) 
     right_of_site = round(size_around_sites / 2)
 
@@ -502,11 +731,22 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
                 print(f'File opened! Iterating through sites...')
 
             # aggregate wps over sites in bed file
-            for line in (tqdm(sites, total=bed_length) if verbose>=2 else sites):
+            for line in (
+                tqdm(sites, total=bed_length) if verbose>=2 else sites
+                ):
                 line_items = line.split()
                 if ('.' in line_items[5]):
                     continue
-                single_scores = wps(file, line_items[0], int(line_items[1]) + left_of_site, int(line_items[1]) + right_of_site, output_file=None, window_size=window_size, quality_threshold=quality_threshold, workers=wps_workers, verbose=(verbose-2 if verbose-2>0 else 0))[:, 1]
+                single_scores = wps(file,
+                                    line_items[0],
+                                    int(line_items[1]) + left_of_site,
+                                    int(line_items[1]) + right_of_site,
+                                    output_file=None,
+                                    window_size=window_size,
+                                    quality_threshold=quality_threshold,
+                                    workers=wps_workers,
+                                    verbose=(verbose-2 if verbose-2>0 else 0)
+                                    )[:, 1]
                 if ('+' in line_items[5]):
                     unaggregated_scores.append(single_scores)
                 elif ('-' in line_items[5]):
@@ -528,8 +768,13 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
                     print(f'File opened! Writing...')
 
                 # declaration line
-                out.write(f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan={window_size}\n')
-                for score in (tqdm(scores[:, 1]) if verbose >= 2 else scores[:, 1]):
+                out.write(
+                    f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
+                    f'={window_size}\n'
+                    )
+                for score in (tqdm(scores[:, 1])
+                              if verbose >= 2
+                              else scores[:, 1]):
                     out.write(f'{score}\n')
 
         elif output_file.endswith(".wig"):  # wiggle
@@ -537,15 +782,26 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
                 if (verbose):
                     print(f'File opened! Writing...')
                 # declaration line
-                out.write(f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan={window_size}\n')
-                for score in (tqdm(scores[:, 1]) if verbose >= 2 else scores[:, 1]):
+                out.write(
+                    f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
+                    f'={window_size}\n'
+                    )
+                for score in (tqdm(scores[:, 1])
+                              if verbose >= 2
+                              else scores[:, 1]):
                     out.write(f'{score}\n')
 
         else:   # unaccepted file type
-            raise ValueError('output_file can only have suffixes .wig or .wig.gz.')
+            raise ValueError(
+                'output_file can only have suffixes .wig or .wig.gz.'
+                )
 
     elif (output_file != None):
-        raise TypeError(f'output_file is unsupported type "{type(input_file)}". output_file should be a string specifying the path of the file to output scores to.')
+        raise TypeError(
+            f'output_file is unsupported type "{type(input_file)}". '
+            'output_file should be a string specifying the path of the file '
+            'to output scores to.'
+            )
     
     if (verbose):
         end_time = time.time()
@@ -556,14 +812,17 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str], site_bed: str, ou
 # TODO: look through argparse args and fix them all
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='finaletools',
-                    description='Calculates fragmentation features given a CRAM/BAM/SAM file',
+                    description=('Calculates fragmentation features given a '
+                                 'CRAM/BAM/SAM file'),
                     epilog='')
-    subparsers = parser.add_subparsers(title='subcommands', description="Subcommands of finaletools", dest='subcommand')
+    subparsers = parser.add_subparsers(title='subcommands',
+                                       dest='subcommand')
 
     # Common arguments
 
     # Subcommand 1: frag-coverage
-    parser_command1 = subparsers.add_parser('frag-center-coverage', prog='frag-converage',
+    parser_command1 = subparsers.add_parser('frag-center-coverage',
+                                            prog='frag-converage',
                                             description='Calculates fragmentation coverage over a region given a CRAM/BAM/SAM file')
     parser_command1.add_argument('--start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
     parser_command1.add_argument('--stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
