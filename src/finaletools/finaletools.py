@@ -197,7 +197,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     """
     # boolean flag indicating whether or not a minimum and maximum
     # location for one fragment end is specified.
-    has_min_max = (minimum != None) and (maximum != None)
+    has_min_max = (minimum is not None) and (maximum is not None)
     if (minimum == None) != (maximum == None):
         raise ValueError(
             'Both minimum and maximum must either be present or absent.'
@@ -423,7 +423,7 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 'output_file can only have suffixes .wig or .wig.gz.'
                 )
 
-    elif (output_file != None):
+    elif (output_file is not None):
         raise TypeError(
             f'output_file is unsupported type "{type(input_file)}". '
             'output_file should be a string specifying the path of the file '
@@ -662,7 +662,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                 'output_file can only have suffixes .wig or .wig.gz.'
                 )
 
-    elif (output_file != None):
+    elif (output_file is not None):
         raise TypeError(
             f'output_file is unsupported type "{type(input_file)}". '
             'output_file should be a string specifying the path of the file '
@@ -796,7 +796,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                 'output_file can only have suffixes .wig or .wig.gz.'
                 )
 
-    elif (output_file != None):
+    elif (output_file is not None):
         raise TypeError(
             f'output_file is unsupported type "{type(input_file)}". '
             'output_file should be a string specifying the path of the file '
@@ -811,10 +811,10 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
 # TODO: look through argparse args and fix them all
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='finaletools',
-                    description=('Calculates fragmentation features given a '
-                                 'CRAM/BAM/SAM file'),
-                    epilog='')
+    parser = argparse.ArgumentParser(
+        description='Calculates fragmentation features given a CRAM/BAM/SAM '
+        'file',
+        epilog='')
     subparsers = parser.add_subparsers(title='subcommands',
                                        dest='subcommand')
 
@@ -822,51 +822,72 @@ if __name__ == '__main__':
 
     # Subcommand 1: frag-coverage
     parser_command1 = subparsers.add_parser('frag-center-coverage',
-                                            prog='frag-converage',
-                                            description='Calculates fragmentation coverage over a region given a CRAM/BAM/SAM file')
-    parser_command1.add_argument('--start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
-    parser_command1.add_argument('--stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
+                                            description=(
+                                                'Calculates fragmentation '
+                                                'coverage over a region given '
+                                                'a CRAM/BAM/SAM file')
+                                            )
+    # inclusive location of region start in 0-based coordinate system.
+    # If not included, will end at the end of the chromosome
+    parser_command1.add_argument('--start', type=int)   
+    # exclusive location of region end in 0-based coordinate system.
+    # If not included, will end at the end of the chromosome
+    parser_command1.add_argument('--stop', type=int)   
     parser_command1.add_argument('--region')   # samtools region string
     parser_command1.add_argument('--method', default="frag-center")
-    # parser_command1.add_argument('--quality_threshold', default=15, type=int)   # minimum phred score for a base to be counted TODO: implement threshold
-    # parser_command1.add_argument('--read_callback', default='all')    # TODO: implement read callback
     parser_command1.add_argument('-v', '--verbose', default=False, type=bool)
     parser_command1.set_defaults(func=frag_center_coverage)
     
     # Subcommand 2: frag-length
-    parser_command2 = subparsers.add_parser('frag-length', prog='frag-length',
-                                            description='Calculates fragment lengths given a CRAM/BAM/SAM file')
-    parser_command2.add_argument('input_file')    # input bam file to calculate coverage from
-    parser_command2.add_argument('--contig')   # chromosome of window
-    parser_command2.add_argument('--output_file') # optional output text file to print coverage in
+    parser_command2 = subparsers.add_parser(
+        'frag-length', prog='frag-length',
+        description='Calculates fragment lengths given a CRAM/BAM/SAM file'
+        )
+    parser_command2.add_argument('input_file')
+    parser_command2.add_argument('--contig')
+    parser_command2.add_argument('--output_file')
     parser_command2.add_argument('--workers', default=1, type=int)
     parser_command2.add_argument('--quality_threshold', default=15, type=int)
     parser_command2.add_argument('-v', '--verbose', action='store_true')
     parser_command2.set_defaults(func=frag_length)
     
     # Subcommand 3: wps()
-    parser_command3 = subparsers.add_parser('wps', prog='wps',
-                                            description='Calculates Windowed Protection Score over a region given a CRAM/BAM/SAM file')
-    parser_command3.add_argument('input_file')    # input bam file to calculate coverage from
-    parser_command3.add_argument('contig')   # chromosome of window
-    parser_command3.add_argument('start', type=int)   # inclusive location of region start in 0-based coordinate system. If not included, will start at the beginning of the chromosome
-    parser_command3.add_argument('stop', type=int)   # exclusive location of region end in 0-based coordinate system. If not included, will end at the end of the chromosome
-    parser_command3.add_argument('-o', '--output_file') # optional output text file to print coverage in
+    parser_command3 = subparsers.add_parser(
+        'wps', prog='wps',
+        description='Calculates Windowed Protection Score over a region given '
+        'a CRAM/BAM/SAM file'
+        )
+    parser_command3.add_argument('input_file')
+    parser_command3.add_argument('contig')
+    # inclusive location of region start in 0-based coordinate system.
+    # If not included, will start at the beginning of the chromosome
+    parser_command3.add_argument('start', type=int)
+    # exclusive location of region end in 0-based coordinate system.
+    # If not included, will end at the end of the chromosome
+    parser_command3.add_argument('stop', type=int)
+    parser_command3.add_argument('-o', '--output_file')
     parser_command3.add_argument('--window_size', default=120, type=int)
-    parser_command3.add_argument('-lo', '--fraction_low', default=120, type=int)
-    parser_command3.add_argument('-hi', '--fraction_high', default=180, type=int)
+    parser_command3.add_argument('-lo', '--fraction_low', default=120,
+                                 type=int)
+    parser_command3.add_argument('-hi', '--fraction_high', default=180,
+                                 type=int)
     parser_command3.add_argument('-n', '--workers', default=1, type=int)
     parser_command3.add_argument('--quality_threshold', default=15, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count')
     parser_command3.set_defaults(func=wps)
 
     # Subcommand 4: aggregate-wps
-    parser_command4 = subparsers.add_parser('aggregate-wps', prog='aggregate-wps',
-                                            description='Calculates Windowed Protection Score over a region around sites specified in a BED file from alignments in a CRAM/BAM/SAM file')
-    parser_command4.add_argument('input_file')    # input bam file to calculate coverage from
-    parser_command4.add_argument('site_bed')    # input bam file to calculate coverage from
-    parser_command4.add_argument('-o', '--output_file') # optional output text file to print coverage in
-    parser_command4.add_argument('--size_around_sites', default=5000, type=int)    # input bam file to calculate coverage from
+    parser_command4 = subparsers.add_parser(
+        'aggregate-wps', 
+        prog='aggregate-wps',
+        description='Calculates Windowed Protection Score over a region '
+        'around sites specified in a BED file from alignments in a '
+        'CRAM/BAM/SAM file'
+        )
+    parser_command4.add_argument('input_file')
+    parser_command4.add_argument('site_bed')
+    parser_command4.add_argument('-o', '--output_file')
+    parser_command4.add_argument('--size_around_sites', default=5000, type=int)
     parser_command4.add_argument('--window_size', default=120, type=int)
     parser_command4.add_argument('--agg_workers', default=1, type=int)
     parser_command4.add_argument('--wps_workers', default=1, type=int)
