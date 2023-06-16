@@ -16,7 +16,7 @@ import numpy as np
 import time
 from tqdm import tqdm
 from multiprocessing.pool import Pool
-from typing import Union
+from typing import Union, TextIO
 
 
 def frag_bam_to_bed(input_file,
@@ -311,15 +311,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     return frag_ends
 
 
-# min_mapq is synonymous to quality_threshold, copied from
-# https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary
-# _in_intervals.py
-
-
 def low_quality_read_pairs(read, min_mapq=15):
     """
     Return `True` if the sequenced read described in `read` is not a
-    properly paired read with a Phred score exceeding `min_mapq`.
+    properly paired read with a Phred score exceeding `min_mapq`. Based
+    on https://github.com/epifluidlab/cofragr/blob/master/python/frag_su
+    mmary_in_intervals.py
 
     Parameters
     ----------
@@ -710,6 +707,46 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     return scores
 
 
+def _agg_wps_single_contig(input_file: Union[str, pysam.AlignmentFile],
+                           contig_site_bed: TextIO,
+                           contig: str,
+                           window_size: int=120,
+                           size_around_sites: int=5000,
+                           quality_threshold: int=15,
+                           workers: int=1,
+                           verbose: Union[int, bool]=0
+                           ):
+    """
+    Helper function for aggregate_wps. Aggregates wps over sites in one
+    contig.
+
+    Parameters
+    ----------
+    input_file : str or pysam.AlignmentFile
+        BAM or SAM file containing paired-end fragment reads or its
+        path. `AlignmentFile` must be opened in read mode.
+    contig : str
+    window_size : int, optional
+        Size of window to calculate WPS. Default is k = 120, equivalent
+        to L-WPS.
+    quality_threshold : int, optional
+    workers : int, optional
+    verbose : int or bool, optional
+
+    Returns
+    -------
+    scores : numpy.ndarray
+        np array of shape (window_size, 2) where column 1 is the coordinate and
+        column 2 is the score.
+    """
+    contig_frags = frag_array(input_file,
+                              contig,
+                              quality_threshold,
+                              )
+    # TODO: implement
+    return None
+
+
 def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   site_bed: str,
                   output_file: str=None,
@@ -778,6 +815,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                                     int(line_items[1]) + right_of_site,
                                     output_file=None,
                                     window_size=window_size,
+                                    fraction_low=fraction_low,
+                                    fraction_high=fraction_high,
                                     quality_threshold=quality_threshold,
                                     workers=wps_workers,
                                     verbose=(verbose-2 if verbose-2>0 else 0)
