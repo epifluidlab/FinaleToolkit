@@ -815,8 +815,6 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                                     int(line_items[1]) + right_of_site,
                                     output_file=None,
                                     window_size=window_size,
-                                    fraction_low=fraction_low,
-                                    fraction_high=fraction_high,
                                     quality_threshold=quality_threshold,
                                     workers=wps_workers,
                                     verbose=(verbose-2 if verbose-2>0 else 0)
