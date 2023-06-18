@@ -171,7 +171,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                fraction_low: int=120,
                fraction_high: int=180,
                verbose: bool=False
-               ) -> np.ndarray[np.int64, np.int64]:
+               ) -> np.ndarray[int, int]:
     """
     Reads from BAM, SAM, or BED file and returns a two column matrix
     with fragment start and stop positions.
@@ -351,7 +351,7 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 output_file: str=None, workers: int=1,
                 quality_threshold: int=15,
                 verbose: bool=False
-                ) -> np.ndarray[np.int64]:
+                ) -> np.ndarray[int]:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file`
     that are above the quality threshold and are proper-paired reads.
@@ -551,7 +551,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         quality_threshold: int=15,
         workers: int=1,
         verbose: Union[bool, int]=0
-        ) -> np.ndarray[np.int64, np.int64]:
+        ) -> np.ndarray[int, int]:
     """
     Return Windowed Protection Scores as specified in Snyder et al
     (2016) over a region [start,stop).
@@ -615,11 +615,11 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     if (frag_ends.shape == (0, 2)):
 
         scores = np.zeros((stop-start, 2))
-        scores[:, 0] = np.arange(start, stop, dtype=np.int64)
+        scores[:, 0] = np.arange(start, stop, dtype=int)
     else:
         # array to store positions and scores
         scores = np.zeros((stop-start, 2))
-        window_centers = np.arange(start, stop, dtype=np.int64)
+        window_centers = np.arange(start, stop, dtype=int)
         window_starts = np.round(window_centers - window_size * 0.5)
         window_stops = np.round(window_centers + window_size * 0.5 - 1)
         # inclusive
@@ -698,7 +698,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   agg_workers: int=1,
                   wps_workers: int=1,
                   verbose: Union[bool, int]=0
-                  ) -> np.ndarray[np.int64, np.int64]:
+                  ) -> np.ndarray[int, int]:
     """
     Function that aggregates WPS over sites in BED file
     """
