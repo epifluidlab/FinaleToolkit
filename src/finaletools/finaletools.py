@@ -9,6 +9,7 @@ Python script to calculate fragment features given a BAM file.
 """
 # TODO: typing annotations for all functions
 
+from __future__ import annotations
 import pysam
 import argparse
 import gzip
