@@ -15,6 +15,7 @@ import argparse
 import gzip
 import numpy as np
 import time
+from numba import jit
 from tqdm import tqdm
 from multiprocessing.pool import Pool
 from typing import Union
@@ -83,7 +84,7 @@ def frag_bam_to_bed(input_file,
         end_time = time.time()
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete')
 
-
+@jit
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
                     has_min_max: bool,
@@ -129,7 +130,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
                      )
     return frag_ends
 
-
+@jit
 def _bed_frag_array(bed_file,
                     contig: str,
                     has_min_max: bool,
@@ -516,12 +517,12 @@ def frag_center_coverage(input_file,
 
     return coverage
 
-
+@jit(nopython=True)
 def _single_wps(window_start: int,
                 window_stop: int,
                 window_position: int,
                 frag_ends: np.ndarray[int, int]
-                ) -> int:
+                ) -> tuple[int, int]:
     # count number of totally spanning fragments
     is_spanning = ((frag_ends[:, 0] < window_start)
                    * (frag_ends[:, 1] > window_stop))
@@ -549,7 +550,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         fraction_high: int=180,
         quality_threshold: int=15,
         workers: int=1,
-        verbose: Union[bool, int]=0) -> np.ndarray[np.int64, np.int64]:
+        verbose: Union[bool, int]=0
+        ) -> np.ndarray[np.int64, np.int64]:
     """
     Return Windowed Protection Scores as specified in Snyder et al
     (2016) over a region [start,stop).

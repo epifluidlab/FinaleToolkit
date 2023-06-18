@@ -22,6 +22,7 @@ dependencies = [
     "numpy",
     "pysam",
     "tqdm",
+    "numba",
 ]
 
 [project.urls]
