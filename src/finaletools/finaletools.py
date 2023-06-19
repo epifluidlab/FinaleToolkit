@@ -84,7 +84,7 @@ def frag_bam_to_bed(input_file,
         end_time = time.time()
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete')
 
-@jit
+
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
                     has_min_max: bool,
@@ -540,6 +540,26 @@ def _single_wps(window_start: int,
     return (window_position, num_spanning - num_end_in)
 
 
+@jit(nopython=True)
+def _vectorized_wps(frag_ends, window_starts, window_stops):
+    is_spanning = np.logical_and(
+            np.less_equal(frag_ends[:, 0], window_starts),
+            np.greater_equal(frag_ends[:, 1], window_stops))
+    
+    n_spanning = np.sum(is_spanning, axis=0)
+        
+    start_in = np.logical_and(
+        np.less(frag_ends[:, 0], window_starts),
+        np.greater_equal(frag_ends[:, 0], window_stops))
+    
+    stop_in = np.logical_and(
+        np.less(frag_ends[:, 1], window_starts),
+        np.greater_equal(frag_ends[:, 1], window_stops))
+    
+    end_in = np.logical_or(start_in, stop_in)
+
+
+
 def wps(input_file: Union[str, pysam.AlignmentFile],
         contig: str,
         start: Union[int, str],
@@ -620,10 +640,23 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         # array to store positions and scores
         scores = np.zeros((stop-start, 2))
         window_centers = np.arange(start, stop, dtype=int)
+        scores[:, 0] = window_centers
         window_starts = np.round(window_centers - window_size * 0.5)
         window_stops = np.round(window_centers + window_size * 0.5 - 1)
         # inclusive
+        
+        
 
+        
+        for i in range(stop-start):
+            scores[i, :] = _single_wps(
+                window_starts[i],
+                window_stops[i],
+                window_centers[i],
+                frag_ends)
+        
+
+        """
         # create list of soft copies of frag_ends for multiprocessing
         input_frag_ends = [frag_ends] * (stop - start)
 
@@ -638,8 +671,10 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
         with Pool(workers) as pool:
             scores = np.array(pool.starmap(_single_wps, input_tuples))
+        
 
     assert scores.shape == (stop-start, 2)
+    """
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
