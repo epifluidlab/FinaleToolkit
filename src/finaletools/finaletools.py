@@ -21,11 +21,15 @@ from tqdm import tqdm
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
 
+# Regions from the ENCODE Blacklist (Amemiya et al 2019)
+BLACKLIST = None
+
+
 
 def frag_bam_to_bed(input_file,
                     output_file,
                     contig=None,
-                    quality_threshold=15,
+                    quality_threshold=30,
                     verbose=False):
     """
     Take paired-end reads from bam_file and write to a BED file.
@@ -64,13 +68,12 @@ def frag_bam_to_bed(input_file,
         for read1 in sam_file.fetch(contig=contig):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
-            if (read1.is_read2
-                or low_quality_read_pairs(read1, quality_threshold)):
+            if (not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 out.write(
                     f'{read1.reference_name}\t{read1.reference_start}\t'
-                    '{read1.reference_start + read1.template_length}\n'
+                    f'{read1.reference_start + read1.template_length}\n'
                     )
     except Exception as e:
         print("An error occurred:", str(e))
@@ -111,11 +114,13 @@ def frags_in_region(frag_array: np.ndarray[int, int],
     filtered_frags = frag_array[in_region]
     return filtered_frags
 
+def _in_blacklist(contig, start, stop):
+    return None
 
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
                     has_min_max: bool,
-                    quality_threshold:int=15,
+                    quality_threshold:int=30,
                     minimum: int=None,
                     maximum: int=None,
                     fraction_low: int=120,
@@ -158,11 +163,11 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
     return frag_ends
 
 
-@jit
-def _bed_frag_array(bed_file,
+@jit(forceobj=True)
+def _bed_frag_array(bed_file: TextIO,
                     contig: str,
                     has_min_max: bool,
-                    quality_threshold:int=15,
+                    quality_threshold:int=30,
                     minimum: int=None,
                     maximum: int=None,
                     fraction_low: int=120,
@@ -170,7 +175,7 @@ def _bed_frag_array(bed_file,
                     verbose: bool=False):
     frag_ends = []
     if (has_min_max):
-        for line in (tqdm(bed_file) if verbose else bed_file):
+        for line in bed_file:
             frag_info = line.split('\t')
             read_start = int(frag_info[1])
             read_stop = int(frag_info[2])
@@ -184,7 +189,7 @@ def _bed_frag_array(bed_file,
                 ):
                 frag_ends.append((read_start, read_stop))
     else:
-        for line in (tqdm(bed_file) if verbose else bed_file):
+        for line in bed_file:
             frag_info = line.split('\t')
             if (frag_info[0] == contig):
                 frag_ends.append((int(frag_info[1]), int(frag_info[2])))
@@ -193,7 +198,7 @@ def _bed_frag_array(bed_file,
 
 def frag_array(input_file: Union[str, pysam.AlignmentFile],
                contig: str,
-               quality_threshold: int=15,
+               quality_threshold: int=30,
                minimum: int=None,
                maximum: int=None,
                fraction_low: int=120,
@@ -315,7 +320,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     return frag_ends
 
 
-def low_quality_read_pairs(read, min_mapq=15):
+def low_quality_read_pairs(read, min_mapq=30):
     """
     Return `True` if the sequenced read described in `read` is not a
     properly paired read with a Phred score exceeding `min_mapq`. Based
@@ -328,7 +333,7 @@ def low_quality_read_pairs(read, min_mapq=15):
         Sequenced read to check for quality, perfect pairing and if it
         is mapped.
     min_mapq : int, optional
-        Minimum Phred score for map quality of read. Defaults to 15.
+        Minimum Phred score for map quality of read. Defaults to 30.
 
     Returns
     -------
@@ -348,7 +353,7 @@ def low_quality_read_pairs(read, min_mapq=15):
             or read.reference_name != read.next_reference_name)
 
 
-def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=15):
+def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
     """
     Return `True` if the sequenced read described in `read` is not read1
     and a properly paired read with a Phred score exceeding `min_mapq`.
@@ -359,7 +364,7 @@ def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=15):
         Sequenced read to check for quality, perfect pairing and if it
         is mapped.
     min_mapq : int, optional
-        Minimum Phred score for map quality of read. Defaults to 15.
+        Minimum Phred score for map quality of read. Defaults to 30.
 
     Returns
     -------
@@ -374,7 +379,7 @@ def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=15):
 def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 contig: str=None,
                 output_file: str=None, workers: int=1,
-                quality_threshold: int=15,
+                quality_threshold: int=30,
                 verbose: bool=False
                 ) -> np.ndarray[int]:
     """
@@ -474,7 +479,7 @@ def frag_center_coverage(input_file,
                          start,
                          stop,
                          output_file=None,
-                         quality_threshold=15,
+                         quality_threshold=30,
                          verbose=False):
     """
     Return estimated fragment coverage over specified `contig` and
@@ -542,6 +547,7 @@ def frag_center_coverage(input_file,
 
     return coverage
 
+
 @jit(nopython=True)
 def _single_wps(window_start: int,
                 window_stop: int,
@@ -565,7 +571,8 @@ def _single_wps(window_start: int,
     return (window_position, num_spanning - num_end_in)
 
 
-@jit
+
+@jit(nopython=True)
 def _vectorized_wps(frag_ends, window_starts, window_stops):
     """
     Unused helper function for vectorization
@@ -580,17 +587,17 @@ def _vectorized_wps(frag_ends, window_starts, window_stops):
     is_spanning = np.logical_and(
             np.less_equal(frag_starts, w_starts),
             np.greater_equal(frag_stops, w_stops))
-    
+
     n_spanning = np.sum(is_spanning, axis=0)
-        
+
     start_in = np.logical_and(
         np.less(frag_starts, w_starts),
         np.greater_equal(frag_starts, w_stops))
-    
+
     stop_in = np.logical_and(
         np.less(frag_stops, w_starts),
         np.greater_equal(frag_stops, w_stops))
-    
+
     end_in = np.logical_or(start_in, stop_in)
 
     n_end_in = np.sum(end_in, axis=0)
@@ -621,7 +628,7 @@ def _wps_loop(frag_ends: np.ndarray[int],
             window_stops[i],
             window_centers[i],
             frag_ends)
-        
+
     return scores
 
 
@@ -633,7 +640,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         window_size: int=120,
         fraction_low: int=120,
         fraction_high: int=180,
-        quality_threshold: int=15,
+        quality_threshold: int=30,
         verbose: Union[bool, int]=0
         ) -> np.ndarray[int, int]:
     """
@@ -702,7 +709,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         scores[:, 0] = np.arange(start, stop, dtype=int)
     else:
         scores = _wps_loop(frag_ends, start, stop, window_size)
-        
+
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
@@ -751,12 +758,13 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
 
 def _agg_wps_single_contig(input_file: Union[str, str],
-                           contig_site_bed: TextIO,
                            contig: str,
+                           site_bed: str,
                            window_size: int=120,
                            size_around_sites: int=5000,
-                           quality_threshold: int=15,
-                           workers: int=1,
+                           fraction_low: int=120,
+                           fraction_high: int=180,
+                           quality_threshold: int=30,
                            verbose: Union[int, bool]=0
                            ):
     """
@@ -782,15 +790,79 @@ def _agg_wps_single_contig(input_file: Union[str, str],
         np array of shape (window_size, 2) where column 1 is the coordinate and
         column 2 is the score.
     """
-    contig_frags = frag_array(input_file,
-                              contig,
-                              quality_threshold,
-                              )
-    # TODO: implement
-    return None
+    if verbose:
+        print(f'Aggregating over contig {contig}...')
+
+    # Create tempfile and write contig fragments to
+    print(f'Creating frag bed for {contig}')
+    _, frag_bed= tf.mkstemp(suffix='.bed.gz', text=True)
+    frag_bam_to_bed(input_file,
+                    frag_bed,
+                    contig=None,
+                    quality_threshold=30,
+                    verbose=False)
+
+    scores = np.zeros((size_around_sites, 2))
+
+    # Values to add to center of each site to get start and stop of each
+    # wps function
+    left_of_site = round(-size_around_sites / 2)
+    right_of_site = round(size_around_sites / 2)
+
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    unaggregated_scores = []
+
+    if (verbose):
+        print(f'Opening {input_file} for {contig}...')
+
+    if (verbose >= 2):
+        with open(site_bed, 'rt') as sites:
+            print('File opened! counting lines for {contig}')
+            bed_length = 0
+            for line in sites:
+                bed_length += 1
+    with open(site_bed, 'rt') as sites:
+        # verbose stuff
+        if (verbose):
+            print(f'File opened! Iterating through sites for {contig}...')
+
+        # aggregate wps over sites in bed file
+        for line in (
+            tqdm(sites, total=bed_length) if verbose>=2 else sites
+            ):
+            line_items = line.split()
+            if ('.' in line_items[5] or contig not in line_items[0]):
+                continue
+            single_scores = wps(frag_bed,
+                                line_items[0],
+                                int(line_items[1]) + left_of_site,
+                                int(line_items[1]) + right_of_site,
+                                output_file=None,
+                                window_size=window_size,
+                                fraction_low=fraction_low,
+                                fraction_high=fraction_high,
+                                quality_threshold=quality_threshold,
+                                verbose=(verbose-2 if verbose-2>0 else 0)
+                                )[:, 1]
+
+            if ('+' in line_items[5]):
+                unaggregated_scores.append(single_scores)
+            elif ('-' in line_items[5]):
+                single_scores = np.flip(single_scores)
+                unaggregated_scores.append(single_scores)
+            else:   # sites without strand direction are ignored
+                pass
+        scores[:, 1] = np.sum(unaggregated_scores, axis=0)
+
+        if (verbose):
+            print(f'Aggregation complete for {contig}!')
+
+    return scores
 
 
-def contig_site_bams(site_bed: str,
+def _contig_site_bams(site_bed: str,
                       genome_path: str
                       ) -> dict[str, BinaryIO]:
     with open(genome_path) as genome:
@@ -816,7 +888,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   size_around_sites: int=5000,
                   fraction_low: int=120,
                   fraction_high: int=180,
-                  quality_threshold: int=15,
+                  quality_threshold: int=30,
                   workers: int=1,
                   verbose: Union[bool, int]=0
                   ) -> np.ndarray[int, int]:
@@ -838,6 +910,51 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             """
             )
 
+    with open(site_bed) as bed_file:
+        contigs = []
+        for line in bed_file:
+            contig = line.split()[0].strip()
+            if contig not in contigs:
+                contigs.append(contig)
+
+        num_contigs = len(contigs)
+
+    if (verbose):
+        print(f'Fragments for {num_contigs} contigs detected.')
+
+    if (verbose >= 2):
+        for contig in contigs:
+            print(contig)
+
+    input_tuples = zip([input_file] * num_contigs,
+                       contigs,
+                       [site_bed] * num_contigs,
+                       [window_size] * num_contigs,
+                       [size_around_sites] * num_contigs,
+                       [fraction_low] * num_contigs,
+                       [fraction_high] * num_contigs,
+                       [quality_threshold] * num_contigs,
+                       [verbose - 1 if verbose >= 1 else 0] * num_contigs)
+
+    if (verbose):
+        print('Calculating...')
+
+    with Pool(workers) as pool:
+        contig_scores = pool.starmap(_agg_wps_single_contig, input_tuples)
+
+    if (verbose):
+        print('Compiling scores')
+
+    scores = np.zeros((size_around_sites, 2))
+    left_of_site = round(-size_around_sites / 2)
+    right_of_site = round(size_around_sites / 2)
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    for contig_score in contig_scores:
+        scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+
+    """
     scores = np.zeros((size_around_sites, 2))
 
     # Values to add to center of each site to get start and stop of each
@@ -895,6 +1012,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     if (verbose):
         print(f'Aggregation complete!')
+    """
+
 
     if (type(output_file) == str):   # check if output specified
         if (verbose):
@@ -947,6 +1066,60 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     return scores
 
 
+def _single_contig_delfi():
+    return None
+
+
+def delfi(input_bam: Union[str, pysam.AlignmentFile],
+          genome_file: str,
+          window_size: int=5000000,
+          subsample_coverage: int=2,
+          quality_threshold: int=30,
+          verbose: Union[int, bool]=False):
+    """
+    A function that replicates the methodology of Christiano et al
+    (2019).
+
+    Parameters
+    ----------
+    input_bam: str or AlignmentFile
+        Path string or Alignment File pointing a bam file containing PE
+        fragment reads.
+    genome_file: str
+        Path string to .genome file.
+    window_size: int
+        Size of non-overlapping windows to cover genome. Default is
+        5 megabases.
+    subsample_coverage: int, optional
+        The depth at which to subsample the input_bam. Default is 2.
+    verbose: int or bool, optional
+        Determines how many print statements and loading bars appear in
+        stdout. Default is False.
+
+    """
+
+    # TODO: subsample bam to specified coverage. Jan28.hg19.mdups.bam
+    # already has 1-2x coverage.
+
+    if (verbose):
+        start_time = time.time()
+
+    with open(genome_file) as genome:
+        contigs = [(
+            line.split()[0],
+            int(line.split()[1])
+            ) for line in genome.readlines()]
+
+    print(contigs)
+
+
+
+    if (verbose):
+        end_time = time.time()
+        print(f'aggregate_wps took {end_time - start_time} s to complete')
+    return None
+
+
 # TODO: look through argparse args and fix them all
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -985,7 +1158,7 @@ if __name__ == '__main__':
     parser_command2.add_argument('--contig')
     parser_command2.add_argument('--output_file')
     parser_command2.add_argument('--workers', default=1, type=int)
-    parser_command2.add_argument('--quality_threshold', default=15, type=int)
+    parser_command2.add_argument('--quality_threshold', default=30, type=int)
     parser_command2.add_argument('-v', '--verbose', action='store_true')
     parser_command2.set_defaults(func=frag_length)
 
@@ -1009,8 +1182,7 @@ if __name__ == '__main__':
                                  type=int)
     parser_command3.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
-    parser_command3.add_argument('-n', '--workers', default=1, type=int)
-    parser_command3.add_argument('--quality_threshold', default=15, type=int)
+    parser_command3.add_argument('--quality_threshold', default=30, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count')
     parser_command3.set_defaults(func=wps)
 
