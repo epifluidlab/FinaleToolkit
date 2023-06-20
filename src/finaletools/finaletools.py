@@ -573,6 +573,29 @@ def _vectorized_wps(frag_ends, window_starts, window_stops):
 
     return scores
 
+@jit(nopython=True)
+def _wps_loop(frag_ends: np.ndarray[int],
+              start: int,
+              stop: int,
+              window_size: int):
+    # array to store positions and scores
+    scores = np.zeros((stop-start, 2))
+    window_centers = np.arange(start, stop, dtype=np.int64)
+    scores[:, 0] = window_centers
+    window_starts = np.zeros(stop-start)
+    window_stops = np.zeros(stop-start)
+    np.rint(window_centers - window_size * 0.5, window_starts)
+    np.rint(window_centers + window_size * 0.5 - 1, window_stops)
+    # inclusive
+
+    for i in range(stop-start):
+        scores[i, :] = _single_wps(
+            window_starts[i],
+            window_stops[i],
+            window_centers[i],
+            frag_ends)
+        
+    return scores
 
 
 def wps(input_file: Union[str, pysam.AlignmentFile],
@@ -652,22 +675,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         scores = np.zeros((stop-start, 2))
         scores[:, 0] = np.arange(start, stop, dtype=int)
     else:
-        # array to store positions and scores
-        scores = np.zeros((stop-start, 2))
-        window_centers = np.arange(start, stop, dtype=int)
-        scores[:, 0] = window_centers
-        window_starts = np.round(window_centers - window_size * 0.5)
-        window_stops = np.round(window_centers + window_size * 0.5 - 1)
-        # inclusive
+        scores = _wps_loop(frag_ends, start, stop, window_size)
         
-        # scores[:, 1] = _vectorized_wps(frag_ends, window_starts, window_stops)
-
-        for i in range(stop-start):
-            scores[i, :] = _single_wps(
-                window_starts[i],
-                window_stops[i],
-                window_centers[i],
-                frag_ends)
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
