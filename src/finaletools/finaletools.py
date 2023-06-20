@@ -21,6 +21,9 @@ from tqdm import tqdm
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
 
+# Regions from the
+
+
 
 def frag_bam_to_bed(input_file,
                     output_file,
@@ -110,6 +113,8 @@ def frags_in_region(frag_array: np.ndarray[int, int],
     filtered_frags = frag_array[in_region]
     return filtered_frags
 
+def _in_blacklist(contig, start, stop):
+    return None
 
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
@@ -1101,7 +1106,7 @@ def delfi(input_bam: Union[str, pysam.AlignmentFile],
     with open(genome_file) as genome:
         contigs = [(
             line.split()[0],
-            int(line.split([1]))
+            int(line.split()[1])
             ) for line in genome.readlines()]
 
     print(contigs)
