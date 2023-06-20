@@ -157,7 +157,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
     return frag_ends
 
 
-@jit
+@jit(forceobj=True)
 def _bed_frag_array(bed_file: TextIO,
                     contig: str,
                     has_min_max: bool,
@@ -563,6 +563,7 @@ def _single_wps(window_start: int,
 
     # calculate wps and return
     return (window_position, num_spanning - num_end_in)
+
 
 
 @jit(nopython=True)
