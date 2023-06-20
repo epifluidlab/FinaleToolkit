@@ -130,6 +130,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
                      )
     return frag_ends
 
+
 @jit
 def _bed_frag_array(bed_file,
                     contig: str,
@@ -539,6 +540,7 @@ def _single_wps(window_start: int,
     # calculate wps and return
     return (window_position, num_spanning - num_end_in)
 
+
 @jit
 def _vectorized_wps(frag_ends, window_starts, window_stops):
     """
@@ -572,6 +574,7 @@ def _vectorized_wps(frag_ends, window_starts, window_stops):
     scores = n_spanning - n_end_in
 
     return scores
+
 
 @jit(nopython=True)
 def _wps_loop(frag_ends: np.ndarray[int],
@@ -607,7 +610,6 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         fraction_low: int=120,
         fraction_high: int=180,
         quality_threshold: int=15,
-        workers: int=1,
         verbose: Union[bool, int]=0
         ) -> np.ndarray[int, int]:
     """
@@ -732,8 +734,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   fraction_low: int=120,
                   fraction_high: int=180,
                   quality_threshold: int=15,
-                  agg_workers: int=1,
-                  wps_workers: int=1,
+                  workers: int=1,
                   verbose: Union[bool, int]=0
                   ) -> np.ndarray[int, int]:
     """
@@ -797,7 +798,6 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                                     fraction_low=fraction_low,
                                     fraction_high=fraction_high,
                                     quality_threshold=quality_threshold,
-                                    workers=wps_workers,
                                     verbose=(verbose-2 if verbose-2>0 else 0)
                                     )[:, 1]
 
@@ -948,8 +948,7 @@ if __name__ == '__main__':
                                  type=int)
     parser_command4.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
-    parser_command4.add_argument('--agg_workers', default=1, type=int)
-    parser_command4.add_argument('--wps_workers', default=1, type=int)
+    parser_command4.add_argument('--workers', default=1, type=int)
     parser_command4.add_argument('-v', '--verbose', action='count')
     parser_command4.set_defaults(func=aggregate_wps)
 
