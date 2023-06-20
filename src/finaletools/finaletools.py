@@ -915,6 +915,10 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     if (verbose):
         print(f'Fragments for {num_contigs} contigs detected.')
 
+    if (verbose >= 2):
+        for contig in contigs:
+            print(contig)
+
     input_tuples = zip([input_file] * num_contigs,
                        contigs,
                        [site_bed] * num_contigs,
