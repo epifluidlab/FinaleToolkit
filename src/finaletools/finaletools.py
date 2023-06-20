@@ -903,8 +903,13 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             """
             )
 
-    with pysam.AlignmentFile(input_file) as sam_file:
-        contigs = sam_file.references
+    with open(site_bed) as bed_file:
+        contigs = []
+        for line in bed_file:
+            contig = line.split()[0].strip()
+            if contig not in contigs:
+                contigs.append(contig)
+
         num_contigs = len(contigs)
         
     if (verbose):
