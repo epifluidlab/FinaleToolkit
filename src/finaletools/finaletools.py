@@ -64,13 +64,12 @@ def frag_bam_to_bed(input_file,
         for read1 in sam_file.fetch(contig=contig):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
-            if (read1.is_read2
-                or low_quality_read_pairs(read1, quality_threshold)):
+            if (not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 out.write(
                     f'{read1.reference_name}\t{read1.reference_start}\t'
-                    '{read1.reference_start + read1.template_length}\n'
+                    f'{read1.reference_start + read1.template_length}\n'
                     )
     except Exception as e:
         print("An error occurred:", str(e))
@@ -542,6 +541,7 @@ def frag_center_coverage(input_file,
 
     return coverage
 
+
 @jit(nopython=True)
 def _single_wps(window_start: int,
                 window_stop: int,
@@ -751,7 +751,6 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
 
 def _agg_wps_single_contig(input_file: Union[str, str],
-                           contig_site_bed: TextIO,
                            contig: str,
                            window_size: int=120,
                            size_around_sites: int=5000,
@@ -782,11 +781,18 @@ def _agg_wps_single_contig(input_file: Union[str, str],
         np array of shape (window_size, 2) where column 1 is the coordinate and
         column 2 is the score.
     """
-    contig_frags = frag_array(input_file,
-                              contig,
-                              quality_threshold,
-                              )
-    # TODO: implement
+    try:
+        # Create tempfile and write contig fragments to
+        output_file, output_path= tf.mkstemp(suffix='.bed.gz', text=True)
+        frag_bam_to_bed(input_file,
+                        output_path,
+                        contig=None,
+                        quality_threshold=15,
+                        verbose=False)
+    except Exception as e:
+        print(e)
+    finally:
+        output_file.close()
     return None
 
 
