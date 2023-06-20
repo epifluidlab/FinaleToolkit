@@ -1060,6 +1060,60 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     return scores
 
 
+def _single_contig_delfi():
+    return None
+
+
+def delfi(input_bam: Union[str, pysam.AlignmentFile],
+          genome_file: str,
+          window_size: int=5000000,
+          subsample_coverage: int=2,
+          quality_threshold: int=30,
+          verbose: Union[int, bool]=False):
+    """
+    A function that replicates the methodology of Christiano et al
+    (2019).
+
+    Parameters
+    ----------
+    input_bam: str or AlignmentFile
+        Path string or Alignment File pointing a bam file containing PE
+        fragment reads.
+    genome_file: str
+        Path string to .genome file.
+    window_size: int
+        Size of non-overlapping windows to cover genome. Default is
+        5 megabases.
+    subsample_coverage: int, optional
+        The depth at which to subsample the input_bam. Default is 2.
+    verbose: int or bool, optional
+        Determines how many print statements and loading bars appear in
+        stdout. Default is False.
+
+    """
+
+    # TODO: subsample bam to specified coverage. Jan28.hg19.mdups.bam
+    # already has 1-2x coverage.
+
+    if (verbose):
+        start_time = time.time()
+
+    with open(genome_file) as genome:
+        contigs = [(
+            line.split()[0],
+            int(line.split([1]))
+            ) for line in genome.readlines()]
+
+    print(contigs)
+
+
+
+    if (verbose):
+        end_time = time.time()
+        print(f'aggregate_wps took {end_time - start_time} s to complete')
+    return None
+
+
 # TODO: look through argparse args and fix them all
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
