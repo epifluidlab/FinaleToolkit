@@ -21,11 +21,6 @@ from tqdm import tqdm
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
 
-# Regions from the ENCODE Blacklist (Amemiya et al 2019)
-BLACKLIST = None
-
-
-
 def frag_bam_to_bed(input_file,
                     output_file,
                     contig=None,
