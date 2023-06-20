@@ -169,7 +169,7 @@ def _bed_frag_array(bed_file,
                     verbose: bool=False):
     frag_ends = []
     if (has_min_max):
-        for line in (tqdm(bed_file) if verbose else bed_file):
+        for line in bed_file:
             frag_info = line.split('\t')
             read_start = int(frag_info[1])
             read_stop = int(frag_info[2])
@@ -183,7 +183,7 @@ def _bed_frag_array(bed_file,
                 ):
                 frag_ends.append((read_start, read_stop))
     else:
-        for line in (tqdm(bed_file) if verbose else bed_file):
+        for line in bed_file:
             frag_info = line.split('\t')
             if (frag_info[0] == contig):
                 frag_ends.append((int(frag_info[1]), int(frag_info[2])))
