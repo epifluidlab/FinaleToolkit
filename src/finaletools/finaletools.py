@@ -157,7 +157,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
     return frag_ends
 
 
-@jit
+@jit(nopython=True)
 def _bed_frag_array(bed_file,
                     contig: str,
                     has_min_max: bool,
@@ -565,7 +565,7 @@ def _single_wps(window_start: int,
     return (window_position, num_spanning - num_end_in)
 
 
-@jit
+@jit(nopython=True)
 def _vectorized_wps(frag_ends, window_starts, window_stops):
     """
     Unused helper function for vectorization
@@ -580,17 +580,17 @@ def _vectorized_wps(frag_ends, window_starts, window_stops):
     is_spanning = np.logical_and(
             np.less_equal(frag_starts, w_starts),
             np.greater_equal(frag_stops, w_stops))
-    
+
     n_spanning = np.sum(is_spanning, axis=0)
-        
+
     start_in = np.logical_and(
         np.less(frag_starts, w_starts),
         np.greater_equal(frag_starts, w_stops))
-    
+
     stop_in = np.logical_and(
         np.less(frag_stops, w_starts),
         np.greater_equal(frag_stops, w_stops))
-    
+
     end_in = np.logical_or(start_in, stop_in)
 
     n_end_in = np.sum(end_in, axis=0)
@@ -621,7 +621,7 @@ def _wps_loop(frag_ends: np.ndarray[int],
             window_stops[i],
             window_centers[i],
             frag_ends)
-        
+
     return scores
 
 
@@ -702,7 +702,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         scores[:, 0] = np.arange(start, stop, dtype=int)
     else:
         scores = _wps_loop(frag_ends, start, stop, window_size)
-        
+
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
@@ -794,7 +794,7 @@ def _agg_wps_single_contig(input_file: Union[str, str],
                     contig=None,
                     quality_threshold=15,
                     verbose=False)
-    
+
     scores = np.zeros((size_around_sites, 2))
 
     # Values to add to center of each site to get start and stop of each
@@ -911,7 +911,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                 contigs.append(contig)
 
         num_contigs = len(contigs)
-        
+
     if (verbose):
         print(f'Fragments for {num_contigs} contigs detected.')
 
@@ -924,10 +924,10 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                        [fraction_high] * num_contigs,
                        [quality_threshold] * num_contigs,
                        [verbose - 1 if verbose >= 1 else 0] * num_contigs)
-    
+
     if (verbose):
         print('Calculating...')
-    
+
     with Pool(workers) as pool:
         contig_scores = pool.starmap(_agg_wps_single_contig, input_tuples)
 
@@ -1117,7 +1117,6 @@ if __name__ == '__main__':
                                  type=int)
     parser_command3.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
-    parser_command3.add_argument('-n', '--workers', default=1, type=int)
     parser_command3.add_argument('--quality_threshold', default=15, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count')
     parser_command3.set_defaults(func=wps)
