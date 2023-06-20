@@ -752,10 +752,12 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
 def _agg_wps_single_contig(input_file: Union[str, str],
                            contig: str,
+                           site_bed: str,
                            window_size: int=120,
                            size_around_sites: int=5000,
+                           fraction_low: int=120,
+                           fraction_high: int=180,
                            quality_threshold: int=15,
-                           workers: int=1,
                            verbose: Union[int, bool]=0
                            ):
     """
@@ -781,22 +783,79 @@ def _agg_wps_single_contig(input_file: Union[str, str],
         np array of shape (window_size, 2) where column 1 is the coordinate and
         column 2 is the score.
     """
-    try:
-        # Create tempfile and write contig fragments to
-        output_file, output_path= tf.mkstemp(suffix='.bed.gz', text=True)
-        frag_bam_to_bed(input_file,
-                        output_path,
-                        contig=None,
-                        quality_threshold=15,
-                        verbose=False)
-    except Exception as e:
-        print(e)
-    finally:
-        output_file.close()
-    return None
+    if verbose:
+        print(f'Aggregating over contig {contig}...')
+
+    # Create tempfile and write contig fragments to
+    print(f'Creating frag bed for {contig}')
+    _, frag_bed= tf.mkstemp(suffix='.bed.gz', text=True)
+    frag_bam_to_bed(input_file,
+                    frag_bed,
+                    contig=None,
+                    quality_threshold=15,
+                    verbose=False)
+    
+    scores = np.zeros((size_around_sites, 2))
+
+    # Values to add to center of each site to get start and stop of each
+    # wps function
+    left_of_site = round(-size_around_sites / 2)
+    right_of_site = round(size_around_sites / 2)
+
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    unaggregated_scores = []
+
+    if (verbose):
+        print(f'Opening {input_file} for {contig}...')
+
+    if (verbose >= 2):
+        with open(site_bed, 'rt') as sites:
+            print('File opened! counting lines for {contig}')
+            bed_length = 0
+            for line in sites:
+                bed_length += 1
+    with open(site_bed, 'rt') as sites:
+        # verbose stuff
+        if (verbose):
+            print(f'File opened! Iterating through sites for {contig}...')
+
+        # aggregate wps over sites in bed file
+        for line in (
+            tqdm(sites, total=bed_length) if verbose>=2 else sites
+            ):
+            line_items = line.split()
+            if ('.' in line_items[5] or contig not in line_items[0]):
+                continue
+            single_scores = wps(frag_bed,
+                                line_items[0],
+                                int(line_items[1]) + left_of_site,
+                                int(line_items[1]) + right_of_site,
+                                output_file=None,
+                                window_size=window_size,
+                                fraction_low=fraction_low,
+                                fraction_high=fraction_high,
+                                quality_threshold=quality_threshold,
+                                verbose=(verbose-2 if verbose-2>0 else 0)
+                                )[:, 1]
+
+            if ('+' in line_items[5]):
+                unaggregated_scores.append(single_scores)
+            elif ('-' in line_items[5]):
+                single_scores = np.flip(single_scores)
+                unaggregated_scores.append(single_scores)
+            else:   # sites without strand direction are ignored
+                pass
+        scores[:, 1] = np.sum(unaggregated_scores, axis=0)
+
+        if (verbose):
+            print(f'Aggregation complete for {contig}!')
+
+    return scores
 
 
-def contig_site_bams(site_bed: str,
+def _contig_site_bams(site_bed: str,
                       genome_path: str
                       ) -> dict[str, BinaryIO]:
     with open(genome_path) as genome:
@@ -844,6 +903,42 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             """
             )
 
+    with pysam.AlignmentFile(input_file) as sam_file:
+        contigs = sam_file.references
+        num_contigs = len(contigs)
+        
+    if (verbose):
+        print(f'Fragments for {num_contigs} contigs detected.')
+
+    input_tuples = zip([input_file] * num_contigs,
+                       contigs,
+                       [site_bed] * num_contigs,
+                       [window_size] * num_contigs,
+                       [size_around_sites] * num_contigs,
+                       [fraction_low] * num_contigs,
+                       [fraction_high] * num_contigs,
+                       [quality_threshold] * num_contigs,
+                       [verbose - 1 if verbose >= 1 else 0] * num_contigs)
+    
+    if (verbose):
+        print('Calculating...')
+    
+    with Pool(workers) as pool:
+        contig_scores = pool.starmap(_agg_wps_single_contig, input_tuples)
+
+    if (verbose):
+        print('Compiling scores')
+
+    scores = np.zeros((size_around_sites, 2))
+    left_of_site = round(-size_around_sites / 2)
+    right_of_site = round(size_around_sites / 2)
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    for contig_score in contig_scores:
+        scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+
+    """
     scores = np.zeros((size_around_sites, 2))
 
     # Values to add to center of each site to get start and stop of each
@@ -901,6 +996,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     if (verbose):
         print(f'Aggregation complete!')
+    """
+
 
     if (type(output_file) == str):   # check if output specified
         if (verbose):
