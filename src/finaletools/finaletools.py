@@ -539,24 +539,39 @@ def _single_wps(window_start: int,
     # calculate wps and return
     return (window_position, num_spanning - num_end_in)
 
-
-@jit(nopython=True)
+@jit
 def _vectorized_wps(frag_ends, window_starts, window_stops):
+    """
+    Unused helper function for vectorization
+    """
+
+
+    w_starts = np.column_stack(window_starts)
+    w_stops = np.column_stack(window_stops)
+    frag_starts = np.row_stack(frag_ends[:, 0])
+    frag_stops = np.row_stack(frag_ends[:, 1])
+
     is_spanning = np.logical_and(
-            np.less_equal(frag_ends[:, 0], window_starts),
-            np.greater_equal(frag_ends[:, 1], window_stops))
+            np.less_equal(frag_starts, w_starts),
+            np.greater_equal(frag_stops, w_stops))
     
     n_spanning = np.sum(is_spanning, axis=0)
         
     start_in = np.logical_and(
-        np.less(frag_ends[:, 0], window_starts),
-        np.greater_equal(frag_ends[:, 0], window_stops))
+        np.less(frag_starts, w_starts),
+        np.greater_equal(frag_starts, w_stops))
     
     stop_in = np.logical_and(
-        np.less(frag_ends[:, 1], window_starts),
-        np.greater_equal(frag_ends[:, 1], window_stops))
+        np.less(frag_stops, w_starts),
+        np.greater_equal(frag_stops, w_stops))
     
     end_in = np.logical_or(start_in, stop_in)
+
+    n_end_in = np.sum(end_in, axis=0)
+
+    scores = n_spanning - n_end_in
+
+    return scores
 
 
 
@@ -645,36 +660,14 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         window_stops = np.round(window_centers + window_size * 0.5 - 1)
         # inclusive
         
-        
+        # scores[:, 1] = _vectorized_wps(frag_ends, window_starts, window_stops)
 
-        
         for i in range(stop-start):
             scores[i, :] = _single_wps(
                 window_starts[i],
                 window_stops[i],
                 window_centers[i],
                 frag_ends)
-        
-
-        """
-        # create list of soft copies of frag_ends for multiprocessing
-        input_frag_ends = [frag_ends] * (stop - start)
-
-        # input for starmap
-        input_tuples = zip(window_starts,
-                           window_stops,
-                           window_centers,
-                           input_frag_ends)
-
-        if (verbose):
-            print("Calculating WPS")
-
-        with Pool(workers) as pool:
-            scores = np.array(pool.starmap(_single_wps, input_tuples))
-        
-
-    assert scores.shape == (stop-start, 2)
-    """
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
