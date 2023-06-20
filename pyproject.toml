@@ -11,7 +11,7 @@ authors = [
 ]
 description = "A package containing functions to process paired-end reads of cfDNA fragment WGS."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.7"
 license = {file = "LICENSE"}
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -22,6 +22,7 @@ dependencies = [
     "numpy",
     "pysam",
     "tqdm",
+    "numba",
 ]
 
 [project.urls]
