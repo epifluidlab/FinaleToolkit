@@ -9,12 +9,14 @@ Python script to calculate fragment features given a BAM file.
 """
 # TODO: typing annotations for all functions
 
+from __future__ import annotations
 import pysam
 import argparse
 import gzip
 import numpy as np
 import time
 import tempfile as tf
+from numba import jit
 from tqdm import tqdm
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
@@ -156,6 +158,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
     return frag_ends
 
 
+@jit
 def _bed_frag_array(bed_file,
                     contig: str,
                     has_min_max: bool,
@@ -196,7 +199,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                fraction_low: int=120,
                fraction_high: int=180,
                verbose: bool=False
-               ) -> np.ndarray[np.int64, np.int64]:
+               ) -> np.ndarray[int, int]:
     """
     Reads from BAM, SAM, or BED file and returns a two column matrix
     with fragment start and stop positions.
@@ -373,7 +376,7 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 output_file: str=None, workers: int=1,
                 quality_threshold: int=15,
                 verbose: bool=False
-                ) -> np.ndarray[np.int64]:
+                ) -> np.ndarray[int]:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file`
     that are above the quality threshold and are proper-paired reads.
@@ -539,12 +542,12 @@ def frag_center_coverage(input_file,
 
     return coverage
 
-
+@jit(nopython=True)
 def _single_wps(window_start: int,
                 window_stop: int,
                 window_position: int,
                 frag_ends: np.ndarray[int, int]
-                ) -> int:
+                ) -> tuple[int, int]:
     # count number of totally spanning fragments
     is_spanning = ((frag_ends[:, 0] < window_start)
                    * (frag_ends[:, 1] > window_stop))
@@ -562,6 +565,66 @@ def _single_wps(window_start: int,
     return (window_position, num_spanning - num_end_in)
 
 
+@jit
+def _vectorized_wps(frag_ends, window_starts, window_stops):
+    """
+    Unused helper function for vectorization
+    """
+
+
+    w_starts = np.column_stack(window_starts)
+    w_stops = np.column_stack(window_stops)
+    frag_starts = np.row_stack(frag_ends[:, 0])
+    frag_stops = np.row_stack(frag_ends[:, 1])
+
+    is_spanning = np.logical_and(
+            np.less_equal(frag_starts, w_starts),
+            np.greater_equal(frag_stops, w_stops))
+    
+    n_spanning = np.sum(is_spanning, axis=0)
+        
+    start_in = np.logical_and(
+        np.less(frag_starts, w_starts),
+        np.greater_equal(frag_starts, w_stops))
+    
+    stop_in = np.logical_and(
+        np.less(frag_stops, w_starts),
+        np.greater_equal(frag_stops, w_stops))
+    
+    end_in = np.logical_or(start_in, stop_in)
+
+    n_end_in = np.sum(end_in, axis=0)
+
+    scores = n_spanning - n_end_in
+
+    return scores
+
+
+@jit(nopython=True)
+def _wps_loop(frag_ends: np.ndarray[int],
+              start: int,
+              stop: int,
+              window_size: int):
+    # array to store positions and scores
+    scores = np.zeros((stop-start, 2))
+    window_centers = np.arange(start, stop, dtype=np.int64)
+    scores[:, 0] = window_centers
+    window_starts = np.zeros(stop-start)
+    window_stops = np.zeros(stop-start)
+    np.rint(window_centers - window_size * 0.5, window_starts)
+    np.rint(window_centers + window_size * 0.5 - 1, window_stops)
+    # inclusive
+
+    for i in range(stop-start):
+        scores[i, :] = _single_wps(
+            window_starts[i],
+            window_stops[i],
+            window_centers[i],
+            frag_ends)
+        
+    return scores
+
+
 def wps(input_file: Union[str, pysam.AlignmentFile],
         contig: str,
         start: Union[int, str],
@@ -571,8 +634,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         fraction_low: int=120,
         fraction_high: int=180,
         quality_threshold: int=15,
-        workers: int=1,
-        verbose: Union[bool, int]=0) -> np.ndarray[np.int64, np.int64]:
+        verbose: Union[bool, int]=0
+        ) -> np.ndarray[int, int]:
     """
     Return Windowed Protection Scores as specified in Snyder et al
     (2016) over a region [start,stop).
@@ -636,31 +699,10 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     if (frag_ends.shape == (0, 2)):
 
         scores = np.zeros((stop-start, 2))
-        scores[:, 0] = np.arange(start, stop, dtype=np.int64)
+        scores[:, 0] = np.arange(start, stop, dtype=int)
     else:
-        # array to store positions and scores
-        scores = np.zeros((stop-start, 2))
-        window_centers = np.arange(start, stop, dtype=np.int64)
-        window_starts = np.round(window_centers - window_size * 0.5)
-        window_stops = np.round(window_centers + window_size * 0.5 - 1)
-        # inclusive
-
-        # create list of soft copies of frag_ends for multiprocessing
-        input_frag_ends = [frag_ends] * (stop - start)
-
-        # input for starmap
-        input_tuples = zip(window_starts,
-                           window_stops,
-                           window_centers,
-                           input_frag_ends)
-
-        if (verbose):
-            print("Calculating WPS")
-
-        with Pool(workers) as pool:
-            scores = np.array(pool.starmap(_single_wps, input_tuples))
-
-    assert scores.shape == (stop-start, 2)
+        scores = _wps_loop(frag_ends, start, stop, window_size)
+        
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
@@ -771,14 +813,13 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   site_bed: str,
                   output_file: str=None,
                   window_size: int=120,
-                  size_around_sites: int=4000,
+                  size_around_sites: int=5000,
                   fraction_low: int=120,
                   fraction_high: int=180,
                   quality_threshold: int=15,
-                  agg_workers: int=1,
-                  wps_workers: int=1,
+                  workers: int=1,
                   verbose: Union[bool, int]=0
-                  ) -> np.ndarray[np.int64, np.int64]:
+                  ) -> np.ndarray[int, int]:
     """
     Function that aggregates WPS over sites in BED file
     """
@@ -840,7 +881,6 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                                     fraction_low=fraction_low,
                                     fraction_high=fraction_high,
                                     quality_threshold=quality_threshold,
-                                    workers=wps_workers,
                                     verbose=(verbose-2 if verbose-2>0 else 0)
                                     )[:, 1]
 
@@ -991,8 +1031,7 @@ if __name__ == '__main__':
                                  type=int)
     parser_command4.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
-    parser_command4.add_argument('--agg_workers', default=1, type=int)
-    parser_command4.add_argument('--wps_workers', default=1, type=int)
+    parser_command4.add_argument('--workers', default=1, type=int)
     parser_command4.add_argument('-v', '--verbose', action='count')
     parser_command4.set_defaults(func=aggregate_wps)
 
