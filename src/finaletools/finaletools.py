@@ -25,7 +25,7 @@ from typing import Union, TextIO, BinaryIO
 def frag_bam_to_bed(input_file,
                     output_file,
                     contig=None,
-                    quality_threshold=15,
+                    quality_threshold=30,
                     verbose=False):
     """
     Take paired-end reads from bam_file and write to a BED file.
@@ -114,7 +114,7 @@ def frags_in_region(frag_array: np.ndarray[int, int],
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
                     has_min_max: bool,
-                    quality_threshold:int=15,
+                    quality_threshold:int=30,
                     minimum: int=None,
                     maximum: int=None,
                     fraction_low: int=120,
@@ -161,7 +161,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
 def _bed_frag_array(bed_file: TextIO,
                     contig: str,
                     has_min_max: bool,
-                    quality_threshold:int=15,
+                    quality_threshold:int=30,
                     minimum: int=None,
                     maximum: int=None,
                     fraction_low: int=120,
@@ -192,7 +192,7 @@ def _bed_frag_array(bed_file: TextIO,
 
 def frag_array(input_file: Union[str, pysam.AlignmentFile],
                contig: str,
-               quality_threshold: int=15,
+               quality_threshold: int=30,
                minimum: int=None,
                maximum: int=None,
                fraction_low: int=120,
@@ -314,7 +314,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     return frag_ends
 
 
-def low_quality_read_pairs(read, min_mapq=15):
+def low_quality_read_pairs(read, min_mapq=30):
     """
     Return `True` if the sequenced read described in `read` is not a
     properly paired read with a Phred score exceeding `min_mapq`. Based
@@ -327,7 +327,7 @@ def low_quality_read_pairs(read, min_mapq=15):
         Sequenced read to check for quality, perfect pairing and if it
         is mapped.
     min_mapq : int, optional
-        Minimum Phred score for map quality of read. Defaults to 15.
+        Minimum Phred score for map quality of read. Defaults to 30.
 
     Returns
     -------
@@ -347,7 +347,7 @@ def low_quality_read_pairs(read, min_mapq=15):
             or read.reference_name != read.next_reference_name)
 
 
-def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=15):
+def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
     """
     Return `True` if the sequenced read described in `read` is not read1
     and a properly paired read with a Phred score exceeding `min_mapq`.
@@ -358,7 +358,7 @@ def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=15):
         Sequenced read to check for quality, perfect pairing and if it
         is mapped.
     min_mapq : int, optional
-        Minimum Phred score for map quality of read. Defaults to 15.
+        Minimum Phred score for map quality of read. Defaults to 30.
 
     Returns
     -------
@@ -373,7 +373,7 @@ def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=15):
 def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 contig: str=None,
                 output_file: str=None, workers: int=1,
-                quality_threshold: int=15,
+                quality_threshold: int=30,
                 verbose: bool=False
                 ) -> np.ndarray[int]:
     """
@@ -473,7 +473,7 @@ def frag_center_coverage(input_file,
                          start,
                          stop,
                          output_file=None,
-                         quality_threshold=15,
+                         quality_threshold=30,
                          verbose=False):
     """
     Return estimated fragment coverage over specified `contig` and
@@ -634,7 +634,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         window_size: int=120,
         fraction_low: int=120,
         fraction_high: int=180,
-        quality_threshold: int=15,
+        quality_threshold: int=30,
         verbose: Union[bool, int]=0
         ) -> np.ndarray[int, int]:
     """
@@ -758,7 +758,7 @@ def _agg_wps_single_contig(input_file: Union[str, str],
                            size_around_sites: int=5000,
                            fraction_low: int=120,
                            fraction_high: int=180,
-                           quality_threshold: int=15,
+                           quality_threshold: int=30,
                            verbose: Union[int, bool]=0
                            ):
     """
@@ -793,7 +793,7 @@ def _agg_wps_single_contig(input_file: Union[str, str],
     frag_bam_to_bed(input_file,
                     frag_bed,
                     contig=None,
-                    quality_threshold=15,
+                    quality_threshold=30,
                     verbose=False)
 
     scores = np.zeros((size_around_sites, 2))
@@ -882,7 +882,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   size_around_sites: int=5000,
                   fraction_low: int=120,
                   fraction_high: int=180,
-                  quality_threshold: int=15,
+                  quality_threshold: int=30,
                   workers: int=1,
                   verbose: Union[bool, int]=0
                   ) -> np.ndarray[int, int]:
@@ -1152,7 +1152,7 @@ if __name__ == '__main__':
     parser_command2.add_argument('--contig')
     parser_command2.add_argument('--output_file')
     parser_command2.add_argument('--workers', default=1, type=int)
-    parser_command2.add_argument('--quality_threshold', default=15, type=int)
+    parser_command2.add_argument('--quality_threshold', default=30, type=int)
     parser_command2.add_argument('-v', '--verbose', action='store_true')
     parser_command2.set_defaults(func=frag_length)
 
@@ -1176,7 +1176,7 @@ if __name__ == '__main__':
                                  type=int)
     parser_command3.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
-    parser_command3.add_argument('--quality_threshold', default=15, type=int)
+    parser_command3.add_argument('--quality_threshold', default=30, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count')
     parser_command3.set_defaults(func=wps)
 
