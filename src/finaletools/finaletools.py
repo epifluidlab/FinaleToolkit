@@ -15,10 +15,11 @@ import argparse
 import gzip
 import numpy as np
 import time
+import tempfile as tf
 from numba import jit
 from tqdm import tqdm
 from multiprocessing.pool import Pool
-from typing import Union
+from typing import Union, TextIO, BinaryIO
 
 
 def frag_bam_to_bed(input_file,
@@ -63,13 +64,12 @@ def frag_bam_to_bed(input_file,
         for read1 in sam_file.fetch(contig=contig):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
-            if (read1.is_read2
-                or low_quality_read_pairs(read1, quality_threshold)):
+            if (not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 out.write(
                     f'{read1.reference_name}\t{read1.reference_start}\t'
-                    '{read1.reference_start + read1.template_length}\n'
+                    f'{read1.reference_start + read1.template_length}\n'
                     )
     except Exception as e:
         print("An error occurred:", str(e))
@@ -83,6 +83,32 @@ def frag_bam_to_bed(input_file,
     if (verbose):
         end_time = time.time()
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete')
+
+
+def frags_in_region(frag_array: np.ndarray[int, int],
+                   minimum: int,
+                   maximum: int) -> np.ndarray[int, int]:
+    """
+    Takes an array of coordinates for ends of fragments and returns an
+    array of fragments with coverage in the specified region. That is, a
+    fragment is included if at least one base is in [minimum, maximum).
+
+    Parameters
+    ----------
+    frag_array : ndarray
+    minimum : int
+    maximum : int
+
+    Returns
+    -------
+    filtered_frags : ndarray
+    """
+    in_region = np.logical_and(
+        np.less(frag_array[:, 0], maximum),
+        np.greater_equal(frag_array[:, 1], minimum)
+        )
+    filtered_frags = frag_array[in_region]
+    return filtered_frags
 
 
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
@@ -132,7 +158,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
 
 
 @jit(forceobj=True)
-def _bed_frag_array(bed_file,
+def _bed_frag_array(bed_file: TextIO,
                     contig: str,
                     has_min_max: bool,
                     quality_threshold:int=15,
@@ -143,7 +169,7 @@ def _bed_frag_array(bed_file,
                     verbose: bool=False):
     frag_ends = []
     if (has_min_max):
-        for line in (tqdm(bed_file) if verbose else bed_file):
+        for line in bed_file:
             frag_info = line.split('\t')
             read_start = int(frag_info[1])
             read_stop = int(frag_info[2])
@@ -157,7 +183,7 @@ def _bed_frag_array(bed_file,
                 ):
                 frag_ends.append((read_start, read_stop))
     else:
-        for line in (tqdm(bed_file) if verbose else bed_file):
+        for line in bed_file:
             frag_info = line.split('\t')
             if (frag_info[0] == contig):
                 frag_ends.append((int(frag_info[1]), int(frag_info[2])))
@@ -288,15 +314,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     return frag_ends
 
 
-# min_mapq is synonymous to quality_threshold, copied from
-# https://github.com/epifluidlab/cofragr/blob/master/python/frag_summary
-# _in_intervals.py
-
-
 def low_quality_read_pairs(read, min_mapq=15):
     """
     Return `True` if the sequenced read described in `read` is not a
-    properly paired read with a Phred score exceeding `min_mapq`.
+    properly paired read with a Phred score exceeding `min_mapq`. Based
+    on https://github.com/epifluidlab/cofragr/blob/master/python/frag_su
+    mmary_in_intervals.py
 
     Parameters
     ----------
@@ -518,6 +541,7 @@ def frag_center_coverage(input_file,
 
     return coverage
 
+
 @jit(nopython=True)
 def _single_wps(window_start: int,
                 window_stop: int,
@@ -541,7 +565,8 @@ def _single_wps(window_start: int,
     return (window_position, num_spanning - num_end_in)
 
 
-@jit(forceobj=True)
+
+@jit(nopython=True)
 def _vectorized_wps(frag_ends, window_starts, window_stops):
     """
     Unused helper function for vectorization
@@ -726,6 +751,130 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     return scores
 
 
+def _agg_wps_single_contig(input_file: Union[str, str],
+                           contig: str,
+                           site_bed: str,
+                           window_size: int=120,
+                           size_around_sites: int=5000,
+                           fraction_low: int=120,
+                           fraction_high: int=180,
+                           quality_threshold: int=15,
+                           verbose: Union[int, bool]=0
+                           ):
+    """
+    Helper function for aggregate_wps. Aggregates wps over sites in one
+    contig.
+
+    Parameters
+    ----------
+    input_file : str or pysam.AlignmentFile
+        BAM or SAM file containing paired-end fragment reads or its
+        path. `AlignmentFile` must be opened in read mode.
+    contig : str
+    window_size : int, optional
+        Size of window to calculate WPS. Default is k = 120, equivalent
+        to L-WPS.
+    quality_threshold : int, optional
+    workers : int, optional
+    verbose : int or bool, optional
+
+    Returns
+    -------
+    scores : numpy.ndarray
+        np array of shape (window_size, 2) where column 1 is the coordinate and
+        column 2 is the score.
+    """
+    if verbose:
+        print(f'Aggregating over contig {contig}...')
+
+    # Create tempfile and write contig fragments to
+    print(f'Creating frag bed for {contig}')
+    _, frag_bed= tf.mkstemp(suffix='.bed.gz', text=True)
+    frag_bam_to_bed(input_file,
+                    frag_bed,
+                    contig=None,
+                    quality_threshold=15,
+                    verbose=False)
+
+    scores = np.zeros((size_around_sites, 2))
+
+    # Values to add to center of each site to get start and stop of each
+    # wps function
+    left_of_site = round(-size_around_sites / 2)
+    right_of_site = round(size_around_sites / 2)
+
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    unaggregated_scores = []
+
+    if (verbose):
+        print(f'Opening {input_file} for {contig}...')
+
+    if (verbose >= 2):
+        with open(site_bed, 'rt') as sites:
+            print('File opened! counting lines for {contig}')
+            bed_length = 0
+            for line in sites:
+                bed_length += 1
+    with open(site_bed, 'rt') as sites:
+        # verbose stuff
+        if (verbose):
+            print(f'File opened! Iterating through sites for {contig}...')
+
+        # aggregate wps over sites in bed file
+        for line in (
+            tqdm(sites, total=bed_length) if verbose>=2 else sites
+            ):
+            line_items = line.split()
+            if ('.' in line_items[5] or contig not in line_items[0]):
+                continue
+            single_scores = wps(frag_bed,
+                                line_items[0],
+                                int(line_items[1]) + left_of_site,
+                                int(line_items[1]) + right_of_site,
+                                output_file=None,
+                                window_size=window_size,
+                                fraction_low=fraction_low,
+                                fraction_high=fraction_high,
+                                quality_threshold=quality_threshold,
+                                verbose=(verbose-2 if verbose-2>0 else 0)
+                                )[:, 1]
+
+            if ('+' in line_items[5]):
+                unaggregated_scores.append(single_scores)
+            elif ('-' in line_items[5]):
+                single_scores = np.flip(single_scores)
+                unaggregated_scores.append(single_scores)
+            else:   # sites without strand direction are ignored
+                pass
+        scores[:, 1] = np.sum(unaggregated_scores, axis=0)
+
+        if (verbose):
+            print(f'Aggregation complete for {contig}!')
+
+    return scores
+
+
+def _contig_site_bams(site_bed: str,
+                      genome_path: str
+                      ) -> dict[str, BinaryIO]:
+    with open(genome_path) as genome:
+        contigs = [line.split()[0] for line in genome.readlines()]
+    tempdir = tf.TemporaryDirectory()
+    tempfiles = [f'{tempdir.name}/{contig}.bed' for contig in contigs]
+    contig_dict = dict(zip(contigs, tempfiles))
+    # TODO: this is known to be broken
+    with open(site_bed) as sites:
+        for line in sites:
+            contig = line.split()[0]
+            contig_dict[contig].write(line)
+        print(contig_dict.values())
+    for file in contig_dict.values():
+        file.seek(0)
+    return contig_dict
+
+
 def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   site_bed: str,
                   output_file: str=None,
@@ -755,6 +904,51 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             """
             )
 
+    with open(site_bed) as bed_file:
+        contigs = []
+        for line in bed_file:
+            contig = line.split()[0].strip()
+            if contig not in contigs:
+                contigs.append(contig)
+
+        num_contigs = len(contigs)
+
+    if (verbose):
+        print(f'Fragments for {num_contigs} contigs detected.')
+
+    if (verbose >= 2):
+        for contig in contigs:
+            print(contig)
+
+    input_tuples = zip([input_file] * num_contigs,
+                       contigs,
+                       [site_bed] * num_contigs,
+                       [window_size] * num_contigs,
+                       [size_around_sites] * num_contigs,
+                       [fraction_low] * num_contigs,
+                       [fraction_high] * num_contigs,
+                       [quality_threshold] * num_contigs,
+                       [verbose - 1 if verbose >= 1 else 0] * num_contigs)
+
+    if (verbose):
+        print('Calculating...')
+
+    with Pool(workers) as pool:
+        contig_scores = pool.starmap(_agg_wps_single_contig, input_tuples)
+
+    if (verbose):
+        print('Compiling scores')
+
+    scores = np.zeros((size_around_sites, 2))
+    left_of_site = round(-size_around_sites / 2)
+    right_of_site = round(size_around_sites / 2)
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    for contig_score in contig_scores:
+        scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+
+    """
     scores = np.zeros((size_around_sites, 2))
 
     # Values to add to center of each site to get start and stop of each
@@ -812,6 +1006,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     if (verbose):
         print(f'Aggregation complete!')
+    """
+
 
     if (type(output_file) == str):   # check if output specified
         if (verbose):
@@ -926,7 +1122,6 @@ if __name__ == '__main__':
                                  type=int)
     parser_command3.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
-    parser_command3.add_argument('-n', '--workers', default=1, type=int)
     parser_command3.add_argument('--quality_threshold', default=15, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count')
     parser_command3.set_defaults(func=wps)
