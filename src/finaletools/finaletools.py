@@ -157,8 +157,8 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
     return frag_ends
 
 
-@jit(nopython=True)
-def _bed_frag_array(bed_file,
+@jit
+def _bed_frag_array(bed_file: TextIO,
                     contig: str,
                     has_min_max: bool,
                     quality_threshold:int=15,
