@@ -10,16 +10,18 @@ Python script to calculate fragment features given a BAM file.
 # TODO: typing annotations for all functions
 
 from __future__ import annotations
-import pysam
 import argparse
 import gzip
-import numpy as np
 import time
 import tempfile as tf
-from numba import jit
-from tqdm import tqdm
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
+
+import pysam
+import numpy as np
+from numba import jit
+from tqdm import tqdm
+
 from finaletools.utils import frag_bam_to_bed, frag_array, not_read1_or_low_quality
 
 

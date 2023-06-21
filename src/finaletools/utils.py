@@ -1,10 +1,12 @@
-import pysam
-import pybedtools
+
 import time
 import gzip
-import numpy as np
 from typing import Union, TextIO
+
+import numpy as np
 from numba import jit
+import pysam
+import pybedtools
 from tqdm import tqdm
 
 
