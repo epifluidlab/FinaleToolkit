@@ -509,7 +509,7 @@ def _agg_wps_single_contig(input_file: Union[str, str],
         scores[:, 1] = np.sum(unaggregated_scores, axis=0)
 
         if (verbose):
-            print(f'Aggregation complete for {contig}!')
+            print(f'Aggregation complete for {contig}!', flush=True)
 
     return scores
 

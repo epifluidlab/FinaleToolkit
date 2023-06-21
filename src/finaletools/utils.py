@@ -70,7 +70,8 @@ def frag_bam_to_bed(input_file,
 
     if (verbose):
         end_time = time.time()
-        print(f'frag_bam_to_bed took {end_time - start_time} s to complete')
+        print(f'frag_bam_to_bed took {end_time - start_time} s to complete',
+              flush=True)
 
 
 def frags_in_region(frag_array: np.ndarray[int, int],
@@ -388,5 +389,9 @@ def filter_bam(
         String containing path to the filtered BAM file. If no
         output_path, will be placed into a temporary file.
     """
+
+    unfiltered_bam = pysam.AlignmentFile(input_file)
+
+
 
     return None
