@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "FinaleTools"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
     {name="James Li", email="jameswli2021@gmail.com"},
     {name="Yaping Liu", email="yaping.liu@cchmc.org"},
@@ -21,8 +21,13 @@ classifiers = [
 dependencies = [
     "numpy",
     "pysam",
+    "pybedtools",
+    "pybigwig",
     "tqdm",
     "numba",
+    "scipy",
+    "matplotlib",
+    "pandas",
 ]
 
 [project.urls]
