@@ -1198,6 +1198,7 @@ if __name__ == '__main__':
                                  type=int)
     parser_command4.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
+    parser_command4.add_argument('--quality_threshold', default=30, type=int)
     parser_command4.add_argument('--workers', default=1, type=int)
     parser_command4.add_argument('-v', '--verbose', action='count')
     parser_command4.set_defaults(func=aggregate_wps)
