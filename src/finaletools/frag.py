@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import time
+import os
 import tempfile as tf
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
@@ -447,69 +448,73 @@ def _agg_wps_single_contig(input_file: Union[str, str],
 
     # Create tempfile and write contig fragments to
     print(f'Creating frag bed for {contig}')
-    _, frag_bed= tf.mkstemp(suffix='.bed.gz', text=True)
-    frag_bam_to_bed(input_file,
-                    frag_bed,
-                    contig=None,
-                    quality_threshold=30,
-                    verbose=False)
+    try:
+        _, frag_bed = tf.mkstemp(suffix='.bed.gz', text=True)
+        frag_bam_to_bed(input_file,
+                        frag_bed,
+                        contig=None,
+                        quality_threshold=30,
+                        verbose=False)
 
-    scores = np.zeros((size_around_sites, 2))
+        scores = np.zeros((size_around_sites, 2))
 
-    # Values to add to center of each site to get start and stop of each
-    # wps function
-    left_of_site = round(-size_around_sites / 2)
-    right_of_site = round(size_around_sites / 2)
+        # Values to add to center of each site to get start and stop of each
+        # wps function
+        left_of_site = round(-size_around_sites / 2)
+        right_of_site = round(size_around_sites / 2)
 
-    assert right_of_site - left_of_site == size_around_sites
-    scores[:, 0] = np.arange(left_of_site, right_of_site)
+        assert right_of_site - left_of_site == size_around_sites
+        scores[:, 0] = np.arange(left_of_site, right_of_site)
 
-    unaggregated_scores = []
+        unaggregated_scores = []
 
-    if (verbose):
-        print(f'Opening {input_file} for {contig}...')
+        if (verbose):
+            print(f'Opening {input_file} for {contig}...')
 
-    if (verbose >= 2):
+        if (verbose >= 2):
+            with open(site_bed, 'rt') as sites:
+                print('File opened! counting lines for {contig}')
+                bed_length = 0
+                for line in sites:
+                    bed_length += 1
         with open(site_bed, 'rt') as sites:
-            print('File opened! counting lines for {contig}')
-            bed_length = 0
-            for line in sites:
-                bed_length += 1
-    with open(site_bed, 'rt') as sites:
-        # verbose stuff
-        if (verbose):
-            print(f'File opened! Iterating through sites for {contig}...')
+            # verbose stuff
+            if (verbose):
+                print(f'File opened! Iterating through sites for {contig}...')
 
-        # aggregate wps over sites in bed file
-        for line in (
-            tqdm(sites, total=bed_length) if verbose>=2 else sites
-            ):
-            line_items = line.split()
-            if ('.' in line_items[5] or contig not in line_items[0]):
-                continue
-            single_scores = wps(frag_bed,
-                                line_items[0],
-                                int(line_items[1]) + left_of_site,
-                                int(line_items[1]) + right_of_site,
-                                output_file=None,
-                                window_size=window_size,
-                                fraction_low=fraction_low,
-                                fraction_high=fraction_high,
-                                quality_threshold=quality_threshold,
-                                verbose=(verbose-2 if verbose-2>0 else 0)
-                                )[:, 1]
+            # aggregate wps over sites in bed file
+            for line in (
+                tqdm(sites, total=bed_length) if verbose>=2 else sites
+                ):
+                line_items = line.split()
+                if ('.' in line_items[5] or contig not in line_items[0]):
+                    continue
+                single_scores = wps(frag_bed,
+                                    line_items[0],
+                                    int(line_items[1]) + left_of_site,
+                                    int(line_items[1]) + right_of_site,
+                                    output_file=None,
+                                    window_size=window_size,
+                                    fraction_low=fraction_low,
+                                    fraction_high=fraction_high,
+                                    quality_threshold=quality_threshold,
+                                    verbose=(verbose-2 if verbose-2>0 else 0)
+                                    )[:, 1]
 
-            if ('+' in line_items[5]):
-                unaggregated_scores.append(single_scores)
-            elif ('-' in line_items[5]):
-                single_scores = np.flip(single_scores)
-                unaggregated_scores.append(single_scores)
-            else:   # sites without strand direction are ignored
-                pass
-        scores[:, 1] = np.sum(unaggregated_scores, axis=0)
-
-        if (verbose):
-            print(f'Aggregation complete for {contig}!', flush=True)
+                if ('+' in line_items[5]):
+                    unaggregated_scores.append(single_scores)
+                elif ('-' in line_items[5]):
+                    single_scores = np.flip(single_scores)
+                    unaggregated_scores.append(single_scores)
+                else:   # sites without strand direction are ignored
+                    pass
+            scores[:, 1] = np.sum(unaggregated_scores, axis=0)
+    except Exception as e:
+        print(e)
+    finally:
+        os.remove(frag_bed)
+    if (verbose):
+        print(f'Aggregation complete for {contig}!', flush=True)
 
     return scores
 
