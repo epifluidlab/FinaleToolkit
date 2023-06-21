@@ -1,6 +1,7 @@
 
 import time
 import gzip
+import tempfile as tf
 from typing import Union, TextIO
 
 import numpy as np
@@ -389,6 +390,15 @@ def filter_bam(
         String containing path to the filtered BAM file. If no
         output_path, will be placed into a temporary file.
     """
+
+    # create tempfile to contain filtered bam
+    if output_path is None:
+        filtered_bam = tf.mkstemp()
+    elif output_path.endswith('bam'):
+        pass
+    else:
+        raise ValueError('output_path should have suffix .bam')
+
 
     unfiltered_bam = pysam.AlignmentFile(input_file)
 
