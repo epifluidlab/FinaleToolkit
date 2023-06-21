@@ -1067,9 +1067,11 @@ def _single_contig_delfi():
 
 def delfi(input_bam: Union[str, pysam.AlignmentFile],
           genome_file: str,
+          blacklist_file: str,
           window_size: int=5000000,
           subsample_coverage: int=2,
           quality_threshold: int=30,
+          workers: int=1,
           verbose: Union[int, bool]=False):
     """
     A function that replicates the methodology of Christiano et al
@@ -1082,11 +1084,15 @@ def delfi(input_bam: Union[str, pysam.AlignmentFile],
         fragment reads.
     genome_file: str
         Path string to .genome file.
+    blacklist_file: str
+        Path string to bed file containing genome blacklist.
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
     subsample_coverage: int, optional
         The depth at which to subsample the input_bam. Default is 2.
+    workers: int, optional
+        Number of worker processes to use. Default is 1.
     verbose: int or bool, optional
         Determines how many print statements and loading bars appear in
         stdout. Default is False.
@@ -1100,10 +1106,21 @@ def delfi(input_bam: Union[str, pysam.AlignmentFile],
         start_time = time.time()
 
     with open(genome_file) as genome:
+        # read genome file into a list of tuples
         contigs = [(
             line.split()[0],
             int(line.split()[1])
             ) for line in genome.readlines()]
+
+    # generate DELFI windows
+    windows = []
+    for contig, size in contigs:
+        for coordinate in range(0, size, window_size):
+            # (contig, start, stop)
+            windows.append((contig, coordinate, coordinate + window_size))
+
+    with Pool(workers) as pool:
+        pass
 
     print(contigs)
 
