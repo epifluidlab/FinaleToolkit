@@ -358,3 +358,35 @@ def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
     """
     return (low_quality_read_pairs(read, min_mapq=min_mapq)
             or not read.is_read1)
+
+
+def filter_bam(
+        input_file: Union[str, pysam.AlignmentFile],
+        blacklist_bed: Union[str, pybedtools.BedTool],
+        output_path: str=None,
+        quality_threshold: int=30,
+        verbose: bool=False):
+    """
+    Accepts the path to a BAM file and returns a BAM file where all
+    reads are read1 in a proper pair, exceed the specified quality
+    threshold, and do not intersect a region in the given blacklist
+    file.
+
+    Parameters
+    ----------
+    input_bam : str or AlignmentFile
+        Path string or AlignmentFile pointing to the BAM file to be
+        filtered.
+    blacklist_bed : str or BedTool, optional
+    output_bam : str, optional
+    quality_threshold : int, optional
+    verbose : bool, optional
+
+    Returns
+    -------
+    output_bam : str
+        String containing path to the filtered BAM file. If no
+        output_path, will be placed into a temporary file.
+    """
+
+    return None
