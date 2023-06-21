@@ -21,8 +21,11 @@ import pysam
 import numpy as np
 from numba import jit
 from tqdm import tqdm
-
-from finaletools.utils import frag_bam_to_bed, frag_array, not_read1_or_low_quality
+from finaletools.utils import (
+    frag_bam_to_bed,
+    frag_array,
+    not_read1_or_low_quality
+)
 
 
 def frag_length(input_file: Union[str, pysam.AlignedSegment],
