@@ -527,8 +527,9 @@ def _agg_wps_process(bam,
                      fraction_low,
                      fraction_high,
                      quality_threshold):
-    minimum = min if (min := tss - window_size - size_around_sites // 2) >= 0 else 0
-    maximum = tss + window_size + size_around_sites // 2
+    min = tss - 2 * window_size - size_around_sites // 2
+    minimum = min if min >= 0 else 0
+    maximum = tss + 2 * window_size + size_around_sites // 2
 
     frag_ends = frag_array(bam,
                            contig,
@@ -623,12 +624,24 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             contigs.append(contig)
             ts_sites.append(start)
 
+
+    left_of_site = round(-size_around_sites / 2)
+    right_of_site = round(size_around_sites / 2)
+
+    assert right_of_site - left_of_site == size_around_sites
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    starts = [tss+left_of_site for tss in ts_sites]
+    stops = [tss+right_of_site for tss in ts_sites]
+
     count = len(contigs)
 
     tss_list = zip(
         count*[input_file],
         contigs,
-        ts_sites,
+        starts,
+        stops,
+        count*[None],
         count*[window_size],
         count*[size_around_sites],
         count*[fraction_low],
@@ -636,14 +649,9 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         count*[quality_threshold])
 
     with Pool(workers) as pool:
-        contig_scores = pool.starmap(_agg_wps_process, tss_list)
+        contig_scores = pool.starmap(wps, tss_list)
 
     scores = np.zeros((size_around_sites, 2))
-    left_of_site = round(-size_around_sites / 2)
-    right_of_site = round(size_around_sites / 2)
-
-    assert right_of_site - left_of_site == size_around_sites
-    scores[:, 0] = np.arange(left_of_site, right_of_site)
 
     for contig_score in contig_scores:
         scores[:, 1] = scores[:, 1] + contig_score[:, 1]
