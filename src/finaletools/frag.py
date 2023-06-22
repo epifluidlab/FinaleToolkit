@@ -34,7 +34,7 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 output_file: str=None, workers: int=1,
                 quality_threshold: int=30,
                 verbose: bool=False
-                ) -> np.ndarray[int]:
+                ) -> np.ndarray:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file`
     that are above the quality threshold and are proper-paired reads.
@@ -205,8 +205,8 @@ def frag_center_coverage(input_file,
 def _single_wps(window_start: int,
                 window_stop: int,
                 window_position: int,
-                frag_ends: np.ndarray[int, int]
-                ) -> tuple[int, int]:
+                frag_ends: np.ndarray
+                ) -> tuple:
     # count number of totally spanning fragments
     is_spanning = ((frag_ends[:, 0] < window_start)
                    * (frag_ends[:, 1] > window_stop))
@@ -261,7 +261,7 @@ def _vectorized_wps(frag_ends, window_starts, window_stops):
 
 
 @jit(nopython=True)
-def _wps_loop(frag_ends: np.ndarray[int],
+def _wps_loop(frag_ends: np.ndarray,
               start: int,
               stop: int,
               window_size: int):
@@ -295,7 +295,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         fraction_high: int=180,
         quality_threshold: int=30,
         verbose: Union[bool, int]=0
-        ) -> np.ndarray[int, int]:
+        ) -> np.ndarray:
     """
     Return Windowed Protection Scores as specified in Snyder et al
     (2016) over a region [start,stop).
@@ -548,7 +548,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   quality_threshold: int=30,
                   workers: int=1,
                   verbose: Union[bool, int]=0
-                  ) -> np.ndarray[int, int]:
+                  ) -> np.ndarray:
     """
     Function that aggregates WPS over sites in BED file
     """

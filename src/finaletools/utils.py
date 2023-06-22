@@ -74,10 +74,10 @@ def frag_bam_to_bed(input_file,
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete',
               flush=True)
 
-@jit(np.ndarray(np.ndarray, int, int), nopython=True)
-def frags_in_region(frag_array: np.ndarray[int, int],
+@jit(nopython=True)
+def frags_in_region(frag_array: np.ndarray,
                    minimum: int,
-                   maximum: int) -> np.ndarray[int, int]:
+                   maximum: int) -> np.ndarray:
     """
     Takes an array of coordinates for ends of fragments and returns an
     array of fragments with coverage in the specified region. That is, a
@@ -191,7 +191,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                fraction_low: int=120,
                fraction_high: int=180,
                verbose: bool=False
-               ) -> np.ndarray[int, int]:
+               ) -> np.ndarray:
     """
     Reads from BAM, SAM, or BED file and returns a two column matrix
     with fragment start and stop positions.
@@ -364,7 +364,7 @@ def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
 
 
 def filter_bam(
-        input_file: Union[str, pysam.AlignmentFile],
+        input_file: str,
         blacklist_bed: Union[str, pybedtools.BedTool],
         output_path: str=None,
         quality_threshold: int=30,
@@ -377,32 +377,37 @@ def filter_bam(
 
     Parameters
     ----------
-    input_bam : str or AlignmentFile
+    input_bam : str
         Path string or AlignmentFile pointing to the BAM file to be
         filtered.
     blacklist_bed : str or BedTool, optional
-    output_bam : str, optional
+    output_path : str, optional
     quality_threshold : int, optional
     verbose : bool, optional
 
     Returns
     -------
-    output_bam : str
-        String containing path to the filtered BAM file. If no
+    output_path : str
+        String containing path to the filtered BED file. If no
         output_path, will be placed into a temporary file.
     """
 
-    # create tempfile to contain filtered bam
+    # create tempfile to contain filtered BED
     if output_path is None:
-        filtered_bam = tf.mkstemp()
-    elif output_path.endswith('bam'):
+        _, output_path = tf.mkstemp(suffix='.bed')
+    elif output_path.endswith('bed'):
         pass
     else:
-        raise ValueError('output_path should have suffix .bam')
+        raise ValueError('output_path should have suffix .bed')
 
+    _, flag_filtered_bam = tf.mkstemp(suffix='bam')
 
-    unfiltered_bam = pysam.AlignmentFile(input_file)
+    pysam.view('-b', '-h', '-o', flag_filtered_bam, '-q', '30', '-f', '2',
+               input_file)
 
+    with pysam.AlignmentFile(flag_filtered_bam, 'rb') as file:
+        for line in file.head(5):
+            print(line)
 
 
     return None
