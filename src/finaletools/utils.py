@@ -10,12 +10,12 @@ import pysam
 import pybedtools
 from tqdm import tqdm
 
-@jit(forceobj=True)
-def frag_bam_to_bed(input_file,
-                    output_file,
-                    contig=None,
-                    quality_threshold=30,
-                    verbose=False):
+
+def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
+                    output_file: str,
+                    contig: str=None,
+                    quality_threshold: int=30,
+                    verbose: bool=False):
     """
     Take paired-end reads from bam_file and write to a BED file.
 
@@ -74,6 +74,66 @@ def frag_bam_to_bed(input_file,
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete',
               flush=True)
 
+
+def frag_bam_to_beds(input_file: str,
+                     blacklist_bed: str=None,
+                     region_bed: str=None,
+                     quality_threshold=30,
+                     workers: int=1,
+                     verbose: bool=False):
+    """
+    Take cfDNA paired-end reads from bam_file and writes to temporary
+    bed files corresponding to each contig in bam_file. If specified,
+    will also filter for fragments in region_bed and filter out
+    fragments in the blacklist. If region_bed is specified, only contigs
+    included in region_bed will be included in the bed files.
+
+    Parameters
+    ----------
+    input_file : str
+    blacklist_bed : str, optional
+    region_bed : str, optional
+    quality_threshold : int, optional
+    workers : int, optional
+    verbose : bool, optional
+
+    Returns
+    -------
+    bed_dict : dict[str, str]
+        A dictionary of (contig name : path string to bed file).
+    """
+
+    if (verbose):
+        start_time = time.time()
+        print('Opening file')
+
+    sam_file = None
+    try:
+        # Open file or asign AlignmentFile to sam_file
+        if (type(input_file) == pysam.AlignmentFile):
+            sam_file = input_file
+        elif (type(input_file) == str):
+            sam_file = pysam.AlignmentFile(input_file)
+        else:
+            raise TypeError(
+                ("bam_file should be an AlignmentFile or path string.")
+            )
+
+        # TODO: finish
+    except Exception as e:
+        print("An error occurred:", str(e))
+
+    finally:
+        pass
+
+    if (verbose):
+        end_time = time.time()
+        print(f'frag_bam_to_beds took {end_time - start_time} s to complete',
+              flush=True)
+
+    return None
+
+
 @jit(nopython=True)
 def frags_in_region(frag_array: np.ndarray,
                    minimum: int,
@@ -103,7 +163,7 @@ def frags_in_region(frag_array: np.ndarray,
 def _in_blacklist(contig, start, stop):
     return None
 
-@jit(forceobj=True)
+
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
                     has_min_max: bool,
@@ -114,11 +174,17 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     fraction_high: int=180,
                     verbose: bool=False):
     frag_ends = []
-    count = sam_file.count(contig=contig) if verbose else None
+    count = sam_file.count(
+        contig=contig,
+        start=minimum,
+        stop=maximum) if verbose else None
     if (has_min_max):
-        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count)
-                      if verbose
-                      else sam_file.fetch(contig=contig)):
+        for read1 in (tqdm(
+            sam_file.fetch(contig=contig, start=minimum, stop=maximum),
+            total=count)
+            if verbose
+            else sam_file.fetch(contig=contig)
+        ):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
             if (read1.is_read2
@@ -128,9 +194,7 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
                 read_length = read1.template_length
                 read_start = read1.reference_start
                 read_stop = read1.reference_start + read_length
-                if ((read_stop >= minimum)
-                    and (read_start < maximum)
-                    and (read_length >= fraction_low)
+                if ((read_length >= fraction_low)
                     and (read_length <= fraction_high)):
                     frag_ends.append((read_start, read_stop))
     else:
@@ -365,15 +429,16 @@ def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
 
 def filter_bam(
         input_file: str,
-        blacklist_bed: Union[str, pybedtools.BedTool],
+        blacklist_bed: str=None,
+        region_bed: str=None,
         output_path: str=None,
         quality_threshold: int=30,
         verbose: bool=False):
     """
-    Accepts the path to a BAM file and returns a BigBed file where all
+    Accepts the path to a BAM file and returns a Bed file where all
     reads are read1 in a proper pair, exceed the specified quality
-    threshold, and do not intersect a region in the given blacklist
-    file.
+    threshold, do not intersect a region in the given blacklist
+    file, and intersects with a region in the region bed.
 
     Parameters
     ----------
@@ -381,6 +446,7 @@ def filter_bam(
         Path string or AlignmentFile pointing to the BAM file to be
         filtered.
     blacklist_bed : str or BedTool, optional
+    region_bed :
     output_path : str, optional
     quality_threshold : int, optional
     verbose : bool, optional
@@ -400,14 +466,17 @@ def filter_bam(
     else:
         raise ValueError('output_path should have suffix .bed')
 
-    _, flag_filtered_bam = tf.mkstemp(suffix='bam')
+    temp_dir = tf.mkdtemp()
 
-    pysam.view('-b', '-h', '-o', flag_filtered_bam, '-q', '30', '-f', '2',
-               input_file)
+    flag_filtered_bam = temp_dir + '/flag_filtered.bam'
+
+    print(flag_filtered_bam)
+
+    pysam.view('-b', '-h', '-o', flag_filtered_bam, '-q',
+               str(quality_threshold), '-f', '2', input_file)
 
     with pysam.AlignmentFile(flag_filtered_bam, 'rb') as file:
         for line in file.head(5):
             print(line)
-
 
     return None
