@@ -563,6 +563,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             window_size: {window_size}
             size_around_sites: {size_around_sites}
             quality_threshold: {quality_threshold}
+            workers: {workers}
             verbose: {verbose}
             """
             )
