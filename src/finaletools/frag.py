@@ -612,67 +612,6 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     for contig_score in contig_scores:
         scores[:, 1] = scores[:, 1] + contig_score[:, 1]
 
-    """
-    scores = np.zeros((size_around_sites, 2))
-
-    # Values to add to center of each site to get start and stop of each
-    # wps function
-    left_of_site = round(-size_around_sites / 2)
-    right_of_site = round(size_around_sites / 2)
-
-    assert right_of_site - left_of_site == size_around_sites
-    scores[:, 0] = np.arange(left_of_site, right_of_site)
-
-    unaggregated_scores = []
-
-    if (verbose):
-        print(f'Opening {input_file}...')
-
-    with pysam.AlignmentFile(input_file) as file:
-        if (verbose >= 2):
-            with open(site_bed, 'rt') as sites:
-                print('File opened! counting lines')
-                bed_length = 0
-                for line in sites:
-                    bed_length += 1
-        with open(site_bed, 'rt') as sites:
-            # verbose stuff
-            if (verbose):
-                print(f'File opened! Iterating through sites...')
-
-            # aggregate wps over sites in bed file
-            for line in (
-                tqdm(sites, total=bed_length) if verbose>=2 else sites
-                ):
-                line_items = line.split()
-                if ('.' in line_items[5]):
-                    continue
-                single_scores = wps(file,
-                                    line_items[0],
-                                    int(line_items[1]) + left_of_site,
-                                    int(line_items[1]) + right_of_site,
-                                    output_file=None,
-                                    window_size=window_size,
-                                    fraction_low=fraction_low,
-                                    fraction_high=fraction_high,
-                                    quality_threshold=quality_threshold,
-                                    verbose=(verbose-2 if verbose-2>0 else 0)
-                                    )[:, 1]
-
-                if ('+' in line_items[5]):
-                    unaggregated_scores.append(single_scores)
-                elif ('-' in line_items[5]):
-                    single_scores = np.flip(single_scores)
-                    unaggregated_scores.append(single_scores)
-                else:   # sites without strand direction are ignored
-                    pass
-            scores[:, 1] = np.sum(unaggregated_scores, axis=0)
-
-    if (verbose):
-        print(f'Aggregation complete!')
-    """
-
-
     if (type(output_file) == str):   # check if output specified
         if (verbose):
             print(f'Output file {output_file} specified. Opening...')
