@@ -643,7 +643,6 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         stops,
         count*[None],
         count*[window_size],
-        count*[size_around_sites],
         count*[fraction_low],
         count*[fraction_high],
         count*[quality_threshold])
