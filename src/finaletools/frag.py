@@ -542,7 +542,6 @@ def _agg_wps_process(bam,
     stop = tss + size_around_sites // 2
 
     scores = _wps_loop(frag_ends, start, stop, window_size)
-    print(time.time(), contig, tss)
     return scores
 
 
