@@ -519,11 +519,24 @@ def _agg_wps_single_contig(input_file: Union[str, str],
     return scores
 
 
-def _agg_wps_process(bam, contig, tss, window_size, size_around_sites, quality_threshold):
+def _agg_wps_process(bam,
+                     contig,
+                     tss,
+                     window_size,
+                     size_around_sites,
+                     fraction_low,
+                     fraction_high,
+                     quality_threshold):
     minimum = min if (min := tss - window_size - size_around_sites // 2) >= 0 else 0
     maximum = tss + window_size + size_around_sites // 2
 
-    frag_ends = frag_array(bam, contig, quality_threshold, minimum, maximum)
+    frag_ends = frag_array(bam,
+                           contig,
+                           quality_threshold,
+                           minimum,
+                           maximum,
+                           fraction_low,
+                           fraction_high)
 
     start = tss - size_around_sites // 2
     stop = tss + size_around_sites // 2
@@ -619,6 +632,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         ts_sites,
         count*[window_size],
         count*[size_around_sites],
+        count*[fraction_low],
+        count*[fraction_high],
         count*[quality_threshold])
 
     with Pool(workers) as pool:
