@@ -519,23 +519,18 @@ def _agg_wps_single_contig(input_file: Union[str, str],
     return scores
 
 
-def _contig_site_bams(site_bed: str,
-                      genome_path: str
-                      ) -> dict[str, BinaryIO]:
-    with open(genome_path) as genome:
-        contigs = [line.split()[0] for line in genome.readlines()]
-    tempdir = tf.TemporaryDirectory()
-    tempfiles = [f'{tempdir.name}/{contig}.bed' for contig in contigs]
-    contig_dict = dict(zip(contigs, tempfiles))
-    # TODO: this is known to be broken
-    with open(site_bed) as sites:
-        for line in sites:
-            contig = line.split()[0]
-            contig_dict[contig].write(line)
-        print(contig_dict.values())
-    for file in contig_dict.values():
-        file.seek(0)
-    return contig_dict
+def _agg_wps_process(bam, contig, tss, window_size, size_around_sites, quality_threshold):
+    minimum = min if (min := tss - window_size - size_around_sites // 2) >= 0 else 0
+    maximum = tss + window_size + size_around_sites // 2
+
+    frag_ends = frag_array(bam, contig, quality_threshold, minimum, maximum)
+
+    start = tss - size_around_sites // 2
+    stop = tss + size_around_sites // 2
+
+    scores = _wps_loop(frag_ends, start, stop, window_size)
+    print(time.time(), contig, tss)
+    return scores
 
 
 def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
@@ -568,6 +563,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             """
             )
 
+    """
     with open(site_bed) as bed_file:
         contigs = []
         for line in bed_file:
@@ -576,6 +572,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                 contigs.append(contig)
 
         num_contigs = len(contigs)
+
 
     if (verbose):
         print(f'Fragments for {num_contigs} contigs detected.')
@@ -602,10 +599,35 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     if (verbose):
         print('Compiling scores')
+    """
+    # read tss contigs and coordinates from bed
+    contigs = []
+    ts_sites = []
+    with open(site_bed) as bed:
+        for line in bed:
+            contents = line.split()
+            contig = contents[0].strip()
+            start = int(contents[1])
+            contigs.append(contig)
+            ts_sites.append(start)
+
+    count = len(contigs)
+
+    tss_list = zip(
+        count*[input_file],
+        contigs,
+        ts_sites,
+        count*[window_size],
+        count*[size_around_sites],
+        count*[quality_threshold])
+
+    with Pool(workers) as pool:
+        contig_scores = pool.starmap(_agg_wps_process, tss_list)
 
     scores = np.zeros((size_around_sites, 2))
     left_of_site = round(-size_around_sites / 2)
     right_of_site = round(size_around_sites / 2)
+
     assert right_of_site - left_of_site == size_around_sites
     scores[:, 0] = np.arange(left_of_site, right_of_site)
 
