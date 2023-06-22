@@ -629,7 +629,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     right_of_site = round(size_around_sites / 2)
 
     assert right_of_site - left_of_site == size_around_sites
-    scores[:, 0] = np.arange(left_of_site, right_of_site)
+
 
     starts = [tss+left_of_site for tss in ts_sites]
     stops = [tss+right_of_site for tss in ts_sites]
@@ -652,6 +652,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         contig_scores = pool.starmap(wps, tss_list)
 
     scores = np.zeros((size_around_sites, 2))
+
+    scores[:, 0] = np.arange(left_of_site, right_of_site)
 
     for contig_score in contig_scores:
         scores[:, 1] = scores[:, 1] + contig_score[:, 1]
