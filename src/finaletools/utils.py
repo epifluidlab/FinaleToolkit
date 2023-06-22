@@ -10,7 +10,7 @@ import pysam
 import pybedtools
 from tqdm import tqdm
 
-
+@jit(forceobj=True)
 def frag_bam_to_bed(input_file,
                     output_file,
                     contig=None,
@@ -74,7 +74,7 @@ def frag_bam_to_bed(input_file,
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete',
               flush=True)
 
-
+@jit(np.ndarray(np.ndarray, int, int), nopython=True)
 def frags_in_region(frag_array: np.ndarray[int, int],
                    minimum: int,
                    maximum: int) -> np.ndarray[int, int]:
@@ -103,6 +103,7 @@ def frags_in_region(frag_array: np.ndarray[int, int],
 def _in_blacklist(contig, start, stop):
     return None
 
+@jit(forceobj=True)
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     contig: str,
                     has_min_max: bool,
@@ -369,7 +370,7 @@ def filter_bam(
         quality_threshold: int=30,
         verbose: bool=False):
     """
-    Accepts the path to a BAM file and returns a BAM file where all
+    Accepts the path to a BAM file and returns a BigBed file where all
     reads are read1 in a proper pair, exceed the specified quality
     threshold, and do not intersect a region in the given blacklist
     file.
