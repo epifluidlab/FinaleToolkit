@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "FinaleTools"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
     {name="James Li", email="jameswli2021@gmail.com"},
     {name="Yaping Liu", email="yaping.liu@cchmc.org"},
 ]
 description = "A package containing functions to process paired-end reads of cfDNA fragment WGS."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {file = "LICENSE"}
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -21,8 +21,13 @@ classifiers = [
 dependencies = [
     "numpy",
     "pysam",
+    "pybedtools",
+    "pybigwig",
     "tqdm",
     "numba",
+    "scipy",
+    "matplotlib",
+    "pandas",
 ]
 
 [project.urls]
