@@ -340,8 +340,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     # set minimum and maximum values for fragments. These extend farther
     # than needed
-    minimum = round(start - window_size)
-    maximum = round(stop + window_size)
+    minimum = round(start - fraction_high)
+    maximum = round(stop + fraction_high)
 
     # read fragments from file
     frag_ends = frag_array(input_file,
@@ -703,7 +703,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     if (verbose):
         end_time = time.time()
-        print(f'aggregate_wps took {end_time - start_time} s to complete')
+        print(f'aggregate_wps took {end_time - start_time} s to complete',
+              flush=True)
 
     return scores
 
