@@ -123,7 +123,9 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     with open(genome_file) as genome:
         for line in genome:
             contents = line.split('/t')
-            contigs.append((contents[0],  int(contents[1])))
+            # account for empty lines
+            if len(contents) > 1:
+                contigs.append((contents[0],  int(contents[1])))
 
 
     # generate DELFI windows
