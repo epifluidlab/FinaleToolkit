@@ -10,6 +10,8 @@ from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
 
 
+# TODO: implement subcommands read from stdin
+# TODO: implement pipelining
 def main_cli():
     parser = argparse.ArgumentParser(
         description='Calculates fragmentation features given a CRAM/BAM/SAM '
