@@ -291,7 +291,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
             'Both minimum and maximum must either be present or absent.'
             )
 
-    # input_file is AllignmentFile
+    # input_file is AlignmentFile
     if (type(input_file) == pysam.AlignmentFile):
         sam_file = input_file
         frag_ends = _sam_frag_array(sam_file,
