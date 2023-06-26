@@ -1,21 +1,13 @@
 from __future__ import annotations
-import argparse
-import gzip
 import time
-import os
-import tempfile as tf
 from multiprocessing.pool import Pool
-from typing import Union, TextIO, BinaryIO
+from typing import Union
 
 import pysam
 import numpy as np
 from numba import jit
 from tqdm import tqdm
-from finaletools.utils import (
-    frag_bam_to_bed,
-    frag_array,
-    not_read1_or_low_quality
-)
+from finaletools.utils import not_read1_or_low_quality
 
 
 def _delfi_single_window(
@@ -32,7 +24,7 @@ def _delfi_single_window(
     blacklist_regions = []
 
     if (blacklist_file is not None):
-        
+
 
         # convert blacklist to a list of tuples
         # TODO: accept other file types
@@ -44,9 +36,9 @@ def _delfi_single_window(
                 if (contig == region_contig
                     and window_start <= region_start
                     and window_stop >= region_stop ):
-                    blacklist_regions.append(region_contig,
-                                            int(region_start),
-                                            int(region_stop)
+                    blacklist_regions.append(
+                        region_start,
+                        region_stop
                 )
 
     lengths = []
@@ -61,15 +53,25 @@ def _delfi_single_window(
             if (not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
+                frag_start = read1.reference_start
+                frag_length = read1.reference_length
+                frag_end = frag_start + frag_length
+
                 # check if in blacklist
+                blacklisted = False
                 for region in blacklist_regions:
-                    pass
+                    if (
+                        (frag_start >= region[0] and frag_start < region[1])
+                        or (frag_end >= region[0] and frag_end < region[1])
+                    ):
+                        blacklisted = True
+                        break
 
                 # append length of fragment to list
-                lengths.append(abs(read1.template_length))
+                if not blacklisted:
+                    lengths.append(abs(frag_length))
 
-        
-
+    print(len(lengths))
 
     return None
 
@@ -78,7 +80,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           genome_file: str,
           blacklist_file: str=None,
           window_size: int=5000000,
-          subsample_coverage: int=2,
+          subsample_coverage: float=2,
           quality_threshold: int=30,
           workers: int=1,
           preprocessing: bool=True,
@@ -125,11 +127,11 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
 
     # generate DELFI windows
-    windows = []
+    window_args = []
     for contig, size in contigs:
         for coordinate in range(0, size, window_size):
             # (contig, start, stop)
-            windows.append((input_file,
+            window_args.append((input_file,
                             contig,
                             coordinate,
                             coordinate + window_size,
@@ -137,13 +139,11 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                             quality_threshold))
 
     with Pool(workers) as pool:
-        pass
+        windows = pool.starmap(_delfi_single_window, window_args)
 
     print(contigs)
 
-
-
     if (verbose):
         end_time = time.time()
-        print(f'aggregate_wps took {end_time - start_time} s to complete')
+        print(f'delfi took {end_time - start_time} s to complete')
     return None
