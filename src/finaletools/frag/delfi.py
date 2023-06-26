@@ -46,19 +46,23 @@ def _delfi_single_window(
     gc_tally = 0  # cumulative sum of gc bases
     base_tally = 0
 
+    reads = 0   # for assertion
+
 
     with pysam.AlignmentFile(input_file) as sam_file:
         # Iterating on each read in file in specified contig/chromosome
         for read1 in (sam_file.fetch(contig=contig,
                                         start=window_start,
-                                        stop=window_stop)):
+                                        stop=window_stop, multiple_iterators=True)):
+            reads += 1
+
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
             if (not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 frag_start = read1.reference_start
-                frag_length = read1.reference_length
+                frag_length = read1.template_length
                 frag_end = frag_start + frag_length
 
                 # check if in blacklist
@@ -82,9 +86,11 @@ def _delfi_single_window(
                     else:
                         small_lengths.append(abs(frag_length))
 
+                    # TODO: somehow recreate each fragment and tally GC
                     # tally gc content
                     try:
-                        sequence = read1.get_reference_sequence()
+
+                        sequence = read1.query_sequence
                         gc_tally += sum([base.upper() == 'G'
                                         or base.upper() == 'C'
                                         for base
@@ -97,13 +103,15 @@ def _delfi_single_window(
                     except Exception as e:
                         print(e)
 
+                    print(frag_length, len(sequence), sequence)
+
     gc_content = gc_tally / base_tally if base_tally != 0 else np.NaN
 
     if (len(small_lengths) != 0 or len(large_lengths) != 0):
-        print(len(small_lengths), len(large_lengths), gc_content)
+        print(len(small_lengths), len(large_lengths), gc_content, reads)
         print(small_lengths, large_lengths)
 
-    return small_lengths, large_lengths, gc_tally
+    return small_lengths, large_lengths, gc_tally, reads
 
 
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
@@ -181,6 +189,14 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     with Pool(workers) as pool:
         windows = pool.starmap(_delfi_single_window, window_args)
+
+    reads = sum(windows[:][3])
+
+    with pysam.AlignmentFile(input_file) as file:
+        actual_reads = file.count()
+
+    assert (error := abs(
+        actual_reads - reads)/reads) < 0.05, f'Error is {error}'
 
     if (verbose):
         end_time = time.time()
