@@ -36,10 +36,7 @@ def _delfi_single_window(
                 if (contig == region_contig
                     and window_start <= region_start
                     and window_stop >= region_stop ):
-                    blacklist_regions.append(
-                        region_start,
-                        region_stop
-                )
+                    blacklist_regions.append((region_start,region_stop))
 
     lengths = []
 
