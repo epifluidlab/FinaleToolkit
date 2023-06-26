@@ -122,8 +122,9 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     contigs = []
     with open(genome_file) as genome:
         for line in genome:
-            contents = line.split('/t')
+            contents = line.split('\t')
             # account for empty lines
+            print(contents)
             if len(contents) > 1:
                 contigs.append((contents[0],  int(contents[1])))
 
