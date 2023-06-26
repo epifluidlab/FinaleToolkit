@@ -1,13 +1,4 @@
-"""
-Author: James Li
-Created: 6/2/23
-PI: Yaping Liu
-
-Description:
-Python script to calculate fragment features given a BAM file.
-
-"""
-# TODO: typing annotations for all functions
+#!/usr/bin/env python3
 
 from __future__ import annotations
 import argparse
@@ -19,8 +10,7 @@ from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
 
 
-# TODO: look through argparse args and fix them all
-if __name__ == '__main__':
+def main_cli():
     parser = argparse.ArgumentParser(
         description='Calculates fragmentation features given a CRAM/BAM/SAM '
         'file',
@@ -119,3 +109,6 @@ if __name__ == '__main__':
     funcargs.pop('subcommand')
     # print(funcargs)
     function(**funcargs)
+
+if __name__ == '__main__':
+    main_cli()
