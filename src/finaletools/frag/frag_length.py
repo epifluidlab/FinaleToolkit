@@ -1,6 +1,7 @@
 from __future__ import annotations
 import time
 from typing import Union
+from sys import stdout
 
 import numpy as np
 import pysam
@@ -101,6 +102,10 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
         if output_file.endswith(".bin"): # binary file
             with open(output_file, 'wt') as out:
                 lengths.tofile(out)
+        elif output_file == '-':
+            for line in lengths:
+                stdout.write(f'{line}\n')
+
         else:   # unaccepted file type
             raise ValueError(
                 'output_file can only have suffixes .wig or .wig.gz.'
