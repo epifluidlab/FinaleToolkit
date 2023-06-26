@@ -11,6 +11,8 @@ from finaletools.utils import not_read1_or_low_quality
 
 def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 contig: str=None,
+                start: int=None,
+                stop: int=None,
                 output_file: str=None, workers: int=1,
                 quality_threshold: int=30,
                 verbose: bool=False
@@ -44,13 +46,19 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
         sam_file = input_file
         if (verbose):
             print('Counting reads')
-        count = sam_file.count(contig=contig) if verbose else None
+        count = sam_file.count(contig=contig,
+                               start=start,
+                               stop=stop) if verbose else None
         if (verbose):
             print(f'{count} reads counted')
         # Iterating on each read in file in specified contig/chromosome
-        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count)
+        for read1 in (tqdm(sam_file.fetch(contig=contig,
+                                          start=start,
+                                          stop=stop), total=count)
                       if verbose
-                      else sam_file.fetch(contig=contig)):
+                      else sam_file.fetch(contig=contig,
+                                          start=start,
+                                          stop=stop)):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
             if (not_read1_or_low_quality(read1, quality_threshold)):
@@ -64,16 +72,21 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
         with pysam.AlignmentFile(input_file) as sam_file:   # Import
             if (verbose):
                 print('Counting reads')
-            count = sam_file.count(contig=contig) if verbose else None
+            count = sam_file.count(contig=contig,
+                                start=start,
+                                stop=stop) if verbose else None
             if (verbose):
                 print(f'{count} reads counted')
-            # Iterating on each read in file in specified
-            # contig/chromosome
-            for read1 in (tqdm(sam_file.fetch(contig=contig), total=count)
-                          if verbose
-                          else sam_file.fetch(contig=contig)):
-                # Only select forward strand and filter out
-                # non-paired-end reads and low-quality reads
+            # Iterating on each read in file in specified contig/chromosome
+            for read1 in (tqdm(sam_file.fetch(contig=contig,
+                                            start=start,
+                                            stop=stop), total=count)
+                        if verbose
+                        else sam_file.fetch(contig=contig,
+                                            start=start,
+                                            stop=stop)):
+                # Only select forward strand and filter out non-paired-end
+                # reads and low-quality reads
                 if (not_read1_or_low_quality(read1, quality_threshold)):
                     pass
                 else:
