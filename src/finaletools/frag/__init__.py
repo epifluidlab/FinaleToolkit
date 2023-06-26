@@ -644,7 +644,7 @@ if __name__ == '__main__':
     parser_command1.add_argument('-o', '--output_file')
     # parser_command1.add_argument('--method', default="frag-center")
     parser_command1.add_argument('-q', '--quality_threshold', default=30, type=int)
-    parser_command1.add_argument('-v', '--verbose', default=False, type=bool)
+    parser_command1.add_argument('-v', '--verbose', action='store_true')
     parser_command1.set_defaults(func=frag_center_coverage)
 
     # Subcommand 2: frag-length
