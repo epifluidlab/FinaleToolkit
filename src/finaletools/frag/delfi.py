@@ -65,7 +65,8 @@ def _delfi_single_window(
                         break
 
                 # append length of fragment to list
-                if not blacklisted:
+                if (not blacklisted
+                    and frag_length ):
                     lengths.append(abs(frag_length))
 
     print(len(lengths))
@@ -76,7 +77,7 @@ def _delfi_single_window(
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           genome_file: str,
           blacklist_file: str=None,
-          window_size: int=5000000,
+          window_size: int=100000,
           subsample_coverage: float=2,
           quality_threshold: int=30,
           workers: int=1,
@@ -116,15 +117,19 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     if (verbose):
         start_time = time.time()
 
+    if verbose:
+        print(f'Reading genome file...')
+
     contigs = []
     with open(genome_file) as genome:
         for line in genome:
             contents = line.split('\t')
             # account for empty lines
-            print(contents)
             if len(contents) > 1:
                 contigs.append((contents[0],  int(contents[1])))
 
+    if verbose:
+        print(f'Generating windows')
 
     # generate DELFI windows
     window_args = []
@@ -138,10 +143,12 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                             blacklist_file,
                             quality_threshold))
 
+    if (verbose):
+        print(f'{len(window_args)} windows created.')
+        print('Calculating fragment lengths...')
+
     with Pool(workers) as pool:
         windows = pool.starmap(_delfi_single_window, window_args)
-
-    print(contigs)
 
     if (verbose):
         end_time = time.time()
