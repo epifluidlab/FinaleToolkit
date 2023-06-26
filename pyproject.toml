@@ -28,6 +28,7 @@ dependencies = [
     "scipy",
     "matplotlib",
     "pandas",
+    "cython",
 ]
 
 [project.urls]
