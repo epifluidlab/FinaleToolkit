@@ -50,11 +50,11 @@ def main_cli():
         description='Calculates fragment lengths given a CRAM/BAM/SAM file'
         )
     parser_command2.add_argument('input_file')
-    parser_command2.add_argument('--contig')
-    parser_command2.add_argument('--output_file')
-    parser_command2.add_argument('--workers', default=1, type=int)
-    parser_command2.add_argument('--quality_threshold', default=30, type=int)
-    parser_command2.add_argument('-v', '--verbose', action='store_true')
+    parser_command2.add_argument('-c', '--contig')
+    parser_command2.add_argument('-o', '--output_file')
+    parser_command2.add_argument('-w', '--workers', default=1, type=int)
+    parser_command2.add_argument('-q', '--quality_threshold', default=30, type=int)
+    parser_command2.add_argument('-v', '--verbose', action='count')
     parser_command2.set_defaults(func=frag_length)
 
     # Subcommand 3: wps()
