@@ -80,14 +80,20 @@ def _delfi_single_window(
                         small_lengths.append(abs(frag_length))
 
                     # tally gc content
-                    sequence = read1.get_reference_sequence()
-                    gc_tally += sum([base.upper() == 'G'
-                                     or base.upper() == 'C'
-                                     for base
-                                     in sequence])
-                    base_tally += frag_length
+                    try:
+                        sequence = read1.get_reference_sequence()
+                        gc_tally += sum([base.upper() == 'G'
+                                        or base.upper() == 'C'
+                                        for base
+                                        in sequence])
+                        base_tally += frag_length
+                    except ValueError as e:
+                        print(e)
 
-    gc_content = gc_tally / base_tally if base_tally != 0 else None
+                    except Exception as e:
+                        print(e)
+
+    gc_content = gc_tally / base_tally if base_tally != 0 else np.NaN
 
     if (len(small_lengths) != 0 or len(large_lengths) != 0):
         print(len(small_lengths), len(large_lengths), gc_content)
