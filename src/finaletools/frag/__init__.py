@@ -633,14 +633,17 @@ if __name__ == '__main__':
                                                 'a CRAM/BAM/SAM file')
                                             )
     parser_command1.add_argument('input_file')
+    parser_command1.add_argument('contig')
     # inclusive location of region start in 0-based coordinate system.
     # If not included, will end at the end of the chromosome
     parser_command1.add_argument('--start', type=int)
     # exclusive location of region end in 0-based coordinate system.
     # If not included, will end at the end of the chromosome
     parser_command1.add_argument('--stop', type=int)
-    parser_command1.add_argument('--region')   # samtools region string
-    parser_command1.add_argument('--method', default="frag-center")
+    
+    parser_command1.add_argument('-o', '--output_file')
+    # parser_command1.add_argument('--method', default="frag-center")
+    parser_command1.add_argument('-q', '--quality_threshold', default=30, type=int)
     parser_command1.add_argument('-v', '--verbose', default=False, type=bool)
     parser_command1.set_defaults(func=frag_center_coverage)
 
