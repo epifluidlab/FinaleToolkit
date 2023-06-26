@@ -18,9 +18,39 @@ from finaletools.utils import (
 )
 
 
-def delfi(input_bam: Union[str, pysam.AlignmentFile],
+def _delfi_single_window(
+        input_file: str,
+        contig: str,
+        window_start: int,
+        window_stop: int,
+        blacklist_file: str=None,
+        verbose: Union[int,bool]=False) -> int:
+    """
+    Calculates DELFI for one window.
+    """
+
+    if (blacklist_file is not None):
+        blacklist_regions = []
+
+        # convert blacklist to a list of tuples
+        # TODO: accept other file types
+        with open(blacklist_file) as blacklist:
+            for line in blacklist:
+                contents = line.split()
+                blacklist_regions.append(contents[0],
+                                         int(contents[1]),
+                                         int(contents[2])
+                )
+
+        
+
+
+    return None
+
+
+def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           genome_file: str,
-          blacklist_file: str,
+          blacklist_file: str=None,
           window_size: int=5000000,
           subsample_coverage: int=2,
           quality_threshold: int=30,
@@ -33,11 +63,11 @@ def delfi(input_bam: Union[str, pysam.AlignmentFile],
 
     Parameters
     ----------
-    input_bam: str or AlignmentFile
-        Path string or Alignment File pointing a bam file containing PE
+    input_file: str
+        Path string pointing to a bam file containing PE
         fragment reads.
     genome_file: str
-        Path string to .genome file.
+        Path string to .genome file. Should contain only autosomal chromosomes
     blacklist_file: str
         Path string to bed file containing genome blacklist.
     window_size: int
@@ -61,19 +91,23 @@ def delfi(input_bam: Union[str, pysam.AlignmentFile],
     if (verbose):
         start_time = time.time()
 
+    contigs = []
     with open(genome_file) as genome:
-        # read genome file into a list of tuples
-        contigs = [(
-            line.split()[0],
-            int(line.split()[1])
-            ) for line in genome.readlines()]
+        for line in genome:
+            contents = line.split()
+            contigs.append((contents[0],  int(contents[1])))
+
 
     # generate DELFI windows
     windows = []
     for contig, size in contigs:
         for coordinate in range(0, size, window_size):
             # (contig, start, stop)
-            windows.append((contig, coordinate, coordinate + window_size))
+            windows.append((input_file,
+                            contig,
+                            coordinate,
+                            coordinate + window_size,
+                            blacklist_file))
 
     with Pool(workers) as pool:
         pass
