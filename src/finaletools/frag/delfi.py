@@ -64,7 +64,7 @@ def _delfi_single_window(
                 for region in blacklist_regions:
                     if (
                         (frag_start >= region[0] and frag_start < region[1])
-                        or (frag_end >= region[0] and frag_end < region[1])
+                        and (frag_end >= region[0] and frag_end < region[1])
                     ):
                         blacklisted = True
                         break
