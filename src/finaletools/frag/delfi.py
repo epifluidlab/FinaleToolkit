@@ -24,23 +24,49 @@ def _delfi_single_window(
         window_start: int,
         window_stop: int,
         blacklist_file: str=None,
+        quality_threshold: int=30,
         verbose: Union[int,bool]=False) -> int:
     """
     Calculates DELFI for one window.
     """
+    blacklist_regions = []
 
     if (blacklist_file is not None):
-        blacklist_regions = []
+        
 
         # convert blacklist to a list of tuples
         # TODO: accept other file types
         with open(blacklist_file) as blacklist:
             for line in blacklist:
-                contents = line.split()
-                blacklist_regions.append(contents[0],
-                                         int(contents[1]),
-                                         int(contents[2])
+                region_contig, region_start, region_stop, *_ = line.split()
+                region_start = int(region_start)
+                region_stop = int(region_stop)
+                if (contig == region_contig
+                    and window_start <= region_start
+                    and window_stop >= region_stop ):
+                    blacklist_regions.append(region_contig,
+                                            int(region_start),
+                                            int(region_stop)
                 )
+
+    lengths = []
+
+    with pysam.AlignmentFile(input_file) as sam_file:
+        # Iterating on each read in file in specified contig/chromosome
+        for read1 in (sam_file.fetch(contig=contig,
+                                        start=window_start,
+                                        stop=window_stop)):
+            # Only select forward strand and filter out non-paired-end
+            # reads and low-quality reads
+            if (not_read1_or_low_quality(read1, quality_threshold)):
+                pass
+            else:
+                # check if in blacklist
+                for region in blacklist_regions:
+                    pass
+
+                # append length of fragment to list
+                lengths.append(abs(read1.template_length))
 
         
 
@@ -107,7 +133,8 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                             contig,
                             coordinate,
                             coordinate + window_size,
-                            blacklist_file))
+                            blacklist_file,
+                            quality_threshold))
 
     with Pool(workers) as pool:
         pass
