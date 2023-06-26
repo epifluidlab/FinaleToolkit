@@ -1,5 +1,6 @@
 from __future__ import annotations
 import time
+import sys
 from multiprocessing.pool import Pool
 from typing import Union
 
@@ -89,6 +90,7 @@ def _delfi_single_window(
                         base_tally += frag_length
                     except ValueError as e:
                         print(e)
+                        exit(1)
 
                     except Exception as e:
                         print(e)
