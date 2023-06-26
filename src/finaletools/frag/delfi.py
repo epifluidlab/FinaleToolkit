@@ -17,7 +17,7 @@ def _delfi_single_window(
         window_stop: int,
         blacklist_file: str=None,
         quality_threshold: int=30,
-        verbose: Union[int,bool]=False) -> int:
+        verbose: Union[int,bool]=False) -> tuple:
     """
     Calculates DELFI for one window.
     """
@@ -38,7 +38,11 @@ def _delfi_single_window(
                     and window_stop >= region_stop ):
                     blacklist_regions.append((region_start,region_stop))
 
-    lengths = []
+    small_lengths = []
+    large_lengths = []
+    gc_tally = 0  # cumulative sum of gc bases
+    base_tally = 0
+
 
     with pysam.AlignmentFile(input_file) as sam_file:
         # Iterating on each read in file in specified contig/chromosome
@@ -64,14 +68,31 @@ def _delfi_single_window(
                         blacklisted = True
                         break
 
-                # append length of fragment to list
+
                 if (not blacklisted
-                    and frag_length ):
-                    lengths.append(abs(frag_length))
+                    and frag_length >= 100
+                    and frag_length <= 220
+                ):
+                    # append length of fragment to list
+                    if (frag_length >= 151):
+                        large_lengths.append(abs(frag_length))
+                    else:
+                        small_lengths.append(abs(frag_length))
 
-    print(len(lengths))
+                    # tally gc content
+                    sequence = read1.get_reference_sequence()
+                    gc_tally += sum([base.upper() == 'G'
+                                     or base.upper() == 'C'
+                                     for base
+                                     in sequence])
+                    base_tally += frag_length
 
-    return None
+    gc_content = gc_tally / base_tally if base_tally != 0 else None
+
+    if (len(small_lengths) != 0 or len(large_lengths) != 0):
+        print(len(small_lengths), len(large_lengths), gc_content)
+
+    return small_lengths, large_lengths, gc_tally
 
 
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
