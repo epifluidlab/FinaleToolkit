@@ -99,6 +99,7 @@ def _delfi_single_window(
 
     if (len(small_lengths) != 0 or len(large_lengths) != 0):
         print(len(small_lengths), len(large_lengths), gc_content)
+        print(small_lengths, large_lengths)
 
     return small_lengths, large_lengths, gc_tally
 
