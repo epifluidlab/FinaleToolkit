@@ -68,7 +68,7 @@ def frag_center_coverage(input_file,
             # specified contig/chromosome
             for read1 in sam_file.fetch(
                 contig=contig,
-                start=None if (tempstart:=start-500) < 0 else tempstart,
+                start=0 if (tempstart:=start-500) < 0 else tempstart,
                 stop=stop+500):
                 # Only select forward strand and filter out
                 # non-paired-end reads and low-quality reads
