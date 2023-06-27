@@ -41,7 +41,7 @@ def main_cli():
     parser_command1.add_argument('-o', '--output_file')
     # parser_command1.add_argument('--method', default="frag-center")
     parser_command1.add_argument('-q', '--quality_threshold', default=30, type=int)
-    parser_command1.add_argument('-v', '--verbose', action='store_true')
+    parser_command1.add_argument('-v', '--verbose', action='store_true', default=0)
     parser_command1.set_defaults(func=frag_center_coverage)
 
     # Subcommand 2: frag-length
@@ -54,7 +54,7 @@ def main_cli():
     parser_command2.add_argument('-o', '--output_file')
     parser_command2.add_argument('-w', '--workers', default=1, type=int)
     parser_command2.add_argument('-q', '--quality_threshold', default=30, type=int)
-    parser_command2.add_argument('-v', '--verbose', action='count')
+    parser_command2.add_argument('-v', '--verbose', action='count', default=0)
     parser_command2.set_defaults(func=frag_length)
 
     # Subcommand 3: wps()
@@ -78,7 +78,7 @@ def main_cli():
     parser_command3.add_argument('-hi', '--fraction_high', default=180,
                                  type=int)
     parser_command3.add_argument('--quality_threshold', default=30, type=int)
-    parser_command3.add_argument('-v', '--verbose', action='count')
+    parser_command3.add_argument('-v', '--verbose', action='count', default=0)
     parser_command3.set_defaults(func=wps)
 
     # Subcommand 4: aggregate-wps
@@ -100,7 +100,7 @@ def main_cli():
                                  type=int)
     parser_command4.add_argument('--quality_threshold', default=30, type=int)
     parser_command4.add_argument('--workers', default=1, type=int)
-    parser_command4.add_argument('-v', '--verbose', action='count')
+    parser_command4.add_argument('-v', '--verbose', action='count', default=0)
     parser_command4.set_defaults(func=aggregate_wps)
 
 
