@@ -8,8 +8,8 @@ from finaletools.utils import not_read1_or_low_quality
 
 def frag_center_coverage(input_file,
                          contig,
-                         start,
-                         stop,
+                         start=0,
+                         stop=2147483646,
                          output_file=None,
                          quality_threshold=30,
                          verbose=False):
