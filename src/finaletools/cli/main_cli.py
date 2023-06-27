@@ -2,12 +2,31 @@
 
 from __future__ import annotations
 import argparse
+import importlib
+import sys
 
+"""
 from finaletools.frag.frag_length import frag_length
 from finaletools.frag.coverage import frag_center_coverage
 from finaletools.frag.wps import wps
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
+"""
+
+def lazy_import(name):
+    spec = importlib.util.find_spec(name)
+    loader = importlib.util.LazyLoader(spec.loader)
+    spec.loader = loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    loader.exec_module(module)
+    return module
+
+frag_length = lazy_import("finaletools.frag.frag_length")
+coverage = lazy_import("finaletools.frag.coverage")
+wps = lazy_import("finaletools.frag.wps")
+agg_wps = lazy_import("finaletools.frag.agg_wps")
+delfi = lazy_import("finaletools.frag.delfi")
 
 
 # TODO: implement subcommands read from stdin
@@ -102,6 +121,23 @@ def main_cli():
     parser_command4.add_argument('--workers', default=1, type=int)
     parser_command4.add_argument('-v', '--verbose', action='count', default=0)
     parser_command4.set_defaults(func=aggregate_wps)
+
+    # Subcommand 5: delfi
+    parser_command5 = subparsers.add_parser(
+        'delfi',
+        prog='delfi',
+        description='Calculates DELFI score over genome'
+        )
+    parser_command5.add_argument('input_file')
+    parser_command5.add_argument('autosomes')
+    parser_command5.add_argument('reference_file')
+    parser_command5.add_argument('-b', '--blacklist_file')
+    parser_command5.add_argument('-o', '--output_file')
+    parser_command5.add_argument('--window_size', default=100000, type=int)
+    parser_command5.add_argument('--quality_threshold', default=30, type=int)
+    parser_command5.add_argument('-w', '--workers', default=1, type=int)
+    parser_command5.add_argument('-v', '--verbose', action='count', default=0)
+    parser_command5.set_defaults(func=delfi)
 
 
     args = parser.parse_args()
