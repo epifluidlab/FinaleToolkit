@@ -33,7 +33,7 @@ def main_cli():
     parser_command1.add_argument('contig')
     # inclusive location of region start in 0-based coordinate system.
     # If not included, will end at the end of the chromosome
-    parser_command1.add_argument('--start', type=int)
+    parser_command1.add_argument('--start', default=0, type=int)
     # exclusive location of region end in 0-based coordinate system.
     # If not included, will end at the end of the chromosome
     parser_command1.add_argument('--stop', type=int)
