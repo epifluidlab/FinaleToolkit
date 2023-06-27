@@ -6,6 +6,7 @@ import os
 import tempfile as tf
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
+from sys import stdout
 
 import pysam
 import numpy as np
@@ -170,6 +171,15 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                     )
                 for score in scores[:, 1]:
                     out.write(f'{score}\n')
+
+        elif output_file == '-':    #stdout
+            stdout.write(
+                f'fixedStep\tchrom={contig}\tstart={start}\tstep='
+                f'{1}\tspan={stop-start}\n'
+                )
+            for score in scores[:, 1]:
+                stdout.write(f'{score}\n')
+            stdout.flush()
 
         else:   # unaccepted file type
             raise ValueError(
