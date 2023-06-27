@@ -5,28 +5,11 @@ import argparse
 import importlib
 import sys
 
-"""
 from finaletools.frag.frag_length import frag_length
 from finaletools.frag.coverage import frag_center_coverage
 from finaletools.frag.wps import wps
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
-"""
-
-def lazy_import(name):
-    spec = importlib.util.find_spec(name)
-    loader = importlib.util.LazyLoader(spec.loader)
-    spec.loader = loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    loader.exec_module(module)
-    return module
-
-frag_length = lazy_import("finaletools.frag.frag_length")
-coverage = lazy_import("finaletools.frag.coverage")
-wps = lazy_import("finaletools.frag.wps")
-agg_wps = lazy_import("finaletools.frag.agg_wps")
-delfi = lazy_import("finaletools.frag.delfi")
 
 
 # TODO: implement subcommands read from stdin
