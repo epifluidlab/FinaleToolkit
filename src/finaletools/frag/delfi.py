@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 import time
-import sys
 from multiprocessing.pool import Pool
 from typing import Union
 
 import pysam
+import py2bit
 import numpy as np
-from numba import jit
-from tqdm import tqdm
 from finaletools.utils import not_read1_or_low_quality
 
 
 def _delfi_single_window(
         input_file: str,
+        reference_file: str,
         contig: str,
         window_start: int,
         window_stop: int,
@@ -24,6 +23,7 @@ def _delfi_single_window(
     """
     Calculates DELFI for one window.
     """
+
     blacklist_regions = []
 
     if (blacklist_file is not None):
@@ -46,15 +46,14 @@ def _delfi_single_window(
     gc_tally = 0  # cumulative sum of gc bases
     base_tally = 0
 
-    reads = 0   # for assertion
+    frags = 0
 
 
     with pysam.AlignmentFile(input_file) as sam_file:
         # Iterating on each read in file in specified contig/chromosome
         for read1 in (sam_file.fetch(contig=contig,
                                         start=window_start,
-                                        stop=window_stop, multiple_iterators=True)):
-            reads += 1
+                                        stop=window_stop)):
 
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
@@ -86,37 +85,32 @@ def _delfi_single_window(
                     else:
                         small_lengths.append(abs(frag_length))
 
-                    # TODO: somehow recreate each fragment and tally GC
-                    # tally gc content
-                    try:
+                    frags += 1
 
-                        sequence = read1.query_sequence
-                        gc_tally += sum([base.upper() == 'G'
-                                        or base.upper() == 'C'
-                                        for base
-                                        in sequence])
-                        base_tally += frag_length
-                    except ValueError as e:
-                        print(e)
-                        exit(1)
 
-                    except Exception as e:
-                        print(e)
+    with py2bit.open(reference_file) as ref_seq:
+        ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
 
-                    print(frag_length, len(sequence), sequence)
+    num_bases = window_stop - window_start
+    num_gc = sum([(base == 'G' or base == 'C') for base in ref_bases])
 
-    gc_content = gc_tally / base_tally if base_tally != 0 else np.NaN
+    # NaN if no fragments in window.
+    gc_content = num_gc / num_bases if frags > 0 else np.NaN
 
-    if (len(small_lengths) != 0 or len(large_lengths) != 0):
-        print(len(small_lengths), len(large_lengths), gc_content, reads)
-        print(small_lengths, large_lengths)
+    # if (len(small_lengths) != 0 or len(large_lengths) != 0):
+    if verbose:
+        print(f'{contig}:{window_start}-{window_stop} small: '
+              f'{len(small_lengths)} large: {len(large_lengths)}, gc_content: '
+              f'{gc_content*100}%')
 
-    return small_lengths, large_lengths, gc_tally, reads
+    return small_lengths, large_lengths, gc_content, frags
 
 
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
-          genome_file: str,
+          autosomes: str,
+          reference_file: str,
           blacklist_file: str=None,
+          output_file: str=None,
           window_size: int=100000,
           subsample_coverage: float=2,
           quality_threshold: int=30,
@@ -132,8 +126,10 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     input_file: str
         Path string pointing to a bam file containing PE
         fragment reads.
-    genome_file: str
-        Path string to .genome file. Should contain only autosomal chromosomes
+    autosomes: str
+        Path string to a .genome file containing only autosomal chromosomes
+    reference_file: str
+        Path string to .2bit file.
     blacklist_file: str
         Path string to bed file containing genome blacklist.
     window_size: int
@@ -151,17 +147,35 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     """
 
+    # TODO: add support to fasta for reference_file
+
+    # TODO: add option to supply a reference genome name instead of
+    # genome file
+
     # TODO: subsample bam to specified coverage. Jan28.hg19.mdups.bam
     # already has 1-2x coverage.
 
     if (verbose):
         start_time = time.time()
+        print(f"""
+        input_file: {input_file}
+        autosomes: {autosomes}
+        reference_file: {reference_file}
+        blacklist_file: {blacklist_file}
+        output_file: {output_file}
+        window_size: {window_size}
+        subsample_coverage: {subsample_coverage}
+        quality_threshold: {quality_threshold}
+        workers: {workers}
+        preprocessing: {preprocessing}
+        verbose: {verbose}
+        """)
 
     if verbose:
         print(f'Reading genome file...')
 
     contigs = []
-    with open(genome_file) as genome:
+    with open(autosomes) as genome:
         for line in genome:
             contents = line.split('\t')
             # account for empty lines
@@ -177,11 +191,13 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         for coordinate in range(0, size, window_size):
             # (contig, start, stop)
             window_args.append((input_file,
-                            contig,
-                            coordinate,
-                            coordinate + window_size,
-                            blacklist_file,
-                            quality_threshold))
+                                reference_file,
+                                contig,
+                                coordinate,
+                                coordinate + window_size,
+                                blacklist_file,
+                                quality_threshold,
+                                verbose - 1 if verbose > 1 else 0))
 
     if (verbose):
         print(f'{len(window_args)} windows created.')
@@ -190,15 +206,10 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     with Pool(workers) as pool:
         windows = pool.starmap(_delfi_single_window, window_args)
 
-    reads = sum(windows[:][3])
-
-    with pysam.AlignmentFile(input_file) as file:
-        actual_reads = file.count()
-
-    assert (error := abs(
-        actual_reads - reads)/reads) < 0.05, f'Error is {error}'
+    frags = sum(window[3] for window in windows)
 
     if (verbose):
         end_time = time.time()
+        print(f'{frags} fragments included.')
         print(f'delfi took {end_time - start_time} s to complete')
     return None
