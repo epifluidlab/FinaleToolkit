@@ -24,6 +24,7 @@ dependencies = [
     "pysam",
     "pybedtools",
     "pybigwig",
+    "py2bit",
     "tqdm",
     "numba",
     "scipy",
