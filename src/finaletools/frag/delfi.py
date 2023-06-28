@@ -44,7 +44,7 @@ def _delfi_single_window(
 
     short_lengths = []
     long_lengths = []
-    gc_tally = 0  # cumulative sum of gc bases
+    frag_pos = []
     base_tally = 0
 
     num_frags = 0
@@ -63,14 +63,14 @@ def _delfi_single_window(
             else:
                 frag_start = read1.reference_start
                 frag_length = read1.template_length
-                frag_end = frag_start + frag_length
+                frag_stop = frag_start + frag_length
 
                 # check if in blacklist
                 blacklisted = False
                 for region in blacklist_regions:
                     if (
                         (frag_start >= region[0] and frag_start < region[1])
-                        and (frag_end >= region[0] and frag_end < region[1])
+                        and (frag_stop >= region[0] and frag_stop < region[1])
                     ):
                         blacklisted = True
                         break
@@ -86,17 +86,26 @@ def _delfi_single_window(
                     else:
                         short_lengths.append(abs(frag_length))
 
+                    frag_pos.append((frag_start, frag_stop))
+
                     num_frags += 1
 
+    num_gc = 0  # cumulative sum of gc bases
 
     with py2bit.open(reference_file) as ref_seq:
-        ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
+        # ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
+        for frag_start, frag_stop in frag_pos:
+            frag_seq = ref_seq.sequence(contig, frag_start, frag_stop).upper()
+            num_gc += sum([(base == 'G' or base == 'C') for base in frag_seq])
 
     num_bases = window_stop - window_start
-    num_gc = sum([(base == 'G' or base == 'C') for base in ref_bases])
+    # num_gc = sum([(base == 'G' or base == 'C') for base in ref_bases])
+
+    # sum of frag_lengths
+    frag_coverage = sum(short_lengths) + sum(long_lengths)
 
     # NaN if no fragments in window.
-    gc_content = num_gc / num_bases if num_frags > 0 else np.NaN
+    gc_content = num_gc / frag_coverage if num_frags > 0 else np.NaN
 
     coverage_short = len(short_lengths)
     coverage_long = len(long_lengths)
