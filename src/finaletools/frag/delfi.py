@@ -4,6 +4,7 @@ from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
 from typing import Union
+from tempfile import TemporaryDirectory
 
 import pysam
 import py2bit
@@ -41,8 +42,8 @@ def _delfi_single_window(
                     and window_stop >= region_stop ):
                     blacklist_regions.append((region_start,region_stop))
 
-    small_lengths = []
-    large_lengths = []
+    short_lengths = []
+    long_lengths = []
     gc_tally = 0  # cumulative sum of gc bases
     base_tally = 0
 
@@ -81,9 +82,9 @@ def _delfi_single_window(
                 ):
                     # append length of fragment to list
                     if (frag_length >= 151):
-                        large_lengths.append(abs(frag_length))
+                        long_lengths.append(abs(frag_length))
                     else:
-                        small_lengths.append(abs(frag_length))
+                        short_lengths.append(abs(frag_length))
 
                     frags += 1
 
@@ -97,13 +98,16 @@ def _delfi_single_window(
     # NaN if no fragments in window.
     gc_content = num_gc / num_bases if frags > 0 else np.NaN
 
-    # if (len(small_lengths) != 0 or len(large_lengths) != 0):
+    coverage_short = len(short_lengths)
+    coverage_long = len(long_lengths)
+
+    # if (len(short_lengths) != 0 or len(long_lengths) != 0):
     if verbose:
-        print(f'{contig}:{window_start}-{window_stop} small: '
-              f'{len(small_lengths)} large: {len(large_lengths)}, gc_content: '
+        print(f'{contig}:{window_start}-{window_stop} short: '
+              f'{coverage_short} long: {coverage_long}, gc_content: '
               f'{gc_content*100}%')
 
-    return small_lengths, large_lengths, gc_content, frags
+    return coverage_short, coverage_long, gc_content, frags
 
 
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
