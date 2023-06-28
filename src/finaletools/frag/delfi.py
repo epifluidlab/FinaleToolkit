@@ -47,7 +47,7 @@ def _delfi_single_window(
     gc_tally = 0  # cumulative sum of gc bases
     base_tally = 0
 
-    frags = 0
+    num_frags = 0
 
 
     with pysam.AlignmentFile(input_file) as sam_file:
@@ -86,7 +86,7 @@ def _delfi_single_window(
                     else:
                         short_lengths.append(abs(frag_length))
 
-                    frags += 1
+                    num_frags += 1
 
 
     with py2bit.open(reference_file) as ref_seq:
@@ -96,7 +96,7 @@ def _delfi_single_window(
     num_gc = sum([(base == 'G' or base == 'C') for base in ref_bases])
 
     # NaN if no fragments in window.
-    gc_content = num_gc / num_bases if frags > 0 else np.NaN
+    gc_content = num_gc / num_bases if num_frags > 0 else np.NaN
 
     coverage_short = len(short_lengths)
     coverage_long = len(long_lengths)
@@ -107,7 +107,7 @@ def _delfi_single_window(
               f'{coverage_short} long: {coverage_long}, gc_content: '
               f'{gc_content*100}%')
 
-    return coverage_short, coverage_long, gc_content, frags
+    return coverage_short, coverage_long, gc_content, num_frags
 
 
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
@@ -210,10 +210,10 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     with Pool(workers) as pool:
         windows = pool.starmap(_delfi_single_window, window_args)
 
-    frags = sum(window[3] for window in windows)
+    num_frags = sum(window[3] for window in windows)
 
     if (verbose):
         end_time = time.time()
-        print(f'{frags} fragments included.')
+        print(f'{num_frags} fragments included.')
         print(f'delfi took {end_time - start_time} s to complete')
     return None
