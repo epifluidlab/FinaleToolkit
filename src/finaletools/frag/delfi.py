@@ -107,7 +107,13 @@ def _delfi_single_window(
               f'{coverage_short} long: {coverage_long}, gc_content: '
               f'{gc_content*100}%')
 
-    return coverage_short, coverage_long, gc_content, num_frags
+    return (contig,
+            window_start,
+            window_stop,
+            coverage_short,
+            coverage_long,
+            gc_content,
+            num_frags)
 
 
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
@@ -209,6 +215,12 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     with Pool(workers) as pool:
         windows = pool.starmap(_delfi_single_window, window_args)
+
+    with open(output_file, 'w') as out:
+        out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
+        for window in windows:
+            out.write(f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t{window[4]}\t{window[5]}\n')
+
 
     num_frags = sum(window[3] for window in windows)
 
