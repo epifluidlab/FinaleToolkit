@@ -94,7 +94,7 @@ def main_cli():
     parser_command4.add_argument('input_file')
     parser_command4.add_argument('site_bed')
     parser_command4.add_argument('-o', '--output_file')
-    parser_command4.add_argument('--size-around_sites', default=5000, type=int)
+    parser_command4.add_argument('--size_around_sites', default=5000, type=int)
     parser_command4.add_argument('--window_size', default=120, type=int)
     parser_command4.add_argument('-lo', '--fraction_low', default=120,
                                  type=int)
