@@ -74,7 +74,7 @@ def main_cli():
     # If not included, will end at the end of the chromosome
     parser_command3.add_argument('stop', type=int)
     parser_command3.add_argument('-o', '--output_file')
-    parser_command3.add_argument('--window-size', default=120, type=int)
+    parser_command3.add_argument('--window_size', default=120, type=int)
     parser_command3.add_argument('-lo', '--fraction_low', default=120,
                                  type=int)
     parser_command3.add_argument('-hi', '--fraction_high', default=180,
