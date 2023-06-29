@@ -31,7 +31,7 @@ def main_cli():
                                                 'coverage over a region given '
                                                 'a CRAM/BAM/SAM file')
                                             )
-    parser_command1.add_argument('input_file')
+    parser_command1.add_argument('input-file')
     parser_command1.add_argument('contig')
     # inclusive location of region start in 0-based coordinate system.
     # If not included, will end at the end of the chromosome
@@ -65,7 +65,7 @@ def main_cli():
         description='Calculates Windowed Protection Score over a region given '
         'a CRAM/BAM/SAM file'
         )
-    parser_command3.add_argument('input_file')
+    parser_command3.add_argument('input-file')
     parser_command3.add_argument('contig')
     # inclusive location of region start in 0-based coordinate system.
     # If not included, will start at the beginning of the chromosome
@@ -73,13 +73,13 @@ def main_cli():
     # exclusive location of region end in 0-based coordinate system.
     # If not included, will end at the end of the chromosome
     parser_command3.add_argument('stop', type=int)
-    parser_command3.add_argument('-o', '--output_file')
-    parser_command3.add_argument('--window_size', default=120, type=int)
-    parser_command3.add_argument('-lo', '--fraction_low', default=120,
+    parser_command3.add_argument('-o', '--output-file')
+    parser_command3.add_argument('--window-size', default=120, type=int)
+    parser_command3.add_argument('-lo', '--fraction-low', default=120,
                                  type=int)
-    parser_command3.add_argument('-hi', '--fraction_high', default=180,
+    parser_command3.add_argument('-hi', '--fraction-high', default=180,
                                  type=int)
-    parser_command3.add_argument('--quality_threshold', default=30, type=int)
+    parser_command3.add_argument('--quality-threshold', default=30, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count', default=0)
     parser_command3.set_defaults(func=wps)
 
@@ -91,10 +91,10 @@ def main_cli():
         'around sites specified in a BED file from alignments in a '
         'CRAM/BAM/SAM file'
         )
-    parser_command4.add_argument('input_file')
-    parser_command4.add_argument('site_bed')
-    parser_command4.add_argument('-o', '--output_file')
-    parser_command4.add_argument('--size_around_sites', default=5000, type=int)
+    parser_command4.add_argument('input-file')
+    parser_command4.add_argument('site-bed')
+    parser_command4.add_argument('-o', '--output-file')
+    parser_command4.add_argument('--size-around-sites', default=5000, type=int)
     parser_command4.add_argument('--window_size', default=120, type=int)
     parser_command4.add_argument('-lo', '--fraction_low', default=120,
                                  type=int)
@@ -113,10 +113,10 @@ def main_cli():
         )
     parser_command5.add_argument('input_file')
     parser_command5.add_argument('autosomes')
-    parser_command5.add_argument('reference_file')
-    parser_command5.add_argument('-b', '--blacklist_file')
-    parser_command5.add_argument('-o', '--output_file')
-    parser_command5.add_argument('--window_size', default=100000, type=int)
+    parser_command5.add_argument('reference-file')
+    parser_command5.add_argument('-b', '--blacklist-file')
+    parser_command5.add_argument('-o', '--output-file')
+    parser_command5.add_argument('--window-size', default=100000, type=int)
     parser_command5.add_argument('--quality_threshold', default=30, type=int)
     parser_command5.add_argument('-w', '--workers', default=1, type=int)
     parser_command5.add_argument('-v', '--verbose', action='count', default=0)
