@@ -127,61 +127,64 @@ def _delfi_single_window(
             num_frags)
 
 
+def delfi_loess(gc, coverage):
+    """
+    Function to simplify loess.
+    """
+    coverage_loess = lowess(
+        coverage,
+        gc,
+        0.75,
+        5,
+        return_sorted=False,
+        missing='drop'
+    )
+    return coverage_loess
+
+
+def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
+    """
+    function to trim lowest 10% of bins by coverage. If a window is
+    below the 10th percentile, coverages and gc are set to NaN and
+    num_frags is set to 0
+    """
+    ten_percentile = np.percentile(window_data['num_frags'], trim_percentile)
+    trimmed = window_data.copy()
+    in_percentile = window_data['num_frags']<ten_percentile
+    trimmed['short'][in_percentile] = np.NaN
+    trimmed['long'][in_percentile] = np.NaN
+    trimmed['gc'][in_percentile] = np.NaN
+    trimmed['num_frags'][in_percentile] = 0
+    return trimmed
+
+
 def _delfi_gc_adjust(
-        windows:list,
+        windows:np.ndarray,
         verbose:bool=False
 ):
     """
     Helper function that takes window data and performs GC adjustment.
     """
-    # read to arrays
-    coverage_short = np.array([line[3] for line in windows])
-    coverage_long = np.array([line[4] for line in windows])
-    gc_content = np.array([line[5] for line in windows])
-
     #LOESS/LOWESS regression for short and long
-    smooth_short_coverage = lowess(
-        coverage_short,
-        gc_content,
-        0.75,
-        5,
-        return_sorted=False
-    )
+    short_loess = delfi_loess(windows['gc'], windows['short'])
+    long_loess = delfi_loess(windows['gc'], windows['long'])
 
-    smooth_long_coverage = lowess(
-        coverage_long,
-        gc_content,
-        0.75,
-        5,
-        return_sorted=False
-    )
+    corrected_windows = windows.copy()
 
     # GC correction
-    gc_corrected_short_coverage = (coverage_short
-        - smooth_short_coverage
-        + np.nanmedian(coverage_short)
+    corrected_windows['short'] = (
+        windows['short']
+        - short_loess
+        + np.nanmedian(windows['short'])
     )
 
-    gc_corrected_long_coverage = (coverage_long
-        - smooth_long_coverage
-        + np.nanmedian(coverage_long)
+    corrected_windows['long'] = (
+        windows['long']
+        - long_loess
+        + np.nanmedian(windows['long'])
     )
 
-    # create new list TODO: find a better way to do this
-    gc_corrected_windows = [
-        (windows[i][0],
-         windows[i][1],
-         windows[i][2],
-         gc_corrected_short_coverage[i],
-         gc_corrected_long_coverage[i],
-         windows[i][5],
-         windows[i][6]
-         )
-         for i
-         in range(len(windows))
-    ]
-
-    return gc_corrected_windows
+    return corrected_windows
 
 
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
@@ -282,16 +285,33 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         print(f'{len(window_args)} windows created.')
         print('Calculating fragment lengths...')
 
+    # pool process to find window frag coverages, gc content
     with Pool(workers) as pool:
         windows = pool.starmap(_delfi_single_window, window_args)
 
+    # move to structured array
+    window_array = np.array(
+        windows,
+        dtype=[('contig', '<U32'),
+           ('start', 'u8'),
+           ('stop', 'u8'),
+           ('short', 'f8'),
+           ('long', 'f8'),
+           ('gc', 'f8'),
+           ('num_frags', 'u8')
+        ]
+    )
+
+    # remove bottom 10 percentile
+    trimmed_windows = trim_coverage(window_array, 10)
+
     if gc_correction:
-        windows = _delfi_gc_adjust(windows, verbose)
+        trimmed_windows = _delfi_gc_adjust(trimmed_windows, verbose)
 
     with open(output_file, 'w') as out:
         out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
-        for window in windows:
-            out.write(f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t{window[4]}\t{window[5]}\n')
+        for window in trimmed_windows:
+            out.write(f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t{window[4]}\t{window[5]}\t{window[6]}\n')
 
 
     num_frags = sum(window[3] for window in windows)
