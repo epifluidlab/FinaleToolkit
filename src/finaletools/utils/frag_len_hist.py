@@ -8,7 +8,24 @@ def frag_len_hist(
 ):
     term_width, term_height = get_terminal_size((80, 24))
     n_bins = term_width - 12
-    counts, bins = np.histogram(frag_lengths, bins=n_bins)
+
+    start = np.min(frag_lengths)
+    stop = np.max(frag_lengths)
+
+    bin_size = round((stop - start) / n_bins)
+
+    print(bin_size)
+
+    n_bins = (stop - start) // bin_size
+
+    bins = np.arange(start, stop, bin_size)
+    counts = []
+    # generate histogram
+    for bin in bins:
+        count = np.sum((frag_lengths >= bin) * (frag_lengths < (bin + bin_size)))
+        counts.append(count)
+    bins = np.append(bins, stop)
+
     max_count = np.max(counts)
     max_height = term_height - 2
     block_height = max_height * 8 - 1    # height for utf-8 block elements
@@ -33,7 +50,7 @@ def frag_len_hist(
         7: '\u2587',
         8: '\u2588'
     }
-    
+
     for row in hist_array:
         print(''.join([bars[num] for num in row]))
-    
+
