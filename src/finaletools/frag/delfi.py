@@ -9,6 +9,8 @@ from tempfile import TemporaryDirectory
 import pysam
 import py2bit
 import numpy as np
+from statsmodels.nonparametric.smoothers_lowess import lowess
+
 from finaletools.utils import not_read1_or_low_quality
 
 
@@ -125,6 +127,63 @@ def _delfi_single_window(
             num_frags)
 
 
+def _delfi_gc_adjust(
+        windows:list,
+        verbose:bool=False
+):
+    """
+    Helper function that takes window data and performs GC adjustment.
+    """
+    # read to arrays
+    coverage_short = np.array([line[3] for line in windows])
+    coverage_long = np.array([line[4] for line in windows])
+    gc_content = np.array([line[5] for line in windows])
+
+    #LOESS/LOWESS regression for short and long
+    smooth_short_coverage = lowess(
+        coverage_short,
+        gc_content,
+        0.75,
+        5,
+        return_sorted=False
+    )
+
+    smooth_long_coverage = lowess(
+        coverage_long,
+        gc_content,
+        0.75,
+        5,
+        return_sorted=False
+    )
+
+    # GC correction
+    gc_corrected_short_coverage = (coverage_short
+        - smooth_short_coverage
+        + np.nanmedian(coverage_short)
+    )
+
+    gc_corrected_long_coverage = (coverage_long
+        - smooth_long_coverage
+        + np.nanmedian(coverage_long)
+    )
+
+    # create new list TODO: find a better way to do this
+    gc_corrected_windows = [
+        (windows[i][0],
+         windows[i][1],
+         windows[i][2],
+         gc_corrected_short_coverage[i],
+         gc_corrected_long_coverage[i],
+         windows[i][5],
+         windows[i][6]
+         )
+         for i
+         in range(len(windows))
+    ]
+
+    return gc_corrected_windows
+
+
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           autosomes: str,
           reference_file: str,
@@ -134,6 +193,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           subsample_coverage: float=2,
           quality_threshold: int=30,
           workers: int=1,
+          gc_correction: bool=True,
           preprocessing: bool=True,
           verbose: Union[int, bool]=False):
     """
@@ -224,6 +284,9 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     with Pool(workers) as pool:
         windows = pool.starmap(_delfi_single_window, window_args)
+
+    if gc_correction:
+        windows = _delfi_gc_adjust(windows, verbose)
 
     with open(output_file, 'w') as out:
         out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
