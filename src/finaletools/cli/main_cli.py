@@ -59,6 +59,7 @@ def main_cli():
     parser_command2.add_argument('-v', '--verbose', action='count', default=0)
     parser_command2.set_defaults(func=frag_length)
 
+    """
     # Subcommand 3: wps()
     parser_command3 = subparsers.add_parser(
         'wps', prog='wps',
@@ -82,11 +83,12 @@ def main_cli():
     parser_command3.add_argument('--quality_threshold', default=30, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count', default=0)
     parser_command3.set_defaults(func=wps)
+    """
 
-    # Subcommand 4: aggregate-wps
+    # Subcommand 4: wps (on interval bed file)
     parser_command4 = subparsers.add_parser(
-        'aggregate-wps',
-        prog='aggregate-wps',
+        'wps',
+        prog='wps',
         description='Calculates Windowed Protection Score over a region '
         'around sites specified in a BED file from alignments in a '
         'CRAM/BAM/SAM file'
