@@ -115,6 +115,7 @@ def main_cli():
     parser_command5.add_argument('autosomes')
     parser_command5.add_argument('reference_file')
     parser_command5.add_argument('-b', '--blacklist_file')
+    parser_command5.add_argument('-c', '--centromere_file')
     parser_command5.add_argument('-o', '--output_file')
     parser_command5.add_argument('-W', '--window_size', default=100000, type=int)
     parser_command5.add_argument('-q', '--quality_threshold', default=30, type=int)
