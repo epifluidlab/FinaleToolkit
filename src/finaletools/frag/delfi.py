@@ -21,6 +21,7 @@ def _delfi_single_window(
         window_start: int,
         window_stop: int,
         blacklist_file: str=None,
+        centromere_file: str=None,
         quality_threshold: int=30,
         verbose: Union[int,bool]=False) -> tuple:
     """
@@ -30,8 +31,6 @@ def _delfi_single_window(
     blacklist_regions = []
 
     if (blacklist_file is not None):
-
-
         # convert blacklist to a list of tuples
         # TODO: accept other file types
         with open(blacklist_file) as blacklist:
@@ -44,10 +43,24 @@ def _delfi_single_window(
                     and window_stop >= region_stop ):
                     blacklist_regions.append((region_start,region_stop))
 
+    centromeres = []
+
+    if (centromere_file is not None):
+        # TODO: find a standard way to get centromeres, like a track on
+        # UCSC
+        with open(centromere_file) as centromere_list:
+            for line in centromere_list:
+                region_contig, region_start, region_stop, *_ = line.split()
+                region_start = int(region_start)
+                region_stop = int(region_stop)
+                if (contig == region_contig
+                    and window_start <= region_start
+                    and window_stop >= region_stop ):
+                    centromeres.append((region_start,region_stop))
+
     short_lengths = []
     long_lengths = []
     frag_pos = []
-    base_tally = 0
 
     num_frags = 0
 
@@ -77,8 +90,18 @@ def _delfi_single_window(
                         blacklisted = True
                         break
 
+                # check if in centromere
+                in_centromere = False
+                for region in centromeres:
+                    if (
+                        (frag_start >= region[0] and frag_start < region[1])
+                        and (frag_stop >= region[0] and frag_stop < region[1])
+                    ):
+                        in_centromere = True
+                        break
 
                 if (not blacklisted
+                    and not in_centromere
                     and frag_length >= 100
                     and frag_length <= 220
                 ):
