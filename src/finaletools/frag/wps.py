@@ -78,7 +78,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         verbose: Union[bool, int]=0
         ) -> np.ndarray:
     """
-    Return Windowed Protection Scores as specified in Snyder et al
+    Return (raw) Windowed Protection Scores as specified in Snyder et al
     (2016) over a region [start,stop).
 
     Parameters
