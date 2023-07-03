@@ -24,7 +24,36 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   verbose: Union[bool, int]=0
                   ) -> np.ndarray:
     """
-    Function that aggregates WPS over sites in BED file
+    Function that aggregates WPS over sites in BED file according to the
+    method described by Snyder et al (2016).
+
+    Parameters
+    ----------
+    input_file : str or pysam.AlignmentFile
+        BAM or SAM file containing paired-end fragment reads or its
+        path. `AlignmentFile` must be opened in read mode.
+    site_bed: str
+        Bed file containing intervals to perform WPS on.
+    output_file : string, optional
+    window_size : int, optional
+        Size of window to calculate WPS. Default is k = 120, equivalent
+        to L-WPS.
+    fraction_low : int, optional
+        Specifies lowest fragment length included in calculation.
+        Default is 120, equivalent to long fraction.
+    fraction_high : int, optional
+        Specifies highest fragment length included in calculation.
+        Default is 120, equivalent to long fraction.
+    quality_threshold : int, optional
+    workers : int, optional
+    verbose : bool, optional
+
+    Returns
+    -------
+    scores : numpy.ndarray
+        np array of shape (n, 2) where column 1 is the coordinate and
+        column 2 is the score and n is the number of coordinates in
+        region [start,stop)
     """
     if (verbose):
         start_time = time.time()
@@ -81,24 +110,23 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     """
     # read tss contigs and coordinates from bed
     contigs = []
-    ts_sites = []
+    starts = []
+    stops = []
     with open(site_bed) as bed:
         for line in bed:
             contents = line.split()
             contig = contents[0].strip()
             start = int(contents[1])
+            stop = int(contents[2])
             contigs.append(contig)
-            ts_sites.append(start)
+            starts.append(start)
+            stops.append(stop)
 
 
     left_of_site = round(-size_around_sites / 2)
     right_of_site = round(size_around_sites / 2)
 
     assert right_of_site - left_of_site == size_around_sites
-
-
-    starts = [tss+left_of_site for tss in ts_sites]
-    stops = [tss+right_of_site for tss in ts_sites]
 
     count = len(contigs)
 
