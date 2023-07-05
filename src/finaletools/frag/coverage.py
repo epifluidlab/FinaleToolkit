@@ -94,23 +94,30 @@ def single_coverage(
     return coverage
 
 
-def coverage():
+def coverage(
+        input_file,
+        intervals,
+        output,
+        quality_threshold=30,
+        verbose=False):
     """
-    Return estimated fragment coverage over specified `contig` and
-    region of`input_file`. Uses an algorithm where the midpoints of
+    Return estimated fragment coverage over intervals specified in
+    `intervals`. Fragments are read from `input_file` which may be
+    either a BAM or SAM file. Uses an algorithm where the midpoints of
     fragments are calculated and coverage is tabulated from the
     midpoints that fall into the specified region. Not suitable for
-    fragments of size approaching region size.
+    fragments of size approaching interval size.
 
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
         BAM, SAM, or CRAM file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
-    contig : string
-    start : int
-    stop : int
+    intervals : str
+        path for BAM file containing intervals
     output_file : string, optional
+        path for bed file to print coverages to. If output_file = `_`,
+        results will be printed to stdout.
     quality_threshold : int, optional
     verbose : bool, optional
 
