@@ -4,6 +4,7 @@ import time
 from typing import Union
 
 import pysam
+import gzip
 from numba import jit
 from multiprocessing import Pool
 
@@ -101,8 +102,8 @@ def single_coverage(
 
 def coverage(
         input_file: Union[str, pysam.AlignmentFile],
-        interval_file: int,
-        output_file: int,
+        interval_file: str,
+        output_file: str,
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False):
@@ -153,9 +154,30 @@ def coverage(
     with Pool(workers) as pool:
         coverages = pool.starmap(single_coverage, intervals)
 
+    # Output
+    output_is_file = False
 
+    if output_file != None:
+        try:
+            # handle output types
+            if output_file.endswith('.bed'):
+                output_is_file = True
+                output = open(output_file, 'w')
+            elif output_file.endswith('.bed.gz'):
+                output = gzip.open(output_file, 'w')
+                output_is_file = True
+            elif output_file == '_':
+                output = sys.stdout
+            else:
+                raise ValueError(
+                    'output_file should have .bed or .bed.gz as as suffix'
+                )
 
-    # TODO: output
+            # print to files
+
+        finally:
+            if output_is_file:
+                output.close()
 
     return coverages
 
