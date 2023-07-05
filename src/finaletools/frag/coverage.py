@@ -145,7 +145,7 @@ def coverage(
                     quality_threshold,
                     verbose - 1 if verbose > 1 else 0
                 )
-                intervals.add(intervals)
+                intervals.add(interval)
 
     with Pool(workers) as pool:
         coverages = pool.starmap(single_coverage, intervals)
