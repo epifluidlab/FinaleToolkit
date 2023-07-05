@@ -6,17 +6,15 @@ import os
 import tempfile as tf
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
-from sys import stdout
+from sys import stdout, getsizeof
 
 import pysam
 import numpy as np
 from numba import jit
 from tqdm import tqdm
-from finaletools.utils import (
-    frag_bam_to_bed,
-    frag_array,
-    not_read1_or_low_quality
-)
+from memory_profiler import profile
+
+from finaletools.utils import frag_array
 
 @jit(nopython=True)
 def _single_wps(window_start: int,
@@ -39,7 +37,6 @@ def _single_wps(window_start: int,
 
     # calculate wps and return
     return (window_position, num_spanning - num_end_in)
-
 
 @jit(nopython=True)
 def _wps_loop(frag_ends: np.ndarray,
@@ -78,7 +75,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         verbose: Union[bool, int]=0
         ) -> np.ndarray:
     """
-    Return Windowed Protection Scores as specified in Snyder et al
+    Return (raw) Windowed Protection Scores as specified in Snyder et al
     (2016) over a region [start,stop).
 
     Parameters
@@ -133,6 +130,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                            fraction_low=fraction_low,
                            fraction_high=fraction_high,
                            verbose=(verbose>=2))
+
+    print(getsizeof(frag_ends))
 
     if (verbose):
         print("Done reading fragments, preparing for WPS calculation.")

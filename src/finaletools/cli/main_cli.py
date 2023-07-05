@@ -82,6 +82,7 @@ def main_cli():
     parser_command2.add_argument('-v', '--verbose', action='count', default=0)
     parser_command2.set_defaults(func=frag_length)
 
+    """
     # Subcommand 3: wps()
     parser_command3 = subparsers.add_parser(
         'wps', prog='wps',
@@ -105,27 +106,69 @@ def main_cli():
     parser_command3.add_argument('--quality_threshold', default=30, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count', default=0)
     parser_command3.set_defaults(func=wps)
+    """
 
-    # Subcommand 4: aggregate-wps
+    # Subcommand 4: wps (on interval bed file)
     parser_command4 = subparsers.add_parser(
-        'aggregate-wps',
-        prog='aggregate-wps',
+        'wps',
+        prog='wps',
         description='Calculates Windowed Protection Score over a region '
         'around sites specified in a BED file from alignments in a '
         'CRAM/BAM/SAM file'
         )
-    parser_command4.add_argument('input_file')
-    parser_command4.add_argument('site_bed')
-    parser_command4.add_argument('-o', '--output_file')
-    parser_command4.add_argument('--size_around_sites', default=5000, type=int)
-    parser_command4.add_argument('--window_size', default=120, type=int)
-    parser_command4.add_argument('-lo', '--fraction_low', default=120,
-                                 type=int)
-    parser_command4.add_argument('-hi', '--fraction_high', default=180,
-                                 type=int)
-    parser_command4.add_argument('--quality_threshold', default=30, type=int)
-    parser_command4.add_argument('--workers', default=1, type=int)
-    parser_command4.add_argument('-v', '--verbose', action='count', default=0)
+    parser_command4.add_argument(
+        'input_file',
+        help='bam or sam file containing paired-end reads of cfDNA WGS'
+    )
+    parser_command4.add_argument(
+        'site_bed',
+        help='bed file containing sites over which to calculate wps'
+    )
+    parser_command4.add_argument(
+        '-o',
+        '--output_file'
+    )
+    parser_command4.add_argument(
+        '-i',
+        '--interval_size',
+        default=5000,
+        type=int
+    )
+    parser_command4.add_argument(
+        '-W',
+        '--window_size',
+        default=120,
+        type=int
+    )
+    parser_command4.add_argument(
+        '-lo',
+        '--fraction_low',
+        default=120,
+        type=int
+    )
+    parser_command4.add_argument(
+        '-hi',
+        '--fraction_high',
+        default=180,
+        type=int
+    )
+    parser_command4.add_argument(
+        '-q',
+        '--quality_threshold',
+        default=30,
+        type=int
+    )
+    parser_command4.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int
+    )
+    parser_command4.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0)
     parser_command4.set_defaults(func=aggregate_wps)
 
     # Subcommand 5: delfi
@@ -153,7 +196,7 @@ def main_cli():
     funcargs = vars(args)
     funcargs.pop('func')
     funcargs.pop('subcommand')
-    # print(funcargs)
+
     function(**funcargs)
 
 if __name__ == '__main__':
