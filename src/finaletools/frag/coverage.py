@@ -4,6 +4,8 @@ import time
 
 import pysam
 from numba import jit
+from multiprocessing import Pool
+
 from finaletools.utils import not_read1_or_low_quality
 
 
@@ -96,9 +98,10 @@ def single_coverage(
 
 def coverage(
         input_file,
-        intervals,
+        interval_file,
         output,
         quality_threshold=30,
+        workers=1,
         verbose=False):
     """
     Return estimated fragment coverage over intervals specified in
@@ -126,5 +129,28 @@ def coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
-    return None
+    intervals = []  # list of inputs for single_coverage
+    with open(interval_file) as bed:
+        for line in bed:
+            if ~line.startswith('#'):
+                contents = line.split()
+                contig = contents[0].strip()
+                start = int(contents[1])
+                stop = int(contents[2])
+                interval = (
+                    input_file,
+                    contig,
+                    start,
+                    stop,
+                    quality_threshold,
+                    verbose - 1 if verbose > 1 else 0
+                )
+                intervals.add(intervals)
+
+    with Pool(workers) as pool:
+        coverages = pool.starmap(single_coverage, intervals)
+
+    # TODO: output
+
+    return coverages
 
