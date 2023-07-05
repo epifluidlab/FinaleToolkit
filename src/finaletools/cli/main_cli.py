@@ -29,7 +29,8 @@ def main_cli():
         'coverage',
         description=(
         'Calculates fragmentation coverage over intervals in a BED file given '
-        'a BAM/SAM file')
+        'a BAM/SAM file'
+        )
     )
     # TODO: accept tabix
 
@@ -38,7 +39,7 @@ def main_cli():
         help='BAM or SAM file containing fragment data'
     )
     parser_command1.add_argument(
-        'intervals',
+        'interval_file',
         help='BED file containing intervals over which coverage is calculated'
     )
     parser_command1.add_argument(
@@ -52,6 +53,13 @@ def main_cli():
         '--quality_threshold',
         default=30,
         type=int
+    )
+    parser_command1.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of worker processes to use. Default is 1.'
     )
     parser_command1.add_argument(
         '-v',
