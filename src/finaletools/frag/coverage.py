@@ -6,13 +6,14 @@ from numba import jit
 from finaletools.utils import not_read1_or_low_quality
 
 
-def coverage(input_file,
-                         contig,
-                         start=0,
-                         stop=None,
-                         output_file=None,
-                         quality_threshold=30,
-                         verbose=False):
+def single_coverage(
+        input_file,
+        contig,
+        start=0,
+        stop=None,
+        output_file=None,
+        quality_threshold=30,
+        verbose=False):
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -104,3 +105,32 @@ def coverage(input_file,
         print(f'frag_coverage took {end_time - start_time} s to complete')
 
     return coverage
+
+
+def coverage():
+    """
+    Return estimated fragment coverage over specified `contig` and
+    region of`input_file`. Uses an algorithm where the midpoints of
+    fragments are calculated and coverage is tabulated from the
+    midpoints that fall into the specified region. Not suitable for
+    fragments of size approaching region size.
+
+    Parameters
+    ----------
+    input_file : str or pysam.AlignmentFile
+        BAM, SAM, or CRAM file containing paired-end fragment reads or
+        its path. `AlignmentFile` must be opened in read mode.
+    contig : string
+    start : int
+    stop : int
+    output_file : string, optional
+    quality_threshold : int, optional
+    verbose : bool, optional
+
+    Returns
+    -------
+    coverage : int
+        Fragment coverage over contig and region.
+    """
+    return None
+
