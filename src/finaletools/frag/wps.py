@@ -62,7 +62,7 @@ def _wps_loop(frag_ends: np.ndarray,
 
     return scores
 
-@profile
+
 def wps(input_file: Union[str, pysam.AlignmentFile],
         contig: str,
         start: Union[int, str],
