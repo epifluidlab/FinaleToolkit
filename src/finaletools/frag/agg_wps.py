@@ -12,7 +12,7 @@ from memory_profiler import profile
 
 from finaletools.frag.wps import wps
 
-@profile
+
 def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                   site_bed: str,
                   output_file: str=None,
