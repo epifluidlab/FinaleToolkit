@@ -6,7 +6,7 @@ import importlib
 import sys
 
 from finaletools.frag.frag_length import frag_length
-from finaletools.frag.coverage import frag_center_coverage
+from finaletools.frag.coverage import coverage
 from finaletools.frag.wps import wps
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
@@ -26,24 +26,48 @@ def main_cli():
 
     # Subcommand 1: frag-coverage
     parser_command1 = subparsers.add_parser(
-        'frag-center-coverage',
-        description=('Calculates fragmentation coverage over a region given '
-                     'a BAM/SAM file')
-                                            )
-    parser_command1.add_argument('input_file')
-    parser_command1.add_argument('contig')
-    # inclusive location of region start in 0-based coordinate system.
-    # If not included, will end at the end of the chromosome
-    parser_command1.add_argument('--start', default=0, type=int)
-    # exclusive location of region end in 0-based coordinate system.
-    # If not included, will end at the end of the chromosome
-    parser_command1.add_argument('--stop', type=int)
+        'coverage',
+        description=(
+        'Calculates fragmentation coverage over intervals in a BED file given '
+        'a BAM/SAM file'
+        )
+    )
+    # TODO: accept tabix
 
-    parser_command1.add_argument('-o', '--output_file')
-    # parser_command1.add_argument('--method', default="frag-center")
-    parser_command1.add_argument('-q', '--quality_threshold', default=30, type=int)
-    parser_command1.add_argument('-v', '--verbose', action='store_true', default=0)
-    parser_command1.set_defaults(func=frag_center_coverage)
+    parser_command1.add_argument(
+        'input_file',
+        help='BAM or SAM file containing fragment data'
+    )
+    parser_command1.add_argument(
+        'interval_file',
+        help='BED file containing intervals over which coverage is calculated'
+    )
+    parser_command1.add_argument(
+        '-o',
+        '--output_file',
+        default='-',
+        help='BED file where coverage is printed'
+    )
+    parser_command1.add_argument(
+        '-q',
+        '--quality_threshold',
+        default=30,
+        type=int
+    )
+    parser_command1.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of worker processes to use. Default is 1.'
+    )
+    parser_command1.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        default=0
+    )
+    parser_command1.set_defaults(func=coverage)
 
     # Subcommand 2: frag-length
     parser_command2 = subparsers.add_parser(
@@ -157,6 +181,7 @@ def main_cli():
     parser_command5.add_argument('autosomes')
     parser_command5.add_argument('reference_file')
     parser_command5.add_argument('-b', '--blacklist_file')
+    parser_command5.add_argument('-c', '--centromere_file')
     parser_command5.add_argument('-o', '--output_file')
     parser_command5.add_argument('-W', '--window_size', default=100000, type=int)
     parser_command5.add_argument('-q', '--quality_threshold', default=30, type=int)
