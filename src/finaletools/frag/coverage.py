@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys
 import time
-from typing import Union
+from typing import Union, Tuple
 
 import pysam
 import gzip
@@ -13,11 +13,13 @@ from finaletools.utils import not_read1_or_low_quality
 
 def single_coverage(
         input_file: Union[str, pysam.AlignmentFile],
-        contig: str,
+        contig: str=None,
         start: int=0,
         stop: int=None,
+        name: str='.',
         quality_threshold: int=30,
-        verbose: Union[bool, int]=False):
+        verbose: Union[bool, int]=False
+    ) -> Tuple[str, int, int, str, float]:
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -33,6 +35,7 @@ def single_coverage(
     contig : string
     start : int
     stop : int
+    name : str
     quality_threshold : int, optional
     verbose : bool, optional
 
@@ -97,7 +100,15 @@ def single_coverage(
             f'frag_coverage took {end_time - start_time} s to complete\n'
         )
 
-    return coverage
+    return contig, start, stop, name, coverage
+
+
+def _single_coverage_star(args):
+    """
+    Helper function that takes a tuple of args and applies to
+    single_coverage. To be used in imap.
+    """
+    return single_coverage(*args)
 
 
 def coverage(
@@ -133,7 +144,32 @@ def coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
+    if (verbose):
+        start_time = time.time()
+        sys.stderr.write(f"""
+        input_file: {input_file}
+        interval file: {interval_file}
+        output_file: {output_file}
+        quality_threshold: {quality_threshold}
+        workers: {workers}
+        verbose: {verbose}
+
+        Calculating total coverage for file
+
+        """)
+
+    # TODO: maybe parallelize
+    total_coverage = single_coverage(
+        input_file,
+        quality_threshold=quality_threshold,
+        verbose = verbose - 1 if verbose > 1 else 0
+    )[4]
+
+    if verbose:
+        sys.stderr.write('reading intervals')
+
     intervals = []  # list of inputs for single_coverage
+
     with open(interval_file) as bed:
         for line in bed:
             if ~line.startswith('#'):
@@ -141,18 +177,23 @@ def coverage(
                 contig = contents[0].strip()
                 start = int(contents[1])
                 stop = int(contents[2])
+                name = contents[3] if len(contents) > 3 else '.'
                 interval = (
                     input_file,
                     contig,
                     start,
                     stop,
+                    name,
                     quality_threshold,
                     verbose - 1 if verbose > 1 else 0
                 )
-                intervals.add(interval)
+                intervals.append(interval)
+
+    if verbose:
+        sys.stderr.write('calculating coverage')
 
     with Pool(workers) as pool:
-        coverages = pool.starmap(single_coverage, intervals)
+        coverages = pool.imap(_single_coverage_star, intervals)
 
     # Output
     output_is_file = False
@@ -174,10 +215,21 @@ def coverage(
                 )
 
             # print to files
+            for coverage in coverages:
+                output.write(
+                    f'{coverage[0]}\t{coverage[1]}\t{coverage[2]}\t'
+                    f'{coverage[3]}\t{coverage[4]/total_coverage}\n'
+                )
 
         finally:
             if output_is_file:
                 output.close()
+
+    if verbose:
+        end_time = time.time()
+        sys.stderr.write(
+            f'coverage took {end_time - start_time} s to complete\n'
+        )
 
     return coverages
 
