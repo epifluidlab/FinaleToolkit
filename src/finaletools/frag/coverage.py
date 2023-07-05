@@ -6,7 +6,7 @@ from numba import jit
 from finaletools.utils import not_read1_or_low_quality
 
 
-def frag_center_coverage(input_file,
+def coverage(input_file,
                          contig,
                          start=0,
                          stop=None,
