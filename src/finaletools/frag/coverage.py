@@ -91,7 +91,9 @@ def single_coverage(
 
     if verbose:
         end_time = time.time()
-        print(f'frag_coverage took {end_time - start_time} s to complete')
+        sys.stderr.write(
+            f'frag_coverage took {end_time - start_time} s to complete\n'
+        )
 
     return coverage
 
@@ -99,7 +101,7 @@ def single_coverage(
 def coverage(
         input_file,
         interval_file,
-        output,
+        output_file,
         quality_threshold=30,
         workers=1,
         verbose=False):
@@ -149,6 +151,8 @@ def coverage(
 
     with Pool(workers) as pool:
         coverages = pool.starmap(single_coverage, intervals)
+
+
 
     # TODO: output
 
