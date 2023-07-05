@@ -6,7 +6,7 @@ import os
 import tempfile as tf
 from multiprocessing.pool import Pool
 from typing import Union, TextIO, BinaryIO
-from sys import stdout, getsizeof
+from sys import stdout, stderr, getsizeof
 
 import pysam
 import numpy as np
@@ -110,7 +110,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     if (verbose):
         start_time = time.time()
-        print("Reading fragments")
+        stderr.write("Reading fragments")
 
     # set start and stop to ints
     start = int(start)
@@ -131,10 +131,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                            fraction_high=fraction_high,
                            verbose=(verbose>=2))
 
-    print(getsizeof(frag_ends))
-
     if (verbose):
-        print("Done reading fragments, preparing for WPS calculation.")
+        stderr.write("Done reading fragments, preparing for WPS calculation.")
     # check if no fragments exist on this interval
     if (frag_ends.shape == (0, 2)):
 
@@ -149,7 +147,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     if (type(output_file) == str):   # check if output specified
 
         if (verbose):
-            print('Writing to output file.')
+            stderr.write('Writing to output file.')
 
         if output_file.endswith(".wig.gz"): # zipped wiggle
             with gzip.open(output_file, 'wt') as out:
@@ -194,6 +192,6 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     if (verbose):
         end_time = time.time()
-        print(f'wps took {end_time - start_time} s to complete')
+        stderr.write(f'wps took {end_time - start_time} s to complete')
 
     return scores

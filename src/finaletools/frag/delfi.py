@@ -5,6 +5,7 @@ import time
 from multiprocessing.pool import Pool
 from typing import Union
 from tempfile import TemporaryDirectory
+from sys import stderr
 
 import pysam
 import py2bit
@@ -137,9 +138,9 @@ def _delfi_single_window(
 
     # if (len(short_lengths) != 0 or len(long_lengths) != 0):
     if verbose:
-        print(f'{contig}:{window_start}-{window_stop} short: '
+        stderr.write(f'{contig}:{window_start}-{window_stop} short: '
               f'{coverage_short} long: {coverage_long}, gc_content: '
-              f'{gc_content*100}%')
+              f'{gc_content*100}%\n')
 
     return (contig,
             window_start,
@@ -262,7 +263,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     if (verbose):
         start_time = time.time()
-        print(f"""
+        stderr.write(f"""
         input_file: {input_file}
         autosomes: {autosomes}
         reference_file: {reference_file}
@@ -274,10 +275,11 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         workers: {workers}
         preprocessing: {preprocessing}
         verbose: {verbose}
+
         """)
 
     if verbose:
-        print(f'Reading genome file...')
+        stderr.write(f'Reading genome file...\n')
 
     contigs = []
     with open(autosomes) as genome:
@@ -288,7 +290,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 contigs.append((contents[0],  int(contents[1])))
 
     if verbose:
-        print(f'Generating windows')
+        stderr.write(f'Generating windows\n')
 
     # generate DELFI windows
     window_args = []
@@ -305,8 +307,8 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                                 verbose - 1 if verbose > 1 else 0))
 
     if (verbose):
-        print(f'{len(window_args)} windows created.')
-        print('Calculating fragment lengths...')
+        stderr.write(f'{len(window_args)} windows created.\n')
+        stderr.write('Calculating fragment lengths...\n')
 
     # pool process to find window frag coverages, gc content
     with Pool(workers) as pool:
@@ -341,6 +343,6 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     if (verbose):
         end_time = time.time()
-        print(f'{num_frags} fragments included.')
-        print(f'delfi took {end_time - start_time} s to complete')
+        stderr.write(f'{num_frags} fragments included.\n')
+        stderr.write(f'delfi took {end_time - start_time} s to complete\n')
     return None

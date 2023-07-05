@@ -1,7 +1,7 @@
 from __future__ import annotations
 import time
 from typing import Union
-from sys import stdout
+from sys import stdout, stderr
 
 import numpy as np
 import pysam
@@ -40,18 +40,18 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
     """
     if (verbose):
         start_time = time.time()
-        print("Finding frag lengths.")
+        stderr.write("Finding frag lengths.\n")
 
     lengths = []    # list of fragment lengths
     if (type(input_file) == pysam.AlignmentFile):
         sam_file = input_file
         if (verbose):
-            print('Counting reads')
+            stderr.write('Counting reads\n')
         count = sam_file.count(contig=contig,
                                start=start,
                                stop=stop) if verbose else None
         if (verbose):
-            print(f'{count} reads counted')
+            stderr.write(f'{count} reads counted\n')
         # Iterating on each read in file in specified contig/chromosome
         for read1 in (tqdm(sam_file.fetch(contig=contig,
                                           start=start,
@@ -69,15 +69,15 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
                 lengths.append(abs(read1.template_length))
     else:
         if (verbose):
-            print(f'Opening {input_file}')
+            stderr.write(f'Opening {input_file}\n')
         with pysam.AlignmentFile(input_file) as sam_file:   # Import
             if (verbose):
-                print('Counting reads')
+                stderr.write('Counting reads')
             count = sam_file.count(contig=contig,
                                 start=start,
                                 stop=stop) if verbose else None
             if (verbose):
-                print(f'{count} reads counted')
+                stderr.write(f'{count} reads counted\n')
             # Iterating on each read in file in specified contig/chromosome
             for read1 in (tqdm(sam_file.fetch(contig=contig,
                                             start=start,
@@ -120,6 +120,8 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
 
     if (verbose):
         end_time = time.time()
-        print(f'frag_length took {end_time - start_time} s to complete')
+        stderr.write(
+            f'frag_length took {end_time - start_time} s to complete\n'
+        )
 
     return lengths

@@ -3,6 +3,7 @@ import gzip
 import time
 from multiprocessing.pool import Pool
 from typing import Union
+from sys import stderr
 
 import pysam
 import numpy as np
@@ -61,7 +62,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     """
     if (verbose):
         start_time = time.time()
-        print(
+        stderr.write(
             f"""
             Calculating aggregate WPS
             input_file: {input_file}
@@ -72,6 +73,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             quality_threshold: {quality_threshold}
             workers: {workers}
             verbose: {verbose}
+
             """
             )
 
@@ -120,11 +122,11 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     if (type(output_file) == str):   # check if output specified
         if (verbose):
-            print(f'Output file {output_file} specified. Opening...')
+            stderr.write(f'Output file {output_file} specified. Opening...\n')
         if output_file.endswith(".wig.gz"): # zipped wiggle
             with gzip.open(output_file, 'wt') as out:
                 if (verbose):
-                    print(f'File opened! Writing...')
+                    stderr.write(f'File opened! Writing...\n')
 
                 # declaration line
                 out.write(
@@ -139,7 +141,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         elif output_file.endswith(".wig"):  # wiggle
             with open(output_file, 'wt') as out:
                 if (verbose):
-                    print(f'File opened! Writing...')
+                    stderr.write(f'File opened! Writing...\n')
                 # declaration line
                 out.write(
                     f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
@@ -164,7 +166,8 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     if (verbose):
         end_time = time.time()
-        print(f'aggregate_wps took {end_time - start_time} s to complete',
-              flush=True)
+        stderr.write(
+            f'aggregate_wps took {end_time - start_time} s to complete\n',
+            flush=True)
 
     return scores
