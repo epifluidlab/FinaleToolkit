@@ -13,7 +13,7 @@ from __future__ import annotations
 import argparse
 
 from finaletools.frag.frag_length import frag_length
-from finaletools.frag.coverage import frag_center_coverage
+from finaletools.frag.coverage import coverage
 from finaletools.frag.wps import wps
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     # parser_command1.add_argument('--method', default="frag-center")
     parser_command1.add_argument('-q', '--quality_threshold', default=30, type=int)
     parser_command1.add_argument('-v', '--verbose', action='store_true')
-    parser_command1.set_defaults(func=frag_center_coverage)
+    parser_command1.set_defaults(func=coverage)
 
     # Subcommand 2: frag-length
     parser_command2 = subparsers.add_parser(
