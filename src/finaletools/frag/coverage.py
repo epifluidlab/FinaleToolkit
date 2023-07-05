@@ -1,6 +1,7 @@
 from __future__ import annotations
 import sys
 import time
+from typing import Union
 
 import pysam
 from numba import jit
@@ -10,12 +11,12 @@ from finaletools.utils import not_read1_or_low_quality
 
 
 def single_coverage(
-        input_file,
-        contig,
-        start=0,
-        stop=None,
-        quality_threshold=30,
-        verbose=False):
+        input_file: Union[str, pysam.AlignmentFile],
+        contig: str,
+        start: int=0,
+        stop: int=None,
+        quality_threshold: int=30,
+        verbose: Union[bool, int]=False):
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -99,12 +100,12 @@ def single_coverage(
 
 
 def coverage(
-        input_file,
-        interval_file,
-        output_file,
-        quality_threshold=30,
-        workers=1,
-        verbose=False):
+        input_file: Union[str, pysam.AlignmentFile],
+        interval_file: int,
+        output_file: int,
+        quality_threshold: int=30,
+        workers: int=1,
+        verbose: Union[bool, int]=False):
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -124,7 +125,7 @@ def coverage(
         path for bed file to print coverages to. If output_file = `_`,
         results will be printed to stdout.
     quality_threshold : int, optional
-    verbose : bool, optional
+    verbose : int or bool, optional
 
     Returns
     -------
