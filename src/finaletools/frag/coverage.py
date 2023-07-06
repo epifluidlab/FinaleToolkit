@@ -228,10 +228,11 @@ def coverage(
 
         if verbose:
             sys.stderr.write('calculating coverage\n')
+
         coverages = pool.imap(
             _single_coverage_star,
             intervals,
-            2225
+            len(intervals) // workers
         )
 
     if verbose:
