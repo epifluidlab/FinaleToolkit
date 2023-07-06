@@ -75,65 +75,6 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
               flush=True)
 
 
-def frag_bam_to_beds(input_file: str,
-                     blacklist_bed: str=None,
-                     region_bed: str=None,
-                     quality_threshold=30,
-                     workers: int=1,
-                     verbose: bool=False):
-    """
-    Take cfDNA paired-end reads from bam_file and writes to temporary
-    bed files corresponding to each contig in bam_file. If specified,
-    will also filter for fragments in region_bed and filter out
-    fragments in the blacklist. If region_bed is specified, only contigs
-    included in region_bed will be included in the bed files.
-
-    Parameters
-    ----------
-    input_file : str
-    blacklist_bed : str, optional
-    region_bed : str, optional
-    quality_threshold : int, optional
-    workers : int, optional
-    verbose : bool, optional
-
-    Returns
-    -------
-    bed_dict : dict[str, str]
-        A dictionary of (contig name : path string to bed file).
-    """
-
-    if (verbose):
-        start_time = time.time()
-        print('Opening file')
-
-    sam_file = None
-    try:
-        # Open file or asign AlignmentFile to sam_file
-        if (type(input_file) == pysam.AlignmentFile):
-            sam_file = input_file
-        elif (type(input_file) == str):
-            sam_file = pysam.AlignmentFile(input_file)
-        else:
-            raise TypeError(
-                ("bam_file should be an AlignmentFile or path string.")
-            )
-
-        # TODO: finish
-    except Exception as e:
-        print("An error occurred:", str(e))
-
-    finally:
-        pass
-
-    if (verbose):
-        end_time = time.time()
-        print(f'frag_bam_to_beds took {end_time - start_time} s to complete',
-              flush=True)
-
-    return None
-
-
 @jit(nopython=True)
 def frags_in_region(frag_array: np.ndarray,
                    minimum: int,
@@ -159,9 +100,6 @@ def frags_in_region(frag_array: np.ndarray,
         )
     filtered_frags = frag_array[in_region]
     return filtered_frags
-
-def _in_blacklist(contig, start, stop):
-    return None
 
 
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
