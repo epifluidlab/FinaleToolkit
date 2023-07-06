@@ -97,7 +97,7 @@ def single_coverage(
 
     if verbose:
         end_time = time.time()
-        sys.stderr.write(
+        tqdm.write(
             f'frag_coverage took {end_time - start_time} s to complete\n'
         )
 
@@ -188,10 +188,6 @@ def coverage(
             """
         )
 
-    sys.stderr.write('\n0')
-    for i in range(10, 99, 10): sys.stderr.write(f'________{i}')
-    sys.stderr.write('\n')
-
     contigs = get_contigs(
         input_file,
         verbose=verbose-1 if verbose>1 else 0
@@ -226,7 +222,7 @@ def coverage(
         )
 
         if verbose:
-            sys.stderr.write('reading intervals\n')
+            tqdm.write('reading intervals\n')
 
         intervals = pool.apply(
             _get_intervals,
@@ -234,7 +230,7 @@ def coverage(
         )
 
         if verbose:
-            sys.stderr.write('calculating coverage\n')
+            tqdm.write('calculating coverage\n')
 
         coverages = pool.imap(
             _single_coverage_star,
@@ -247,17 +243,17 @@ def coverage(
         )
 
         if verbose:
-            sys.stderr.write('Retrieving total coverage for file\n')
+            tqdm.write('Retrieving total coverage for file\n')
         total_coverage = sum(coverage[4] for coverage in total_coverage_results)
         if verbose:
-                sys.stderr.write(f'Total coverage is {total_coverage}\n')
+                tqdm.write(f'Total coverage is {total_coverage}\n')
 
         # Output
         output_is_file = False
 
         if output_file != None:
             if verbose:
-                sys.stderr.write('Writing results to output\n')
+                tqdm.write('Writing results to output\n')
             try:
                 # handle output types
                 if output_file.endswith('.bed'):
