@@ -3,10 +3,12 @@ import sys
 import time
 from typing import Union, Tuple
 
+from multiprocessing import Pool
+
 import pysam
 import gzip
 from numba import jit
-from multiprocessing import Pool
+from tqdm import tqdm
 
 from finaletools.utils import not_read1_or_low_quality, get_contigs
 
@@ -231,8 +233,8 @@ def coverage(
 
         coverages = pool.imap(
             _single_coverage_star,
-            intervals,
-            len(intervals) // workers
+            tqdm(intervals) if verbose else intervals,
+            len(intervals) // workers + 1
         )
 
     if verbose:
