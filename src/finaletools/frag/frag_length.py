@@ -12,7 +12,7 @@ from numba import jit
 from finaletools.utils import not_read1_or_low_quality, cli_hist
 
 
-def single_frag_length(
+def frag_length(
         input_file: Union[str, pysam.AlignmentFile],
         contig: str=None,
         start: int=None,
@@ -121,7 +121,7 @@ def single_frag_length(
     return lengths
 
 
-def single_frag_length_bins(
+def frag_length_bins(
     input_file: Union[str, pysam.AlignmentFile],
     contig: str=None,
     start: int=None,
@@ -154,7 +154,7 @@ def single_frag_length_bins(
     counts : ndarray
     """
     # generating fragment lengths
-    frag_lengths = single_frag_length(
+    frag_lengths = frag_length(
         input_file,
         contig,
         start,
