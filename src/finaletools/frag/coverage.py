@@ -8,7 +8,7 @@ import gzip
 from numba import jit
 from multiprocessing import Pool
 
-from finaletools.utils import not_read1_or_low_quality
+from finaletools.utils import not_read1_or_low_quality, get_contigs
 
 
 def single_coverage(
@@ -46,7 +46,6 @@ def single_coverage(
     """
     # TODO: determine if reference (like as found in pysam) is necessary
     # TODO: consider including region string (like in pysam)
-
     if verbose:
         start_time = time.time()
 
@@ -108,7 +107,38 @@ def _single_coverage_star(args):
     Helper function that takes a tuple of args and applies to
     single_coverage. To be used in imap.
     """
+    sys.stderr.write('|')
     return single_coverage(*args)
+
+
+def _get_intervals(
+    input_file,
+    interval_file,
+    quality_threshold,
+    verbose
+):
+    """Helper function to read intervals from bed file."""
+    intervals = []  # list of inputs for single_coverage
+
+    with open(interval_file) as bed:
+        for line in bed:
+            if ~line.startswith('#'):
+                contents = line.split()
+                contig = contents[0].strip()
+                start = int(contents[1])
+                stop = int(contents[2])
+                name = contents[3] if len(contents) > 3 else '.'
+                interval = (
+                    input_file,
+                    contig,
+                    start,
+                    stop,
+                    name,
+                    quality_threshold,
+                    verbose - 1 if verbose > 1 else 0
+                )
+                intervals.append(interval)
+    return intervals
 
 
 def coverage(
@@ -153,49 +183,63 @@ def coverage(
             output_file: {output_file}
             quality_threshold: {quality_threshold}
             workers: {workers}
-            verbose: {verbose}
-
-            Calculating total coverage for file
-
+            verbose: {verbose}\n
             """
         )
 
-    # TODO: maybe parallelize
-    total_coverage = single_coverage(
+    sys.stderr.write('\n0')
+    for i in range(10, 99, 10): sys.stderr.write(f'________{i}')
+    sys.stderr.write('\n')
+
+    contigs = get_contigs(
         input_file,
-        quality_threshold=quality_threshold,
-        verbose = verbose - 1 if verbose > 1 else 0
-    )[4]
+        verbose=verbose-1 if verbose>1 else 0
+    )
+
+    # calculating coverage for each contig in the input_file
+    contig_intervals = []
+    for contig, length in contigs:
+        contig_intervals.append((
+            input_file,
+            contig,
+            0,
+            length,
+            ".",
+            quality_threshold,
+            verbose - 1 if verbose > 1 else 0
+        ))
+
+    with Pool(processes=workers, ) as pool:
+        if verbose:
+            sys.stderr.write('Calculating total coverage for file\n')
+
+        total_coverage_results = pool.map_async(
+            _single_coverage_star,
+            contig_intervals,
+        )
+
+        if verbose:
+            sys.stderr.write('reading intervals\n')
+
+        intervals = pool.apply(
+            _get_intervals,
+            (input_file, interval_file, quality_threshold, verbose)
+        )
+
+        if verbose:
+            sys.stderr.write('calculating coverage\n')
+        coverages = pool.imap(
+            _single_coverage_star,
+            intervals,
+            2225
+        )
 
     if verbose:
-        sys.stderr.write('reading intervals\n')
-
-    intervals = []  # list of inputs for single_coverage
-
-    with open(interval_file) as bed:
-        for line in bed:
-            if ~line.startswith('#'):
-                contents = line.split()
-                contig = contents[0].strip()
-                start = int(contents[1])
-                stop = int(contents[2])
-                name = contents[3] if len(contents) > 3 else '.'
-                interval = (
-                    input_file,
-                    contig,
-                    start,
-                    stop,
-                    name,
-                    quality_threshold,
-                    verbose - 1 if verbose > 1 else 0
-                )
-                intervals.append(interval)
-
+        sys.stderr.write('Retrieving total coverage for file\n')
+    total_coverages = total_coverage_results.get()
+    total_coverage = sum(coverage[4] for coverage in total_coverages)
     if verbose:
-        sys.stderr.write('calculating coverage\n')
-
-    with Pool(workers) as pool:
-        coverages = pool.imap(_single_coverage_star, intervals)
+            sys.stderr.write(f'Total coverage is {total_coverage}\n')
 
     # Output
     output_is_file = False
