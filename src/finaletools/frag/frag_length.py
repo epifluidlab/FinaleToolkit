@@ -10,7 +10,7 @@ from tqdm import tqdm
 from finaletools.utils import not_read1_or_low_quality
 
 
-def frag_length(input_file: Union[str, pysam.AlignedSegment],
+def single_frag_length(input_file: Union[str, pysam.AlignedSegment],
                 contig: str=None,
                 start: int=None,
                 stop: int=None,
@@ -125,3 +125,8 @@ def frag_length(input_file: Union[str, pysam.AlignedSegment],
         )
 
     return lengths
+
+def frag_length(
+
+):
+    return None
