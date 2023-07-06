@@ -43,23 +43,37 @@ def single_frag_length(input_file: Union[str, pysam.AlignedSegment],
         stderr.write("Finding frag lengths.\n")
 
     lengths = []    # list of fragment lengths
-    if (type(input_file) == pysam.AlignmentFile):
-        sam_file = input_file
+
+    input_is_file = False
+    try:
+        # handling input types
+        if (type(input_file) == pysam.AlignmentFile):
+            sam_file = input_file
+        elif input_file.endswith('bam'):
+            input_is_file = True
+            if (verbose):
+                stderr.write(f'Opening {input_file}\n')
+            sam_file = pysam.AlignmentFile(input_file)
+        else:
+            raise ValueError(
+                'Invalid input_file type. Only BAM or SAM files are allowed.'
+            )
+
         if (verbose):
-            stderr.write('Counting reads\n')
+            stderr.write('Counting reads')
         count = sam_file.count(contig=contig,
-                               start=start,
-                               stop=stop) if verbose else None
+                            start=start,
+                            stop=stop) if verbose else None
         if (verbose):
             stderr.write(f'{count} reads counted\n')
         # Iterating on each read in file in specified contig/chromosome
         for read1 in (tqdm(sam_file.fetch(contig=contig,
-                                          start=start,
-                                          stop=stop), total=count)
-                      if verbose
-                      else sam_file.fetch(contig=contig,
-                                          start=start,
-                                          stop=stop)):
+                                        start=start,
+                                        stop=stop), total=count)
+                    if verbose
+                    else sam_file.fetch(contig=contig,
+                                        start=start,
+                                        stop=stop)):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
             if (not_read1_or_low_quality(read1, quality_threshold)):
@@ -67,32 +81,9 @@ def single_frag_length(input_file: Union[str, pysam.AlignedSegment],
             else:
                 # append length of fragment to list
                 lengths.append(abs(read1.template_length))
-    else:
-        if (verbose):
-            stderr.write(f'Opening {input_file}\n')
-        with pysam.AlignmentFile(input_file) as sam_file:   # Import
-            if (verbose):
-                stderr.write('Counting reads')
-            count = sam_file.count(contig=contig,
-                                start=start,
-                                stop=stop) if verbose else None
-            if (verbose):
-                stderr.write(f'{count} reads counted\n')
-            # Iterating on each read in file in specified contig/chromosome
-            for read1 in (tqdm(sam_file.fetch(contig=contig,
-                                            start=start,
-                                            stop=stop), total=count)
-                        if verbose
-                        else sam_file.fetch(contig=contig,
-                                            start=start,
-                                            stop=stop)):
-                # Only select forward strand and filter out non-paired-end
-                # reads and low-quality reads
-                if (not_read1_or_low_quality(read1, quality_threshold)):
-                    pass
-                else:
-                    # append length of fragment to list
-                    lengths.append(abs(read1.template_length))
+    finally:
+        if input_is_file:
+            sam_file.close()
 
     # convert to array
     lengths = np.array(lengths)
