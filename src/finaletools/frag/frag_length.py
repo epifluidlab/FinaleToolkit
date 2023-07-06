@@ -1,23 +1,26 @@
 from __future__ import annotations
 import time
-from typing import Union
+from typing import Union, Tuple
 from sys import stdout, stderr
+from shutil import get_terminal_size
 
 import numpy as np
 import pysam
 from tqdm import tqdm
+from numba import jit
 
-from finaletools.utils import not_read1_or_low_quality
+from finaletools.utils import not_read1_or_low_quality, cli_hist
 
 
-def single_frag_length(input_file: Union[str, pysam.AlignedSegment],
-                contig: str=None,
-                start: int=None,
-                stop: int=None,
-                output_file: str=None, workers: int=1,
-                quality_threshold: int=30,
-                verbose: bool=False
-                ) -> np.ndarray:
+def single_frag_length(
+        input_file: Union[str, pysam.AlignmentFile],
+        contig: str=None,
+        start: int=None,
+        stop: int=None,
+        output_file: str=None,
+        quality_threshold: int=30,
+        verbose: bool=False
+    ) -> np.ndarray:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file`
     that are above the quality threshold and are proper-paired reads.
@@ -117,7 +120,84 @@ def single_frag_length(input_file: Union[str, pysam.AlignedSegment],
 
     return lengths
 
-def frag_length(
+
+def single_frag_length_bins(
+    input_file: Union[str, pysam.AlignmentFile],
+    contig: str=None,
+    start: int=None,
+    stop: int=None,
+    bin_size: int=None,
+    output_file: str=None,
+    contig_by_contig: bool=False,
+    histogram: bool=False,
+    quality_threshold: int=30,
+    verbose: Union[bool, int]=False
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Takes input_file, computes frag lengths of fragments and returns
+    two arrays containing bins and counts by size. Options
+    for printing data to stdout or file also exist.
+
+    Parameters
+    ----------
+    input_file : str or AlignmentFile
+    contig : str, optional
+    start : int, optional
+    stop : int, optional
+    bin_size : int, optional
+    output_file : str, optional
+    workers : int, optional
+
+    Returns
+    -------
+    bins : ndarray
+    counts : ndarray
+    """
+    # generating fragment lengths
+    frag_lengths = single_frag_length(
+        input_file,
+        contig,
+        start,
+        stop,
+        quality_threshold=quality_threshold,
+        verbose=verbose-1 if verbose>1 else 0
+    )
+
+    # generating bins and counts
+    if bin_size is None:
+        if histogram:
+            term_width, term_height = get_terminal_size((80, 24))
+            n_bins = term_width - 12
+
+            start = np.min(frag_lengths)
+            stop = np.max(frag_lengths)
+
+            bin_size = round((stop - start) / n_bins)
+        else:
+            bin_size = 5
+
+    start = np.min(frag_lengths)
+    stop = np.max(frag_lengths)
+    n_bins = (stop - start) // bin_size
+
+    bins = np.arange(start, stop, bin_size)
+    counts = []
+
+    # generate histogram
+    for bin in bins:
+        count = np.sum((frag_lengths >= bin) * (frag_lengths < (bin + bin_size)))
+        counts.append(count)
+    bins = np.append(bins, stop)
+
+    if histogram:
+        cli_hist(bins, counts)
+
+    # TODO: output to file
+
+    return bins, counts
+
+
+def interval_frag_length_summary(
 
 ):
     return None
