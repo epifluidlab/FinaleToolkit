@@ -3,7 +3,7 @@
 from __future__ import annotations
 import argparse
 
-from finaletools.frag.frag_length import frag_length
+from finaletools.frag.frag_length import frag_length, frag_length_bins
 from finaletools.frag.coverage import coverage
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
@@ -79,31 +79,23 @@ def main_cli():
     parser_command2.add_argument('-v', '--verbose', action='count', default=0)
     parser_command2.set_defaults(func=frag_length)
 
-    """
-    # Subcommand 3: wps()
+    # Subcommand 3: frag_length_bins()
     parser_command3 = subparsers.add_parser(
-        'wps', prog='wps',
-        description='Calculates Windowed Protection Score over a region given '
-        'a CRAM/BAM/SAM file'
+        'frag-length-bins', prog='frag-length-bins',
+        description='computes frag lengths of fragments and either prints'
+        'bins and counts to tsv or prints a histogram'
         )
     parser_command3.add_argument('input_file')
-    parser_command3.add_argument('contig')
-    # inclusive location of region start in 0-based coordinate system.
-    # If not included, will start at the beginning of the chromosome
-    parser_command3.add_argument('start', type=int)
-    # exclusive location of region end in 0-based coordinate system.
-    # If not included, will end at the end of the chromosome
-    parser_command3.add_argument('stop', type=int)
-    parser_command3.add_argument('-o', '--output_file')
-    parser_command3.add_argument('--window_size', default=120, type=int)
-    parser_command3.add_argument('-lo', '--fraction_low', default=120,
-                                 type=int)
-    parser_command3.add_argument('-hi', '--fraction_high', default=180,
-                                 type=int)
-    parser_command3.add_argument('--quality_threshold', default=30, type=int)
+    parser_command3.add_argument('--contig')
+    parser_command3.add_argument('--start', type=int)
+    parser_command3.add_argument('--stop', type=int)
+    parser_command3.add_argument('--bin-size', type=int)
+    parser_command3.add_argument('-o', '--output-file')
+    parser_command3.add_argument('--contig-by-contig', action='store_true')
+    parser_command3.add_argument('--histogram', action='store_true')
+    parser_command3.add_argument('--quality-threshold', default=30, type=int)
     parser_command3.add_argument('-v', '--verbose', action='count', default=0)
-    parser_command3.set_defaults(func=wps)
-    """
+    parser_command3.set_defaults(func=frag_length_bins)
 
     # Subcommand 4: wps (on interval bed file)
     parser_command4 = subparsers.add_parser(

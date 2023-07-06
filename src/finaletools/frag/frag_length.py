@@ -190,7 +190,7 @@ def frag_length_bins(
     bins = np.append(bins, stop)
 
     if histogram:
-        cli_hist(bins, counts)
+        cli_hist(bins, counts, n_bins)
 
     # TODO: output to file
 
