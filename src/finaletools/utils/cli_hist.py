@@ -5,10 +5,10 @@ import numpy as np
 
 def cli_hist(
         bins: np.ndarray,
-        counts: np.ndarray
+        counts: np.ndarray,
+        n_bins: int
 ):
     term_width, term_height = get_terminal_size((80, 24))
-    n_bins = bins.shape[0]
 
     max_count = np.max(counts)
     max_height = term_height - 2
