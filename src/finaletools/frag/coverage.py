@@ -146,17 +146,19 @@ def coverage(
     """
     if (verbose):
         start_time = time.time()
-        sys.stderr.write(f"""
-        input_file: {input_file}
-        interval file: {interval_file}
-        output_file: {output_file}
-        quality_threshold: {quality_threshold}
-        workers: {workers}
-        verbose: {verbose}
+        sys.stderr.write(
+            f"""
+            input_file: {input_file}
+            interval file: {interval_file}
+            output_file: {output_file}
+            quality_threshold: {quality_threshold}
+            workers: {workers}
+            verbose: {verbose}
 
-        Calculating total coverage for file
+            Calculating total coverage for file
 
-        """)
+            """
+        )
 
     # TODO: maybe parallelize
     total_coverage = single_coverage(
@@ -199,6 +201,8 @@ def coverage(
     output_is_file = False
 
     if output_file != None:
+        if verbose:
+            sys.stderr.write('Writing results to output\n')
         try:
             # handle output types
             if output_file.endswith('.bed'):
