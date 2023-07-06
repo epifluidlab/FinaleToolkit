@@ -166,7 +166,7 @@ def coverage(
     )[4]
 
     if verbose:
-        sys.stderr.write('reading intervals')
+        sys.stderr.write('reading intervals\n')
 
     intervals = []  # list of inputs for single_coverage
 
@@ -190,7 +190,7 @@ def coverage(
                 intervals.append(interval)
 
     if verbose:
-        sys.stderr.write('calculating coverage')
+        sys.stderr.write('calculating coverage\n')
 
     with Pool(workers) as pool:
         coverages = pool.imap(_single_coverage_star, intervals)
