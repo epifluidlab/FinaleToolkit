@@ -266,7 +266,7 @@ def coverage(
                 elif output_file.endswith('.bed.gz'):
                     output = gzip.open(output_file, 'w')
                     output_is_file = True
-                elif output_file == '_':
+                elif output_file == '-':
                     output = sys.stdout
                 else:
                     raise ValueError(
