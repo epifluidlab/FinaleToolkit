@@ -109,7 +109,6 @@ def _single_coverage_star(args):
     Helper function that takes a tuple of args and applies to
     single_coverage. To be used in imap.
     """
-    sys.stderr.write('|')
     return single_coverage(*args)
 
 
@@ -210,14 +209,20 @@ def coverage(
             quality_threshold,
             verbose - 1 if verbose > 1 else 0
         ))
-
-    with Pool(processes=workers, ) as pool:
+    if verbose:
+        sys.stderr.write('Creating process pool\n')
+    try:
+        pool = Pool(processes=workers, )
         if verbose:
-            sys.stderr.write('Calculating total coverage for file\n')
+            sys.stderr.write('Calculating total coverage for file,\n')
 
-        total_coverage_results = pool.map_async(
+        total_coverage_results = pool.imap(
             _single_coverage_star,
-            contig_intervals,
+            tqdm(
+                contig_intervals,
+                desc='Genome contigs',
+                position=0
+            ) if verbose else contig_intervals
         )
 
         if verbose:
@@ -233,48 +238,53 @@ def coverage(
 
         coverages = pool.imap(
             _single_coverage_star,
-            tqdm(intervals) if verbose else intervals,
-            len(intervals) // workers + 1
+            tqdm(
+                intervals,
+                desc='Invervals',
+                position=2
+            ) if verbose else intervals,
+            len(intervals) // 2 // workers + 1
         )
 
-    if verbose:
-        sys.stderr.write('Retrieving total coverage for file\n')
-    total_coverages = total_coverage_results.get()
-    total_coverage = sum(coverage[4] for coverage in total_coverages)
-    if verbose:
-            sys.stderr.write(f'Total coverage is {total_coverage}\n')
-
-    # Output
-    output_is_file = False
-
-    if output_file != None:
         if verbose:
-            sys.stderr.write('Writing results to output\n')
-        try:
-            # handle output types
-            if output_file.endswith('.bed'):
-                output_is_file = True
-                output = open(output_file, 'w')
-            elif output_file.endswith('.bed.gz'):
-                output = gzip.open(output_file, 'w')
-                output_is_file = True
-            elif output_file == '_':
-                output = sys.stdout
-            else:
-                raise ValueError(
-                    'output_file should have .bed or .bed.gz as as suffix'
-                )
+            sys.stderr.write('Retrieving total coverage for file\n')
+        total_coverage = sum(coverage[4] for coverage in total_coverage_results)
+        if verbose:
+                sys.stderr.write(f'Total coverage is {total_coverage}\n')
 
-            # print to files
-            for coverage in coverages:
-                output.write(
-                    f'{coverage[0]}\t{coverage[1]}\t{coverage[2]}\t'
-                    f'{coverage[3]}\t{coverage[4]/total_coverage}\n'
-                )
+        # Output
+        output_is_file = False
 
-        finally:
-            if output_is_file:
-                output.close()
+        if output_file != None:
+            if verbose:
+                sys.stderr.write('Writing results to output\n')
+            try:
+                # handle output types
+                if output_file.endswith('.bed'):
+                    output_is_file = True
+                    output = open(output_file, 'w')
+                elif output_file.endswith('.bed.gz'):
+                    output = gzip.open(output_file, 'w')
+                    output_is_file = True
+                elif output_file == '_':
+                    output = sys.stdout
+                else:
+                    raise ValueError(
+                        'output_file should have .bed or .bed.gz as as suffix'
+                    )
+
+                # print to files
+                for coverage in coverages:
+                    output.write(
+                        f'{coverage[0]}\t{coverage[1]}\t{coverage[2]}\t'
+                        f'{coverage[3]}\t{coverage[4]/total_coverage}\n'
+                    )
+
+            finally:
+                if output_is_file:
+                    output.close()
+    finally:
+        pool.close()
 
     if verbose:
         end_time = time.time()
