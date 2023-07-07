@@ -118,6 +118,7 @@ def coverage(
         input_file: Union[str, pysam.AlignmentFile],
         interval_file: str,
         output_file: str,
+        scale_factor: int=1e6,
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False):
@@ -135,10 +136,12 @@ def coverage(
         BAM, SAM, or CRAM file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
     intervals : str
-        path for BAM file containing intervals
+        Path for BAM file containing intervals
     output_file : string, optional
-        path for bed file to print coverages to. If output_file = `_`,
+        Path for bed file to print coverages to. If output_file = `_`,
         results will be printed to stdout.
+    scale_factor : int, optional
+        Amount to multiply coverages by. Default is 10^6.
     quality_threshold : int, optional
     verbose : int or bool, optional
 
@@ -147,7 +150,6 @@ def coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
-    # TODO: add multiplying factor for coverage value
     if (verbose):
         start_time = time.time()
         sys.stderr.write(
@@ -246,7 +248,8 @@ def coverage(
                 for coverage in coverages:
                     output.write(
                         f'{coverage[0]}\t{coverage[1]}\t{coverage[2]}\t'
-                        f'{coverage[3]}\t{coverage[4]/total_coverage}\n'
+                        f'{coverage[3]}\t'
+                        f'{coverage[4]/total_coverage*scale_factor}\n'
                     )
 
             finally:

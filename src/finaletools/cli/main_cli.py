@@ -48,6 +48,13 @@ def main_cli():
         help='BED file where coverage is printed'
     )
     parser_command1.add_argument(
+        '-s',
+        '--scale-factor',
+        default=1e6,
+        type=float,
+        help='Amount coverage will be multiplied by'
+    )
+    parser_command1.add_argument(
         '-q',
         '--quality_threshold',
         default=30,
