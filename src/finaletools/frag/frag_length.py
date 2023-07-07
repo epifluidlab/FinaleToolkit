@@ -3,6 +3,7 @@ import time
 from typing import Union, Tuple
 from sys import stdout, stderr
 from shutil import get_terminal_size
+import gzip
 
 import numpy as np
 import pysam
@@ -52,7 +53,7 @@ def frag_length(
         # handling input types
         if (type(input_file) == pysam.AlignmentFile):
             sam_file = input_file
-        elif input_file.endswith('bam'):
+        elif input_file.endswith('bam') or input_file == '-':
             input_is_file = True
             if (verbose):
                 stderr.write(f'Opening {input_file}\n')
@@ -135,8 +136,8 @@ def frag_length_bins(
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
-    two arrays containing bins and counts by size. Options
-    for printing data to stdout or file also exist.
+    two arrays containing bins and counts by size. Optionally prints
+    data to output as a tab delimited table or histogram.
 
     Parameters
     ----------
@@ -153,6 +154,23 @@ def frag_length_bins(
     bins : ndarray
     counts : ndarray
     """
+    if verbose:
+        stderr.write(
+            f"""
+            input_file: {input_file}
+            contig: {contig}
+            start: {start}
+            stop: {stop}
+            bin_size: {bin_size}
+            output_file: {output_file}
+            contig_by_contig: {contig_by_contig}
+            histogram: {histogram}
+            quality_threshold: {quality_threshold}
+            verbose: {verbose}
+            \n"""
+        )
+        start_time = time.time()
+
     # generating fragment lengths
     frag_lengths = frag_length(
         input_file,
@@ -162,12 +180,19 @@ def frag_length_bins(
         quality_threshold=quality_threshold,
         verbose=verbose-1 if verbose>1 else 0
     )
+    # get statistics
+    stats = []
+    stats.append(('mean', np.mean(frag_lengths)))
+    stats.append(('median', np.median(frag_lengths)))
+    stats.append(('stdev', np.std(frag_lengths)))
+    stats.append(('min', np.min(frag_lengths)))
+    stats.append(('max', np.max(frag_lengths)))
 
     # generating bins and counts
     if bin_size is None:
         if histogram:
             term_width, term_height = get_terminal_size((80, 24))
-            n_bins = term_width - 12
+            n_bins = term_width - 24
 
             start = np.min(frag_lengths)
             stop = np.max(frag_lengths)
@@ -185,14 +210,47 @@ def frag_length_bins(
 
     # generate histogram
     for bin in bins:
-        count = np.sum((frag_lengths >= bin) * (frag_lengths < (bin + bin_size)))
+        count = np.sum(
+            (frag_lengths >= bin)
+            * (frag_lengths < (bin + bin_size))
+        )
         counts.append(count)
     bins = np.append(bins, stop)
 
-    if histogram:
-        cli_hist(bins, counts, n_bins)
+    if output_file is not None:
+        try:
+            out_is_file = False
+            if output_file == '-':
+                out = stdout
+            elif output_file.endswith('.gz'):
+                out_is_file = True
+                out = gzip.open(output_file, 'w')
+            else:
+                out_is_file = True
+                out = open(output_file, 'w')
 
-    # TODO: output to file
+            if histogram:
+                cli_hist(bins, counts, n_bins, stats, out)
+
+            else:
+                out.write('min\tmax\tcount\n')
+                for bin, count in zip(bins, counts):
+                    out.write(f'{bin}\t{bin+bin_size}\t{count}\n')
+        finally:
+            if out_is_file:
+                out.close()
+    elif histogram:
+        if contig is not None:
+            title = f'Fragment Lengths for {contig}:{start}-{stop}'
+        else:
+            title = f'Fragment Lengths'
+        cli_hist(bins, counts, n_bins, stats, stdout, title)
+
+    if verbose:
+        stop_time = time.time()
+        stderr.write(
+            f'frag_length_bins took {stop_time-start_time} s to complete.\n'
+        )
 
     return bins, counts
 
