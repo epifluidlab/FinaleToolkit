@@ -1,8 +1,8 @@
-
+from __future__ import annotations
 import time
 import gzip
 import tempfile as tf
-from typing import Union, TextIO, Tuple
+from typing import Union, TextIO, Tuple, List
 from sys import stderr, stdout
 
 import numpy as np
@@ -451,3 +451,36 @@ def filter_bam(
             print(line)
 
     return None
+
+
+def get_intervals(
+    input_file: Union[str, pysam.AlignmentFile],
+    interval_file: str,
+    quality_threshold: int,
+    verbose: Union[bool, int]
+) -> list:
+    """Helper function to read intervals from bed file."""
+    intervals = []  # list of inputs for single_coverage
+
+    with open(interval_file) as bed:
+        for line in bed:
+            if ~line.startswith('#'):
+                if line != '':
+                    contents = line.split()
+                    contig = contents[0].strip()
+                    start = int(contents[1])
+                    stop = int(contents[2])
+                    name = contents[3] if len(contents) > 3 else '.'
+                    interval = (
+                        input_file,
+                        contig,
+                        start,
+                        stop,
+                        name,
+                        quality_threshold,
+                        verbose - 1 if verbose > 1 else 0
+                    )
+                    intervals.append(interval)
+                else:
+                    break
+    return intervals

@@ -10,7 +10,9 @@ import gzip
 from numba import jit
 from tqdm import tqdm
 
-from finaletools.utils import not_read1_or_low_quality, get_contigs
+from finaletools.utils import (
+    not_read1_or_low_quality, get_contigs, get_intervals
+)
 
 
 def single_coverage(
@@ -112,36 +114,6 @@ def _single_coverage_star(args):
     return single_coverage(*args)
 
 
-def _get_intervals(
-    input_file,
-    interval_file,
-    quality_threshold,
-    verbose
-):
-    """Helper function to read intervals from bed file."""
-    intervals = []  # list of inputs for single_coverage
-
-    with open(interval_file) as bed:
-        for line in bed:
-            if ~line.startswith('#'):
-                contents = line.split()
-                contig = contents[0].strip()
-                start = int(contents[1])
-                stop = int(contents[2])
-                name = contents[3] if len(contents) > 3 else '.'
-                interval = (
-                    input_file,
-                    contig,
-                    start,
-                    stop,
-                    name,
-                    quality_threshold,
-                    verbose - 1 if verbose > 1 else 0
-                )
-                intervals.append(interval)
-    return intervals
-
-
 def coverage(
         input_file: Union[str, pysam.AlignmentFile],
         interval_file: str,
@@ -225,7 +197,7 @@ def coverage(
             tqdm.write('reading intervals\n')
 
         intervals = pool.apply(
-            _get_intervals,
+            get_intervals,
             (input_file, interval_file, quality_threshold, verbose)
         )
 
@@ -236,7 +208,7 @@ def coverage(
             _single_coverage_star,
             tqdm(
                 intervals,
-                desc='Invervals',
+                desc='Intervals',
                 position=2
             ) if verbose else intervals,
             len(intervals) // 2 // workers + 1
