@@ -12,7 +12,7 @@ import pybedtools
 from tqdm import tqdm
 
 
-def get_contigs(
+def _get_contigs(
         input_file: Union[str, pysam.AlignmentFile],
         verbose: bool=False
     ) -> list:
@@ -86,7 +86,7 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
         for read1 in sam_file.fetch(contig=contig):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
-            if (not_read1_or_low_quality(read1, quality_threshold)):
+            if (_not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 out.write(
@@ -375,7 +375,7 @@ def low_quality_read_pairs(read, min_mapq=30):
             or read.reference_name != read.next_reference_name)
 
 
-def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
+def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
     """
     Return `True` if the sequenced read described in `read` is not read1
     and a properly paired read with a Phred score exceeding `min_mapq`.
@@ -453,7 +453,7 @@ def filter_bam(
     return None
 
 
-def get_intervals(
+def _get_intervals(
     input_file: Union[str, pysam.AlignmentFile],
     interval_file: str,
     quality_threshold: int,

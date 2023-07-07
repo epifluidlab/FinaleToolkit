@@ -10,8 +10,8 @@ import gzip
 from numba import jit
 from tqdm import tqdm
 
-from finaletools.utils import (
-    not_read1_or_low_quality, get_contigs, get_intervals
+from finaletools.utils.utils import (
+    _not_read1_or_low_quality, _get_contigs, _get_intervals
 )
 
 
@@ -75,7 +75,7 @@ def single_coverage(
             stop=stop+500 if stop is not None else None):
             # Only select forward strand and filter out
             # non-paired-end reads and low-quality reads
-            if not_read1_or_low_quality(read1, quality_threshold):
+            if _not_read1_or_low_quality(read1, quality_threshold):
                 pass
             else:
                 # calculate mid-point of fragment
@@ -147,6 +147,7 @@ def coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
+    # TODO: add multiplying factor for coverage value
     if (verbose):
         start_time = time.time()
         sys.stderr.write(
@@ -160,7 +161,7 @@ def coverage(
             """
         )
 
-    contigs = get_contigs(
+    contigs = _get_contigs(
         input_file,
         verbose=verbose-1 if verbose>1 else 0
     )
@@ -197,7 +198,7 @@ def coverage(
             tqdm.write('reading intervals\n')
 
         intervals = pool.apply(
-            get_intervals,
+            _get_intervals,
             (input_file, interval_file, quality_threshold, verbose)
         )
 

@@ -11,9 +11,10 @@ import pysam
 import tqdm
 from numba import jit
 
-from finaletools.utils import (
-    not_read1_or_low_quality, cli_hist, get_intervals
+from finaletools.utils.utils import (
+    _not_read1_or_low_quality, _get_intervals
 )
+from finaletools.utils.cli_hist import _cli_hist
 
 
 def frag_length(
@@ -83,7 +84,7 @@ def frag_length(
                                         stop=stop)):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
-            if (not_read1_or_low_quality(read1, quality_threshold)):
+            if (_not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 # append length of fragment to list
@@ -233,7 +234,7 @@ def frag_length_bins(
                 out = open(output_file, 'w')
 
             if histogram:
-                cli_hist(bins, counts, n_bins, stats, out)
+                _cli_hist(bins, counts, n_bins, stats, out)
 
             else:
                 out.write('min\tmax\tcount\n')
@@ -247,7 +248,7 @@ def frag_length_bins(
             title = f'Fragment Lengths for {contig}:{start}-{stop}'
         else:
             title = f'Fragment Lengths'
-        cli_hist(bins, counts, n_bins, stats, stdout, title)
+        _cli_hist(bins, counts, n_bins, stats, stdout, title)
 
     if verbose:
         stop_time = time.time()
@@ -331,7 +332,7 @@ def frag_length_intervals(
         start_time = time.time()
 
     # read interval_file into list of tuples
-    intervals = get_intervals(
+    intervals = _get_intervals(
         input_file,
         interval_file,
         quality_threshold,

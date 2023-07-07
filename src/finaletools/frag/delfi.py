@@ -12,7 +12,7 @@ import py2bit
 import numpy as np
 from statsmodels.nonparametric.smoothers_lowess import lowess
 
-from finaletools.utils import not_read1_or_low_quality
+from finaletools.utils.utils import _not_read1_or_low_quality
 
 
 def _delfi_single_window(
@@ -74,7 +74,7 @@ def _delfi_single_window(
 
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
-            if (not_read1_or_low_quality(read1, quality_threshold)):
+            if (_not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 frag_start = read1.reference_start
@@ -138,9 +138,11 @@ def _delfi_single_window(
 
     # if (len(short_lengths) != 0 or len(long_lengths) != 0):
     if verbose:
-        stderr.write(f'{contig}:{window_start}-{window_stop} short: '
-              f'{coverage_short} long: {coverage_long}, gc_content: '
-              f'{gc_content*100}%\n')
+        stderr.write(
+            f'{contig}:{window_start}-{window_stop} short: '
+            f'{coverage_short} long: {coverage_long}, gc_content: '
+            f'{gc_content*100}%\n'
+        )
 
     return (contig,
             window_start,
@@ -297,14 +299,15 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     for contig, size in contigs:
         for coordinate in range(0, size, window_size):
             # (contig, start, stop)
-            window_args.append((input_file,
-                                reference_file,
-                                contig,
-                                coordinate,
-                                coordinate + window_size,
-                                blacklist_file,
-                                quality_threshold,
-                                verbose - 1 if verbose > 1 else 0))
+            window_args.append((
+                input_file,
+                reference_file,
+                contig,
+                coordinate,
+                coordinate + window_size,
+                blacklist_file,
+                quality_threshold,
+                verbose - 1 if verbose > 1 else 0))
 
     if (verbose):
         stderr.write(f'{len(window_args)} windows created.\n')
@@ -329,6 +332,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     # remove bottom 10 percentile
     trimmed_windows = trim_coverage(window_array, 10)
+
 
     if gc_correction:
         trimmed_windows = _delfi_gc_adjust(trimmed_windows, verbose)

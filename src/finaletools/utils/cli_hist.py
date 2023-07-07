@@ -5,7 +5,7 @@ from sys import stdout
 
 import numpy as np
 
-def cli_hist(
+def _cli_hist(
         bins: np.ndarray,
         counts: np.ndarray,
         n_bins: int,
