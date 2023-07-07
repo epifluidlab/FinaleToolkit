@@ -3,14 +3,17 @@ import time
 from typing import Union, Tuple
 from sys import stdout, stderr
 from shutil import get_terminal_size
+from multiprocessing import Pool
 import gzip
 
 import numpy as np
 import pysam
-from tqdm import tqdm
+import tqdm
 from numba import jit
 
-from finaletools.utils import not_read1_or_low_quality, cli_hist
+from finaletools.utils import (
+    not_read1_or_low_quality, cli_hist, get_intervals
+)
 
 
 def frag_length(
@@ -71,7 +74,7 @@ def frag_length(
         if (verbose):
             stderr.write(f'{count} reads counted\n')
         # Iterating on each read in file in specified contig/chromosome
-        for read1 in (tqdm(sam_file.fetch(contig=contig,
+        for read1 in (tqdm.tqdm(sam_file.fetch(contig=contig,
                                         start=start,
                                         stop=stop), total=count)
                     if verbose
@@ -255,7 +258,135 @@ def frag_length_bins(
     return bins, counts
 
 
-def interval_frag_length_summary(
-
+def _frag_length_stats(
+    input_file: Union(str, pysam.AlignmentFile),
+    contig: str,
+    start: int,
+    stop: int,
+    name: str,
+    quality_threshold: int,
+    verbose: Union(bool, int)
 ):
-    return None
+    # generating fragment lengths
+    frag_lengths = frag_length(
+        input_file,
+        contig,
+        start,
+        stop,
+        quality_threshold=quality_threshold,
+        verbose=verbose
+    )
+    if frag_lengths.shape[0] == 0:
+        mean, median, stdev, min, max = 5*[-1]
+    else:
+        mean = np.mean(frag_lengths)
+        median = np.median(frag_lengths)
+        stdev = np.std(frag_lengths)
+        min = np.min(frag_lengths)
+        max = np.max(frag_lengths)
+
+    return name, contig, start, stop, mean, median, stdev, min, max
+
+
+def _frag_length_stats_star(args):
+    return _frag_length_stats(*args)
+
+
+def frag_length_intervals(
+    input_file: Union[str, pysam.AlignmentFile],
+    interval_file: str,
+    output_file: str=None,
+    quality_threshold: int=30,
+    workers: int=1,
+    verbose: Union[bool, int]=False
+):
+    """
+    Takes fragments from BAM file and calculates fragment length
+    statistics for each interval in a BED file. If output specified,
+    results will be printed into a tab-delimited file.
+
+    Parameters
+    ----------
+    input_file : str or AlignmentFile
+    interval_file : str
+    output_file : str, optional
+    quality_threshold : int, optional
+    workers : int, optional
+    verbose : boo or int, optional
+
+    Returns
+    -------
+    """
+    if verbose:
+        stderr.write(
+            f"""
+            input_file: {input_file}
+            interval_file: {interval_file}
+            output_file: {output_file}
+            quality_threshold: {quality_threshold}
+            workers: {workers}
+            verbose: {verbose}
+            \n"""
+        )
+        start_time = time.time()
+
+    # read interval_file into list of tuples
+    intervals = get_intervals(
+        input_file,
+        interval_file,
+        quality_threshold,
+        verbose=verbose
+    )
+
+    interval_len = len(intervals)
+    if verbose:
+        stderr.write(f'{interval_len} intervals read!\n')
+
+    try:
+        # create pool and submit intervals into processess
+        pool = Pool(workers)
+        iter_results = pool.imap(
+            _frag_length_stats_star,
+            tqdm.tqdm(
+                intervals,
+                desc='Filling process pool',
+                position=0
+            ) if verbose else intervals,
+            round(interval_len/workers/2+1)
+        )
+        # write to output
+        try:
+            output_is_file = False
+            if output_file == '-':
+                out = stdout
+            else:
+                output_is_file = True
+                out = open(output_file, 'w')
+            # header
+            out.write(
+                'name\tcontig\tstart\tstop\tmean\tmedian\tstdev\tmin\tmax\n'
+            )
+            for result in tqdm.tqdm(
+                iter_results,
+                total=interval_len,
+                desc='Writing to out',
+                position=2
+            ) if verbose else iter_results:
+                out.write('\t'.join([str(item) for item in result]))
+                out.write('\n')
+        finally:
+            if output_is_file:
+                out.close()
+
+        results = [result for result in iter_results]
+
+    finally:
+        pool.close()
+
+    if verbose:
+        stop_time = time.time()
+        stderr.write(
+            f'frag_length_intervals took {stop_time-start_time} s\n'
+        )
+
+    return results

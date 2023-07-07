@@ -1,17 +1,22 @@
 from __future__ import annotations
 from shutil import get_terminal_size
+from typing import TextIO
+from sys import stdout
 
 import numpy as np
 
 def cli_hist(
         bins: np.ndarray,
         counts: np.ndarray,
-        n_bins: int
+        n_bins: int,
+        stats: list,
+        out: TextIO,
+        title: str=None,
 ):
     term_width, term_height = get_terminal_size((80, 24))
 
     max_count = np.max(counts)
-    max_height = term_height - 2
+    max_height = term_height - 5
     block_height = max_height * 8 - 1    # height for utf-8 block elements
     block_counts = np.rint(counts / max_count * block_height)
 
@@ -35,6 +40,15 @@ def cli_hist(
         8: '\u2588'
     }
 
-    for row in hist_array:
-        print(''.join([bars[num] for num in row]))
+    out.write(f'{title}\n')
+
+    stat_len = len(stats)
+    for i in range(max_height):
+        row = hist_array[i]
+        out.write(''.join([bars[num] for num in row]))
+        if i < stat_len:
+            stat = stats[i]
+            out.write(f' {(stat[0]+"          ")[:10]}:{stat[1]:6.2f}\n')
+        else:
+            out.write('\n')
 

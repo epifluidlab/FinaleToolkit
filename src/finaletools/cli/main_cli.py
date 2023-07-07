@@ -3,7 +3,9 @@
 from __future__ import annotations
 import argparse
 
-from finaletools.frag.frag_length import frag_length, frag_length_bins
+from finaletools.frag.frag_length import (
+    frag_length, frag_length_bins, frag_length_intervals
+)
 from finaletools.frag.coverage import coverage
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
@@ -97,6 +99,49 @@ def main_cli():
     parser_command3.add_argument('-v', '--verbose', action='count', default=0)
     parser_command3.set_defaults(func=frag_length_bins)
 
+    # Subcommand 3_1: frag_length_intervals
+    parser_command3_1 = subparsers.add_parser(
+        'frag-length-intervals',
+        description='Calculates frag lengths statistics for intervals'
+    )
+    parser_command3_1.add_argument(
+        'input_file',
+        help='BAM or SAM file containing PE WGS of cfDNA'
+    )
+    parser_command3_1.add_argument(
+        'interval_file',
+        help='BED file containing intervals over which to produce statistics'
+    )
+    parser_command3_1.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='File to print results to. if "-", will print to stdout. Default'
+        'is "-".'
+    )
+    parser_command3_1.add_argument(
+        '-q',
+        '--quality-threshold',
+        default=30,
+        type=int,
+        help='minimum MAPQ to filter for'
+    )
+    parser_command3_1.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of subprocesses to use'
+    )
+    parser_command3_1.add_argument(
+        '-v',
+        '--verbose',
+        default=0,
+        action='count',
+        help='Determines how much is written to stderr'
+    )
+    parser_command3_1.set_defaults(func=frag_length_intervals)
+
     # Subcommand 4: wps (on interval bed file)
     parser_command4 = subparsers.add_parser(
         'wps',
@@ -104,7 +149,7 @@ def main_cli():
         description='Calculates Windowed Protection Score over a region '
         'around sites specified in a BED file from alignments in a '
         'CRAM/BAM/SAM file'
-        )
+    )
     parser_command4.add_argument(
         'input_file',
         help='bam or sam file containing paired-end reads of cfDNA WGS'
