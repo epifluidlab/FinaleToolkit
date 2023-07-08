@@ -1,14 +1,47 @@
-
+from __future__ import annotations
 import time
 import gzip
 import tempfile as tf
-from typing import Union, TextIO
+from typing import Union, TextIO, Tuple, List
+from sys import stderr, stdout
 
 import numpy as np
 from numba import jit
 import pysam
 import pybedtools
 from tqdm import tqdm
+
+
+def _get_contigs(
+        input_file: Union[str, pysam.AlignmentFile],
+        verbose: bool=False
+    ) -> list:
+    """
+    Retrieves contigs from input_file and returns lists of contig names
+    and lengths
+    """
+
+    input_is_file = False
+    try:
+        # handling input types
+        if (type(input_file) == pysam.AlignmentFile):
+            sam_file = input_file
+        elif input_file.endswith('bam'):
+            input_is_file = True
+            if (verbose):
+                stderr.write(f'Opening {input_file}\n')
+            sam_file = pysam.AlignmentFile(input_file)
+        else:
+            raise ValueError(
+                'Invalid input_file type. Only BAM or SAM files are allowed.'
+            )
+        contigs = sam_file.references
+        lengths = sam_file.lengths
+    finally:
+        if input_is_file:
+            sam_file.close()
+
+    return zip(contigs, lengths)
 
 
 def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
@@ -53,7 +86,7 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
         for read1 in sam_file.fetch(contig=contig):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
-            if (not_read1_or_low_quality(read1, quality_threshold)):
+            if (_not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
                 out.write(
@@ -73,65 +106,6 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
         end_time = time.time()
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete',
               flush=True)
-
-
-def frag_bam_to_beds(input_file: str,
-                     blacklist_bed: str=None,
-                     region_bed: str=None,
-                     quality_threshold=30,
-                     workers: int=1,
-                     verbose: bool=False):
-    """
-    Take cfDNA paired-end reads from bam_file and writes to temporary
-    bed files corresponding to each contig in bam_file. If specified,
-    will also filter for fragments in region_bed and filter out
-    fragments in the blacklist. If region_bed is specified, only contigs
-    included in region_bed will be included in the bed files.
-
-    Parameters
-    ----------
-    input_file : str
-    blacklist_bed : str, optional
-    region_bed : str, optional
-    quality_threshold : int, optional
-    workers : int, optional
-    verbose : bool, optional
-
-    Returns
-    -------
-    bed_dict : dict[str, str]
-        A dictionary of (contig name : path string to bed file).
-    """
-
-    if (verbose):
-        start_time = time.time()
-        print('Opening file')
-
-    sam_file = None
-    try:
-        # Open file or asign AlignmentFile to sam_file
-        if (type(input_file) == pysam.AlignmentFile):
-            sam_file = input_file
-        elif (type(input_file) == str):
-            sam_file = pysam.AlignmentFile(input_file)
-        else:
-            raise TypeError(
-                ("bam_file should be an AlignmentFile or path string.")
-            )
-
-        # TODO: finish
-    except Exception as e:
-        print("An error occurred:", str(e))
-
-    finally:
-        pass
-
-    if (verbose):
-        end_time = time.time()
-        print(f'frag_bam_to_beds took {end_time - start_time} s to complete',
-              flush=True)
-
-    return None
 
 
 @jit(nopython=True)
@@ -159,9 +133,6 @@ def frags_in_region(frag_array: np.ndarray,
         )
     filtered_frags = frag_array[in_region]
     return filtered_frags
-
-def _in_blacklist(contig, start, stop):
-    return None
 
 
 def _sam_frag_array(sam_file: pysam.AlignmentFile,
@@ -291,7 +262,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
             'Both minimum and maximum must either be present or absent.'
             )
 
-    # input_file is AllignmentFile
+    # input_file is AlignmentFile
     if (type(input_file) == pysam.AlignmentFile):
         sam_file = input_file
         frag_ends = _sam_frag_array(sam_file,
@@ -404,7 +375,7 @@ def low_quality_read_pairs(read, min_mapq=30):
             or read.reference_name != read.next_reference_name)
 
 
-def not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
+def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
     """
     Return `True` if the sequenced read described in `read` is not read1
     and a properly paired read with a Phred score exceeding `min_mapq`.
@@ -480,3 +451,36 @@ def filter_bam(
             print(line)
 
     return None
+
+
+def _get_intervals(
+    input_file: Union[str, pysam.AlignmentFile],
+    interval_file: str,
+    quality_threshold: int,
+    verbose: Union[bool, int]
+) -> list:
+    """Helper function to read intervals from bed file."""
+    intervals = []  # list of inputs for single_coverage
+
+    with open(interval_file) as bed:
+        for line in bed:
+            if ~line.startswith('#'):
+                if line != '':
+                    contents = line.split()
+                    contig = contents[0].strip()
+                    start = int(contents[1])
+                    stop = int(contents[2])
+                    name = contents[3] if len(contents) > 3 else '.'
+                    interval = (
+                        input_file,
+                        contig,
+                        start,
+                        stop,
+                        name,
+                        quality_threshold,
+                        verbose - 1 if verbose > 1 else 0
+                    )
+                    intervals.append(interval)
+                else:
+                    break
+    return intervals
