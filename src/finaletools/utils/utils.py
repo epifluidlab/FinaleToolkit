@@ -291,10 +291,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     # input_file is a path string
     elif (type(input_file) == str):
         # SAM file
-        if (input_file.endswith('.bam')
-            or input_file.endswith('.sam')
-            or input_file == '-'
-        ):
+        if (input_file.endswith('.sam')):
             with pysam.AlignmentFile(input_file, 'r') as sam_file:
                 frag_ends = _sam_frag_array(
                 sam_file,
