@@ -168,7 +168,8 @@ def main_cli():
     )
     parser_command4.add_argument(
         '-o',
-        '--output_file'
+        '--output_file',
+        default='-'
     )
     parser_command4.add_argument(
         '-i',
@@ -263,6 +264,13 @@ def main_cli():
         type=int,
         default=30,
         help='Minimum mapping quality to filter for. Defualt is 30.'
+    )
+    parser_command6.add_argument(
+        '-w',
+        '--workers',
+        type=int,
+        default=1,
+        help='Number of worker processes to spawn.'
     )
     parser_command6.add_argument(
         '-v',
