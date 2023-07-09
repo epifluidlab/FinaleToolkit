@@ -1,5 +1,6 @@
 from __future__ import annotations
 import tempfile as tf
+import subprocess
 
 import pysam
 
@@ -10,6 +11,7 @@ def filter_bam(
         region_file: str=None,
         output_file: str=None,
         quality_threshold: int=30,
+        workers: int=1,
         verbose: bool=False):
     """
     Accepts the path to a BAM file and creates a bam file where all
@@ -25,6 +27,7 @@ def filter_bam(
     region_file : str, option
     output_file : str, optional
     quality_threshold : int, optional
+    workers : int, optional
     verbose : bool, optional
 
     Returns
@@ -32,23 +35,37 @@ def filter_bam(
     output_file : str
     """
 
-    # create tempfile to contain filtered BED
+    # create tempfile to contain filtered bam
     if output_file is None:
-        _, output_file = tf.mkstemp(suffix='.bed')
-    elif output_file.endswith('bed'):
+        _, output_file = tf.mkstemp(suffix='.bam')
+    elif output_file.endswith('bam'):
         pass
     else:
-        raise ValueError('output_file should have suffix .bed')
+        raise ValueError('output_file should have suffix .bam')
 
-    temp_dir = tf.mkdtemp()
+    try:
+        # create temp dir to store intermediate sorted file
+        temp_dir = tf.TemporaryDirectory()
 
-    flag_filtered_bam = temp_dir + '/flag_filtered.bam'
+        flag_filtered_bam = temp_dir.name + '/flag_filtered.bam'
 
-    print(flag_filtered_bam)
+        process = subprocess.run(
+            f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
+            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}',
+            shell=True,
+            check=True
+        ) 
 
-    pysam.view('-b', '-h', '-o', flag_filtered_bam, '-q',
-               str(quality_threshold), '-f', '2', input_file)
+        # filter for reads on different reference
+        with pysam.AlignmentFile(flag_filtered_bam, 'rb') as in_file:
+            with pysam.AlignmentFile(
+                output_file,
+                'wb',
+                template=in_file
+            ) as out_file:
+                for read in in_file:
+                    if read.reference_name == read.next_reference_name:
+                        out_file.write(read)
 
-    with pysam.AlignmentFile(flag_filtered_bam, 'rb') as file:
-        for line in file.head(5):
-            pass
+    finally:
+        temp_dir.cleanup()
