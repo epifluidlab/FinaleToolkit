@@ -276,9 +276,27 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
 
     # input_file is a path string
     elif (type(input_file) == str):
-        # BAM or SAM file
-        if (input_file.endswith('.bam') or input_file.endswith('.sam')):
+        # SAM file
+        if (input_file.endswith('.bam')
+            or input_file.endswith('.sam')
+            or input_file == '-'
+        ):
             with pysam.AlignmentFile(input_file, 'r') as sam_file:
+                frag_ends = _sam_frag_array(
+                sam_file,
+                contig,
+                has_min_max,
+                quality_threshold=quality_threshold,
+                minimum=minimum,
+                maximum=maximum,
+                fraction_low=fraction_low,
+                fraction_high=fraction_high,
+                verbose=verbose)
+        # BAM file or BAM from stdin
+        elif (input_file.endswith('.bam')
+            or input_file == '-'
+        ):
+            with pysam.AlignmentFile(input_file, 'rb') as sam_file:
                 frag_ends = _sam_frag_array(
                 sam_file,
                 contig,
