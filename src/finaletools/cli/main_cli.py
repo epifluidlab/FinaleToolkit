@@ -6,6 +6,7 @@ import argparse
 from finaletools.frag.frag_length import (
     frag_length, frag_length_bins, frag_length_intervals
 )
+from finaletools.utils.filter_bam import filter_bam
 from finaletools.frag.coverage import coverage
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
@@ -231,6 +232,45 @@ def main_cli():
     parser_command5.add_argument('-v', '--verbose', action='count', default=0)
     parser_command5.set_defaults(func=delfi)
 
+    # Subcommand 6: filter_bam
+    parser_command6 = subparsers.add_parser(
+        'filter-bam',
+        prog='filter-bam',
+        description='Filters a BAM file so that all reads are in mapped pairs'
+        ', exceed a certain MAPQ, are not flagged for quality, are read1, are'
+        ' not secondary or supplementary alignments, and are on the same'
+        'reference sequence as the mate.'
+    )
+    parser_command6.add_argument(
+        'input_file',
+        help='BAM file with PE WGS'
+    )
+    parser_command6.add_argument(
+        '-r',
+        '--region-file',
+        help='BED file containing regions to read fragments from.'
+    )
+    parser_command6.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='Path to write filtered BAM. Defualt is "_". If set to "_",'
+        ' the BAM file will be written to stdout.'
+    )
+    parser_command6.add_argument(
+        '-q',
+        '--quality_threshold',
+        type=int,
+        default=30,
+        help='Minimum mapping quality to filter for. Defualt is 30.'
+    )
+    parser_command6.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
+    )
+    parser_command6.set_defaults(func=filter_bam)
 
     args = parser.parse_args()
     function = args.func

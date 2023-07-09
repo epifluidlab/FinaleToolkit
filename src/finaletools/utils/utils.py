@@ -398,61 +398,6 @@ def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
             or not read.is_read1)
 
 
-def filter_bam(
-        input_file: str,
-        blacklist_bed: str=None,
-        region_bed: str=None,
-        output_path: str=None,
-        quality_threshold: int=30,
-        verbose: bool=False):
-    """
-    Accepts the path to a BAM file and returns a Bed file where all
-    reads are read1 in a proper pair, exceed the specified quality
-    threshold, do not intersect a region in the given blacklist
-    file, and intersects with a region in the region bed.
-
-    Parameters
-    ----------
-    input_bam : str
-        Path string or AlignmentFile pointing to the BAM file to be
-        filtered.
-    blacklist_bed : str or BedTool, optional
-    region_bed :
-    output_path : str, optional
-    quality_threshold : int, optional
-    verbose : bool, optional
-
-    Returns
-    -------
-    output_path : str
-        String containing path to the filtered BED file. If no
-        output_path, will be placed into a temporary file.
-    """
-
-    # create tempfile to contain filtered BED
-    if output_path is None:
-        _, output_path = tf.mkstemp(suffix='.bed')
-    elif output_path.endswith('bed'):
-        pass
-    else:
-        raise ValueError('output_path should have suffix .bed')
-
-    temp_dir = tf.mkdtemp()
-
-    flag_filtered_bam = temp_dir + '/flag_filtered.bam'
-
-    print(flag_filtered_bam)
-
-    pysam.view('-b', '-h', '-o', flag_filtered_bam, '-q',
-               str(quality_threshold), '-f', '2', input_file)
-
-    with pysam.AlignmentFile(flag_filtered_bam, 'rb') as file:
-        for line in file.head(5):
-            print(line)
-
-    return None
-
-
 def _get_intervals(
     input_file: Union[str, pysam.AlignmentFile],
     interval_file: str,
