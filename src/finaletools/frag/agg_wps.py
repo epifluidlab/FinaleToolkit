@@ -180,7 +180,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     if (verbose):
         end_time = time.time()
         stderr.write(
-            f'aggregate_wps took {end_time - start_time} s to complete\n',
-            flush=True)
+            f'aggregate_wps took {end_time - start_time} s to complete\n'
+        )
 
     return scores
