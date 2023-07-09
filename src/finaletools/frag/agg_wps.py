@@ -69,7 +69,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             site_bed: {site_bed}
             output_file: {output_file}
             window_size: {window_size}
-            size_around_sites: {interval_size}
+            interval_size: {interval_size}
             quality_threshold: {quality_threshold}
             workers: {workers}
             verbose: {verbose}
@@ -145,7 +145,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                 # declaration line
                 out.write(
                     f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                    f'={window_size}\n'
+                    f'={interval_size}\n'
                     )
                 for score in (tqdm(scores[:, 1])
                               if verbose >= 2
