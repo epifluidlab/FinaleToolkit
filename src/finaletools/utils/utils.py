@@ -324,7 +324,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
             with pysam.AlignmentFile(input_file, 'rb') as sam_file:
                 frag_ends = _sam_frag_array(
                 sam_file,
-                contig=None
+                None,
                 False,
                 quality_threshold=quality_threshold,
                 fraction_low=fraction_low,
