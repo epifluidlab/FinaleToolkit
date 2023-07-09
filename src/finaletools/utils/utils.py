@@ -168,6 +168,20 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
                 if ((read_length >= fraction_low)
                     and (read_length <= fraction_high)):
                     frag_ends.append((read_start, read_stop))
+    elif (contig is None):
+        for read1 in (tqdm(sam_file, total=count)
+                      if verbose
+                      else sam_file):
+            # Only select forward strand and filter out non-paired-end
+            # reads and low-quality reads
+            if (read1.is_read2
+                or low_quality_read_pairs(read1, quality_threshold)):
+                pass
+            else:
+                frag_ends.append(
+                    (read1.reference_start,
+                     read1.reference_start + read1.template_length)
+                     )
     else:
         for read1 in (tqdm(sam_file.fetch(contig=contig), total=count)
                       if verbose
