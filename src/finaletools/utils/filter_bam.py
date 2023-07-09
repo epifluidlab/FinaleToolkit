@@ -51,3 +51,4 @@ def filter_bam(
 
     with pysam.AlignmentFile(flag_filtered_bam, 'rb') as file:
         for line in file.head(5):
+            pass
