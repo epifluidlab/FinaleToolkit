@@ -68,7 +68,12 @@ def _delfi_single_window(
     try:
         if input_file.endswith('.bam') or input_file.endswith('.sam'):
             sam_file = pysam.AlignmentFile(input_file)
-        elif input_file.endswith('.bed') or input_file.endswith('.bed.gz'):
+        elif (
+            input_file.endswith('.bed')
+            or input_file.endswith('.bed.gz')
+            or input_file.endswith('.frag.gz')
+            or input_file.endswith('.frag')
+        ):
             sam_file = pysam.TabixFile(input_file)
         # Iterating on each read in file in specified contig/chromosome
         for read1 in (sam_file.fetch(contig=contig,
