@@ -8,7 +8,6 @@ from sys import stderr, stdout
 import numpy as np
 from numba import jit
 import pysam
-import pybedtools
 from tqdm import tqdm
 
 
