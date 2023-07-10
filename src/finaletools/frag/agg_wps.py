@@ -78,6 +78,9 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             )
 
     # read tss contigs and coordinates from bed
+    if (verbose):
+        stderr.write('Reading intervals from bed\n')
+
     contigs = []
     starts = []
     stops = []
@@ -102,6 +105,9 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     count = len(contigs)
 
+    if (verbose):
+        stderr.write('Zipping inputs\n')
+
     tss_list = zip(
         count*[input_file],
         contigs,
@@ -115,12 +121,18 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         count*[verbose-2 if verbose>2 else 0]
     )
 
-    with Pool(workers, maxtasksperchild=1000) as pool:
+    if (verbose):
+        stderr.write('Calculating wps...\n')
+
+    with Pool(workers, maxtasksperchild=500) as pool:
         contig_scores = pool.starmap(wps, tss_list, chunksize=10000)
 
     scores = np.zeros((interval_size, 2))
 
     scores[:, 0] = np.arange(left_of_site, right_of_site)
+
+    if (verbose):
+        stderr.write('Flipping scores for reverse strand\n')
 
     # aggregate scores by strand
     for i in range(count):
