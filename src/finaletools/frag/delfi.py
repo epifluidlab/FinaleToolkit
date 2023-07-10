@@ -11,8 +11,6 @@ import gzip
 import pysam
 import py2bit
 import numpy as np
-from statsmodels.nonparametric.smoothers_lowess import lowess
-import pyBigWig as pbw
 
 from finaletools.utils.utils import _not_read1_or_low_quality
 
@@ -160,19 +158,7 @@ def _delfi_single_window(
             num_frags)
 
 
-def delfi_loess(gc, coverage):
-    """
-    Function to simplify loess.
-    """
-    coverage_loess = lowess(
-        coverage,
-        gc,
-        0.75,
-        5,
-        return_sorted=False,
-        missing='drop'
-    )
-    return coverage_loess
+
 
 
 def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
@@ -191,35 +177,6 @@ def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     return trimmed
 
 
-def _delfi_gc_adjust(
-        windows:np.ndarray,
-        verbose:bool=False
-):
-    """
-    Helper function that takes window data and performs GC adjustment.
-    """
-    #LOESS/LOWESS regression for short and long
-    short_loess = delfi_loess(windows['gc'], windows['short'])
-    long_loess = delfi_loess(windows['gc'], windows['long'])
-
-    corrected_windows = windows.copy()
-
-    # GC correction
-    corrected_windows['short'] = (
-        windows['short']
-        - short_loess
-        + np.nanmedian(windows['short'])
-    )
-
-    corrected_windows['long'] = (
-        windows['long']
-        - long_loess
-        + np.nanmedian(windows['long'])
-    )
-
-    return corrected_windows
-
-
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           autosomes: str,
           reference_file: str,
@@ -230,7 +187,6 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           subsample_coverage: float=2,
           quality_threshold: int=30,
           workers: int=1,
-          gc_correction: bool=True,
           preprocessing: bool=True,
           verbose: Union[int, bool]=False):
     """
@@ -342,10 +298,6 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     # remove bottom 10 percentile
     trimmed_windows = trim_coverage(window_array, 10)
 
-
-    if gc_correction:
-        trimmed_windows = _delfi_gc_adjust(trimmed_windows, verbose)
-
     # TSV or BED3+3
     if output_file.endswith('.bed'):
         with open(output_file, 'w') as out:
@@ -368,7 +320,6 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 out.write(
                     f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
                     f'{window[4]}\t{window[5]}\t{window[6]}\n')
-
 
     num_frags = sum(window[3] for window in windows)
 
