@@ -67,20 +67,29 @@ def _delfi_single_window(
 
     try:
         if input_file.endswith('.bam') or input_file.endswith('.sam'):
-            sam_file = pysam.AlignmentFile(input_file)
+            file = pysam.AlignmentFile(input_file)
+            is_sam = True
         elif (
             input_file.endswith('.bed')
             or input_file.endswith('.bed.gz')
             or input_file.endswith('.frag.gz')
             or input_file.endswith('.frag')
         ):
-            sam_file = pysam.TabixFile(input_file)
+            file = pysam.TabixFile(input_file)
+            is_sam = False
+        else:
+            raise ValueError(
+                'Unsupported type. Only BAM, SAM, and tabix indexed files'
+                'accepted.'
+            )
         # Iterating on each read in file in specified contig/chromosome
-        for read1 in (sam_file.fetch(contig, window_start, window_stop)):
+        for read1 in (file.fetch(contig, window_start, window_stop)):
 
             # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads
-            if (_not_read1_or_low_quality(read1, quality_threshold)):
+            # reads and low-quality reads.
+            # relies on short circuit evaluation to avoid calling sam
+            # method on tabix.
+            if is_sam and _not_read1_or_low_quality(read1, quality_threshold):
                 pass
             else:
                 frag_start = read1.reference_start
@@ -122,7 +131,7 @@ def _delfi_single_window(
 
                     num_frags += 1
     finally:
-        sam_file.close()
+        file.close()
 
     num_gc = 0  # cumulative sum of gc bases
 
