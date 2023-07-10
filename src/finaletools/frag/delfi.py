@@ -65,8 +65,11 @@ def _delfi_single_window(
 
     num_frags = 0
 
-
-    with pysam.AlignmentFile(input_file) as sam_file:
+    try:
+        if input_file.endswith('.bam') or input_file.endswith('.sam'):
+            sam_file = pysam.AlignmentFile(input_file)
+        elif input_file.endswith('.bed') or input_file.endswith('.bed.gz'):
+            sam_file = pysam.TabixFile(input_file)
         # Iterating on each read in file in specified contig/chromosome
         for read1 in (sam_file.fetch(contig=contig,
                                         start=window_start,
@@ -115,6 +118,8 @@ def _delfi_single_window(
                     frag_pos.append((frag_start, frag_stop))
 
                     num_frags += 1
+    finally:
+        sam_file.close()
 
     num_gc = 0  # cumulative sum of gc bases
 
@@ -124,7 +129,7 @@ def _delfi_single_window(
             frag_seq = ref_seq.sequence(contig, frag_start, frag_stop).upper()
             num_gc += sum([(base == 'G' or base == 'C') for base in frag_seq])
 
-    num_bases = window_stop - window_start
+    # num_bases = window_stop - window_start
     # num_gc = sum([(base == 'G' or base == 'C') for base in ref_bases])
 
     # sum of frag_lengths
