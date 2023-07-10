@@ -290,12 +290,11 @@ def main_cli():
     )
     parser_command7.add_argument(
         'input_file',
-        default='-',
-        help='WIG file with WPS data. If "-", will read from stdin. Default is '
-        '"-".'
+        help='WIG file with WPS data. If "-", will read from stdin.'
     )
     parser_command7.add_argument(
-        'output_file',
+        '-o',
+        '--output-file',
         default='-',
         help='WIG file to print filtered WPS data. If "-", will write to '
         'stdout. Default is "-".'
