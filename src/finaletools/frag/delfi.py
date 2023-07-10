@@ -75,7 +75,7 @@ def _delfi_single_window(
             or input_file.endswith('.frag.gz')
             or input_file.endswith('.frag')
         ):
-            file = pysam.TabixFile(input_file)
+            file = pysam.TabixFile(input_file, parser=pysam.asBed)
             is_sam = False
         else:
             raise ValueError(
@@ -97,8 +97,8 @@ def _delfi_single_window(
                     frag_length = read1.template_length
                     frag_stop = frag_start + frag_length
                 else:
-                    frag_start = int(read1[1])
-                    frag_stop = int(read1[2])
+                    frag_start = read1.start
+                    frag_stop = read1.end
                     frag_length = frag_stop - frag_start
 
                 # check if in blacklist
