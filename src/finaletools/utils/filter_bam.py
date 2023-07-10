@@ -1,6 +1,7 @@
 from __future__ import annotations
 import tempfile as tf
 import subprocess
+from sys import stderr
 
 import pysam
 
@@ -59,7 +60,11 @@ def filter_bam(
         if region_file is not None:
             samtools_command += f' -L {region_file}'
 
-        process1 = subprocess.run(samtools_command, shell=True, check=True)
+        try:
+            process1 = subprocess.run(samtools_command, shell=True, check=True)
+        except Exception as e:
+            stderr.write(e)
+            exit(1)
 
         # filter for reads on different reference
         with pysam.AlignmentFile(flag_filtered_bam, 'rb') as in_file:
@@ -97,8 +102,12 @@ def filter_bam(
 
     if output_file != '-':
         # generate index for output_file
-        process3 = subprocess.run(
-            f'samtools index {output_file} {output_file}.bai',
-            shell=True,
-            check=True
+        try:
+            process3 = subprocess.run(
+                f'samtools index {output_file} {output_file}.bai',
+                shell=True,
+                check=True
             )
+        except Exception as e:
+            stderr.write(e)
+            exit(1)
