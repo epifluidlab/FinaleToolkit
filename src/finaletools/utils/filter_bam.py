@@ -38,7 +38,7 @@ def filter_bam(
     # create tempfile to contain filtered bam
     if output_file is None:
         _, output_file = tf.mkstemp(suffix='.bam')
-    elif output_file.endswith('bam'):
+    elif output_file.endswith('bam') or output_file == '-':
         pass
     else:
         raise ValueError('output_file should have suffix .bam')
@@ -49,12 +49,15 @@ def filter_bam(
 
         flag_filtered_bam = temp_dir.name + '/flag_filtered.bam'
 
-        process = subprocess.run(
+        samtools_command = (
             f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
-            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}',
-            shell=True,
-            check=True
-        ) 
+            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers} -M'
+        )
+
+        if region_file is not None:
+            samtools_command += f' -L {region_file}'
+
+        process1 = subprocess.run(samtools_command, shell=True, check=True)
 
         # filter for reads on different reference
         with pysam.AlignmentFile(flag_filtered_bam, 'rb') as in_file:
@@ -69,3 +72,11 @@ def filter_bam(
 
     finally:
         temp_dir.cleanup()
+
+    if output_file != '-':
+        # generate index for output_file
+        process3 = subprocess.run(
+            f'samtools index {output_file} {output_file}.bai',
+            shell=True,
+            check=True
+            )
