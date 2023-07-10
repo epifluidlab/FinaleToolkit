@@ -51,7 +51,7 @@ def filter_bam(
         # create temp dir to store intermediate sorted file
     with tf.TemporaryDirectory() as temp_dir:
 
-        flag_filtered_bam = temp_dir.name + '/flag_filtered.bam'
+        flag_filtered_bam = temp_dir + '/flag_filtered.bam'
 
         samtools_command = (
             f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
