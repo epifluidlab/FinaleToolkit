@@ -92,9 +92,14 @@ def _delfi_single_window(
             if is_sam and _not_read1_or_low_quality(read1, quality_threshold):
                 pass
             else:
-                frag_start = read1.reference_start
-                frag_length = read1.template_length
-                frag_stop = frag_start + frag_length
+                if is_sam:
+                    frag_start = read1.reference_start
+                    frag_length = read1.template_length
+                    frag_stop = frag_start + frag_length
+                else:
+                    frag_start = int(read1[1])
+                    frag_stop = int(read1[2])
+                    frag_length = frag_stop - frag_start
 
                 # check if in blacklist
                 blacklisted = False
