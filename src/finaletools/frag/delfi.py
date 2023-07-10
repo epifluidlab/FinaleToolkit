@@ -222,6 +222,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           autosomes: str,
           reference_file: str,
           blacklist_file: str=None,
+          centromere_file: str=None,
           output_file: str=None,
           window_size: int=100000,
           subsample_coverage: float=2,
@@ -311,6 +312,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 coordinate,
                 coordinate + window_size,
                 blacklist_file,
+                centromere_file,
                 quality_threshold,
                 verbose - 1 if verbose > 1 else 0))
 
