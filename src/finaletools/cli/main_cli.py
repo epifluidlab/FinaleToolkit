@@ -267,6 +267,20 @@ def main_cli():
         help='Minimum mapping quality to filter for. Defualt is 30.'
     )
     parser_command6.add_argument(
+        '-hi',
+        '--fraction-high',
+        type=int,
+        default=None,
+        help='Maximum fragment size. Default is None'
+    )
+    parser_command6.add_argument(
+        '-lo',
+        '--fraction-low',
+        type=int,
+        default=None,
+        help='Minimum fragment size. Default is None'
+    )
+    parser_command6.add_argument(
         '-w',
         '--workers',
         type=int,

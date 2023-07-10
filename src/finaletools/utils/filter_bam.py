@@ -10,6 +10,8 @@ def filter_bam(
         input_file: str,
         region_file: str=None,
         output_file: str=None,
+        fraction_high: int=None,
+        fraction_low: int=None,
         quality_threshold: int=30,
         workers: int=1,
         verbose: bool=False):
@@ -66,9 +68,29 @@ def filter_bam(
                 'wb',
                 template=in_file
             ) as out_file:
-                for read in in_file:
-                    if read.reference_name == read.next_reference_name:
-                        out_file.write(read)
+                if fraction_high is None and fraction_low is None:
+                    for read in in_file:
+                        if read.reference_name == read.next_reference_name:
+                            out_file.write(read)
+                elif fraction_high is None:
+                    for read in in_file:
+                        if (read.reference_name == read.next_reference_name
+                            and read.template_length >= fraction_low
+                        ):
+                            out_file.write(read)
+                elif fraction_low is None:
+                    for read in in_file:
+                        if (read.reference_name == read.next_reference_name
+                            and read.template_length <= fraction_high
+                        ):
+                            out_file.write(read)
+                else:
+                    for read in in_file:
+                        if (read.reference_name == read.next_reference_name
+                            and read.template_length >= fraction_low
+                            and read.template_length <= fraction_high
+                        ):
+                            out_file.write(read)
 
     finally:
         temp_dir.cleanup()
