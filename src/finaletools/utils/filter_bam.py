@@ -47,9 +47,9 @@ def filter_bam(
     else:
         raise ValueError('output_file should have suffix .bam')
 
-    try:
+
         # create temp dir to store intermediate sorted file
-        temp_dir = tf.TemporaryDirectory()
+    with tf.TemporaryDirectory() as temp_dir:
 
         flag_filtered_bam = temp_dir.name + '/flag_filtered.bam'
 
@@ -97,9 +97,6 @@ def filter_bam(
                             and read.template_length <= fraction_high
                         ):
                             out_file.write(read)
-
-    finally:
-        temp_dir.cleanup()
 
     if output_file != '-':
         # generate index for output_file
