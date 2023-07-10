@@ -3,9 +3,9 @@
 from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
-from typing import Union
+from typing import Union, TextIO
 from tempfile import TemporaryDirectory
-from sys import stderr
+from sys import stderr, stdout
 import gzip
 
 import pysam
@@ -298,14 +298,13 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     # remove bottom 10 percentile
     trimmed_windows = trim_coverage(window_array, 10)
 
-    # TSV or BED3+3
-    if output_file.endswith('.bed'):
-        with open(output_file, 'w') as out:
-            out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
-            for window in trimmed_windows:
-                out.write(
-                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
+    def _write_out(out: TextIO):
+        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
+        for window in trimmed_windows:
+            out.write(
+                f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
+                f'{window[4]}\t{window[5]}\t{window[6]}\n')
+
     if output_file.endswith('.tsv'):
         with open(output_file, 'w') as out:
             out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
@@ -313,13 +312,19 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 out.write(
                     f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
                     f'{window[4]}\t{window[5]}\t{window[6]}\n')
+    elif output_file.endswith('.bed'):
+        with open(output_file, 'w') as out:
+            _write_out(out)
     elif output_file.endswith('.bed.gz'):
         with gzip.open(output_file, 'w') as out:
-            out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
-            for window in trimmed_windows:
-                out.write(
-                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
+            _write_out(out)
+    elif output_file == '-':
+        with stdout as out:
+            _write_out(out)
+    else:
+        raise ValueError(
+            'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
+        )
 
     num_frags = sum(window[3] for window in windows)
 
