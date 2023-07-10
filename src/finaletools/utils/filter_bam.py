@@ -3,6 +3,8 @@ import tempfile as tf
 import subprocess
 import traceback
 from sys import stderr
+from os.path import isdir
+from shutil import rmtree
 
 import pysam
 
@@ -49,17 +51,18 @@ def filter_bam(
 
 
         # create temp dir to store intermediate sorted file
-    with tf.TemporaryDirectory() as temp_dir:
+    try:
+        temp_dir = tf.TemporaryDirectory()
 
-        flag_filtered_bam = temp_dir + '/flag_filtered.bam'
+        flag_filtered_bam = temp_dir.name + '/flag_filtered.bam'
 
         samtools_command = (
             f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
-            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers} -M'
+            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
         )
 
         if region_file is not None:
-            samtools_command += f' -L {region_file}'
+            samtools_command += f' -M -L {region_file}'
 
         try:
             process1 = subprocess.run(samtools_command, shell=True, check=True)
@@ -97,6 +100,8 @@ def filter_bam(
                             and read.template_length <= fraction_high
                         ):
                             out_file.write(read)
+    finally:
+        temp_dir.cleanup()
 
     if output_file != '-':
         # generate index for output_file
