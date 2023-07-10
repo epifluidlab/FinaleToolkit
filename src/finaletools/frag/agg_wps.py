@@ -133,9 +133,9 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                     f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
                     f'={window_size}\n'
                     )
-                for score in (tqdm(scores[:, 1])
+                for score in (tqdm(scores[:, 1]+1)
                               if verbose >= 2
-                              else scores[:, 1]):
+                              else scores[:, 1]+1):
                     out.write(f'{score}\n')
 
         elif output_file.endswith(".wig"):  # wiggle
@@ -147,9 +147,9 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                     f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
                     f'={interval_size}\n'
                     )
-                for score in (tqdm(scores[:, 1])
+                for score in (tqdm(scores[:, 1]+1)
                               if verbose >= 2
-                              else scores[:, 1]):
+                              else scores[:, 1]+1):
                     out.write(f'{score}\n')
 
         elif output_file == '-':  # stdout
