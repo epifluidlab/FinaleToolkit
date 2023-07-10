@@ -112,7 +112,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         count*[verbose-2 if verbose>2 else 0]
     )
 
-    with Pool(workers) as pool:
+    with Pool(workers, maxtasksperchild=1000) as pool:
         contig_scores = pool.starmap(wps, tss_list, chunksize=10000)
 
     scores = np.zeros((interval_size, 2))
