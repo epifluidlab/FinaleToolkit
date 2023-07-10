@@ -250,7 +250,9 @@ def main_cli():
     parser_command6.add_argument(
         '-r',
         '--region-file',
-        help='BED file containing regions to read fragments from.'
+        default=None,
+        help='BED file containing regions to read fragments from. Default is'
+        ' None.'
     )
     parser_command6.add_argument(
         '-o',
