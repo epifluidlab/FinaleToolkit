@@ -110,7 +110,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     if (verbose):
         start_time = time.time()
-        stderr.write("Reading fragments")
+        stderr.write("[finaletools-wps] Reading fragments\n")
+        stderr.write(f'Region: {contig}:{start}-{stop}\n')
 
     # set start and stop to ints
     start = int(start)
@@ -132,7 +133,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                            verbose=(verbose>=2))
 
     if (verbose):
-        stderr.write("Done reading fragments, preparing for WPS calculation.")
+        stderr.write("Done reading fragments, preparing for WPS calculation.\n")
     # check if no fragments exist on this interval
     if (frag_ends.shape == (0, 2)):
 
@@ -147,7 +148,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     if (type(output_file) == str):   # check if output specified
 
         if (verbose):
-            stderr.write('Writing to output file.')
+            stderr.write('Writing to output file.\n')
 
         if output_file.endswith(".wig.gz"): # zipped wiggle
             with gzip.open(output_file, 'wt') as out:
@@ -192,6 +193,6 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     if (verbose):
         end_time = time.time()
-        stderr.write(f'wps took {end_time - start_time} s to complete')
+        stderr.write(f'wps took {end_time - start_time} s to complete\n')
 
     return scores

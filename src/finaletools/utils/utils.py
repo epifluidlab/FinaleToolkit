@@ -8,7 +8,6 @@ from sys import stderr, stdout
 import numpy as np
 from numba import jit
 import pysam
-import pybedtools
 from tqdm import tqdm
 
 
@@ -168,6 +167,20 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
                 if ((read_length >= fraction_low)
                     and (read_length <= fraction_high)):
                     frag_ends.append((read_start, read_stop))
+    elif (contig is None):
+        for read1 in (tqdm(sam_file, total=count)
+                      if verbose
+                      else sam_file):
+            # Only select forward strand and filter out non-paired-end
+            # reads and low-quality reads
+            if (read1.is_read2
+                or low_quality_read_pairs(read1, quality_threshold)):
+                pass
+            else:
+                frag_ends.append(
+                    (read1.reference_start,
+                     read1.reference_start + read1.template_length)
+                     )
     else:
         for read1 in (tqdm(sam_file.fetch(contig=contig), total=count)
                       if verbose
@@ -276,8 +289,8 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
 
     # input_file is a path string
     elif (type(input_file) == str):
-        # BAM or SAM file
-        if (input_file.endswith('.bam') or input_file.endswith('.sam')):
+        # SAM file
+        if (input_file.endswith('.sam')):
             with pysam.AlignmentFile(input_file, 'r') as sam_file:
                 frag_ends = _sam_frag_array(
                 sam_file,
@@ -288,7 +301,34 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 maximum=maximum,
                 fraction_low=fraction_low,
                 fraction_high=fraction_high,
-                verbose=verbose)
+                verbose=verbose
+            )
+        # BAM file
+        elif (input_file.endswith('.bam')):
+            with pysam.AlignmentFile(input_file, 'rb') as sam_file:
+                frag_ends = _sam_frag_array(
+                    sam_file,
+                    contig,
+                    has_min_max,
+                    quality_threshold=quality_threshold,
+                    minimum=minimum,
+                    maximum=maximum,
+                    fraction_low=fraction_low,
+                    fraction_high=fraction_high,
+                    verbose=verbose
+                )
+        # BAM from stdin
+        elif (input_file == '-'):
+            with pysam.AlignmentFile(input_file, 'rb') as sam_file:
+                frag_ends = _sam_frag_array(
+                    sam_file,
+                    None,
+                    False,
+                    quality_threshold=quality_threshold,
+                    fraction_low=fraction_low,
+                    fraction_high=fraction_high,
+                    verbose=verbose
+                )
         # BED file
         elif (input_file.endswith('.bed')):
             with open(input_file, 'rt') as bed_file:
@@ -301,7 +341,8 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 maximum=maximum,
                 fraction_low=fraction_low,
                 fraction_high=fraction_high,
-                verbose=verbose)
+                verbose=verbose
+            )
         # BED.gz file
         elif (input_file.endswith('.bed.gz')):
             with gzip.open(input_file, 'rt') as bed_file:
@@ -314,7 +355,8 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                     maximum=maximum,
                     fraction_low=fraction_low,
                     fraction_high=fraction_high,
-                    verbose=verbose)
+                    verbose=verbose
+                )
         else:
             raise ValueError(
                 'input_file can only have suffixes .bam, .sam, .bed, or '
@@ -396,61 +438,6 @@ def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
     """
     return (low_quality_read_pairs(read, min_mapq=min_mapq)
             or not read.is_read1)
-
-
-def filter_bam(
-        input_file: str,
-        blacklist_bed: str=None,
-        region_bed: str=None,
-        output_path: str=None,
-        quality_threshold: int=30,
-        verbose: bool=False):
-    """
-    Accepts the path to a BAM file and returns a Bed file where all
-    reads are read1 in a proper pair, exceed the specified quality
-    threshold, do not intersect a region in the given blacklist
-    file, and intersects with a region in the region bed.
-
-    Parameters
-    ----------
-    input_bam : str
-        Path string or AlignmentFile pointing to the BAM file to be
-        filtered.
-    blacklist_bed : str or BedTool, optional
-    region_bed :
-    output_path : str, optional
-    quality_threshold : int, optional
-    verbose : bool, optional
-
-    Returns
-    -------
-    output_path : str
-        String containing path to the filtered BED file. If no
-        output_path, will be placed into a temporary file.
-    """
-
-    # create tempfile to contain filtered BED
-    if output_path is None:
-        _, output_path = tf.mkstemp(suffix='.bed')
-    elif output_path.endswith('bed'):
-        pass
-    else:
-        raise ValueError('output_path should have suffix .bed')
-
-    temp_dir = tf.mkdtemp()
-
-    flag_filtered_bam = temp_dir + '/flag_filtered.bam'
-
-    print(flag_filtered_bam)
-
-    pysam.view('-b', '-h', '-o', flag_filtered_bam, '-q',
-               str(quality_threshold), '-f', '2', input_file)
-
-    with pysam.AlignmentFile(flag_filtered_bam, 'rb') as file:
-        for line in file.head(5):
-            print(line)
-
-    return None
 
 
 def _get_intervals(

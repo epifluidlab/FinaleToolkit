@@ -3,7 +3,7 @@ import gzip
 import time
 from multiprocessing.pool import Pool
 from typing import Union
-from sys import stderr
+from sys import stderr, stdout
 
 import pysam
 import numpy as np
@@ -69,7 +69,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             site_bed: {site_bed}
             output_file: {output_file}
             window_size: {window_size}
-            size_around_sites: {interval_size}
+            interval_size: {interval_size}
             quality_threshold: {quality_threshold}
             workers: {workers}
             verbose: {verbose}
@@ -78,18 +78,24 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             )
 
     # read tss contigs and coordinates from bed
+    if (verbose):
+        stderr.write('Reading intervals from bed\n')
+
     contigs = []
     starts = []
     stops = []
+    strands = []
     with open(site_bed) as bed:
         for line in bed:
             contents = line.split()
             contig = contents[0].strip()
             start = int(contents[1])
             stop = int(contents[2])
+            strand = contents[5].strip()
             contigs.append(contig)
             starts.append(start)
             stops.append(stop)
+            strands.append(strand)
 
 
     left_of_site = round(-interval_size / 2)
@@ -98,6 +104,9 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     assert right_of_site - left_of_site == interval_size
 
     count = len(contigs)
+
+    if (verbose):
+        stderr.write('Zipping inputs\n')
 
     tss_list = zip(
         count*[input_file],
@@ -108,17 +117,36 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
         count*[window_size],
         count*[fraction_low],
         count*[fraction_high],
-        count*[quality_threshold])
+        count*[quality_threshold],
+        count*[verbose-2 if verbose>2 else 0]
+    )
 
-    with Pool(workers) as pool:
-        contig_scores = pool.starmap(wps, tss_list)
+    if (verbose):
+        stderr.write('Calculating wps...\n')
+
+    with Pool(workers, maxtasksperchild=500) as pool:
+        contig_scores = pool.starmap(wps, tss_list, chunksize=10000)
 
     scores = np.zeros((interval_size, 2))
 
     scores[:, 0] = np.arange(left_of_site, right_of_site)
 
-    for contig_score in contig_scores:
-        scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+    if (verbose):
+        stderr.write('Flipping scores for reverse strand\n')
+
+    # aggregate scores by strand
+    for i in range(count):
+        if strands[i] == '.':
+            continue
+        elif strands[i] == '-':
+            contig_score = np.flip(contig_scores[i], 1)
+            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+        elif strands[i] == '+':
+            contig_score = contig_scores[i]
+            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+        else:
+            stderr.write('Invalid strand found. Interval skipped.')
+    
 
     if (type(output_file) == str):   # check if output specified
         if (verbose):
@@ -133,9 +161,9 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                     f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
                     f'={window_size}\n'
                     )
-                for score in (tqdm(scores[:, 1])
+                for score in (tqdm(scores[:, 1]+1)
                               if verbose >= 2
-                              else scores[:, 1]):
+                              else scores[:, 1]+1):
                     out.write(f'{score}\n')
 
         elif output_file.endswith(".wig"):  # wiggle
@@ -145,12 +173,25 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
                 # declaration line
                 out.write(
                     f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                    f'={window_size}\n'
+                    f'={interval_size}\n'
                     )
-                for score in (tqdm(scores[:, 1])
+                for score in (tqdm(scores[:, 1]+1)
                               if verbose >= 2
-                              else scores[:, 1]):
+                              else scores[:, 1]+1):
                     out.write(f'{score}\n')
+
+        elif output_file == '-':  # stdout
+            if (verbose):
+                stderr.write(f'File opened! Writing...\n')
+            # declaration line
+            stdout.write(
+                f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
+                f'={window_size}\n'
+                )
+            for score in (tqdm(scores[:, 1])
+                            if verbose >= 2
+                            else scores[:, 1]):
+                stdout.write(f'{score}\n')
 
         else:   # unaccepted file type
             raise ValueError(
@@ -167,7 +208,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     if (verbose):
         end_time = time.time()
         stderr.write(
-            f'aggregate_wps took {end_time - start_time} s to complete\n',
-            flush=True)
+            f'aggregate_wps took {end_time - start_time} s to complete\n'
+        )
 
     return scores

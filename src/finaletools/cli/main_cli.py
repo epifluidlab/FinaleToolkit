@@ -6,9 +6,11 @@ import argparse
 from finaletools.frag.frag_length import (
     frag_length, frag_length_bins, frag_length_intervals
 )
+from finaletools.utils.filter_bam import filter_bam
 from finaletools.frag.coverage import coverage
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
+from finaletools.frag.process_wps import process_wps
 
 
 # TODO: implement subcommands read from stdin
@@ -77,7 +79,7 @@ def main_cli():
 
     # Subcommand 2: frag-length
     parser_command2 = subparsers.add_parser(
-        'frag-length', prog='frag-length',
+        'frag-length', prog='finaletools-frag-length',
         description='Calculates fragment lengths given a CRAM/BAM/SAM file'
         )
     parser_command2.add_argument('input_file')
@@ -90,7 +92,7 @@ def main_cli():
 
     # Subcommand 3: frag_length_bins()
     parser_command3 = subparsers.add_parser(
-        'frag-length-bins', prog='frag-length-bins',
+        'frag-length-bins', prog='finaletools-frag-length-bins',
         description='computes frag lengths of fragments and either prints'
         'bins and counts to tsv or prints a histogram'
         )
@@ -152,7 +154,7 @@ def main_cli():
     # Subcommand 4: wps (on interval bed file)
     parser_command4 = subparsers.add_parser(
         'wps',
-        prog='wps',
+        prog='finaletools-wps',
         description='Calculates Windowed Protection Score over a region '
         'around sites specified in a BED file from alignments in a '
         'CRAM/BAM/SAM file'
@@ -167,7 +169,8 @@ def main_cli():
     )
     parser_command4.add_argument(
         '-o',
-        '--output_file'
+        '--output_file',
+        default='-'
     )
     parser_command4.add_argument(
         '-i',
@@ -215,7 +218,7 @@ def main_cli():
     # Subcommand 5: delfi
     parser_command5 = subparsers.add_parser(
         'delfi',
-        prog='delfi',
+        prog='finaletools-delfi',
         description='Calculates DELFI score over genome'
         )
     parser_command5.add_argument('input_file')
@@ -231,6 +234,107 @@ def main_cli():
     parser_command5.add_argument('-v', '--verbose', action='count', default=0)
     parser_command5.set_defaults(func=delfi)
 
+    # Subcommand 6: filter_bam
+    parser_command6 = subparsers.add_parser(
+        'filter-bam',
+        prog='finaletools-filter-bam',
+        description='Filters a BAM file so that all reads are in mapped pairs'
+        ', exceed a certain MAPQ, are not flagged for quality, are read1, are'
+        ' not secondary or supplementary alignments, and are on the same'
+        'reference sequence as the mate.'
+    )
+    parser_command6.add_argument(
+        'input_file',
+        help='BAM file with PE WGS'
+    )
+    parser_command6.add_argument(
+        '-r',
+        '--region-file',
+        help='BED file containing regions to read fragments from.'
+    )
+    parser_command6.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='Path to write filtered BAM. Defualt is "_". If set to "_",'
+        ' the BAM file will be written to stdout.'
+    )
+    parser_command6.add_argument(
+        '-q',
+        '--quality_threshold',
+        type=int,
+        default=30,
+        help='Minimum mapping quality to filter for. Defualt is 30.'
+    )
+    parser_command6.add_argument(
+        '-hi',
+        '--fraction-high',
+        type=int,
+        default=None,
+        help='Maximum fragment size. Default is None'
+    )
+    parser_command6.add_argument(
+        '-lo',
+        '--fraction-low',
+        type=int,
+        default=None,
+        help='Minimum fragment size. Default is None'
+    )
+    parser_command6.add_argument(
+        '-w',
+        '--workers',
+        type=int,
+        default=1,
+        help='Number of worker processes to spawn.'
+    )
+    parser_command6.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
+    )
+    parser_command6.set_defaults(func=filter_bam)
+
+    # Subcommand 7: process WPS
+    parser_command7 = subparsers.add_parser(
+        'process-wps',
+        prog='finaletools-process-wps',
+        description='Reads WPS data from a WIG file and applies a median filter'
+        ' and a Savitsky-Golay filter (Savitsky and Golay, 1964).'
+    )
+    parser_command7.add_argument(
+        'input_file',
+        help='WIG file with WPS data. If "-", will read from stdin.'
+    )
+    parser_command7.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='WIG file to print filtered WPS data. If "-", will write to '
+        'stdout. Default is "-".'
+    )
+    parser_command7.add_argument(
+        '-m',
+        '--larm-window-size',
+        default=1000,
+        type=int,
+        help='Size of window for median filter. Default is 1000.'
+    )
+    parser_command7.add_argument(
+        '-s',
+        '--savgol-window-size',
+        default=21,
+        type=int,
+        help='Size of window for Savitsky-Golay filter. Default is 21.'
+    )
+    parser_command7.add_argument(
+        '-p',
+        '--savgol-poly-deg',
+        default=2,
+        type=int,
+        help='Degree polynomial for Savitsky-Golay filter. Default is 1000.'
+    )
+    parser_command7.set_defaults(func=process_wps)
 
     args = parser.parse_args()
     function = args.func
