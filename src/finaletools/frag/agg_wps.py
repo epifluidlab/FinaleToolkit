@@ -81,15 +81,18 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
     contigs = []
     starts = []
     stops = []
+    strands = []
     with open(site_bed) as bed:
         for line in bed:
             contents = line.split()
             contig = contents[0].strip()
             start = int(contents[1])
             stop = int(contents[2])
+            strand = contents[5].strip()
             contigs.append(contig)
             starts.append(start)
             stops.append(stop)
+            strands.append(strand)
 
 
     left_of_site = round(-interval_size / 2)
@@ -119,8 +122,19 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
 
     scores[:, 0] = np.arange(left_of_site, right_of_site)
 
-    for contig_score in contig_scores:
-        scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+    # aggregate scores by strand
+    for i in range(count):
+        if strands[i] == '.':
+            continue
+        elif strands[i] == '-':
+            contig_score = np.flip(contig_scores[i], 1)
+            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+        elif strands[i] == '+':
+            contig_score = contig_scores[i]
+            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
+        else:
+            stderr.write('Invalid strand found. Interval skipped.')
+    
 
     if (type(output_file) == str):   # check if output specified
         if (verbose):
