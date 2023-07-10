@@ -6,6 +6,7 @@ from multiprocessing.pool import Pool
 from typing import Union
 from tempfile import TemporaryDirectory
 from sys import stderr
+import gzip
 
 import pysam
 import py2bit
@@ -344,10 +345,21 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     if gc_correction:
         trimmed_windows = _delfi_gc_adjust(trimmed_windows, verbose)
 
-    with open(output_file, 'w') as out:
-        out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
-        for window in trimmed_windows:
-            out.write(f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t{window[4]}\t{window[5]}\t{window[6]}\n')
+    # TSV or BED3+3
+    if output_file.endswith('.bed') or output_file.endswith('.tsv'):
+        with open(output_file, 'w') as out:
+            out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
+            for window in trimmed_windows:
+                out.write(
+                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
+                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
+    if output_file.endswith('.bed.gz'):
+        with gzip.open(output_file, 'w') as out:
+            out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
+            for window in trimmed_windows:
+                out.write(
+                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
+                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
 
 
     num_frags = sum(window[3] for window in windows)
