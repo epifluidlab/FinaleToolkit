@@ -1,6 +1,7 @@
 from __future__ import annotations
 import tempfile as tf
 import subprocess
+import traceback
 from sys import stderr
 
 import pysam
@@ -63,7 +64,7 @@ def filter_bam(
         try:
             process1 = subprocess.run(samtools_command, shell=True, check=True)
         except Exception as e:
-            stderr.write(e)
+            traceback.print_exc()
             exit(1)
 
         # filter for reads on different reference
@@ -109,5 +110,5 @@ def filter_bam(
                 check=True
             )
         except Exception as e:
-            stderr.write(e)
+            traceback.print_exc()
             exit(1)
