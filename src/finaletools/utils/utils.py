@@ -301,31 +301,34 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 maximum=maximum,
                 fraction_low=fraction_low,
                 fraction_high=fraction_high,
-                verbose=verbose)
+                verbose=verbose
+            )
         # BAM file
         elif (input_file.endswith('.bam')):
             with pysam.AlignmentFile(input_file, 'rb') as sam_file:
                 frag_ends = _sam_frag_array(
-                sam_file,
-                contig,
-                has_min_max,
-                quality_threshold=quality_threshold,
-                minimum=minimum,
-                maximum=maximum,
-                fraction_low=fraction_low,
-                fraction_high=fraction_high,
-                verbose=verbose)
+                    sam_file,
+                    contig,
+                    has_min_max,
+                    quality_threshold=quality_threshold,
+                    minimum=minimum,
+                    maximum=maximum,
+                    fraction_low=fraction_low,
+                    fraction_high=fraction_high,
+                    verbose=verbose
+                )
         # BAM from stdin
         elif (input_file == '-'):
             with pysam.AlignmentFile(input_file, 'rb') as sam_file:
                 frag_ends = _sam_frag_array(
-                sam_file,
-                None,
-                False,
-                quality_threshold=quality_threshold,
-                fraction_low=fraction_low,
-                fraction_high=fraction_high,
-                verbose=verbose)
+                    sam_file,
+                    None,
+                    False,
+                    quality_threshold=quality_threshold,
+                    fraction_low=fraction_low,
+                    fraction_high=fraction_high,
+                    verbose=verbose
+                )
         # BED file
         elif (input_file.endswith('.bed')):
             with open(input_file, 'rt') as bed_file:
@@ -338,7 +341,8 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 maximum=maximum,
                 fraction_low=fraction_low,
                 fraction_high=fraction_high,
-                verbose=verbose)
+                verbose=verbose
+            )
         # BED.gz file
         elif (input_file.endswith('.bed.gz')):
             with gzip.open(input_file, 'rt') as bed_file:
@@ -351,7 +355,8 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                     maximum=maximum,
                     fraction_low=fraction_low,
                     fraction_high=fraction_high,
-                    verbose=verbose)
+                    verbose=verbose
+                )
         else:
             raise ValueError(
                 'input_file can only have suffixes .bam, .sam, .bed, or '
