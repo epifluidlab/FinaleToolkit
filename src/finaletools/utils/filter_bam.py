@@ -70,6 +70,9 @@ def filter_bam(
             traceback.print_exc()
             exit(1)
 
+        # supress index file warning
+        save = pysam.set_verbosity(0)
+
         # filter for reads on different reference
         with pysam.AlignmentFile(flag_filtered_bam, 'rb') as in_file:
             with pysam.AlignmentFile(
@@ -102,6 +105,7 @@ def filter_bam(
                             out_file.write(read)
     finally:
         temp_dir.cleanup()
+        pysam.set_verbosity(save)
 
     if output_file != '-':
         # generate index for output_file
