@@ -12,6 +12,7 @@ import pysam
 import py2bit
 import numpy as np
 from statsmodels.nonparametric.smoothers_lowess import lowess
+import pyBigWig as pbw
 
 from finaletools.utils.utils import _not_read1_or_low_quality
 
@@ -346,14 +347,21 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         trimmed_windows = _delfi_gc_adjust(trimmed_windows, verbose)
 
     # TSV or BED3+3
-    if output_file.endswith('.bed') or output_file.endswith('.tsv'):
+    if output_file.endswith('.bed'):
         with open(output_file, 'w') as out:
             out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
             for window in trimmed_windows:
                 out.write(
                     f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
                     f'{window[4]}\t{window[5]}\t{window[6]}\n')
-    if output_file.endswith('.bed.gz'):
+    if output_file.endswith('.tsv'):
+        with open(output_file, 'w') as out:
+            out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
+            for window in trimmed_windows:
+                out.write(
+                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
+                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
+    elif output_file.endswith('.bed.gz'):
         with gzip.open(output_file, 'w') as out:
             out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
             for window in trimmed_windows:
