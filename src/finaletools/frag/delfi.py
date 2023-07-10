@@ -76,9 +76,7 @@ def _delfi_single_window(
         ):
             sam_file = pysam.TabixFile(input_file)
         # Iterating on each read in file in specified contig/chromosome
-        for read1 in (sam_file.fetch(contig=contig,
-                                        start=window_start,
-                                        stop=window_stop)):
+        for read1 in (sam_file.fetch(contig, window_start, window_stop)):
 
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
@@ -303,6 +301,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     # remove bottom 10 percentile
     trimmed_windows = trim_coverage(window_array, 10)
 
+    # output
     def _write_out(out: TextIO):
         out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
         for window in trimmed_windows:
