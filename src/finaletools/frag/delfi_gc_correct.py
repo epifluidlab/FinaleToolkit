@@ -77,7 +77,8 @@ def cli_delfi_gc_correct(
             ('stop', 'u8'),
             ('short', 'f8'),
             ('long', 'f8'),
-            ('gc', 'f8')
+            ('gc', 'f8'),
+            ('frag_count', 'f8')
         ],
         skip_header=header_lines,
     )
@@ -93,7 +94,7 @@ def cli_delfi_gc_correct(
 
     if output_file.endswith('.tsv'):
         with open(output_file, 'w') as out:
-            out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
+            out.write('contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
             for window in corrected_delfi:
                 out.write(
                     f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
