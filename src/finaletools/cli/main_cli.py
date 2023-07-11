@@ -360,7 +360,7 @@ def main_cli():
         '--header-lines',
         default=1,
         type=int,
-        help='Number of header lines in BED'
+        help='Number of header lines in BED. Default is 1.'
     )
     parser_command8.add_argument(
         '-v',
