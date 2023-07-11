@@ -11,6 +11,7 @@ from finaletools.frag.coverage import coverage
 from finaletools.frag.agg_wps import aggregate_wps
 from finaletools.frag.delfi import delfi
 from finaletools.frag.process_wps import process_wps
+from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
 
 
 # TODO: implement subcommands read from stdin
@@ -292,7 +293,8 @@ def main_cli():
         '-v',
         '--verbose',
         action='count',
-        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
+        help='Specify verbosity. Number of printed statements is proportional '
+        'to number of vs.'
     )
     parser_command6.set_defaults(func=filter_bam)
 
@@ -336,6 +338,38 @@ def main_cli():
         help='Degree polynomial for Savitsky-Golay filter. Default is 1000.'
     )
     parser_command7.set_defaults(func=process_wps)
+
+    # parser command 8: delfi gc correct
+    parser_command8 = subparsers.add_parser(
+        'delfi-gc-correct',
+        prog='finaletools-delfi-gc-correct',
+        description='Performs gc-correction on raw delfi data.'
+    )
+    parser_command8.add_argument(
+        'input_file',
+        help='BED3+3 file containing raw data'
+    )
+    parser_command8.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='BED3+3 to print GC-corrected DELFI fractions. If "-", will write'
+        ' to stdout. Default is "-".'
+    )
+    parser_command8.add_argument(
+        '--header-lines',
+        default=1,
+        type=int,
+        help='Number of header lines in BED'
+    )
+    parser_command8.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional '
+        'to number of vs.'
+    )
+    parser_command8.set_defaults(func=cli_delfi_gc_correct)
 
     args = parser.parse_args()
     function = args.func
