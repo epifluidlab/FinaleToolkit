@@ -86,7 +86,7 @@ def cli_delfi_gc_correct(
 
     # output
     def _write_out(out: TextIO):
-        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
+        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
         for window in corrected_delfi:
             out.write(
                 f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
