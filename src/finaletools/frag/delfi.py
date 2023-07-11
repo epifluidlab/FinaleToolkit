@@ -75,7 +75,7 @@ def _delfi_single_window(
             or input_file.endswith('.frag.gz')
             or input_file.endswith('.frag')
         ):
-            file = pysam.TabixFile(input_file, parser=pysam.asBed)
+            file = pysam.TabixFile(input_file, parser=pysam.asBed())
             is_sam = False
         else:
             raise ValueError(
@@ -92,6 +92,7 @@ def _delfi_single_window(
             if is_sam and _not_read1_or_low_quality(read1, quality_threshold):
                 pass
             else:
+                # TODO: fix tabix reading
                 if is_sam:
                     frag_start = read1.reference_start
                     frag_length = read1.template_length
