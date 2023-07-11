@@ -318,7 +318,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     # output
     def _write_out(out: TextIO):
-        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\n')
+        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
         for window in trimmed_windows:
             out.write(
                 f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
@@ -326,7 +326,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     if output_file.endswith('.tsv'):
         with open(output_file, 'w') as out:
-            out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
+            out.write('contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
             for window in trimmed_windows:
                 out.write(
                     f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
