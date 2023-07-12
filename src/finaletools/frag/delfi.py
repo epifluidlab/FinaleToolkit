@@ -66,6 +66,7 @@ def _delfi_single_window(
     num_frags = 0
 
     try:
+        # read from tabix or bam/bam
         if input_file.endswith('.bam') or input_file.endswith('.sam'):
             file = pysam.AlignmentFile(input_file)
             is_sam = True
@@ -142,19 +143,15 @@ def _delfi_single_window(
     num_gc = 0  # cumulative sum of gc bases
 
     with py2bit.open(reference_file) as ref_seq:
-        # ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
-        for frag_start, frag_stop in frag_pos:
-            frag_seq = ref_seq.sequence(contig, frag_start, frag_stop).upper()
-            num_gc += sum([(base == 'G' or base == 'C') for base in frag_seq])
+        ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
 
-    # num_bases = window_stop - window_start
-    # num_gc = sum([(base == 'G' or base == 'C') for base in ref_bases])
+    num_gc = sum((base == 'G' or base == 'C') for base in ref_bases)
 
-    # sum of frag_lengths
-    frag_coverage = sum(short_lengths) + sum(long_lengths)
+    # window_length
+    window_coverage = window_stop - window_start
 
     # NaN if no fragments in window.
-    gc_content = num_gc / frag_coverage if num_frags > 0 else np.NaN
+    gc_content = num_gc / window_coverage if num_frags > 0 else np.NaN
 
     coverage_short = len(short_lengths)
     coverage_long = len(long_lengths)
