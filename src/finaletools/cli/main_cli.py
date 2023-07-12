@@ -240,7 +240,7 @@ def main_cli():
         prog='finaletools-filter-bam',
         description='Filters a BAM file so that all reads are in mapped pairs'
         ', exceed a certain MAPQ, are not flagged for quality, are read1, are'
-        ' not secondary or supplementary alignments, and are on the same'
+        ' not secondary or supplementary alignments, and are on the same '
         'reference sequence as the mate.'
     )
     parser_command6.add_argument(
