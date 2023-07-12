@@ -14,7 +14,7 @@ from memory_profiler import profile
 from finaletools.frag.wps import wps
 
 
-def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
+def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                   site_bed: str,
                   output_file: str=None,
                   window_size: int=120,
@@ -146,7 +146,7 @@ def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
             scores[:, 1] = scores[:, 1] + contig_score[:, 1]
         else:
             stderr.write('Invalid strand found. Interval skipped.')
-    
+
 
     if (type(output_file) == str):   # check if output specified
         if (verbose):

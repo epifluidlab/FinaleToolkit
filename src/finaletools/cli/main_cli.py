@@ -8,7 +8,7 @@ from finaletools.frag.frag_length import (
 )
 from finaletools.utils.filter_bam import filter_bam
 from finaletools.frag.coverage import coverage
-from finaletools.frag.agg_wps import aggregate_wps
+from finaletools.frag.multi_wps import multi_wps
 from finaletools.frag.delfi import delfi
 from finaletools.frag.process_wps import process_wps
 
@@ -213,7 +213,7 @@ def main_cli():
         '--verbose',
         action='count',
         default=0)
-    parser_command4.set_defaults(func=aggregate_wps)
+    parser_command4.set_defaults(func=multi_wps)
 
     # Subcommand 5: delfi
     parser_command5 = subparsers.add_parser(
