@@ -10,6 +10,7 @@ import numpy as np
 from numba import jit
 from tqdm import tqdm
 from memory_profiler import profile
+import pyBigWig as pbw
 
 from finaletools.frag.wps import wps
 
@@ -76,6 +77,23 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
 
             """
             )
+    # get header from input_file
+    if input_file.endswith('.sam') or input_file.endswith('.bam'):
+        with pysam.AlignmentFile(input_file, 'r') as bam:
+            references = bam.references
+            lengths = bam.lengths
+            header = list(zip(references, lengths))
+    # TODO: get a header when reading tabix
+    elif (input_file.endswith('.bed')
+          or input_file.endswith('.bed.gz')
+          or input_file.endswith('.frag')
+          or input_file.endswith('.frag.gz')
+    ):
+        with pysam.TabixFile(input_file, 'r') as tbx:
+            raise NotImplementedError('tabix files not yet supported!')
+
+    if (verbose):
+        stderr.write(f'header is {header}')
 
     # read tss contigs and coordinates from bed
     if (verbose):
@@ -125,77 +143,31 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
         stderr.write('Calculating wps...\n')
 
     with Pool(workers, maxtasksperchild=500) as pool:
-        contig_scores = pool.starmap(wps, tss_list, chunksize=10000)
+        interval_scores = pool.starmap(wps, tss_list, chunksize=10000)
 
-    scores = np.zeros((interval_size, 2))
-
-    scores[:, 0] = np.arange(left_of_site, right_of_site)
-
-    if (verbose):
-        stderr.write('Flipping scores for reverse strand\n')
-
-    # aggregate scores by strand
-    for i in range(count):
-        if strands[i] == '.':
-            continue
-        elif strands[i] == '-':
-            contig_score = np.flip(contig_scores[i], 1)
-            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
-        elif strands[i] == '+':
-            contig_score = contig_scores[i]
-            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
-        else:
-            stderr.write('Invalid strand found. Interval skipped.')
-
-
+    # output
     if (type(output_file) == str):   # check if output specified
         if (verbose):
             stderr.write(f'Output file {output_file} specified. Opening...\n')
-        if output_file.endswith(".wig.gz"): # zipped wiggle
-            with gzip.open(output_file, 'wt') as out:
-                if (verbose):
-                    stderr.write(f'File opened! Writing...\n')
 
-                # declaration line
-                out.write(
-                    f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                    f'={window_size}\n'
+        if output_file.endswith(".bw"): # BigWig
+            with pbw.open(output_file, 'w') as bigwig:
+                bigwig.addHeader(header)
+                for interval_score in interval_scores:
+                    contigs = interval_score['contig']
+                    starts = interval_score['start']
+                    scores = interval_score['wps']
+                    stops = starts + 1
+                    bigwig.addEntries(
+                        chroms=contigs,
+                        starts=starts,
+                        ends=stops,
+                        values=scores.astype(np.float64),
                     )
-                for score in (tqdm(scores[:, 1]+1)
-                              if verbose >= 2
-                              else scores[:, 1]+1):
-                    out.write(f'{score}\n')
-
-        elif output_file.endswith(".wig"):  # wiggle
-            with open(output_file, 'wt') as out:
-                if (verbose):
-                    stderr.write(f'File opened! Writing...\n')
-                # declaration line
-                out.write(
-                    f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                    f'={interval_size}\n'
-                    )
-                for score in (tqdm(scores[:, 1]+1)
-                              if verbose >= 2
-                              else scores[:, 1]+1):
-                    out.write(f'{score}\n')
-
-        elif output_file == '-':  # stdout
-            if (verbose):
-                stderr.write(f'File opened! Writing...\n')
-            # declaration line
-            stdout.write(
-                f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                f'={window_size}\n'
-                )
-            for score in (tqdm(scores[:, 1])
-                            if verbose >= 2
-                            else scores[:, 1]):
-                stdout.write(f'{score}\n')
 
         else:   # unaccepted file type
             raise ValueError(
-                'output_file can only have suffixes .wig or .wig.gz.'
+                'output_file can only have suffix .bw'
                 )
 
     elif (output_file is not None):

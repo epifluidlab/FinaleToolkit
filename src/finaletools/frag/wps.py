@@ -17,7 +17,8 @@ from memory_profiler import profile
 from finaletools.utils import frag_array
 
 @jit(nopython=True)
-def _single_wps(window_start: int,
+def _single_wps(contig: str,
+                window_start: int,
                 window_stop: int,
                 window_position: int,
                 frag_ends: np.ndarray
@@ -36,29 +37,37 @@ def _single_wps(window_start: int,
     num_end_in = np.sum(is_end_in)
 
     # calculate wps and return
-    return (window_position, num_spanning - num_end_in)
+    return (contig, window_position, num_spanning - num_end_in)
 
-@jit(nopython=True)
+
 def _wps_loop(frag_ends: np.ndarray,
+              contig: str,
               start: int,
               stop: int,
               window_size: int):
-    # array to store positions and scores
-    scores = np.zeros((stop-start, 2))
     window_centers = np.arange(start, stop, dtype=np.int64)
-    scores[:, 0] = window_centers
     window_starts = np.zeros(stop-start)
     window_stops = np.zeros(stop-start)
     np.rint(window_centers - window_size * 0.5, window_starts)
     np.rint(window_centers + window_size * 0.5 - 1, window_stops)
-    # inclusive
-
+    # stops are inclusive
+    # array to store positions and scores
+    scores = np.zeros(
+        stop-start,
+        dtype=[
+            ('contig', 'U16'),
+            ('start', 'i8'),
+            ('wps', 'i8'),
+        ]
+    )
     for i in range(stop-start):
-        scores[i, :] = _single_wps(
+        scores[i] = _single_wps(
+            contig,
             window_starts[i],
             window_stops[i],
             window_centers[i],
-            frag_ends)
+            frag_ends
+        )
 
     return scores
 
@@ -137,10 +146,17 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     # check if no fragments exist on this interval
     if (frag_ends.shape == (0, 2)):
 
-        scores = np.zeros((stop-start, 2))
-        scores[:, 0] = np.arange(start, stop, dtype=int)
+        scores = np.zeros(
+        stop-start,
+        dtype=[
+            ('contig', 'U16'),
+            ('start', 'i8'),
+            ('wps', 'i8'),
+        ]
+    )
+        scores['start'] = np.arange(start, stop, dtype=int)
     else:
-        scores = _wps_loop(frag_ends, start, stop, window_size)
+        scores = _wps_loop(frag_ends, contig, start, stop, window_size)
 
 
     # TODO: consider switch-case statements and determine if they
@@ -157,7 +173,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                     f'fixedStep\tchrom={contig}\tstart={start}\t'
                     f'step={1}\tspan={stop-start}\n'
                     )
-                for score in scores[:, 1]:
+                for score in scores['wps']:
                     out.write(f'{score}\n')
 
         elif output_file.endswith(".wig"):  # wiggle
@@ -167,7 +183,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                     f'fixedStep\tchrom={contig}\tstart={start}\tstep='
                     f'{1}\tspan={stop-start}\n'
                     )
-                for score in scores[:, 1]:
+                for score in scores['wps']:
                     out.write(f'{score}\n')
 
         elif output_file == '-':    #stdout
@@ -175,7 +191,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                 f'fixedStep\tchrom={contig}\tstart={start}\tstep='
                 f'{1}\tspan={stop-start}\n'
                 )
-            for score in scores[:, 1]:
+            for score in scores['wps']:
                 stdout.write(f'{score}\n')
             stdout.flush()
 
