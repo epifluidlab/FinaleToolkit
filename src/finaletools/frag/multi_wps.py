@@ -118,7 +118,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
             bed = open(site_bed)
 
         # for overlap checking
-        prev_contig = "0"
+        prev_contig = None
         prev_start = 0
         prev_stop = 0
         for line in bed:
@@ -128,18 +128,22 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
             stop = int(contents[2])
             strand = contents[5].strip()
 
-            # cut off part of current interval if overlap
+            # cut off part of previous interval if overlap
             if contig == prev_contig and start < prev_stop:
-                start = prev_stop
+                prev_stop = start
 
-            contigs.append(contig)
-            starts.append(start)
-            stops.append(stop)
-            strands.append(strand)
+            if prev_contig is not None:
+                contigs.append(prev_contig)
+                starts.append(prev_start)
+                stops.append(prev_stop)
 
             prev_contig = contig
             prev_start = start
             prev_stop = stop
+        # appending last interval
+        contigs.append(prev_contig)
+        starts.append(prev_start)
+        stops.append(prev_stop)
 
     finally:
         if site_bed != '-':
