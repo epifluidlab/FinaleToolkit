@@ -39,7 +39,6 @@ def _single_wps(contig: str,
     # calculate wps and return
     return (contig, window_position, num_spanning - num_end_in)
 
-
 def _wps_loop(frag_ends: np.ndarray,
               contig: str,
               start: int,
