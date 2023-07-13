@@ -1,12 +1,15 @@
 from __future__ import annotations
 from sys import stdin, stdout, stderr
-from typing import TextIO
+from typing import TextIO, Union
+from multiprocessing import Pool
+from time import time
 
 import numpy as np
+import pyBigWig as pbw
 
 from scipy.signal import savgol_filter
 
-def _larm(data, window_size):
+def _median_filter(data, window_size):
     """locally adjusted running median"""
     # Calculate the running median
     running_median = np.array([
@@ -18,71 +21,95 @@ def _larm(data, window_size):
 
     return adjusted_data
 
-def process_wps(
+def _single_process_wps(
         input_file: str,
-        output_file: str,
-        larm_window_size: int=1000,
+        contig: str,
+        start: int,
+        stop: int,
+        median_window_size: int=1000,
         savgol_window_size: int=21,
         savgol_poly_deg: int=2,
-    ):
+):
     """
     Takes a wps WIG file and applies a median filter and a Savitsky-
     Golay filter (Savitsky and Golay, 1964) on it.
     """
-    try:
-        # read from file or stdin
-        if input_file == '-':
-            wig_file = stdin
-        else:
-            wig_file = open(input_file, 'r')
 
-        wps = []
-        is_first_line = True
-        for line in wig_file:
-            if line.isspace():
-                break
-            # Read info from header
-            if is_first_line:
-                contents = line.split('\t')
-                for item in contents:
-                    if 'chrom' in item:
-                        chrom = item.split('=')[1].strip()
-                    if 'start' in item:
-                        start = int(item.split('=')[1])
-                    if 'span' in item:
-                        span = int(item.split('=')[1])
-
-                is_first_line = False
-                continue
-            else:
-                wps.append(float(line))
-    finally:
-        if input_file != '-':
-            wig_file.close()
-
-    adjusted = _larm(wps, larm_window_size)
+    """
+    adjusted = _median_filter(wps, median_window_size)
     filtered = savgol_filter(adjusted, savgol_window_size, savgol_poly_deg)
     length = len(filtered)
-    filt_start = start + larm_window_size//2
-
-    # write to file or stdout
+    filt_start = start + median_window_size//2
+    """
+    # read wps
     try:
-        if output_file == '-':
-            wig_file = stdout
+        # check input types
+        if input_file.endswith('.bw'):
+            raw_wps = pbw.open(input_file, 'r')
         else:
-            wig_file = open(output_file, 'w')
+            raise ValueError('Invalid filetype for input_file.')
 
-        header = (
-            f'fixedStep\tchrom={chrom}\tstart={filt_start}\tstep=1\tspan='
-            f'{length}\n'
-        )
-        wig_file.write(header)
-        for score in filtered:
-            wig_file.write(f'{score}\n')
     finally:
-        if output_file != '-':
-            wig_file.close()
+        raw_wps.close()
 
-    
+    return None
+
+def process_wps(
+    input_file: str,
+    interval_file: str,
+    output_file: str,
+    median_window_size: int=1000,
+    savgol_window_size: int=21,
+    savgol_poly_deg: int=2,
+    workers: int=1,
+    verbose: Union(bool, int)=False
+):
+    if verbose:
+        start_time = time()
+
+    # read intervals
+        # read intervals
+    if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
+        intervals = []
+        with open(interval_file, 'r') as file:
+            for line in file:
+                contents = line.split('\t')
+                contig = contents[0]
+                start = int(contents[1])
+                stop = int(contents[2])
+                intervals.append(
+                    input_file,
+                    contig,
+                    start,
+                    stop,
+                    median_window_size,
+                    savgol_window_size,
+                    savgol_poly_deg
+                )
+    else:
+        raise ValueError('Invalid filetype for interval_file.')
+
+    # amount taken by median filter
+    end_decrease = median_window_size//2
+    # correct overlaps accounting for median filter
+    for interval1, interval2 in intervals[:-1], intervals[1:]:
+        if (
+            interval1[0] == interval2[0]
+            and interval1[2] - end_decrease
+            > interval2[1] + end_decrease
+        ):
+            interval1[2] = interval2[1] + median_window_size
+
+    try:
+        pool = Pool(workers)
+        processed_scores = pool.imap(_single_process_wps, intervals)
+    finally:
+        pool.close()
+
+
+
+
+
+
 
 
