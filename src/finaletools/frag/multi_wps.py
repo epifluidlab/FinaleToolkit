@@ -3,7 +3,7 @@ import gzip
 import time
 from multiprocessing.pool import Pool
 from typing import Union
-from sys import stderr, stdout
+from sys import stderr, stdout, stdin
 
 import pysam
 import numpy as np
@@ -81,7 +81,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
             verbose: {verbose}
 
             """
-            )
+        )
 
     if (input_file == '-' and site_bed == '-'):
         raise ValueError('input_file and site_bed cannot both read from stdin')
@@ -126,7 +126,6 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
             contig = contents[0].strip()
             start = int(contents[1])
             stop = int(contents[2])
-            strand = contents[5].strip()
 
             # cut off part of previous interval if overlap
             if contig == prev_contig and start < prev_stop:
@@ -199,6 +198,11 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                         starts = interval_score['start']
                         scores = interval_score['wps']
                         stops = starts + 1
+                        # skip empty intervals
+
+                        if interval_score.shape == (0,):
+                            continue
+
                         bigwig.addEntries(
                             chroms=contigs,
                             starts=starts,
