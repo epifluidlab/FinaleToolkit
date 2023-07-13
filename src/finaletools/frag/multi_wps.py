@@ -82,6 +82,10 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
 
             """
             )
+
+    if (input_file == '-' and site_bed == '-'):
+        raise ValueError('input_file and site_bed cannot both read from stdin')
+
     # get header from input_file
     if input_file.endswith('.sam') or input_file.endswith('.bam'):
         with pysam.AlignmentFile(input_file, 'r') as bam:
