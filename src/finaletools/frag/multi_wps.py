@@ -102,7 +102,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
             raise NotImplementedError('tabix files not yet supported!')
 
     if (verbose):
-        stderr.write(f'header is {header}')
+        stderr.write(f'header is {header}\n')
 
     # read tss contigs and coordinates from bed
     if (verbose):
@@ -111,8 +111,12 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
     contigs = []
     starts = []
     stops = []
-    strands = []
-    with open(site_bed) as bed:
+    try:
+        if site_bed == '-':
+            bed = stdin
+        else:
+            bed = open(site_bed)
+
         # for overlap checking
         prev_contig = "0"
         prev_start = 0
@@ -137,6 +141,9 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
             prev_start = start
             prev_stop = stop
 
+    finally:
+        if site_bed != '-':
+            bed.close()
 
     left_of_site = round(-interval_size / 2)
     right_of_site = round(interval_size / 2)
