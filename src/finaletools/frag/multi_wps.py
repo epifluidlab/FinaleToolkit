@@ -2,11 +2,12 @@ from __future__ import annotations
 import gzip
 import time
 from multiprocessing.pool import Pool
-from typing import Union
+from typing import Union, Iterator, Generator
 from sys import stderr, stdout, stdin
 
 import pysam
 import numpy as np
+from numpy.typing import NDArray
 from numba import jit
 from tqdm import tqdm
 from memory_profiler import profile
@@ -203,12 +204,20 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                         if interval_score.shape == (0,):
                             continue
 
-                        bigwig.addEntries(
-                            chroms=contigs,
-                            starts=starts,
-                            ends=stops,
-                            values=scores.astype(np.float64),
-                        )
+                        try:
+                            bigwig.addEntries(
+                                chroms=contigs,
+                                starts=starts,
+                                ends=stops,
+                                values=scores.astype(np.float64),
+                            )
+                        except RuntimeError as e:
+                            stderr.write(interval_score)
+                            stderr.write(
+                                '/n invalid or out of order interval'
+                                'encountered. Skipping to next.'
+                            )
+                            continue
 
             else:   # unaccepted file type
                 raise ValueError(
