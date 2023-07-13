@@ -258,7 +258,7 @@ def main_cli():
         '-o',
         '--output-file',
         default='-',
-        help='Path to write filtered BAM. Defualt is "_". If set to "_",'
+        help='Path to write filtered BAM. Defualt is "-". If set to "-",'
         ' the BAM file will be written to stdout.'
     )
     parser_command6.add_argument(
