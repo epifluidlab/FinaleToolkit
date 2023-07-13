@@ -15,6 +15,11 @@ import pyBigWig as pbw
 from finaletools.frag.wps import wps
 
 
+def _wps_star(args):
+    """Helper function to be used with imap"""
+    return wps(*args)
+
+
 def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                   site_bed: str,
                   output_file: str=None,
@@ -142,40 +147,50 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
     if (verbose):
         stderr.write('Calculating wps...\n')
 
-    with Pool(workers, maxtasksperchild=500) as pool:
-        interval_scores = pool.starmap(wps, tss_list, chunksize=10000)
+    try:
+        pool = Pool(workers, maxtasksperchild=500)
+        # chunksize limited for memory
+        interval_scores = pool.imap(
+            _wps_star,
+            tss_list,
+            chunksize=min(10000, int(count/workers//2+1))
+        )
 
-    # output
-    if (type(output_file) == str):   # check if output specified
-        if (verbose):
-            stderr.write(f'Output file {output_file} specified. Opening...\n')
-
-        if output_file.endswith(".bw"): # BigWig
-            with pbw.open(output_file, 'w') as bigwig:
-                bigwig.addHeader(header)
-                for interval_score in interval_scores:
-                    contigs = interval_score['contig']
-                    starts = interval_score['start']
-                    scores = interval_score['wps']
-                    stops = starts + 1
-                    bigwig.addEntries(
-                        chroms=contigs,
-                        starts=starts,
-                        ends=stops,
-                        values=scores.astype(np.float64),
-                    )
-
-        else:   # unaccepted file type
-            raise ValueError(
-                'output_file can only have suffix .bw'
+        # output
+        if (type(output_file) == str):   # check if output specified
+            if (verbose):
+                stderr.write(
+                    f'Output file {output_file} specified. Opening...\n'
                 )
 
-    elif (output_file is not None):
-        raise TypeError(
-            f'output_file is unsupported type "{type(input_file)}". '
-            'output_file should be a string specifying the path of the file '
-            'to output scores to.'
-            )
+            if output_file.endswith(".bw"): # BigWig
+                with pbw.open(output_file, 'w') as bigwig:
+                    bigwig.addHeader(header)
+                    for interval_score in interval_scores:
+                        contigs = interval_score['contig']
+                        starts = interval_score['start']
+                        scores = interval_score['wps']
+                        stops = starts + 1
+                        bigwig.addEntries(
+                            chroms=contigs,
+                            starts=starts,
+                            ends=stops,
+                            values=scores.astype(np.float64),
+                        )
+
+            else:   # unaccepted file type
+                raise ValueError(
+                    'output_file can only have suffix .bw'
+                    )
+
+        elif (output_file is not None):
+            raise TypeError(
+                f'output_file is unsupported type "{type(input_file)}". '
+                'output_file should be a string specifying the path of the file '
+                'to output scores to.'
+                )
+    finally:
+        pool.close()
 
     if (verbose):
         end_time = time.time()
