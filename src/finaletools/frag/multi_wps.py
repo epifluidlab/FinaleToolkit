@@ -109,16 +109,29 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
     stops = []
     strands = []
     with open(site_bed) as bed:
+        # for overlap checking
+        prev_contig = "0"
+        prev_start = 0
+        prev_stop = 0
         for line in bed:
             contents = line.split()
             contig = contents[0].strip()
             start = int(contents[1])
             stop = int(contents[2])
             strand = contents[5].strip()
+
+            # cut off part of current interval if overlap
+            if contig == prev_contig and start < prev_stop:
+                start = prev_stop
+
             contigs.append(contig)
             starts.append(start)
             stops.append(stop)
             strands.append(strand)
+
+            prev_contig = contig
+            prev_start = start
+            prev_stop = stop
 
 
     left_of_site = round(-interval_size / 2)
@@ -186,8 +199,8 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
         elif (output_file is not None):
             raise TypeError(
                 f'output_file is unsupported type "{type(input_file)}". '
-                'output_file should be a string specifying the path of the file '
-                'to output scores to.'
+                'output_file should be a string specifying the path of the '
+                'file to output scores to.'
                 )
     finally:
         pool.close()
@@ -195,7 +208,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
     if (verbose):
         end_time = time.time()
         stderr.write(
-            f'aggregate_wps took {end_time - start_time} s to complete\n'
+            f'multi_wps took {end_time - start_time} s to complete\n'
         )
 
     return scores
