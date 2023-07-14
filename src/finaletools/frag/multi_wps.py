@@ -216,8 +216,8 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                                 f'{contigs[0]}:{starts[0]}-{stops[-1]}\n'
                             )
                             stderr.write(
-                                '/n invalid or out of order interval'
-                                'encountered. Skipping to next.'
+                                '/n invalid or out of order interval '
+                                'encountered. Skipping to next.\n'
                             )
                             continue
 
