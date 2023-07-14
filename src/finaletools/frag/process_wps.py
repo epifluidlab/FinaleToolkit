@@ -138,13 +138,23 @@ def process_wps(
     # amount taken by median filter
     end_decrease = median_window_size//2
     # correct overlaps accounting for shortening from median filter
-    for interval1, interval2 in intervals[:-1], intervals[1:]:
+    length=len(intervals)
+    for i, j in zip(range(0, length-1), range(1, length)):
+        interval1, interval2 = intervals[i], intervals[j]
         if (
-            interval1[0] == interval2[0]    # same contig
-            and interval1[2] - end_decrease
-            > interval2[1] + end_decrease
+            interval1[1] == interval2[1]    # same contig
+            and interval1[3] - end_decrease
+            > interval2[2] + end_decrease
         ):
-            interval1[2] = interval2[1] + median_window_size
+            intervals[i] = (
+                interval1[0],
+                interval1[1],
+                interval1[2],
+                interval2[2] + median_window_size,
+                interval1[4],
+                interval1[5],
+                interval1[6],
+            )
 
     try:
         # use pool of processes to process wps scores into an iterator
