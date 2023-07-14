@@ -201,7 +201,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                         stops = starts + 1
                         # skip empty intervals
 
-                        if interval_score.shape == (0,):
+                        if contigs.shape == (0,):
                             continue
 
                         try:
@@ -212,7 +212,9 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                                 values=scores.astype(np.float64),
                             )
                         except RuntimeError as e:
-                            stderr.write(interval_score)
+                            stderr.write(
+                                f'{contigs[0]}:{starts[0]}-{stops[-1]}\n'
+                            )
                             stderr.write(
                                 '/n invalid or out of order interval'
                                 'encountered. Skipping to next.'
