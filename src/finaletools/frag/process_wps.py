@@ -115,11 +115,12 @@ def process_wps(
         stderr.write('Reading intervals from bed...\n')
 
     # read intervals
-        # read intervals
+    # TODO: add support for bedgz
     if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
         # amount taken by median filter
         end_decrease = median_window_size//2
-
+        if interval_file.endswith('.gz'):
+            raise NotImplementedError('bed.gz not supported yet')
         intervals = []
         with open(interval_file, 'r') as file:
             for line in file:
