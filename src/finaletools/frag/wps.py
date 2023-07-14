@@ -154,6 +154,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         ]
     )
         scores['start'] = np.arange(start, stop, dtype=int)
+        scores['contig'] = contig
     else:
         scores = _wps_loop(frag_ends, contig, start, stop, window_size)
 
