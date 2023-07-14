@@ -11,7 +11,7 @@ from finaletools.frag.coverage import coverage
 from finaletools.frag.multi_wps import multi_wps
 from finaletools.frag.delfi import delfi
 from finaletools.frag.adjust_wps import adjust_wps
-
+from finaletools.frag.agg_wps import agg_wps
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
@@ -170,7 +170,8 @@ def main_cli():
     parser_command4.add_argument(
         '-o',
         '--output_file',
-        default='-'
+        default='-',
+        help='BigWig file to write results to. Default is stdout'
     )
     parser_command4.add_argument(
         '-i',
@@ -306,7 +307,7 @@ def main_cli():
     )
     parser_command7.add_argument(
         'input_file',
-        help='WIG file with WPS data. If "-", will read from stdin.'
+        help='BigWig file with WPS data.'
     )
     parser_command7.add_argument(
         'interval_file',
@@ -359,6 +360,43 @@ def main_cli():
         help='Specify verbosity. Number of printed statements is proportional to number of vs.'
     )
     parser_command7.set_defaults(func=adjust_wps)
+
+    # Subcommand 8: aggregate WPS
+    parser_command8 = subparsers.add_parser(
+        'agg-wps',
+        prog='finaletools-agg-wps',
+        description='Reads WPS data from a WIG file and aggregates over'
+        ' intervals in a BED file.'
+    )
+    parser_command8.add_argument(
+        'input_file',
+        help='BigWig file with WPS data.'
+    )
+    parser_command8.add_argument(
+        'interval_file',
+        help='BED file containing intervals over which wps was calculated'
+    )
+    parser_command8.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='WIG file to print filtered WPS data. If "-", will write to '
+        'stdout. Default is "-".'
+    )
+    parser_command8.add_argument(
+        '-m',
+        '--median-window-size',
+        default=1000,
+        type=int,
+        help='Size of window for median filter. Default is 1000.'
+    )
+    parser_command8.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
+    )
+    parser_command8.set_defaults(func=agg_wps)
 
     args = parser.parse_args()
     function = args.func
