@@ -94,6 +94,7 @@ def _single_adjust_wps(
             f'Invalid interval detected:\n'
             f'{contig}:{start}-{stop}. This interval will be skipped.\n'
         )
+        # While writing to output, empty intervals like this are skipped
         adjusted_positions = np.zeros((0,), dtype=np.int64)
         stops = np.zeros((0,), dtype=np.int64)
         filtered_scores = np.zeros((0,), dtype=np.float64)
