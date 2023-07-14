@@ -72,7 +72,8 @@ def single_coverage(
         for read1 in sam_file.fetch(
             contig=contig,
             start=0 if (tempstart:=start-500) < 0 else tempstart,
-            stop=stop+500 if stop is not None else None):
+            stop=stop+500 if stop is not None else None
+        ):
             # Only select forward strand and filter out
             # non-paired-end reads and low-quality reads
             if _not_read1_or_low_quality(read1, quality_threshold):
