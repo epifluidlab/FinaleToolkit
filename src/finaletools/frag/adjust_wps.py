@@ -27,15 +27,15 @@ def _median_filter(positions: NDArray, data: NDArray, window_size: int):
     return adjusted_positions, adjusted_data
 
 
-def _single_process_wps_star(args):
+def _single_adjust_wps_star(args):
     """
     Version of single_process_wps that accepts a tuple of args. Used for
     multiprocess.imap.
     """
-    return _single_process_wps(*args)
+    return _single_adjust_wps(*args)
 
 
-def _single_process_wps(
+def _single_adjust_wps(
         input_file: str,
         contig: str,
         start: int,
@@ -99,7 +99,7 @@ def _single_process_wps(
             stops,
             filtered_scores)
 
-def process_wps(
+def adjust_wps(
     input_file: str,
     interval_file: str,
     output_file: str,
@@ -161,7 +161,7 @@ def process_wps(
     try:
         # use pool of processes to process wps scores into an iterator
         pool = Pool(workers)
-        processed_scores = pool.imap(_single_process_wps_star, intervals)
+        processed_scores = pool.imap(_single_adjust_wps_star, intervals)
 
         if verbose:
             stderr.write('Writing to output\n')

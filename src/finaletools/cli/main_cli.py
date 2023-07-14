@@ -10,7 +10,7 @@ from finaletools.utils.filter_bam import filter_bam
 from finaletools.frag.coverage import coverage
 from finaletools.frag.multi_wps import multi_wps
 from finaletools.frag.delfi import delfi
-from finaletools.frag.process_wps import process_wps
+from finaletools.frag.adjust_wps import adjust_wps
 
 
 # TODO: implement subcommands read from stdin
@@ -297,10 +297,10 @@ def main_cli():
     )
     parser_command6.set_defaults(func=filter_bam)
 
-    # Subcommand 7: process WPS
+    # Subcommand 7: adjust WPS
     parser_command7 = subparsers.add_parser(
-        'process-wps',
-        prog='finaletools-process-wps',
+        'adjust-wps',
+        prog='finaletools-adjust-wps',
         description='Reads WPS data from a WIG file and applies a median filter'
         ' and a Savitsky-Golay filter (Savitsky and Golay, 1964).'
     )
@@ -358,7 +358,7 @@ def main_cli():
         action='count',
         help='Specify verbosity. Number of printed statements is proportional to number of vs.'
     )
-    parser_command7.set_defaults(func=process_wps)
+    parser_command7.set_defaults(func=adjust_wps)
 
     args = parser.parse_args()
     function = args.func
