@@ -5,3 +5,4 @@ from finaletools.frag.wps import wps
 from finaletools.frag.multi_wps import multi_wps
 from finaletools.frag.delfi import delfi
 from finaletools.frag.adjust_wps import adjust_wps
+from finaletools.frag.delfi_gc_correct import delfi_gc_correct

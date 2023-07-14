@@ -12,6 +12,7 @@ from finaletools.frag.multi_wps import multi_wps
 from finaletools.frag.delfi import delfi
 from finaletools.frag.adjust_wps import adjust_wps
 from finaletools.frag.agg_wps import agg_wps
+from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
@@ -230,7 +231,6 @@ def main_cli():
     parser_command5.add_argument('-o', '--output_file')
     parser_command5.add_argument('-W', '--window_size', default=100000, type=int)
     parser_command5.add_argument('-q', '--quality_threshold', default=30, type=int)
-    parser_command5.add_argument('-gc', '--gc_correction', action='store_true')
     parser_command5.add_argument('-w', '--workers', default=1, type=int)
     parser_command5.add_argument('-v', '--verbose', action='count', default=0)
     parser_command5.set_defaults(func=delfi)
@@ -294,7 +294,8 @@ def main_cli():
         '-v',
         '--verbose',
         action='count',
-        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
+        help='Specify verbosity. Number of printed statements is proportional '
+        'to number of vs.'
     )
     parser_command6.set_defaults(func=filter_bam)
 
@@ -397,6 +398,38 @@ def main_cli():
         help='Specify verbosity. Number of printed statements is proportional to number of vs.'
     )
     parser_command8.set_defaults(func=agg_wps)
+
+    # parser command 8: delfi gc correct
+    parser_command8 = subparsers.add_parser(
+        'delfi-gc-correct',
+        prog='finaletools-delfi-gc-correct',
+        description='Performs gc-correction on raw delfi data.'
+    )
+    parser_command8.add_argument(
+        'input_file',
+        help='BED3+3 file containing raw data'
+    )
+    parser_command8.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='BED3+3 to print GC-corrected DELFI fractions. If "-", will write'
+        ' to stdout. Default is "-".'
+    )
+    parser_command8.add_argument(
+        '--header-lines',
+        default=1,
+        type=int,
+        help='Number of header lines in BED. Default is 1.'
+    )
+    parser_command8.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional '
+        'to number of vs.'
+    )
+    parser_command8.set_defaults(func=cli_delfi_gc_correct)
 
     args = parser.parse_args()
     function = args.func

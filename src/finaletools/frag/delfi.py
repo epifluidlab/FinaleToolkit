@@ -3,14 +3,14 @@
 from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
-from typing import Union
+from typing import Union, TextIO
 from tempfile import TemporaryDirectory
-from sys import stderr
+from sys import stderr, stdout
+import gzip
 
 import pysam
 import py2bit
 import numpy as np
-from statsmodels.nonparametric.smoothers_lowess import lowess
 
 from finaletools.utils.utils import _not_read1_or_low_quality
 
@@ -66,23 +66,42 @@ def _delfi_single_window(
     num_frags = 0
 
     try:
+        # read from tabix or bam/bam
         if input_file.endswith('.bam') or input_file.endswith('.sam'):
-            sam_file = pysam.AlignmentFile(input_file)
-        elif input_file.endswith('.bed') or input_file.endswith('.bed.gz'):
-            sam_file = pysam.TabixFile(input_file)
+            file = pysam.AlignmentFile(input_file)
+            is_sam = True
+        elif (
+            input_file.endswith('.bed')
+            or input_file.endswith('.bed.gz')
+            or input_file.endswith('.frag.gz')
+            or input_file.endswith('.frag')
+        ):
+            file = pysam.TabixFile(input_file, parser=pysam.asBed())
+            is_sam = False
+        else:
+            raise ValueError(
+                'Unsupported type. Only BAM, SAM, and tabix indexed files'
+                'accepted.'
+            )
         # Iterating on each read in file in specified contig/chromosome
-        for read1 in (sam_file.fetch(contig=contig,
-                                        start=window_start,
-                                        stop=window_stop)):
+        for read1 in (file.fetch(contig, window_start, window_stop)):
 
             # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads
-            if (_not_read1_or_low_quality(read1, quality_threshold)):
+            # reads and low-quality reads.
+            # relies on short circuit evaluation to avoid calling sam
+            # method on tabix.
+            if is_sam and _not_read1_or_low_quality(read1, quality_threshold):
                 pass
             else:
-                frag_start = read1.reference_start
-                frag_length = read1.template_length
-                frag_stop = frag_start + frag_length
+                # TODO: fix tabix reading
+                if is_sam:
+                    frag_start = read1.reference_start
+                    frag_length = read1.template_length
+                    frag_stop = frag_start + frag_length
+                else:
+                    frag_start = read1.start
+                    frag_stop = read1.end
+                    frag_length = frag_stop - frag_start
 
                 # check if in blacklist
                 blacklisted = False
@@ -119,24 +138,20 @@ def _delfi_single_window(
 
                     num_frags += 1
     finally:
-        sam_file.close()
+        file.close()
 
     num_gc = 0  # cumulative sum of gc bases
 
     with py2bit.open(reference_file) as ref_seq:
-        # ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
-        for frag_start, frag_stop in frag_pos:
-            frag_seq = ref_seq.sequence(contig, frag_start, frag_stop).upper()
-            num_gc += sum([(base == 'G' or base == 'C') for base in frag_seq])
+        ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
 
-    # num_bases = window_stop - window_start
-    # num_gc = sum([(base == 'G' or base == 'C') for base in ref_bases])
+    num_gc = sum((base == 'G' or base == 'C') for base in ref_bases)
 
-    # sum of frag_lengths
-    frag_coverage = sum(short_lengths) + sum(long_lengths)
+    # window_length
+    window_coverage = window_stop - window_start
 
     # NaN if no fragments in window.
-    gc_content = num_gc / frag_coverage if num_frags > 0 else np.NaN
+    gc_content = num_gc / window_coverage if num_frags > 0 else np.NaN
 
     coverage_short = len(short_lengths)
     coverage_long = len(long_lengths)
@@ -158,19 +173,7 @@ def _delfi_single_window(
             num_frags)
 
 
-def delfi_loess(gc, coverage):
-    """
-    Function to simplify loess.
-    """
-    coverage_loess = lowess(
-        coverage,
-        gc,
-        0.75,
-        5,
-        return_sorted=False,
-        missing='drop'
-    )
-    return coverage_loess
+
 
 
 def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
@@ -189,35 +192,6 @@ def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     return trimmed
 
 
-def _delfi_gc_adjust(
-        windows:np.ndarray,
-        verbose:bool=False
-):
-    """
-    Helper function that takes window data and performs GC adjustment.
-    """
-    #LOESS/LOWESS regression for short and long
-    short_loess = delfi_loess(windows['gc'], windows['short'])
-    long_loess = delfi_loess(windows['gc'], windows['long'])
-
-    corrected_windows = windows.copy()
-
-    # GC correction
-    corrected_windows['short'] = (
-        windows['short']
-        - short_loess
-        + np.nanmedian(windows['short'])
-    )
-
-    corrected_windows['long'] = (
-        windows['long']
-        - long_loess
-        + np.nanmedian(windows['long'])
-    )
-
-    return corrected_windows
-
-
 def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           autosomes: str,
           reference_file: str,
@@ -228,7 +202,6 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           subsample_coverage: float=2,
           quality_threshold: int=30,
           workers: int=1,
-          gc_correction: bool=True,
           preprocessing: bool=True,
           verbose: Union[int, bool]=False):
     """
@@ -340,15 +313,34 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     # remove bottom 10 percentile
     trimmed_windows = trim_coverage(window_array, 10)
 
-
-    if gc_correction:
-        trimmed_windows = _delfi_gc_adjust(trimmed_windows, verbose)
-
-    with open(output_file, 'w') as out:
-        out.write('contig\tstart\tstop\tshort\tlong\tgc%\n')
+    # output
+    def _write_out(out: TextIO):
+        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
         for window in trimmed_windows:
-            out.write(f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t{window[4]}\t{window[5]}\t{window[6]}\n')
+            out.write(
+                f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
+                f'{window[4]}\t{window[5]}\t{window[6]}\n')
 
+    if output_file.endswith('.tsv'):
+        with open(output_file, 'w') as out:
+            out.write('contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
+            for window in trimmed_windows:
+                out.write(
+                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
+                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
+    elif output_file.endswith('.bed'):
+        with open(output_file, 'w') as out:
+            _write_out(out)
+    elif output_file.endswith('.bed.gz'):
+        with gzip.open(output_file, 'w') as out:
+            _write_out(out)
+    elif output_file == '-':
+        with stdout as out:
+            _write_out(out)
+    else:
+        raise ValueError(
+            'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
+        )
 
     num_frags = sum(window[3] for window in windows)
 
