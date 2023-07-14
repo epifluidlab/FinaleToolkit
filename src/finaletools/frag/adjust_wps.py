@@ -92,7 +92,7 @@ def _single_adjust_wps(
     except RuntimeError as e:
         stderr.write(
             f'Invalid interval detected:\n'
-            f'{contig}:{start}-{stop}\n'
+            f'{contig}:{start}-{stop}. This interval will be skipped.\n'
         )
         adjusted_positions = np.zeros((0,), dtype=np.int64)
         stops = np.zeros((0,), dtype=np.int64)
