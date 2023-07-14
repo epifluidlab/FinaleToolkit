@@ -103,7 +103,7 @@ def process_wps(
     input_file: str,
     interval_file: str,
     output_file: str,
-    genome_file: str=None,
+    genome_file: str,
     median_window_size: int=1000,
     savgol_window_size: int=21,
     savgol_poly_deg: int=2,
@@ -174,6 +174,10 @@ def process_wps(
 
     finally:
         pool.close()
+
+    if verbose:
+        end_time = time()
+        stderr.write(f'Process-WPS took {end_time-start_time} s to run.\n')
 
 
 

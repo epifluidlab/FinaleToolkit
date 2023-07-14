@@ -309,6 +309,15 @@ def main_cli():
         help='WIG file with WPS data. If "-", will read from stdin.'
     )
     parser_command7.add_argument(
+        'interval_file',
+        help='BED file containing intervals over which wps was calculated'
+    )
+    parser_command7.add_argument(
+        'genome_file',
+        help='GENOME file containing chromosome/contig names and lengths. '
+        'Needed to write head for BigWig.'
+    )
+    parser_command7.add_argument(
         '-o',
         '--output-file',
         default='-',
@@ -317,7 +326,7 @@ def main_cli():
     )
     parser_command7.add_argument(
         '-m',
-        '--larm-window-size',
+        '--median-window-size',
         default=1000,
         type=int,
         help='Size of window for median filter. Default is 1000.'
@@ -334,7 +343,20 @@ def main_cli():
         '--savgol-poly-deg',
         default=2,
         type=int,
-        help='Degree polynomial for Savitsky-Golay filter. Default is 1000.'
+        help='Degree polynomial for Savitsky-Golay filter. Default is 2.'
+    )
+    parser_command7.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of subprocesses to use. Default is 1.'
+    )
+    parser_command7.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
     )
     parser_command7.set_defaults(func=process_wps)
 
