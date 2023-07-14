@@ -112,17 +112,37 @@ def process_wps(
 ):
     if verbose:
         start_time = time()
+        stderr.write('Reading intervals from bed...\n')
 
     # read intervals
         # read intervals
     if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
+        # amount taken by median filter
+        end_decrease = median_window_size//2
+
         intervals = []
         with open(interval_file, 'r') as file:
             for line in file:
+                # read segment from BED
                 contents = line.split('\t')
                 contig = contents[0]
                 start = int(contents[1])
                 stop = int(contents[2])
+
+                # Checks for overlap with previous interval, accounting
+                # for change in interval size from median filter.
+                # This is needed to avoid duplicate entries in the
+                # BigWig file.
+                if (len(intervals) > 0
+                    and intervals[-1][1] == contig
+                    and intervals[-1][3] - end_decrease
+                    > start + end_decrease
+                ):
+                    # if overlap, pop first from list and append the
+                    # union of the intervals to list
+                    start = intervals[-1][2]    # start of first
+                    intervals.pop(-1)   # pop first
+
                 intervals.append((
                     input_file,
                     contig,
@@ -135,27 +155,8 @@ def process_wps(
     else:
         raise ValueError('Invalid filetype for interval_file.')
 
-    # amount taken by median filter
-    end_decrease = median_window_size//2
-    # correct overlaps accounting for shortening from median filter
-    length=len(intervals)
-    for i, j in zip(range(0, length-1), range(1, length)):
-        interval1, interval2 = intervals[i], intervals[j]
-        if (
-            interval1[1] == interval2[1]    # same contig
-            and interval1[3] - end_decrease
-            > interval2[2] + end_decrease
-        ):
-            intervals[i] = (
-                interval1[0],
-                interval1[1],
-                interval1[2],
-                interval2[2] + median_window_size,
-                interval1[4],
-                interval1[5],
-                interval1[6],
-            )
-
+    if verbose:
+        stderr.write('Opening pool\n')
     try:
         # use pool of processes to process wps scores into an iterator
         pool = Pool(workers)
