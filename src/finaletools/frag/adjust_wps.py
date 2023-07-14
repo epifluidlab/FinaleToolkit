@@ -3,6 +3,7 @@ from sys import stdin, stdout, stderr
 from typing import TextIO, Union
 from multiprocessing import Pool
 from time import time
+import traceback
 
 import numpy as np
 from numpy.typing import NDArray
@@ -90,6 +91,7 @@ def _single_adjust_wps(
         stops = adjusted_positions+1
 
     except RuntimeError as e:
+        traceback.print_exception(e)
         stderr.write(
             f'Invalid interval detected:\n'
             f'{contig}:{start}-{stop}. This interval will be skipped.\n'
@@ -190,7 +192,8 @@ def adjust_wps(
                         ends=stops,
                         values=values,
                     )
-                except RuntimeError:
+                except RuntimeError as e:
+                    traceback.print_exception(e)
                     stderr.write(
                         f'RuntimeError encountered while writing to '
                         f'{output_file} at interval {contigs[[0]]}:'
