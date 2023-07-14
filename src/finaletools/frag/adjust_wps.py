@@ -138,7 +138,7 @@ def adjust_wps(
             for line in file:
                 # read segment from BED
                 contents = line.split('\t')
-                contig = contents[0]
+                contig = contents[0].strip()
                 start = int(contents[1])
                 stop = int(contents[2])
 
