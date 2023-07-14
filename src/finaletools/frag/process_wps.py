@@ -70,7 +70,7 @@ def _single_process_wps(
         if not all(
             (pos1 + 1 == pos2
              for pos1, pos2
-             in zip(intervals['starts',:-1], intervals['starts',1:])),
+             in zip(intervals['starts'][:-1], intervals['starts'][1:])),
         ):
             # TODO: create special error for invalid file formats
             raise ValueError(
@@ -161,11 +161,14 @@ def process_wps(
         pool = Pool(workers)
         processed_scores = pool.imap(_single_process_wps_star, intervals)
 
-        # read to output
+        if verbose:
+            stderr.write('Writing to output\n')
+
+        # write to output
         with pbw.open(output_file, 'w') as output_bw:
             output_bw.addHeader(genome2list(genome_file))
             for scores in processed_scores:
-                contigs, starts, stops, values = processed_scores
+                contigs, starts, stops, values = scores
                 if len(contigs) == 0:
                     continue
                 try:
