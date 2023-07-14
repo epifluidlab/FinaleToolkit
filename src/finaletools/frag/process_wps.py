@@ -123,15 +123,15 @@ def process_wps(
                 contig = contents[0]
                 start = int(contents[1])
                 stop = int(contents[2])
-                intervals.append(
+                intervals.append((
                     input_file,
                     contig,
-                    start,
-                    stop,
+                    int(start),
+                    int(stop),
                     median_window_size,
                     savgol_window_size,
                     savgol_poly_deg
-                )
+                ))
     else:
         raise ValueError('Invalid filetype for interval_file.')
 
