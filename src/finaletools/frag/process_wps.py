@@ -59,7 +59,7 @@ def _single_process_wps(
             raise ValueError('Invalid filetype for input_file.')
 
         intervals = np.array(
-            raw_wps.intervals(contig, start, stop),
+            list(raw_wps.intervals(contig, start, stop)),
             dtype=[
                 ('starts', '<i8'),
                 ('stops', '<i8'),
