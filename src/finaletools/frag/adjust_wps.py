@@ -85,12 +85,21 @@ def _single_adjust_wps(
         filtered_scores = savgol_filter(
             adjusted_scores, savgol_window_size, savgol_poly_deg)
 
+        assert len(adjusted_positions) == len(filtered_scores)
+
+        stops = adjusted_positions+1
+
+    except RuntimeError as e:
+        stderr.write(
+            f'Invalid interval detected:\n'
+            f'{contig}:{start}-{stop}\n'
+        )
+        adjusted_positions = np.zeros((0,), dtype=np.int64)
+        stops = np.zeros((0,), dtype=np.int64)
+        filtered_scores = np.zeros((0,), dtype=np.float64)
+
     finally:
         raw_wps.close()
-
-    assert len(adjusted_positions) == len(filtered_scores)
-
-    stops = adjusted_positions+1
 
     # the contig is stored in a list while the rest of the values are
     # in NDArrays. This may change in future versions.
