@@ -471,3 +471,28 @@ def _get_intervals(
                 else:
                     break
     return intervals
+
+
+def genome2list(genome_file: str) -> list:
+    """
+    Reads a GENOME text file into a list of tuples (chrom, length)
+
+    Parameters
+    ----------
+    genome_file : str
+        String containing path to GENOME format file
+
+    Returns
+    _______
+    chroms : str
+        List of tuples containing chrom/contig names and lengths
+    """
+    chroms = []
+    with open(genome_file) as file:
+        for line in file:
+            if line != '\n':
+                chroms.append((
+                    (contents:=line.split('\t'))[0],
+                    int(contents[1])
+                ))
+    return chroms

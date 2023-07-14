@@ -8,10 +8,10 @@ from finaletools.frag.frag_length import (
 )
 from finaletools.utils.filter_bam import filter_bam
 from finaletools.frag.coverage import coverage
-from finaletools.frag.agg_wps import aggregate_wps
+from finaletools.frag.multi_wps import multi_wps
 from finaletools.frag.delfi import delfi
-from finaletools.frag.process_wps import process_wps
-
+from finaletools.frag.adjust_wps import adjust_wps
+from finaletools.frag.agg_wps import agg_wps
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
@@ -170,7 +170,8 @@ def main_cli():
     parser_command4.add_argument(
         '-o',
         '--output_file',
-        default='-'
+        default='-',
+        help='BigWig file to write results to. Default is stdout'
     )
     parser_command4.add_argument(
         '-i',
@@ -213,7 +214,7 @@ def main_cli():
         '--verbose',
         action='count',
         default=0)
-    parser_command4.set_defaults(func=aggregate_wps)
+    parser_command4.set_defaults(func=multi_wps)
 
     # Subcommand 5: delfi
     parser_command5 = subparsers.add_parser(
@@ -240,7 +241,7 @@ def main_cli():
         prog='finaletools-filter-bam',
         description='Filters a BAM file so that all reads are in mapped pairs'
         ', exceed a certain MAPQ, are not flagged for quality, are read1, are'
-        ' not secondary or supplementary alignments, and are on the same'
+        ' not secondary or supplementary alignments, and are on the same '
         'reference sequence as the mate.'
     )
     parser_command6.add_argument(
@@ -258,7 +259,7 @@ def main_cli():
         '-o',
         '--output-file',
         default='-',
-        help='Path to write filtered BAM. Defualt is "_". If set to "_",'
+        help='Path to write filtered BAM. Defualt is "-". If set to "-",'
         ' the BAM file will be written to stdout.'
     )
     parser_command6.add_argument(
@@ -297,16 +298,25 @@ def main_cli():
     )
     parser_command6.set_defaults(func=filter_bam)
 
-    # Subcommand 7: process WPS
+    # Subcommand 7: adjust WPS
     parser_command7 = subparsers.add_parser(
-        'process-wps',
-        prog='finaletools-process-wps',
+        'adjust-wps',
+        prog='finaletools-adjust-wps',
         description='Reads WPS data from a WIG file and applies a median filter'
         ' and a Savitsky-Golay filter (Savitsky and Golay, 1964).'
     )
     parser_command7.add_argument(
         'input_file',
-        help='WIG file with WPS data. If "-", will read from stdin.'
+        help='BigWig file with WPS data.'
+    )
+    parser_command7.add_argument(
+        'interval_file',
+        help='BED file containing intervals over which wps was calculated'
+    )
+    parser_command7.add_argument(
+        'genome_file',
+        help='GENOME file containing chromosome/contig names and lengths. '
+        'Needed to write head for BigWig.'
     )
     parser_command7.add_argument(
         '-o',
@@ -317,7 +327,7 @@ def main_cli():
     )
     parser_command7.add_argument(
         '-m',
-        '--larm-window-size',
+        '--median-window-size',
         default=1000,
         type=int,
         help='Size of window for median filter. Default is 1000.'
@@ -334,9 +344,59 @@ def main_cli():
         '--savgol-poly-deg',
         default=2,
         type=int,
-        help='Degree polynomial for Savitsky-Golay filter. Default is 1000.'
+        help='Degree polynomial for Savitsky-Golay filter. Default is 2.'
     )
-    parser_command7.set_defaults(func=process_wps)
+    parser_command7.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of subprocesses to use. Default is 1.'
+    )
+    parser_command7.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
+    )
+    parser_command7.set_defaults(func=adjust_wps)
+
+    # Subcommand 8: aggregate WPS
+    parser_command8 = subparsers.add_parser(
+        'agg-wps',
+        prog='finaletools-agg-wps',
+        description='Reads WPS data from a WIG file and aggregates over'
+        ' intervals in a BED file.'
+    )
+    parser_command8.add_argument(
+        'input_file',
+        help='BigWig file with WPS data.'
+    )
+    parser_command8.add_argument(
+        'interval_file',
+        help='BED file containing intervals over which wps was calculated'
+    )
+    parser_command8.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='WIG file to print filtered WPS data. If "-", will write to '
+        'stdout. Default is "-".'
+    )
+    parser_command8.add_argument(
+        '-m',
+        '--median-window-size',
+        default=1000,
+        type=int,
+        help='Size of window for median filter. Default is 1000.'
+    )
+    parser_command8.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
+    )
+    parser_command8.set_defaults(func=agg_wps)
 
     args = parser.parse_args()
     function = args.func
