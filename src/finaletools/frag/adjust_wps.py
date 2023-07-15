@@ -59,6 +59,7 @@ def _single_adjust_wps(
         else:
             raise ValueError('Invalid filetype for input_file.')
 
+        # scores are read from BigWig into an numpy structured array
         intervals = np.array(
             list(raw_wps.intervals(contig, start, stop)),
             dtype=[
@@ -68,6 +69,7 @@ def _single_adjust_wps(
             ]
         )
 
+        # check BigWig for errors
         if not all(
             (pos1 + 1 == pos2
              for pos1, pos2
@@ -80,6 +82,7 @@ def _single_adjust_wps(
                 'regions specified in the interval file.'
             )
 
+        # adjusting/filtering
         adjusted_positions, adjusted_scores = _median_filter(
             intervals['starts'], intervals['scores'], median_window_size)
 
