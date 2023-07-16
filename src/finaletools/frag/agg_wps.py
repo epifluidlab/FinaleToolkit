@@ -98,7 +98,7 @@ def agg_wps(
                 stderr.write(f'File opened! Writing...\n')
             # declaration line
             out.write(
-                f'fixedStep\tchrom=.\tstart={interval_size//2}\tstep={1}\tspan'
+                f'fixedStep\tchrom=.\tstart={-interval_size//2}\tstep={1}\tspan'
                 f'={interval_size}\n'
             )
             for score in agg_scores:
