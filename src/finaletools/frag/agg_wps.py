@@ -1,6 +1,7 @@
 from __future__ import annotations
 from sys import stdin, stdout, stderr
 from typing import Union
+import time
 
 import numpy as np
 import pyBigWig as pbw
@@ -45,6 +46,9 @@ def agg_wps(
     ------
     agg_scores : NDArray
     """
+    if verbose:
+        start_time = time.time()
+        stderr.write('Reading intervals from bed...\n')
 
     # reading intervals from interval_file into a list
     if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
@@ -59,11 +63,13 @@ def agg_wps(
                 contig = contents[0]
                 start = int(contents[1])
                 stop = int(contents[2])
+                strand = contents[5]
 
                 intervals.append((
                     contig,
                     int(start),
                     int(stop),
+                    strand.strip(),
                 ))
     else:
         raise ValueError('Invalid filetype for interval_file.')
@@ -72,11 +78,19 @@ def agg_wps(
         # get size of interval based on first entry in interval_file
         interval_size = intervals[0][2] - intervals[0][1] - median_window_size
         agg_scores = np.zeros(interval_size, dtype=np.int64)
-        for contig, start, stop in intervals:
+        for contig, start, stop, strand in intervals:
             values = np.array(raw_wps.values(contig, start, stop))
             # trimmed from median filter
             trimmed = values[median_window_size//2:-median_window_size//2]
-            agg_scores = agg_scores + trimmed
+            # flip scores if on reverse strand
+            if strand == '+':
+                agg_scores = agg_scores + trimmed
+            elif strand == '-':
+                agg_scores = agg_scores + np.flip(trimmed)
+            elif verbose:
+                stderr.write(
+                    'A segment without strand was encountered. Skipping.'
+                )
     positions = np.arange(-interval_size//2, interval_size//2)
     if output_file.endswith('wig'):
         with open(output_file, 'wt') as out:
@@ -86,13 +100,17 @@ def agg_wps(
             out.write(
                 f'fixedStep\tchrom=.\tstart={interval_size//2}\tstep={1}\tspan'
                 f'={interval_size}\n'
-                )
+            )
             for score in agg_scores:
                 out.write(f'{score}\n')
     else:
         raise ValueError(
             'output_file is unaccepted type.'
         )
+    
+    if verbose:
+        end_time = time.time()
+        stderr.write(f'Agg-WPS took {end_time-start_time} s to run.\n')
 
     return agg_scores
 
