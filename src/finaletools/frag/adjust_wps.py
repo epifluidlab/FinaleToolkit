@@ -15,12 +15,28 @@ from finaletools.utils import genome2list
 def _median_filter(positions: NDArray, data: NDArray, window_size: int):
     """locally adjusted running median"""
     # Calculate the running median
-    running_median = np.array([
-        np.median(data[i:i+window_size]) for i in range(len(data) - window_size)
-    ])
+    running_median = np.array(
+        [np.median(data[i:i+window_size]) for i in range(len(data) - window_size)]
+    )
 
     # Adjust the data by subtracting the running median
     adjusted_data = data[window_size//2 : -(window_size//2)] - running_median
+
+    # trim positions
+    adjusted_positions = positions[window_size//2 : -(window_size//2)]
+
+    return adjusted_positions, adjusted_data
+
+
+def _mean_filter(positions: NDArray, data: NDArray, window_size: int):
+    """locally adjusted running mean"""
+    # Calculate the running mean
+    running_mean = np.array(
+        [np.mean(data[i:i+window_size]) for i in range(len(data) - window_size)]
+    )
+
+    # Adjust the data by subtracting the running median
+    adjusted_data = data[window_size//2 : -(window_size//2)] - running_mean
 
     # trim positions
     adjusted_positions = positions[window_size//2 : -(window_size//2)]
@@ -44,6 +60,8 @@ def _single_adjust_wps(
         median_window_size: int=1000,
         savgol_window_size: int=21,
         savgol_poly_deg: int=2,
+        mean: bool=False,
+        subtract_edges: bool=False,
 ):
     """
     Takes a wps WIG file and applies a median filter and a Savitsky-
@@ -59,6 +77,7 @@ def _single_adjust_wps(
         else:
             raise ValueError('Invalid filetype for input_file.')
 
+        # scores are read from BigWig into an numpy structured array
         intervals = np.array(
             list(raw_wps.intervals(contig, start, stop)),
             dtype=[
@@ -68,6 +87,7 @@ def _single_adjust_wps(
             ]
         )
 
+        # check BigWig for errors
         if not all(
             (pos1 + 1 == pos2
              for pos1, pos2
@@ -80,8 +100,21 @@ def _single_adjust_wps(
                 'regions specified in the interval file.'
             )
 
-        adjusted_positions, adjusted_scores = _median_filter(
-            intervals['starts'], intervals['scores'], median_window_size)
+        # adjusting/filtering
+        if subtract_edges:
+            # TODO: addoption for edge size
+            edge_size = 500
+            start_mean = np.mean(intervals['scores'][:edge_size])
+            stop_mean = np.mean(intervals['scores'][-edge_size:])
+            mean = np.mean([start_mean, stop_mean])
+            intervals['scores'] = intervals['scores'] - mean
+
+        if not mean:
+            adjusted_positions, adjusted_scores = _median_filter(
+                intervals['starts'], intervals['scores'], median_window_size)
+        else:
+            adjusted_positions, adjusted_scores = _mean_filter(
+                intervals['starts'], intervals['scores'], median_window_size)
 
         filtered_scores = savgol_filter(
             adjusted_scores, savgol_window_size, savgol_poly_deg)
@@ -119,6 +152,8 @@ def adjust_wps(
     median_window_size: int=1000,
     savgol_window_size: int=21,
     savgol_poly_deg: int=2,
+    mean: bool=False,
+    subtract_edges: bool=False,
     workers: int=1,
     verbose: Union(bool, int)=False
 ):
@@ -163,7 +198,9 @@ def adjust_wps(
                     int(stop),
                     median_window_size,
                     savgol_window_size,
-                    savgol_poly_deg
+                    savgol_poly_deg,
+                    mean,
+                    subtract_edges,
                 ))
     else:
         raise ValueError('Invalid filetype for interval_file.')
@@ -205,7 +242,7 @@ def adjust_wps(
 
     if verbose:
         end_time = time()
-        stderr.write(f'Process-WPS took {end_time-start_time} s to run.\n')
+        stderr.write(f'Adjust-WPS took {end_time-start_time} s to run.\n')
 
 
 

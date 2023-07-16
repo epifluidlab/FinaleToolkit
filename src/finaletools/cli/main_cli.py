@@ -355,6 +355,14 @@ def main_cli():
         help='Number of subprocesses to use. Default is 1.'
     )
     parser_command7.add_argument(
+        '--mean',
+        action='store_true',
+    )
+    parser_command7.add_argument(
+        '--subtract-edges',
+        action='store_true',
+    )
+    parser_command7.add_argument(
         '-v',
         '--verbose',
         action='count',
