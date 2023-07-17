@@ -472,6 +472,13 @@ def main_cli():
         ' to stdout. Default is "-".'
     )
     parser_command10.add_argument(
+        '-q',
+        '--quality_threshold',
+        default=30,
+        type=int,
+        help='Minimum MAPQ of reads. Default is 30.'
+    )
+    parser_command10.add_argument(
         '-w',
         '--workers',
         default=1,
