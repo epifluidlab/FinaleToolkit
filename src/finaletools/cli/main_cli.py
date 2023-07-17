@@ -13,6 +13,7 @@ from finaletools.frag.delfi import delfi
 from finaletools.frag.adjust_wps import adjust_wps
 from finaletools.frag.agg_wps import agg_wps
 from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
+from finaletools.frag.end_motifs import end_motifs
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
@@ -407,37 +408,82 @@ def main_cli():
     )
     parser_command8.set_defaults(func=agg_wps)
 
-    # parser command 8: delfi gc correct
-    parser_command8 = subparsers.add_parser(
+    # Subcommand 9: delfi gc correct
+    parser_command9 = subparsers.add_parser(
         'delfi-gc-correct',
         prog='finaletools-delfi-gc-correct',
         description='Performs gc-correction on raw delfi data.'
     )
-    parser_command8.add_argument(
+    parser_command9.add_argument(
         'input_file',
         help='BED3+3 file containing raw data'
     )
-    parser_command8.add_argument(
+    parser_command9.add_argument(
         '-o',
         '--output-file',
         default='-',
         help='BED3+3 to print GC-corrected DELFI fractions. If "-", will write'
         ' to stdout. Default is "-".'
     )
-    parser_command8.add_argument(
+    parser_command9.add_argument(
         '--header-lines',
         default=1,
         type=int,
         help='Number of header lines in BED. Default is 1.'
     )
-    parser_command8.add_argument(
+    parser_command9.add_argument(
         '-v',
         '--verbose',
         action='count',
         help='Specify verbosity. Number of printed statements is proportional '
         'to number of vs.'
     )
-    parser_command8.set_defaults(func=cli_delfi_gc_correct)
+    parser_command9.set_defaults(func=cli_delfi_gc_correct)
+
+    # Subcommand 10: end motigs
+    parser_command10 = subparsers.add_parser(
+        'end-motifs',
+        prog='finaletools-end-motifs',
+        description="Measures frequency of k-mer 5' end motifs and tabulates"
+        " data into a tab-delimited file."
+    )
+    parser_command10.add_argument(
+        'input_file',
+        help='SAM, BAM, or tabix-indexed file with fragment data.'
+    )
+    parser_command10.add_argument(
+        'refseq',
+        help='2bit file containing reference sequence that fragments were'
+        ' aligned to.'
+    )
+    parser_command10.add_argument(
+        '-k',
+        default=4,
+        type=int,
+        help='Length of k-mer. Default is 4.'
+    )
+    parser_command10.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='TSV to print k-mer frequencies. If "-", will write'
+        ' to stdout. Default is "-".'
+    )
+    parser_command10.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of subprocesses to use. Default is 1.'
+    )
+    parser_command10.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional '
+        'to number of vs.'
+    )
+    parser_command10.set_defaults(func=end_motifs)
 
     args = parser.parse_args()
     function = args.func

@@ -3,9 +3,11 @@ from typing import Union
 
 # XXX: implement
 def end_motifs(
-    input_bam: str,
+    input_file: str,
+    refseq: str,
     k: int = 4,
     output_file: Union(None, str) = None,
+    workers: int = 1,
     verbose: Union(bool, int) = False,
 ) -> dict:
     """
