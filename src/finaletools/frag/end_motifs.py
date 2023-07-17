@@ -65,6 +65,9 @@ def region_end_motifs(
     ------
     end_motif_freq : dict
     """
+    if verbose:
+        start_time = time()
+
     # numpy array of fragments
     frag_ends = frag_array(
         input_file,
@@ -100,6 +103,12 @@ def region_end_motifs(
                 end_motif_counts[_reverse_complement(reverse_kmer)] += 1
     finally:
         refseq.close()
+
+    if verbose:
+        stop_time = time()
+        stderr.write(
+            f'region_end_motifs took {stop_time-start_time} seconds to run\n'
+        )
 
     return end_motif_counts
 
@@ -194,6 +203,8 @@ def end_motifs(
     # FIXME: output to file
     if verbose:
         stop_time = time()
-        stderr.write(f'end_motif took {stop_time-start_time} seconds to run\n')
+        stderr.write(
+            f'end_motifs took {stop_time-start_time} seconds to run\n'
+        )
 
     return results
