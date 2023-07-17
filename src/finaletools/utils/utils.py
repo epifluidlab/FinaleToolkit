@@ -6,6 +6,7 @@ from typing import Union, TextIO, Tuple, List
 from sys import stderr, stdout
 
 import numpy as np
+from numpy.typing import NDArray
 from numba import jit
 import pysam
 from tqdm import tqdm
@@ -108,9 +109,9 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
 
 
 @jit(nopython=True)
-def frags_in_region(frag_array: np.ndarray,
+def frags_in_region(frag_array: NDArray[np.int64],
                    minimum: int,
-                   maximum: int) -> np.ndarray:
+                   maximum: int) -> NDArray[np.int64]:
     """
     Takes an array of coordinates for ends of fragments and returns an
     array of fragments with coverage in the specified region. That is, a
@@ -142,7 +143,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                fraction_low: int=120,
                fraction_high: int=180,
                verbose: bool=False
-               ) -> np.ndarray:
+               ) -> NDArray[np.int64]:
     """
     Reads from BAM, SAM, or BED file and returns a two column matrix
     with fragment start and stop positions.
@@ -232,7 +233,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
             tbx.close()
 
     # convert to ndarray
-    frag_ends = np.array(frag_ends)
+    frag_ends = np.array(frag_ends, dtype=np.int64)
 
     if frag_ends.ndim == 1:
         frag_ends = frag_ends.reshape((0, 2))
