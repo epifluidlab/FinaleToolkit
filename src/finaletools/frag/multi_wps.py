@@ -102,7 +102,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
         with pysam.TabixFile(input_file, 'r') as tbx:
             raise NotImplementedError('tabix files not yet supported!')
 
-    if (verbose):
+    if (verbose > 1):
         stderr.write(f'header is {header}\n')
 
     # read tss contigs and coordinates from bed

@@ -85,6 +85,8 @@ def main_cli():
         )
     parser_command2.add_argument('input_file')
     parser_command2.add_argument('-c', '--contig')
+    parser_command2.add_argument('--start', type=int)
+    parser_command2.add_argument('--stop', type=int)
     parser_command2.add_argument('-o', '--output_file')
     parser_command2.add_argument('-w', '--workers', default=1, type=int)
     parser_command2.add_argument('-q', '--quality_threshold', default=30, type=int)
