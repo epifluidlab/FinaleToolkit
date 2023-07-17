@@ -1,214 +1,118 @@
 from __future__ import annotations
-import gzip
-import time
-from multiprocessing.pool import Pool
+from sys import stdin, stdout, stderr
 from typing import Union
-from sys import stderr, stdout
+import time
 
-import pysam
 import numpy as np
-from numba import jit
-from tqdm import tqdm
-from memory_profiler import profile
+import pyBigWig as pbw
 
-from finaletools.frag.wps import wps
-
-
-def aggregate_wps(input_file: Union[pysam.AlignmentFile, str],
-                  site_bed: str,
-                  output_file: str=None,
-                  window_size: int=120,
-                  interval_size: int=5000,
-                  fraction_low: int=120,
-                  fraction_high: int=180,
-                  quality_threshold: int=30,
-                  workers: int=1,
-                  verbose: Union[bool, int]=0
-                  ) -> np.ndarray:
+def agg_wps(
+    input_file: str,
+    interval_file: str,
+    output_file: str,
+    median_window_size: int=0,
+    verbose: Union[bool, int]=False
+):
     """
-    Function that aggregates WPS over sites in BED file according to the
-    method described by Snyder et al (2016).
+    Takes a BigWig containing adjusted WPS scores and an interval BED and
+    aggregates scores along the intervals.
+
+    Note that the median filter trims the ends of each interval by half
+    of the window size of the filter while adjusting raw WPS data. There
+    are two way this can be approached in aggregation:
+    1. supply an interval file containing smaller intervals. e.g. if
+    you used 5kb intervals for WPS and used a median filter window
+    of 1kb, supply a BED file with 4kb windows to this function.
+
+    2. provide the size of the median filter window in
+    `median_window_size` along with the original intervals. e.g if
+    5kb intervals were used for WPS and a 1kb median filter window
+    was used, supply the 5kb bed file and median filter window size
+    to this function.
+
+    Do not do both of these at once.
 
     Parameters
     ----------
-    input_file : str or pysam.AlignmentFile
-        BAM or SAM file containing paired-end fragment reads or its
-        path. `AlignmentFile` must be opened in read mode.
-    site_bed: str
-        Bed file containing intervals to perform WPS on.
-    output_file : string, optional
-    window_size : int, optional
-        Size of window to calculate WPS. Default is k = 120, equivalent
-        to L-WPS.
-    interval_size : int, optional
-        Size of each interval specified in the bed file. Should be the
-        same for every interbal. Default is 5000.
-    fraction_low : int, optional
-        Specifies lowest fragment length included in calculation.
-        Default is 120, equivalent to long fraction.
-    fraction_high : int, optional
-        Specifies highest fragment length included in calculation.
-        Default is 120, equivalent to long fraction.
-    quality_threshold : int, optional
-    workers : int, optional
-    verbose : bool, optional
+    input_file : str
+    interval_file : str
+    output_file : str
+    median_window_size : int, optional
+        default is 0
+    verbose : int or bool, optional
+        default is False
 
-    Returns
-    -------
-    scores : numpy.ndarray
-        np array of shape (n, 2) where column 1 is the coordinate and
-        column 2 is the score and n is the number of coordinates in
-        region [start,stop)
+    Return
+    ------
+    agg_scores : NDArray
     """
-    if (verbose):
+    if verbose:
         start_time = time.time()
-        stderr.write(
-            f"""
-            Calculating aggregate WPS
-            input_file: {input_file}
-            site_bed: {site_bed}
-            output_file: {output_file}
-            window_size: {window_size}
-            interval_size: {interval_size}
-            quality_threshold: {quality_threshold}
-            workers: {workers}
-            verbose: {verbose}
+        stderr.write('Reading intervals from bed...\n')
 
-            """
-            )
+    # reading intervals from interval_file into a list
+    if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
+        # TODO: add support for bed.gz
+        if interval_file.endswith('.gz'):
+            raise NotImplementedError('bed.gz not supported yet')
+        intervals = []
+        with open(interval_file, 'r') as file:
+            for line in file:
+                # read segment from BED
+                contents = line.split('\t')
+                contig = contents[0]
+                start = int(contents[1])
+                stop = int(contents[2])
+                strand = contents[5]
 
-    # read tss contigs and coordinates from bed
-    if (verbose):
-        stderr.write('Reading intervals from bed\n')
+                intervals.append((
+                    contig,
+                    int(start),
+                    int(stop),
+                    strand.strip(),
+                ))
+    else:
+        raise ValueError('Invalid filetype for interval_file.')
 
-    contigs = []
-    starts = []
-    stops = []
-    strands = []
-    with open(site_bed) as bed:
-        for line in bed:
-            contents = line.split()
-            contig = contents[0].strip()
-            start = int(contents[1])
-            stop = int(contents[2])
-            strand = contents[5].strip()
-            contigs.append(contig)
-            starts.append(start)
-            stops.append(stop)
-            strands.append(strand)
-
-
-    left_of_site = round(-interval_size / 2)
-    right_of_site = round(interval_size / 2)
-
-    assert right_of_site - left_of_site == interval_size
-
-    count = len(contigs)
-
-    if (verbose):
-        stderr.write('Zipping inputs\n')
-
-    tss_list = zip(
-        count*[input_file],
-        contigs,
-        starts,
-        stops,
-        count*[None],
-        count*[window_size],
-        count*[fraction_low],
-        count*[fraction_high],
-        count*[quality_threshold],
-        count*[verbose-2 if verbose>2 else 0]
-    )
-
-    if (verbose):
-        stderr.write('Calculating wps...\n')
-
-    with Pool(workers, maxtasksperchild=500) as pool:
-        contig_scores = pool.starmap(wps, tss_list, chunksize=10000)
-
-    scores = np.zeros((interval_size, 2))
-
-    scores[:, 0] = np.arange(left_of_site, right_of_site)
-
-    if (verbose):
-        stderr.write('Flipping scores for reverse strand\n')
-
-    # aggregate scores by strand
-    for i in range(count):
-        if strands[i] == '.':
-            continue
-        elif strands[i] == '-':
-            contig_score = np.flip(contig_scores[i], 1)
-            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
-        elif strands[i] == '+':
-            contig_score = contig_scores[i]
-            scores[:, 1] = scores[:, 1] + contig_score[:, 1]
-        else:
-            stderr.write('Invalid strand found. Interval skipped.')
-    
-
-    if (type(output_file) == str):   # check if output specified
-        if (verbose):
-            stderr.write(f'Output file {output_file} specified. Opening...\n')
-        if output_file.endswith(".wig.gz"): # zipped wiggle
-            with gzip.open(output_file, 'wt') as out:
-                if (verbose):
-                    stderr.write(f'File opened! Writing...\n')
-
-                # declaration line
-                out.write(
-                    f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                    f'={window_size}\n'
-                    )
-                for score in (tqdm(scores[:, 1]+1)
-                              if verbose >= 2
-                              else scores[:, 1]+1):
-                    out.write(f'{score}\n')
-
-        elif output_file.endswith(".wig"):  # wiggle
-            with open(output_file, 'wt') as out:
-                if (verbose):
-                    stderr.write(f'File opened! Writing...\n')
-                # declaration line
-                out.write(
-                    f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                    f'={interval_size}\n'
-                    )
-                for score in (tqdm(scores[:, 1]+1)
-                              if verbose >= 2
-                              else scores[:, 1]+1):
-                    out.write(f'{score}\n')
-
-        elif output_file == '-':  # stdout
+    with pbw.open(input_file, 'r') as raw_wps:
+        # get size of interval based on first entry in interval_file
+        interval_size = intervals[0][2] - intervals[0][1] - median_window_size
+        agg_scores = np.zeros(interval_size, dtype=np.int64)
+        for contig, start, stop, strand in intervals:
+            values = np.array(raw_wps.values(contig, start, stop))
+            # trimmed from median filter
+            trimmed = values[median_window_size//2:-median_window_size//2]
+            # flip scores if on reverse strand
+            if strand == '+':
+                agg_scores = agg_scores + trimmed
+            elif strand == '-':
+                agg_scores = agg_scores + np.flip(trimmed)
+            elif verbose:
+                stderr.write(
+                    'A segment without strand was encountered. Skipping.'
+                )
+    positions = np.arange(-interval_size//2, interval_size//2)
+    if output_file.endswith('wig'):
+        with open(output_file, 'wt') as out:
             if (verbose):
                 stderr.write(f'File opened! Writing...\n')
             # declaration line
-            stdout.write(
-                f'fixedStep\tchrom=.\tstart={left_of_site}\tstep={1}\tspan'
-                f'={window_size}\n'
-                )
-            for score in (tqdm(scores[:, 1])
-                            if verbose >= 2
-                            else scores[:, 1]):
-                stdout.write(f'{score}\n')
-
-        else:   # unaccepted file type
-            raise ValueError(
-                'output_file can only have suffixes .wig or .wig.gz.'
-                )
-
-    elif (output_file is not None):
-        raise TypeError(
-            f'output_file is unsupported type "{type(input_file)}". '
-            'output_file should be a string specifying the path of the file '
-            'to output scores to.'
+            out.write(
+                f'fixedStep\tchrom=.\tstart={-interval_size//2}\tstep={1}\tspan'
+                f'={interval_size}\n'
             )
-
-    if (verbose):
-        end_time = time.time()
-        stderr.write(
-            f'aggregate_wps took {end_time - start_time} s to complete\n'
+            for score in agg_scores:
+                out.write(f'{score}\n')
+    else:
+        raise ValueError(
+            'output_file is unaccepted type.'
         )
+    
+    if verbose:
+        end_time = time.time()
+        stderr.write(f'Agg-WPS took {end_time-start_time} s to run.\n')
 
-    return scores
+    return agg_scores
+
+
+

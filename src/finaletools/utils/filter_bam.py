@@ -1,6 +1,10 @@
 from __future__ import annotations
 import tempfile as tf
 import subprocess
+import traceback
+from sys import stderr
+from os.path import isdir
+from shutil import rmtree
 
 import pysam
 
@@ -45,21 +49,29 @@ def filter_bam(
     else:
         raise ValueError('output_file should have suffix .bam')
 
-    try:
+
         # create temp dir to store intermediate sorted file
+    try:
         temp_dir = tf.TemporaryDirectory()
 
         flag_filtered_bam = temp_dir.name + '/flag_filtered.bam'
 
         samtools_command = (
             f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
-            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers} -M'
+            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
         )
 
         if region_file is not None:
-            samtools_command += f' -L {region_file}'
+            samtools_command += f' -M -L {region_file}'
 
-        process1 = subprocess.run(samtools_command, shell=True, check=True)
+        try:
+            process1 = subprocess.run(samtools_command, shell=True, check=True)
+        except Exception as e:
+            traceback.print_exc()
+            exit(1)
+
+        # supress index file warning
+        save = pysam.set_verbosity(0)
 
         # filter for reads on different reference
         with pysam.AlignmentFile(flag_filtered_bam, 'rb') as in_file:
@@ -91,14 +103,18 @@ def filter_bam(
                             and read.template_length <= fraction_high
                         ):
                             out_file.write(read)
-
     finally:
         temp_dir.cleanup()
+        pysam.set_verbosity(save)
 
     if output_file != '-':
         # generate index for output_file
-        process3 = subprocess.run(
-            f'samtools index {output_file} {output_file}.bai',
-            shell=True,
-            check=True
+        try:
+            process3 = subprocess.run(
+                f'samtools index {output_file} {output_file}.bai',
+                shell=True,
+                check=True
             )
+        except Exception as e:
+            traceback.print_exc()
+            exit(1)
