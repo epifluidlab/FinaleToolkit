@@ -134,56 +134,11 @@ def frags_in_region(frag_array: np.ndarray,
     return filtered_frags
 
 
-def _sam_frag_array(sam_file: pysam.AlignmentFile,
-                    contig: str,
-                    has_min_max: bool,
-                    quality_threshold:int=30,
-                    minimum: int=None,
-                    maximum: int=None,
-                    fraction_low: int=120,
-                    fraction_high: int=180,
-                    verbose: bool=False):
-    frag_ends = []
-    for read1 in sam_file.fetch(contig=contig):
-        # Only select forward strand and filter out non-paired-end
-        # reads and low-quality reads
-        if (read1.is_read2
-            or low_quality_read_pairs(read1, quality_threshold)):
-            pass
-        else:
-            read_length = read1.template_length
-            read_start = read1.reference_start
-            read_stop = read1.reference_start + read_length
-            if ((read_length >= fraction_low)
-                and (read_length <= fraction_high)):
-                frag_ends.append((read_start, read_stop))
-    return frag_ends
-
-
-def _tabix_frag_array(tbx: pysam.TabixFile,
-                    contig: str,
-                    has_min_max: bool,
-                    quality_threshold:int=30,
-                    minimum: int=None,
-                    maximum: int=None,
-                    fraction_low: int=120,
-                    fraction_high: int=180,
-                    verbose: bool=False):
-    frag_ends = []
-    for line in tbx.fetch(contig, minimum, maximum, parser=pysam.asTuple()):
-        read_start = int(line[1])
-        read_stop = int(line[2])
-        read_length = read_stop - read_start
-        if read_length >= fraction_low and read_length <= fraction_high:
-            frag_ends.append((read_start, read_stop))
-    return frag_ends
-
-
 def frag_array(input_file: Union[str, pysam.AlignmentFile],
                contig: str,
                quality_threshold: int=30,
-               minimum: int=None,
-               maximum: int=None,
+               start: int=None,
+               stop: int=None,
                fraction_low: int=120,
                fraction_high: int=180,
                verbose: bool=False
@@ -215,99 +170,66 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
         If no fragments exist in the specified minimum-maximum interval,
         the returned 'ndarray' will have a shape of (0, 2)
     """
-    # boolean flag indicating whether or not a minimum and maximum
-    # location for one fragment end is specified.
-    has_min_max = (minimum is not None) and (maximum is not None)
-    if (minimum is None) != (maximum is None):
-        raise ValueError(
-            'Both minimum and maximum must either be present or absent.'
-            )
-
-    # input_file is AlignmentFile
-    if (type(input_file) == pysam.AlignmentFile):
-        sam_file = input_file
-        frag_ends = _sam_frag_array(sam_file,
-                                    contig,
-                                    has_min_max,
-                                    quality_threshold=quality_threshold,
-                                    minimum=minimum, maximum=maximum,
-                                    fraction_low=fraction_low,
-                                    fraction_high=fraction_high,
-                                    verbose=verbose)
-
-    # input_file is a path string
-    elif (type(input_file) == str):
-        # SAM file
-        if (input_file.endswith('.sam')):
-            with pysam.AlignmentFile(input_file, 'r') as sam_file:
-                frag_ends = _sam_frag_array(
-                sam_file,
-                contig,
-                has_min_max,
-                quality_threshold=quality_threshold,
-                minimum=minimum,
-                maximum=maximum,
-                fraction_low=fraction_low,
-                fraction_high=fraction_high,
-                verbose=verbose
-            )
-        # BAM file
-        elif (input_file.endswith('.bam')):
-            with pysam.AlignmentFile(input_file, 'rb') as sam_file:
-                frag_ends = _sam_frag_array(
-                    sam_file,
-                    contig,
-                    has_min_max,
-                    quality_threshold=quality_threshold,
-                    minimum=minimum,
-                    maximum=maximum,
-                    fraction_low=fraction_low,
-                    fraction_high=fraction_high,
-                    verbose=verbose
-                )
-        # BAM from stdin
-        elif (input_file == '-'):
-            with pysam.AlignmentFile(input_file, 'rb') as sam_file:
-                frag_ends = _sam_frag_array(
-                    sam_file,
-                    None,
-                    False,
-                    quality_threshold=quality_threshold,
-                    fraction_low=fraction_low,
-                    fraction_high=fraction_high,
-                    verbose=verbose
-                )
-        # tabix file
-        elif (
-            input_file.endswith('.bed.gz')
-            or input_file.endswith('.frag.gz')
-            or input_file.endswith('.bed')
-            or input_file.endswith('.frag')
-        ):
-            with pysam.TabixFile(input_file, 'rb') as tbx:
-                frag_ends = _tabix_frag_array(
-                tbx,
-                contig,
-                has_min_max,
-                quality_threshold=quality_threshold,
-                minimum=minimum,
-                maximum=maximum,
-                fraction_low=fraction_low,
-                fraction_high=fraction_high,
-                verbose=verbose
-            )
+    try:
+        # check type of input and open if needed
+        input_file_is_str = False   # file was opened in this context
+        is_sam = False  # file is SAM/BAM, not tabix indexed
+        if type(input_file) == str:   # path string
+            input_file_is_str == True
+            # check file type
+            if (
+                input_file.endswith('.sam')
+                or input_file.endswith('.bam')
+            ):
+                is_sam = True
+                sam_file = pysam.AlignmentFile(input_file, 'r')
+            elif (
+                input_file.endswith('frag.gz')
+                or input_file.endswith('bed.gz')
+                or input_file.endswith('frag.gz')
+                or input_file.endswith('bed.gz')
+            ):
+                tbx = pysam.TabixFile(input_file, 'r')
+        elif type(input_file) == pysam.AlignmentFile:
+            is_sam = True
+            sam_file = input_file
+        elif type(input_file) == pysam.TabixFile:
+            tbx = input_file
         else:
-            raise ValueError(
-                'input_file can only have suffixes .bam, .sam, .bed, or '
-                '.bed.gz'
-                )
-
-    else:
-        raise TypeError(
-            f'input_file is unsupported type "{type(input_file)}". Input_file '
-            'should be a pysam.AlignmentFile or a string containing the path '
-            'to a SAM or BAM file.'
+            raise TypeError(
+                f'{type(input_file)} is invalid type for input_file.'
             )
+
+        # based on file type, read into an array
+        frag_ends = []
+        if is_sam:
+            for read1 in sam_file.fetch(contig, start, stop):
+                # Only select forward strand and filter out non-paired-end
+                # reads and low-quality reads
+                if (read1.is_read2
+                    or low_quality_read_pairs(read1, quality_threshold)):
+                    pass
+                else:
+                    read_length = read1.template_length
+                    read_start = read1.reference_start
+                    read_stop = read1.reference_start + read_length
+                    if ((read_length >= fraction_low)
+                        and (read_length <= fraction_high)):
+                        frag_ends.append((read_start, read_stop))
+        else:
+            for line in tbx.fetch(
+                contig, start, stop, parser=pysam.asTuple()
+            ):
+                read_start = int(line[1])
+                read_stop = int(line[2])
+                read_length = read_stop - read_start
+                if read_length >= fraction_low and read_length <= fraction_high:
+                    frag_ends.append((read_start, read_stop))
+    finally:
+        if input_file_is_str and is_sam:
+            sam_file.close()
+        elif input_file_is_str:
+            tbx.close()
 
     # convert to ndarray
     frag_ends = np.array(frag_ends)
@@ -318,7 +240,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     assert frag_ends.ndim == 2, (f'frag_ends has dims {frag_ends.ndim} and '
                                  f'shape {frag_ends.shape}')
     assert (frag_ends.shape == (0, 2)
-            or frag_ends.shape[1] == 2), ('frag_ends has shape'
+            or frag_ends.shape[1] == 2),('frag_ends has shape'
                                           f'{frag_ends.shape}')
     return frag_ends
 
