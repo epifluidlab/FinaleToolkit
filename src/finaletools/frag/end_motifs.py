@@ -1,6 +1,10 @@
 from __future__ import annotations
 from typing import Union
+from multiprocessing import Pool
+from time import time
+from sys import stderr
 
+import tqdm
 import py2bit
 import numpy as np
 from numpy.typing import NDArray
@@ -99,7 +103,12 @@ def region_end_motifs(
 
     return end_motif_counts
 
-# XXX: implement
+
+def _region_end_motifs_star(args) -> NDArray:
+    results_dict = region_end_motifs(*args)
+    return np.array(list(results_dict.values()))
+
+
 def end_motifs(
     input_file: str,
     refseq_file: str,
@@ -128,4 +137,63 @@ def end_motifs(
     ------
     end_motif_freq : list
     """
-    return None
+    if verbose:
+        start_time = time()
+
+    bases='ACGT'
+    kmer_list = _gen_kmers(k, bases)
+
+    # read chromosomes from py2bit
+    try:
+        refseq = py2bit.open(refseq_file, 'r')
+        chroms: dict = refseq.chroms()
+    finally:
+        refseq.close()
+
+    # generate list of inputs
+    intervals = []
+    window_size = 100000
+    for chrom, chrom_length in chroms.items():
+        for start in range(0, chrom_length, window_size):
+            intervals.append((
+                input_file,
+                chrom,
+                start,
+                start+window_size,
+                refseq_file,
+                k,
+                output_file,
+                quality_threshold,
+                verbose - 2 if verbose > 2 else 0
+            ))
+
+    # use process pool to count kmers
+    try:
+        # open pool
+        pool = Pool(workers)
+
+        # uses tqdm loading bar if verbose == True
+        counts_iter = pool.imap(
+            _region_end_motifs_star,
+            tqdm.tqdm(intervals, 'Reading 100kb windows')if verbose else intervals,
+            chunksize=int(len(intervals)/workers/2+1)
+        )
+
+        ccounts = np.zeros((4**k,), np.float64)
+        for count in tqdm.tqdm(counts_iter, 'Counting end-motifs', len(intervals)) if verbose else counts_iter:
+            ccounts = ccounts + count
+
+    finally:
+        pool.close()
+
+
+    # calculate results
+    results = np.array(np.column_stack(kmer_list, ccounts/np.sum(ccounts)),
+        dtype=[('k-mer', f'<U{k}'), ('frequency', '<f8')]
+    )
+    # FIXME: output to file
+    if verbose:
+        stop_time = time()
+        stderr.write(f'end_motif took {stop_time-start_time} seconds to run\n')
+
+    return results
