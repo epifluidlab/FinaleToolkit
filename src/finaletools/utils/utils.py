@@ -144,62 +144,23 @@ def _sam_frag_array(sam_file: pysam.AlignmentFile,
                     fraction_high: int=180,
                     verbose: bool=False):
     frag_ends = []
-    count = sam_file.count(
-        contig=contig,
-        start=minimum,
-        stop=maximum) if verbose else None
-    if (has_min_max):
-        for read1 in (tqdm(
-            sam_file.fetch(contig=contig, start=minimum, stop=maximum),
-            total=count)
-            if verbose
-            else sam_file.fetch(contig=contig)
-        ):
-            # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads
-            if (read1.is_read2
-                or low_quality_read_pairs(read1, quality_threshold)):
-                pass
-            else:
-                read_length = read1.template_length
-                read_start = read1.reference_start
-                read_stop = read1.reference_start + read_length
-                if ((read_length >= fraction_low)
-                    and (read_length <= fraction_high)):
-                    frag_ends.append((read_start, read_stop))
-    elif (contig is None):
-        for read1 in (tqdm(sam_file, total=count)
-                      if verbose
-                      else sam_file):
-            # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads
-            if (read1.is_read2
-                or low_quality_read_pairs(read1, quality_threshold)):
-                pass
-            else:
-                frag_ends.append(
-                    (read1.reference_start,
-                     read1.reference_start + read1.template_length)
-                     )
-    else:
-        for read1 in (tqdm(sam_file.fetch(contig=contig), total=count)
-                      if verbose
-                      else sam_file.fetch(contig=contig)):
-            # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads
-            if (read1.is_read2
-                or low_quality_read_pairs(read1, quality_threshold)):
-                pass
-            else:
-                frag_ends.append(
-                    (read1.reference_start,
-                     read1.reference_start + read1.template_length)
-                     )
+    for read1 in sam_file.fetch(contig=contig):
+        # Only select forward strand and filter out non-paired-end
+        # reads and low-quality reads
+        if (read1.is_read2
+            or low_quality_read_pairs(read1, quality_threshold)):
+            pass
+        else:
+            read_length = read1.template_length
+            read_start = read1.reference_start
+            read_stop = read1.reference_start + read_length
+            if ((read_length >= fraction_low)
+                and (read_length <= fraction_high)):
+                frag_ends.append((read_start, read_stop))
     return frag_ends
 
 
-@jit(forceobj=True)
-def _bed_frag_array(bed_file: TextIO,
+def _tabix_frag_array(tbx: pysam.TabixFile,
                     contig: str,
                     has_min_max: bool,
                     quality_threshold:int=30,
@@ -209,25 +170,12 @@ def _bed_frag_array(bed_file: TextIO,
                     fraction_high: int=180,
                     verbose: bool=False):
     frag_ends = []
-    if (has_min_max):
-        for line in bed_file:
-            frag_info = line.split('\t')
-            read_start = int(frag_info[1])
-            read_stop = int(frag_info[2])
-            read_length = read_stop - read_start
-            if ((frag_info[0] == contig)
-                and ((read_stop >= minimum)
-                     and (read_start < maximum)
-                     and (read_length >= fraction_low)
-                     and (read_length <= fraction_high)
-                     )
-                ):
-                frag_ends.append((read_start, read_stop))
-    else:
-        for line in bed_file:
-            frag_info = line.split('\t')
-            if (frag_info[0] == contig):
-                frag_ends.append((int(frag_info[1]), int(frag_info[2])))
+    for line in tbx.fetch(contig, minimum, maximum, parser=pysam.asTuple()):
+        read_start = int(line[1])
+        read_stop = int(line[2])
+        read_length = read_stop - read_start
+        if read_length >= fraction_low and read_length <= fraction_high:
+            frag_ends.append((read_start, read_stop))
     return frag_ends
 
 
@@ -329,11 +277,16 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                     fraction_high=fraction_high,
                     verbose=verbose
                 )
-        # BED file
-        elif (input_file.endswith('.bed')):
-            with open(input_file, 'rt') as bed_file:
-                frag_ends = _bed_frag_array(
-                bed_file,
+        # tabix file
+        elif (
+            input_file.endswith('.bed.gz')
+            or input_file.endswith('.frag.gz')
+            or input_file.endswith('.bed')
+            or input_file.endswith('.frag')
+        ):
+            with pysam.TabixFile(input_file, 'rb') as tbx:
+                frag_ends = _tabix_frag_array(
+                tbx,
                 contig,
                 has_min_max,
                 quality_threshold=quality_threshold,
@@ -343,20 +296,6 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 fraction_high=fraction_high,
                 verbose=verbose
             )
-        # BED.gz file
-        elif (input_file.endswith('.bed.gz')):
-            with gzip.open(input_file, 'rt') as bed_file:
-                frag_ends = _bed_frag_array(
-                    bed_file,
-                    contig,
-                    has_min_max,
-                    quality_threshold=quality_threshold,
-                    minimum=minimum,
-                    maximum=maximum,
-                    fraction_low=fraction_low,
-                    fraction_high=fraction_high,
-                    verbose=verbose
-                )
         else:
             raise ValueError(
                 'input_file can only have suffixes .bam, .sam, .bed, or '
