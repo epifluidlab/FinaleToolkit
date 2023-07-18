@@ -45,7 +45,7 @@ def region_end_motifs(
     verbose: Union(bool, int) = False,
 ) -> dict:
     """
-    Function that reads fragments int the specified region from a BAM,
+    Function that reads fragments in the specified region from a BAM,
     SAM, or tabix indexed file and returns the 5' k-mer (default is
     4-mer) end motif counts as a structured array.
 
@@ -115,7 +115,7 @@ def region_end_motifs(
 
 def _region_end_motifs_star(args) -> NDArray:
     results_dict = region_end_motifs(*args)
-    return np.array(list(results_dict.values()))
+    return np.array(list(results_dict.values()), dtype='<f8')
 
 
 def end_motifs(
@@ -171,7 +171,7 @@ def end_motifs(
                 start+window_size,
                 refseq_file,
                 k,
-                output_file,
+                None,
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0
             ))
@@ -184,12 +184,12 @@ def end_motifs(
         # uses tqdm loading bar if verbose == True
         counts_iter = pool.imap(
             _region_end_motifs_star,
-            tqdm.tqdm(intervals, 'Reading 100kb windows')if verbose else intervals,
-            chunksize=int(len(intervals)/workers/2+1)
+            tqdm.tqdm(intervals, 'Reading 100kb windows', position=0)if verbose else intervals,
+            chunksize=min(int(len(intervals)/workers/2+1), 1000)
         )
 
         ccounts = np.zeros((4**k,), np.float64)
-        for count in tqdm.tqdm(counts_iter, 'Counting end-motifs', len(intervals)) if verbose else counts_iter:
+        for count in tqdm.tqdm(counts_iter, 'Counting end-motifs', len(intervals), position=1) if verbose else counts_iter:
             ccounts = ccounts + count
 
     finally:
@@ -197,13 +197,16 @@ def end_motifs(
 
 
     # calculate results
-    results = np.array(np.column_stack(kmer_list, ccounts/np.sum(ccounts)),
-        dtype=[('k-mer', f'<U{k}'), ('frequency', '<f8')]
+    results = np.zeros((len(kmer_list),),
+        dtype=[('k-mer', f'U{k}'), ('frequency', '<f8')]
     )
+    results['k-mer'] = kmer_list
+    results['frequency'] = ccounts/np.sum(ccounts)
+
     # FIXME: output to file
     if verbose:
         stop_time = time()
-        stderr.write(
+        tqdm.tqdm.write(
             f'end_motifs took {stop_time-start_time} seconds to run\n'
         )
 
