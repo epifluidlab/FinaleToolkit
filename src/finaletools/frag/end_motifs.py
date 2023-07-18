@@ -8,14 +8,13 @@ try:
 except ImportError:
     from importlib_resources import files
 from pathlib import PosixPath
-from os import PathLike
 
 import tqdm
 import py2bit
 import numpy as np
 from numpy.typing import NDArray
 
-from finaletools.utils.utils import frag_array
+from finaletools.utils.utils import frag_generator
 import finaletools.frag as pkg_data
 
 # path to tsv containing f-profiles from Zhou et al (2023)
@@ -120,7 +119,7 @@ def region_end_motifs(
         start_time = time()
 
     # numpy array of fragments
-    frag_ends = frag_array(
+    frag_ends = frag_generator(
         input_file,
         contig,
         quality_threshold,
@@ -141,14 +140,14 @@ def region_end_motifs(
         for frag in frag_ends:
             # forward end-motif
             forward_kmer = refseq.sequence(
-                contig, int(frag[0]), int(frag[0]+k)
+                contig, int(frag[1]), int(frag[1]+k)
             )
             if 'N' not in forward_kmer:
                 end_motif_counts[forward_kmer] += 1
 
             # reverse end-motif
             reverse_kmer = refseq.sequence(
-                contig, int(frag[1]-k), int(frag[1])
+                contig, int(frag[2]-k), int(frag[2])
             )
             if 'N' not in reverse_kmer:
                 end_motif_counts[_reverse_complement(reverse_kmer)] += 1
@@ -213,7 +212,7 @@ def end_motifs(
 
     # generate list of inputs
     intervals = []
-    window_size = 100000
+    window_size = 1000000
     for chrom, chrom_length in chroms.items():
         for start in range(0, chrom_length, window_size):
             intervals.append((
@@ -227,6 +226,17 @@ def end_motifs(
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0
             ))
+        intervals.append((
+            input_file,
+            chrom,
+            chrom_length - chrom_length%window_size,
+            chrom_length,
+            refseq_file,
+            k,
+            None,
+            quality_threshold,
+            verbose - 2 if verbose > 2 else 0
+        ))
 
     # use process pool to count kmers
     try:
@@ -236,7 +246,7 @@ def end_motifs(
         # uses tqdm loading bar if verbose == True
         counts_iter = pool.imap(
             _region_end_motifs_star,
-            tqdm.tqdm(intervals, 'Reading 100kb windows', position=0)if verbose else intervals,
+            tqdm.tqdm(intervals, 'Reading 1mb windows', position=0)if verbose else intervals,
             chunksize=min(int(len(intervals)/workers/2+1), 1000)
         )
 
