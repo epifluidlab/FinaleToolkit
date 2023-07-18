@@ -11,6 +11,7 @@ from numpy.typing import NDArray
 
 from finaletools.utils.utils import frag_array
 
+
 def _gen_kmers(k: int, bases: str) -> list:
         """Function to recursively create a list of k-mers."""
         if k == 1:
@@ -47,7 +48,8 @@ def region_end_motifs(
     """
     Function that reads fragments in the specified region from a BAM,
     SAM, or tabix indexed file and returns the 5' k-mer (default is
-    4-mer) end motif counts as a structured array.
+    4-mer) end motif counts as a structured array. This function
+    reproduces the methodology of Zhou et al (2023).
 
     Parameters
     ----------
@@ -130,7 +132,8 @@ def end_motifs(
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
     file and returns the 5' k-mer (default is 4-mer) end motif
-    frequencies as a dictionary. Optionally writes data to a tsv.
+    frequencies as a dictionary. Optionally writes data to a tsv. This
+    function reproduces the methodology of Zhou et al (2023).
 
     Parameters
     ----------
