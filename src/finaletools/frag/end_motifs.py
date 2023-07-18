@@ -1,8 +1,14 @@
 from __future__ import annotations
-from typing import Union
+from typing import Union, Iterable
 from multiprocessing import Pool
 from time import time
 from sys import stderr
+try:
+    from importlib.resources import files
+except ImportError:
+    from importlib_resources import files
+from pathlib import PosixPath
+from os import PathLike
 
 import tqdm
 import py2bit
@@ -10,6 +16,49 @@ import numpy as np
 from numpy.typing import NDArray
 
 from finaletools.utils.utils import frag_array
+import finaletools.frag as pkg_data
+
+# path to tsv containing f-profiles from Zhou et al (2023)
+FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
+
+
+class EndMotifFreqs(dict):
+    """
+    Class that stores frequencies of end-motif k-mer frequencies and
+    contains methods to manipulate this data. Can also be indexed like
+    a Python dictionary to return frequencies.
+
+    Parameters
+    ----------
+    kmer_frequencies : Iterable
+        A Iterable of tuples, each containing a str representing a k-mer
+        and a float representing its frequency
+    k : int
+        Size of k-mers
+    refseq_file: str
+        A 2bit file containing the reference sequence that cfDNA
+        fragments were aligned to
+    quality_threshold: int, optional
+        Minimum mapping quality used. Default is 30.
+
+    """
+
+    def __init__(
+        self,
+        kmer_frequencies: Iterable,
+        k: int,
+        refseq_file: str,
+        quality_threshold: int = 30,
+    ):
+        super().__init__(kmer_frequencies)
+        self.k = k
+        self.refseq_file = refseq_file
+        self.quality_threshold = quality_threshold
+        if not all(len(kmer) == k for kmer, _ in kmer_frequencies):
+            raise ValueError(
+                'kmer_frequencies contains a kmer with length not equal'
+                ' to k.'
+            )
 
 
 def _gen_kmers(k: int, bases: str) -> list:
@@ -128,7 +177,7 @@ def end_motifs(
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union(bool, int) = False,
-) -> NDArray:
+) -> EndMotifFreqs:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
     file and returns the 5' k-mer (default is 4-mer) end motif
@@ -198,13 +247,14 @@ def end_motifs(
     finally:
         pool.close()
 
+    frequencies = ccounts/np.sum(ccounts)
 
-    # calculate results
-    results = np.zeros((len(kmer_list),),
-        dtype=[('k-mer', f'U{k}'), ('frequency', '<f8')]
+    results = EndMotifFreqs(
+        zip(kmer_list, frequencies),
+        k,
+        refseq_file,
+        quality_threshold
     )
-    results['k-mer'] = kmer_list
-    results['frequency'] = ccounts/np.sum(ccounts)
 
     # FIXME: output to file
     if verbose:
