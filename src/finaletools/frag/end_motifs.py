@@ -8,6 +8,7 @@ try:
 except ImportError:
     from importlib_resources import files
 from pathlib import PosixPath
+from collections import UserDict
 
 import tqdm
 import py2bit
@@ -21,7 +22,7 @@ import finaletools.frag as pkg_data
 FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
 
 
-class EndMotifFreqs(dict):
+class EndMotifFreqs(UserDict):
     """
     Class that stores frequencies of end-motif k-mer frequencies and
     contains methods to manipulate this data. Can also be indexed like
