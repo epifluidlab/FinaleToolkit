@@ -182,7 +182,7 @@ def multi_wps(
         interval_scores = pool.imap(
             _wps_star,
             tss_list,
-            chunksize=min(10000, int(count/workers//2+1))
+            chunksize=min(500, int(count/workers//2+1))
         )
 
         # output
