@@ -2,10 +2,11 @@ from __future__ import annotations
 import time
 import gzip
 import tempfile as tf
-from typing import Union, TextIO, Tuple, List
+from typing import Union, TextIO, Tuple, List, Generator
 from sys import stderr, stdout
 
 import numpy as np
+from numpy.typing import NDArray
 from numba import jit
 import pysam
 from tqdm import tqdm
@@ -108,9 +109,9 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
 
 
 @jit(nopython=True)
-def frags_in_region(frag_array: np.ndarray,
+def frags_in_region(frag_array: NDArray[np.int64],
                    minimum: int,
-                   maximum: int) -> np.ndarray:
+                   maximum: int) -> NDArray[np.int64]:
     """
     Takes an array of coordinates for ends of fragments and returns an
     array of fragments with coverage in the specified region. That is, a
@@ -134,6 +135,101 @@ def frags_in_region(frag_array: np.ndarray,
     return filtered_frags
 
 
+def frag_generator(
+    input_file: Union[str, pysam.AlignmentFile],
+    contig: str,
+    quality_threshold: int=30,
+    start: int=None,
+    stop: int=None,
+    fraction_low: int=120,
+    fraction_high: int=180,
+    verbose: bool=False
+) -> Generator[Tuple]:
+    """
+    Reads from BAM, SAM, or BED file and returns tuples containing
+    contig (chromosome), start, and stop (end) for each fragment.
+
+    Parameters
+    ----------
+    input_file : str or AlignmentFile
+    contig : str
+    quality_threshold : int, optional
+    minimum : int, optional
+    maximum : int, optional
+    fraction_low : int, optional
+        Specifies lowest fragment length included in array. Default is
+        120, equivalent to long fraction.
+    fraction_high : int, optional
+        Specifies highest fragment length included in array. Default is
+        120, equivalent to long fraction.
+    verbose : bool, optional
+
+    Returns
+    -------
+    frag_ends : Generator
+        Generator that yields tuples containing the region covered by
+        each fragment in input_file.
+    """
+    try:
+        # check type of input and open if needed
+        input_file_is_str = False   # file was opened in this context
+        is_sam = False  # file is SAM/BAM, not tabix indexed
+        if type(input_file) == str:   # path string
+            input_file_is_str == True
+            # check file type
+            if (
+                input_file.endswith('.sam')
+                or input_file.endswith('.bam')
+            ):
+                is_sam = True
+                sam_file = pysam.AlignmentFile(input_file, 'r')
+            elif (
+                input_file.endswith('frag.gz')
+                or input_file.endswith('bed.gz')
+                or input_file.endswith('frag.gz')
+                or input_file.endswith('bed.gz')
+            ):
+                tbx = pysam.TabixFile(input_file, 'r')
+        elif type(input_file) == pysam.AlignmentFile:
+            is_sam = True
+            sam_file = input_file
+        elif type(input_file) == pysam.TabixFile:
+            tbx = input_file
+        else:
+            raise TypeError(
+                f'{type(input_file)} is invalid type for input_file.'
+            )
+
+        if is_sam:
+            for read1 in sam_file.fetch(contig, start, stop):
+                # Only select forward strand and filter out non-paired-end
+                # reads and low-quality reads
+                if (read1.is_read2
+                    or low_quality_read_pairs(read1, quality_threshold)):
+                    pass
+                else:
+                    read_length = read1.template_length
+                    read_start = read1.reference_start
+                    read_stop = read1.reference_start + read_length
+                    if ((read_length >= fraction_low)
+                        and (read_length <= fraction_high)):
+                        yield contig, read_start, read_stop
+        else:
+            for line in tbx.fetch(
+                contig, start, stop, parser=pysam.asTuple()
+            ):
+                read_start = int(line[1])
+                read_stop = int(line[2])
+                read_length = read_stop - read_start
+                if read_length >= fraction_low and read_length <= fraction_high:
+                    yield contig, read_start, read_stop
+    finally:
+        if input_file_is_str and is_sam:
+            sam_file.close()
+        elif input_file_is_str:
+            tbx.close()
+
+
 def frag_array(input_file: Union[str, pysam.AlignmentFile],
                contig: str,
                quality_threshold: int=30,
@@ -142,7 +238,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                fraction_low: int=120,
                fraction_high: int=180,
                verbose: bool=False
-               ) -> np.ndarray:
+               ) -> NDArray[np.int64]:
     """
     Reads from BAM, SAM, or BED file and returns a two column matrix
     with fragment start and stop positions.
@@ -164,8 +260,8 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
 
     Returns
     -------
-    frag_ends : ndarray
-        'ndarray' with shape (n, 2) where column 1 contains fragment
+    frag_ends : NDArray
+        'NDArray' with shape (n, 2) where column 1 contains fragment
         start positions and column 2 contains fragment stop positions.
         If no fragments exist in the specified minimum-maximum interval,
         the returned 'ndarray' will have a shape of (0, 2)
@@ -232,7 +328,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
             tbx.close()
 
     # convert to ndarray
-    frag_ends = np.array(frag_ends)
+    frag_ends = np.array(frag_ends, dtype=np.int64)
 
     if frag_ends.ndim == 1:
         frag_ends = frag_ends.reshape((0, 2))
