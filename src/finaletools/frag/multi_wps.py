@@ -21,17 +21,18 @@ def _wps_star(args):
     return wps(*args)
 
 
-def multi_wps(input_file: Union[pysam.AlignmentFile, str],
-                  site_bed: str,
-                  output_file: str=None,
-                  window_size: int=120,
-                  interval_size: int=5000,
-                  fraction_low: int=120,
-                  fraction_high: int=180,
-                  quality_threshold: int=30,
-                  workers: int=1,
-                  verbose: Union[bool, int]=0
-                  ) -> np.ndarray:
+def multi_wps(
+        input_file: Union[pysam.AlignmentFile, str],
+        site_bed: str,
+        output_file: Union[str, None]=None,
+        window_size: int=120,
+        interval_size: int=5000,
+        fraction_low: int=120,
+        fraction_high: int=180,
+        quality_threshold: int=30,
+        workers: int=1,
+        verbose: Union[bool, int]=0
+        ) -> np.ndarray:
     """
     Function that aggregates WPS over sites in BED file according to the
     method described by Snyder et al (2016).
