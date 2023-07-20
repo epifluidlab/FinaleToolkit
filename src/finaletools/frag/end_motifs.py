@@ -1,8 +1,9 @@
 from __future__ import annotations
+from collections.abc import Iterator
 from typing import Union, Iterable
 from multiprocessing import Pool
 from time import time
-from sys import stderr
+from sys import stderr, stdout
 try:
     from importlib.resources import files
 except ImportError:
@@ -60,15 +61,6 @@ class EndMotifFreqs():
                 ' to k.'
             )
 
-    def kmers(self) -> Iterable:
-        return self._dict.keys()
-
-    def frequencies(self) -> Iterable:
-        return self._dict.values()
-
-    def freq(self, kmer: str) -> float:
-        return self._dict[kmer]
-
     def __iter__(self) -> Iterator:
         return ((kmer, frequency)
                 for (kmer, frequency)
@@ -79,6 +71,44 @@ class EndMotifFreqs():
 
     def __str__(self) -> str:
         return ''.join(f'{kmer}: {freq}\n' for kmer, freq in self)
+
+    def kmers(self) -> Iterable:
+        return self._dict.keys()
+
+    def frequencies(self) -> Iterable:
+        return self._dict.values()
+
+    def freq(self, kmer: str) -> float:
+        return self._dict[kmer]
+
+    def to_tsv(self, output_file: str, sep: str='\t'):
+        """Prints k-mer frequencies to a tsv"""
+        if type(output_file) == str:
+            try:
+                # open file based on name
+                output_is_file = False
+                if output_file == '-':
+                    output = stdout
+                elif output_file.endswith('.tsv'):
+                    output_is_file = True
+                    output = open(output_file, 'w')
+                else:
+                    raise ValueError('output_file is unsupported format.')
+
+                # write to file
+                for kmer, freq in self:
+                    output.write(f'{kmer}{sep}{freq}\n')
+
+            finally:
+                if output_is_file:
+                    output.close()
+        else:
+            raise TypeError(f'output_file must be a string.')
+
+
+
+
+
 
 
 def _gen_kmers(k: int, bases: str) -> list:
@@ -287,7 +317,12 @@ def end_motifs(
         quality_threshold
     )
 
-    # FIXME: output to file
+    if output_file is not None:
+        if output_file.endswith('.csv'):
+            results.to_tsv(output_file, sep=',')
+        else:
+            results.to_tsv(output_file)
+
     if verbose:
         stop_time = time()
         tqdm.tqdm.write(
