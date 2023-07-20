@@ -4,6 +4,7 @@ from typing import Union, Iterable
 from multiprocessing import Pool
 from time import time
 from sys import stderr, stdout
+import gzip
 try:
     from importlib.resources import files
 except ImportError:
@@ -46,7 +47,7 @@ class EndMotifFreqs():
 
     def __init__(
         self,
-        kmer_frequencies: Iterable,
+        kmer_frequencies: Iterable[tuple[str, float]],
         k: int,
         refseq_file: str,
         quality_threshold: int = 30,
@@ -102,6 +103,64 @@ class EndMotifFreqs():
                     output.close()
         else:
             raise TypeError(f'output_file must be a string.')
+
+    @classmethod
+    def from_file(
+            cls,
+            file_path: str,
+            refseq_file: str,
+            quality_threshold: int,
+            sep: str='\t',
+            header: int=0,) -> EndMotifFreqs:
+        """
+        Reads kmer frequency from a two-column tab-delimited file
+
+        Parameters
+        ---------
+        file_path : str
+            Path string containing path to file.
+        sep : str, optional
+            Delimiter used in file.
+        header : int, optional
+            Number of lines to ignore at the head of the file.
+
+        Return
+        ------
+        kmer_freqs : EndMotifFreqs
+        """
+        try:
+            # open file
+            if file_path.endswith('gz'):
+                file = gzip.open(file_path)
+            else:
+                file = open(file_path)
+
+            # ignore header
+            for _ in range(header):
+                file.readline()
+
+            freq_list = []
+            lines = file.readlines()
+            line = lines[header].split(sep)
+            k = len(line[0])    # infer k from first entry
+
+            for line in lines:
+                line_data = line.split(sep)
+                if len(line_data) != 2:
+                    break
+                freq_list.append((line_data[0], float(line_data[1])))
+                if k != len(line_data[0]):
+                    raise RuntimeError(
+                        'File contains k-mers of inconsistent length.'
+                    )
+            if length := len(freq_list) != 4**k:
+                raise RuntimeError(
+                    f'File contains {length} {k}-mers instead of the expected'
+                    f' {4**k} {k}-mers.'
+                )
+        finally:
+            file.close()
+        return cls(freq_list, k, refseq_file, quality_threshold)
 
 
 
