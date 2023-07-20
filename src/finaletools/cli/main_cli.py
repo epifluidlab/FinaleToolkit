@@ -442,7 +442,7 @@ def main_cli():
     )
     parser_command9.set_defaults(func=cli_delfi_gc_correct)
 
-    # Subcommand 10: end motigs
+    # Subcommand 10: end motifs
     parser_command10 = subparsers.add_parser(
         'end-motifs',
         prog='finaletools-end-motifs',
@@ -454,7 +454,7 @@ def main_cli():
         help='SAM, BAM, or tabix-indexed file with fragment data.'
     )
     parser_command10.add_argument(
-        'refseq',
+        'refseq_file',
         help='2bit file containing reference sequence that fragments were'
         ' aligned to.'
     )
@@ -473,7 +473,7 @@ def main_cli():
     )
     parser_command10.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int,
         help='Minimum MAPQ of reads. Default is 30.'

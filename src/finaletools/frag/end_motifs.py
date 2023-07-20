@@ -1,8 +1,9 @@
 from __future__ import annotations
+from collections.abc import Iterator
 from typing import Union, Iterable
 from multiprocessing import Pool
 from time import time
-from sys import stderr
+from sys import stderr, stdout
 try:
     from importlib.resources import files
 except ImportError:
@@ -22,7 +23,7 @@ import finaletools.frag as pkg_data
 FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
 
 
-class EndMotifFreqs(UserDict):
+class EndMotifFreqs():
     """
     Class that stores frequencies of end-motif k-mer frequencies and
     contains methods to manipulate this data. Can also be indexed like
@@ -50,7 +51,7 @@ class EndMotifFreqs(UserDict):
         refseq_file: str,
         quality_threshold: int = 30,
     ):
-        super().__init__(kmer_frequencies)
+        self._dict = dict(kmer_frequencies)
         self.k = k
         self.refseq_file = refseq_file
         self.quality_threshold = quality_threshold
@@ -59,6 +60,53 @@ class EndMotifFreqs(UserDict):
                 'kmer_frequencies contains a kmer with length not equal'
                 ' to k.'
             )
+
+    def __iter__(self) -> Iterator:
+        return ((kmer, frequency)
+                for (kmer, frequency)
+                in zip(self.kmers(), self.frequencies()))
+
+    def __len__(self) -> int:
+        return self._dict.__len__()
+
+    def __str__(self) -> str:
+        return ''.join(f'{kmer}: {freq}\n' for kmer, freq in self)
+
+    def kmers(self) -> Iterable:
+        return self._dict.keys()
+
+    def frequencies(self) -> Iterable:
+        return self._dict.values()
+
+    def freq(self, kmer: str) -> float:
+        return self._dict[kmer]
+
+    def to_tsv(self, output_file: str, sep: str='\t'):
+        """Prints k-mer frequencies to a tsv"""
+        if type(output_file) == str:
+            try:
+                # open file based on name
+                output_is_file = False
+                if output_file == '-':
+                    output = stdout
+                else:
+                    output_is_file = True
+                    output = open(output_file, 'w')
+
+                # write to file
+                for kmer, freq in self:
+                    output.write(f'{kmer}{sep}{freq}\n')
+
+            finally:
+                if output_is_file:
+                    output.close()
+        else:
+            raise TypeError(f'output_file must be a string.')
+
+
+
+
+
 
 
 def _gen_kmers(k: int, bases: str) -> list:
@@ -267,7 +315,12 @@ def end_motifs(
         quality_threshold
     )
 
-    # FIXME: output to file
+    if output_file is not None:
+        if output_file.endswith('.csv'):
+            results.to_tsv(output_file, sep=',')
+        else:
+            results.to_tsv(output_file)
+
     if verbose:
         stop_time = time()
         tqdm.tqdm.write(
