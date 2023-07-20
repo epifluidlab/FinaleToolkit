@@ -22,7 +22,7 @@ import finaletools.frag as pkg_data
 FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
 
 
-class EndMotifFreqs(UserDict):
+class EndMotifFreqs():
     """
     Class that stores frequencies of end-motif k-mer frequencies and
     contains methods to manipulate this data. Can also be indexed like
@@ -50,7 +50,7 @@ class EndMotifFreqs(UserDict):
         refseq_file: str,
         quality_threshold: int = 30,
     ):
-        super().__init__(kmer_frequencies)
+        self._dict = dict(kmer_frequencies)
         self.k = k
         self.refseq_file = refseq_file
         self.quality_threshold = quality_threshold
@@ -59,6 +59,26 @@ class EndMotifFreqs(UserDict):
                 'kmer_frequencies contains a kmer with length not equal'
                 ' to k.'
             )
+
+    def kmers(self) -> Iterable:
+        return self._dict.keys()
+
+    def frequencies(self) -> Iterable:
+        return self._dict.values()
+
+    def freq(self, kmer: str) -> float:
+        return self._dict[kmer]
+
+    def __iter__(self) -> Iterator:
+        return ((kmer, frequency)
+                for (kmer, frequency)
+                in zip(self.kmers(), self.frequencies()))
+
+    def __len__(self) -> int:
+        return self._dict.__len__()
+
+    def __str__(self) -> str:
+        return ''.join(f'{kmer}: {freq}\n' for kmer, freq in self)
 
 
 def _gen_kmers(k: int, bases: str) -> list:
