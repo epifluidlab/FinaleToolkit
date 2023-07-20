@@ -89,11 +89,9 @@ class EndMotifFreqs():
                 output_is_file = False
                 if output_file == '-':
                     output = stdout
-                elif output_file.endswith('.tsv'):
+                else:
                     output_is_file = True
                     output = open(output_file, 'w')
-                else:
-                    raise ValueError('output_file is unsupported format.')
 
                 # write to file
                 for kmer, freq in self:
