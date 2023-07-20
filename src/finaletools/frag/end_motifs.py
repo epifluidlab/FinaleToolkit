@@ -103,7 +103,7 @@ class EndMotifFreqs():
         else:
             raise TypeError(f'output_file must be a string.')
 
-    def motif_diversity_score(self):
+    def motif_diversity_score(self) -> float:
         """
         Calculates a motif diversity score (MDS) using normalized
         Shannon entropy as described by Jiang et al (2020). This
