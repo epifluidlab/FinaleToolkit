@@ -73,11 +73,11 @@ class EndMotifFreqs():
     def __str__(self) -> str:
         return ''.join(f'{kmer}: {freq}\n' for kmer, freq in self)
 
-    def kmers(self) -> Iterable:
-        return self._dict.keys()
+    def kmers(self) -> list:
+        return list(self._dict.keys())
 
-    def frequencies(self) -> Iterable:
-        return self._dict.values()
+    def frequencies(self) -> list:
+        return list(self._dict.values())
 
     def freq(self, kmer: str) -> float:
         return self._dict[kmer]
@@ -103,6 +103,18 @@ class EndMotifFreqs():
                     output.close()
         else:
             raise TypeError(f'output_file must be a string.')
+
+    def motif_diversity_score(self):
+        """
+        Calculates a motif diversity score (MDS) using normalized
+        Shannon entropy as described by Jiang et al (2020). This
+        function is generalized for any k instead of just 4-mers.
+        """
+        num_kmers = 4**self.k
+        freq = np.array(self.frequencies())
+        mds = np.sum(-freq*np.log(freq)/np.log(num_kmers))
+
+        return mds
 
     @classmethod
     def from_file(
