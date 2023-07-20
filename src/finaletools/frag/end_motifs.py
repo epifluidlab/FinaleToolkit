@@ -3,7 +3,8 @@ from collections.abc import Iterator
 from typing import Union, Iterable
 from multiprocessing import Pool
 from time import time
-from sys import stderr, stdout
+from sys import stderr, stdout, stdin
+import gzip
 try:
     from importlib.resources import files
 except ImportError:
@@ -26,8 +27,7 @@ FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv
 class EndMotifFreqs():
     """
     Class that stores frequencies of end-motif k-mer frequencies and
-    contains methods to manipulate this data. Can also be indexed like
-    a Python dictionary to return frequencies.
+    contains methods to manipulate this data.
 
     Parameters
     ----------
@@ -46,14 +46,12 @@ class EndMotifFreqs():
 
     def __init__(
         self,
-        kmer_frequencies: Iterable,
+        kmer_frequencies: Iterable[tuple[str, float]],
         k: int,
-        refseq_file: str,
         quality_threshold: int = 30,
     ):
         self._dict = dict(kmer_frequencies)
         self.k = k
-        self.refseq_file = refseq_file
         self.quality_threshold = quality_threshold
         if not all(len(kmer) == k for kmer, _ in kmer_frequencies):
             raise ValueError(
@@ -72,11 +70,11 @@ class EndMotifFreqs():
     def __str__(self) -> str:
         return ''.join(f'{kmer}: {freq}\n' for kmer, freq in self)
 
-    def kmers(self) -> Iterable:
-        return self._dict.keys()
+    def kmers(self) -> list:
+        return list(self._dict.keys())
 
-    def frequencies(self) -> Iterable:
-        return self._dict.values()
+    def frequencies(self) -> list:
+        return list(self._dict.values())
 
     def freq(self, kmer: str) -> float:
         return self._dict[kmer]
@@ -102,6 +100,81 @@ class EndMotifFreqs():
                     output.close()
         else:
             raise TypeError(f'output_file must be a string.')
+
+    def motif_diversity_score(self) -> float:
+        """
+        Calculates a motif diversity score (MDS) using normalized
+        Shannon entropy as described by Jiang et al (2020). This
+        function is generalized for any k instead of just 4-mers.
+        """
+        num_kmers = 4**self.k
+        freq = np.array(self.frequencies())
+        mds = np.sum(-freq*np.log(freq)/np.log(num_kmers))
+
+        return mds
+
+    @classmethod
+    def from_file(
+            cls,
+            file_path: str,
+            quality_threshold: int,
+            sep: str='\t',
+            header: int=0,) -> EndMotifFreqs:
+        """
+        Reads kmer frequency from a two-column tab-delimited file
+
+        Parameters
+        ---------
+        file_path : str
+            Path string containing path to file.
+        sep : str, optional
+            Delimiter used in file.
+        header : int, optional
+            Number of lines to ignore at the head of the file.
+
+        Return
+        ------
+        kmer_freqs : EndMotifFreqs
+        """
+        try:
+            # open file
+            is_file = False
+            if file_path.endswith('gz'):
+                is_file = True
+                file = gzip.open(file_path)
+            elif file_path == '-':
+                file = stdin
+            else:
+                is_file = True
+                file = open(file_path)
+
+            # ignore header
+            for _ in range(header):
+                file.readline()
+
+            freq_list = []
+            lines = file.readlines()
+            line = lines[header].split(sep)
+            k = len(line[0])    # infer k from first entry
+
+            for line in lines:
+                line_data = line.split(sep)
+                if len(line_data) != 2:
+                    break
+                freq_list.append((line_data[0], float(line_data[1])))
+                if k != len(line_data[0]):
+                    raise RuntimeError(
+                        'File contains k-mers of inconsistent length.'
+                    )
+            if length := len(freq_list) != 4**k:
+                raise RuntimeError(
+                    f'File contains {length} {k}-mers instead of the expected'
+                    f' {4**k} {k}-mers.'
+                )
+        finally:
+            if is_file:
+                file.close()
+        return cls(freq_list, k, quality_threshold)
 
 
 
@@ -311,8 +384,7 @@ def end_motifs(
     results = EndMotifFreqs(
         zip(kmer_list, frequencies),
         k,
-        refseq_file,
-        quality_threshold
+        quality_threshold,
     )
 
     if output_file is not None:
@@ -328,3 +400,21 @@ def end_motifs(
         )
 
     return results
+
+
+def _cli_mds(
+    file_path: str,
+    sep: str = '\t',
+    header: int = 0,
+) -> float:
+    """Function for commandline acces to MDS from a tsv file."""
+    # 30 is used as a placeholder for the quality threshold. It is not
+    # used to calculate MDS and can be ignored.
+    motifs = EndMotifFreqs.from_file(
+        file_path,
+        30,
+        sep,
+        header,
+    )
+    mds = motifs.motif_diversity_score()
+    stdout.write(f'{mds}\n')

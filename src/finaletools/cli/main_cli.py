@@ -13,7 +13,7 @@ from finaletools.frag.delfi import delfi
 from finaletools.frag.adjust_wps import adjust_wps
 from finaletools.frag.agg_wps import agg_wps
 from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
-from finaletools.frag.end_motifs import end_motifs
+from finaletools.frag.end_motifs import end_motifs, _cli_mds
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
@@ -488,11 +488,42 @@ def main_cli():
     parser_command10.add_argument(
         '-v',
         '--verbose',
+        default=0,
         action='count',
         help='Specify verbosity. Number of printed statements is proportional '
         'to number of vs.'
     )
     parser_command10.set_defaults(func=end_motifs)
+
+    # Subcommand 11: MDS
+    parser_command11 = subparsers.add_parser(
+        'mds',
+        prog='finaletools-mds',
+        description='Reads k-mer frequencies from a file and calculates a '
+        'motif diversity score (MDS) using normalized Shannon entropy as '
+        'described by Jiang et al (2020). This function is generalized for '
+        'any k-mer instead of just 4-mers.'
+    )
+    parser_command11.add_argument(
+        'file_path',
+        nargs='?',
+        default='-',
+        help='Tab-delimited or similar file containing one column for all '
+        'k-mers a one column for frequency. Reads from stdin by default.'
+    )
+    parser_command11.add_argument(
+        '-s',
+        '--sep',
+        default='\t',
+        help='Separator used in tabular file. Default is tab.'
+    )
+    parser_command11.add_argument(
+        '--header',
+        default=0,
+        type=int,
+        help='Number of header rows to ignore. Default is 0'
+    )
+    parser_command11.set_defaults(func=_cli_mds)
 
     args = parser.parse_args()
     function = args.func
