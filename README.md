@@ -2,10 +2,11 @@
 
 Python tools for analysis of cell free DNA fragment data. FinaleTools refers to FragmentatIoN AnaLysis of cEll-free DNA Tools.
 
-This package is currently wip. Here is how to install (very wip):
+This package is currently work-in-progress. Here is how to install (wip):
 
 - Clone repo from https://github.com/epifluidlab/FinaleTools/
-- Create a conda environment with all of the dependencies. If only using pip to install dependencies, create venv/conda env and go to next step
+- Create a conda environment with all of the dependencies. If only using pip to install dependencies, create venv/conda env and go to next step.
+  Pip might not install all non-python dependencies.
     - For conda, run the following:
     ```
     conda create -n <env_name> -c bioconda -c conda-forge python=3.<version>
