@@ -3,7 +3,7 @@ from collections.abc import Iterator
 from typing import Union, Iterable
 from multiprocessing import Pool
 from time import time
-from sys import stderr, stdout
+from sys import stderr, stdout, stdin
 import gzip
 try:
     from importlib.resources import files
@@ -48,12 +48,10 @@ class EndMotifFreqs():
         self,
         kmer_frequencies: Iterable[tuple[str, float]],
         k: int,
-        refseq_file: str,
         quality_threshold: int = 30,
     ):
         self._dict = dict(kmer_frequencies)
         self.k = k
-        self.refseq_file = refseq_file
         self.quality_threshold = quality_threshold
         if not all(len(kmer) == k for kmer, _ in kmer_frequencies):
             raise ValueError(
@@ -119,7 +117,6 @@ class EndMotifFreqs():
     def from_file(
             cls,
             file_path: str,
-            refseq_file: str,
             quality_threshold: int,
             sep: str='\t',
             header: int=0,) -> EndMotifFreqs:
@@ -141,9 +138,14 @@ class EndMotifFreqs():
         """
         try:
             # open file
+            is_file = False
             if file_path.endswith('gz'):
+                is_file = True
                 file = gzip.open(file_path)
+            elif file_path == '-':
+                file = stdin
             else:
+                is_file = True
                 file = open(file_path)
 
             # ignore header
@@ -170,8 +172,9 @@ class EndMotifFreqs():
                     f' {4**k} {k}-mers.'
                 )
         finally:
-            file.close()
-        return cls(freq_list, k, refseq_file, quality_threshold)
+            if is_file:
+                file.close()
+        return cls(freq_list, k, quality_threshold)
 
 
 
@@ -381,8 +384,7 @@ def end_motifs(
     results = EndMotifFreqs(
         zip(kmer_list, frequencies),
         k,
-        refseq_file,
-        quality_threshold
+        quality_threshold,
     )
 
     if output_file is not None:
@@ -398,3 +400,21 @@ def end_motifs(
         )
 
     return results
+
+
+def _cli_mds(
+    file_path: str,
+    sep: str = '\t',
+    header: int = 0,
+) -> float:
+    """Function for commandline acces to MDS from a tsv file."""
+    # 30 is used as a placeholder for the quality threshold. It is not
+    # used to calculate MDS and can be ignored.
+    motifs = EndMotifFreqs.from_file(
+        file_path,
+        30,
+        sep,
+        header,
+    )
+    mds = motifs.motif_diversity_score()
+    stdout.write(f'{mds}\n')
