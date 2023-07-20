@@ -1,19 +1,23 @@
 # FinaleTools
 
-Python tools for analysis of cell free DNA fragment data. FinaleTools refers to
-FragmentatIoN AnaLysis of cEll-free DNA Tools.
+Python tools for analysis of cell free DNA fragment data. FinaleTools refers to FragmentatIoN AnaLysis of cEll-free DNA Tools.
 
-This package is currently wip. Here is how to install (very wip):
+This package is currently work-in-progress. Here is how to install (wip):
 
-- copy from https://github.com/epifluidlab/FinaleTools/
-- create a conda environment with all of the dependencies. If only using pip,
-    create venv and go to next step
-    - for conda, run the following:
+- Clone repo from https://github.com/epifluidlab/FinaleTools/
+- Create a conda environment with all of the dependencies. If only using pip to install dependencies, create venv/conda env and go to next step.
+  Pip might not install all non-python dependencies.
+    - For conda, run the following:
     ```
     conda create -n <env_name> -c bioconda -c conda-forge python=3.<version>
     <dependencies>
-    ```
     - see pyproject.toml for dependencies
-- cd to repo root directory
-- run `pip install -e .`
-- run `finaletools -h` to see if you did this right
+    ```
+    - Alternatively if using Linux, you can also use the attached YAML file by navigating to the project directory and running:
+      ```
+      conda create -f conda_env/environment.yml
+      ```
+      The resulting environment should be called `samenv3`.
+- cd to project directory
+- Run `pip install -e .`
+- Run `finaletools -h` to see if you did this right
