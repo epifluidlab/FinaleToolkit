@@ -27,8 +27,7 @@ FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv
 class EndMotifFreqs():
     """
     Class that stores frequencies of end-motif k-mer frequencies and
-    contains methods to manipulate this data. Can also be indexed like
-    a Python dictionary to return frequencies.
+    contains methods to manipulate this data.
 
     Parameters
     ----------
