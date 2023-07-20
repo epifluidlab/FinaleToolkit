@@ -221,6 +221,20 @@ def multi_wps(
                                 'encountered. Skipping to next.\n'
                             )
                             continue
+            elif (output_file.endswith('.bed.gz')
+                  or output_file.endswith('bedGraph.gz')):
+                with gzip.open(output_file, 'wt') as bedgraph:
+                    for interval_score in interval_scores:
+                        contigs = interval_score['contig']
+                        starts = interval_score['start']
+                        scores = interval_score['wps']
+                        stops = starts + 1
+
+                        lines = ''.join(f'{contig}\t{start}\t{stop}\t{score}\n'
+                                 for contig, start, stop, score
+                                 in zip(contigs, starts, stops, scores))
+
+                        bedgraph.write(lines)
 
             else:   # unaccepted file type
                 raise ValueError(
