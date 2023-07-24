@@ -16,6 +16,7 @@ author = 'James Li, Yaping Liu'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_rtd_theme',
+    'sphinx.ext.napoleon',
 ]
 
 templates_path = ['_templates']
