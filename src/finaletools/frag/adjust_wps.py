@@ -102,7 +102,7 @@ def _single_adjust_wps(
 
         # adjusting/filtering
         if subtract_edges:
-            # TODO: addoption for edge size
+            # TODO: add option for edge size
             edge_size = 500
             start_mean = np.mean(intervals['scores'][:edge_size])
             stop_mean = np.mean(intervals['scores'][-edge_size:])
@@ -157,6 +157,41 @@ def adjust_wps(
     workers: int=1,
     verbose: Union(bool, int)=False
 ):
+    """
+    Adjusts raw WPS data in a BigWig by applying a median filter and
+    Savitsky-Golay filter (Savitsky and Golay, 1964).
+
+    Parameters
+    ----------
+    input_file : str
+        Path string to a BigWig containing raw WPS data.
+    interval_file : str
+        BED format file containing intervals over which WPS was
+        calculated on.
+    output_file : str
+        BigWig file to write adjusted WPS to.
+    genome_file : str
+        The genome file for the reference genome that WGS was aligned
+        to. A tab delimited file where column 1 contains the name of
+        chromosomes and column 2 contains chromosome length.
+    median_window_size : int, optional
+        Size of median filter window. Default is 1000.
+    savgol_window_size : int, optional
+        Size of Savitsky Golay filter window. Default is 21.
+    savgol_poly_deg : int, optional
+        Degree polynomial for Savitsky Golay filter. Default is 2.
+    mean : bool, optional
+        If true, a mean filter is used instead of median. Default is
+        False.
+    subtract_edges : bool, optional
+        If true, take the median of the first and last 500 bases in a
+        window and subtract from the whole interval. Default is False.
+    workers : int, optional
+        Number of processes to use. Default is 1.
+    verbose : bool or int, optional
+        Default is False.
+
+    """
     if verbose:
         start_time = time()
         stderr.write('Reading intervals from bed...\n')
