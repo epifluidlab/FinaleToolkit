@@ -4,4 +4,4 @@ dist
 *.egg-info
 pip-wheel-metadata
 .vscode
-docs/build/*
+**/.DS_Store
