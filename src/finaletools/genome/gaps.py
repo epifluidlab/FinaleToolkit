@@ -111,6 +111,23 @@ class GenomeGaps:
     def ucsc_hg38(cls):
         return NotImplemented
 
+    def in_tcmere(self, contig: str, start: int, stop: int) -> bool:
+        # get centromere and telomeres for contig
+        centromere = self.centromeres[self.centromeres['contig'] == contig]
+        telomeres = self.telomeres[self.telomeres['contig'] == contig]
+        if not (centromere.shape[0] or telomeres.shape[0]):
+            return None
+        else:
+            in_centromere = np.logical_and(
+                start >= centromere['start'],
+                stop <= centromere['stop'],
+            )
+            in_telomeres = np.sum(np.logical_and(
+                start >= telomeres['start'],
+                stop <= telomeres['stop'],
+            )) > 0
+            return in_centromere or in_telomeres
+
     def to_bed(self, output_file: str):
         """
         Prints gap intervals in GenomeGaps to a BED4 file where the name
