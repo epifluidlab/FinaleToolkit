@@ -194,7 +194,20 @@ class GenomeGaps:
         else:
             return ''
 
-    def get_contig_gaps(self, contig):
+    def get_contig_gaps(self, contig: str) -> ContigGaps:
+        """
+        Creates a ContigGaps for the specified chromosome
+
+        Parameters
+        ----------
+        contig : str
+            Chromosome to make ContigGaps for
+
+        Returns
+        -------
+        ContigGaps
+            Contains centromere and telomere intervals for chromosome
+        """
         # get centromere and telomeres for contig
         centromere = self.centromeres[self.centromeres['contig'] == contig]
         centromere_ends = (centromere[0]['start'], centromere[0]['stop'])
@@ -256,7 +269,22 @@ class ContigGaps():
         self.telomeres = telomeres
         self.has_short_arm = has_short_arm
 
-    def in_tcmere(self, start: int, stop: int):
+    def in_tcmere(self, start: int, stop: int) -> bool:
+        """
+        Checks if specified interval is in a centromere or telomere.
+
+        Parameters
+        ----------
+        start : int
+            Start of interval.
+        stop : int
+            End of Interval.
+
+        Returns
+        -------
+        bool
+            True if there is an overlap.
+        """
         in_centromere = (
             stop > self.centromere[0] and start < self.centromere[1]
         )
@@ -267,6 +295,28 @@ class ContigGaps():
         return in_centromere or in_telomeres
 
     def get_arm(self, start: int, stop: int):
+        """
+        Returns name of chromosome arm the interval is in. Returns a
+        blank string if in a centromere, telomere, or short arm of an
+        acrocentric chromosome.
+
+        Parameters
+        ----------
+        start : int
+            Start of interval.
+        stop : int
+            End of interval.
+
+        Returns
+        -------
+        str
+            Name of the chromosome arm.
+
+        Raises
+        ------
+        ValueError
+            Raised if invalid coordinates are given.
+        """
         if stop < start:
             raise ValueError('start must be less than stop')
 
