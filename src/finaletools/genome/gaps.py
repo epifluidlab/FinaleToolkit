@@ -1,3 +1,11 @@
+"""
+FinaleTools.gaps
+================
+
+This module contains classes and functions to use the gap tracks found
+on the UCSC Genome Browser (Kent et al 2002).
+"""
+
 from __future__ import annotations
 from typing import Union, Tuple, Iterable
 import gzip
@@ -274,10 +282,40 @@ class ContigGaps():
 
 
 def ucsc_hg19_gap_bed(output_file: str):
+    """
+    Creates BED4 of centromeres, telomeres, and short arms for the UCSC
+    hg19 reference sequence.
+
+    Parameters
+    ----------
+    output_file : str
+        Output path
+    """
     return GenomeGaps.ucsc_hg19().to_bed(output_file)
 
+
 def b37_gap_bed(output_file: str):
+    """
+    Creates BED4 of centromeres, telomeres, and short arms for the Broad
+    Institute GRCh37 (b37) reference sequence. Also useful for
+    files aligned to human_g1k_v37 (1000 Genomes Project).
+
+    Parameters
+    ----------
+    output_file : str
+        Output path
+    """
     return GenomeGaps.b37().to_bed(output_file)
 
+
 def ucsc_hg38_gap_bed(output_file: str):
+    """
+    Creates BED4 of centromeres, telomeres, and short arms for the UCSC
+    hg38 reference sequence.
+
+    Parameters
+    ----------
+    output_file : str
+        Output path
+    """
     return NotImplemented
