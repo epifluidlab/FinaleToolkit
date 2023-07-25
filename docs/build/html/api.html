@@ -119,6 +119,26 @@
 <li class="toctree-l3"><a class="reference internal" href="#finaletools.utils.genome2list"><code class="docutils literal notranslate"><span class="pre">genome2list()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#genome-utilities">Genome Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.genome.GenomeGaps"><code class="docutils literal notranslate"><span class="pre">GenomeGaps</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.GenomeGaps.b37"><code class="docutils literal notranslate"><span class="pre">GenomeGaps.b37()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.GenomeGaps.get_arm"><code class="docutils literal notranslate"><span class="pre">GenomeGaps.get_arm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.GenomeGaps.get_contig_gaps"><code class="docutils literal notranslate"><span class="pre">GenomeGaps.get_contig_gaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.GenomeGaps.in_tcmere"><code class="docutils literal notranslate"><span class="pre">GenomeGaps.in_tcmere()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.GenomeGaps.to_bed"><code class="docutils literal notranslate"><span class="pre">GenomeGaps.to_bed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.GenomeGaps.ucsc_hg19"><code class="docutils literal notranslate"><span class="pre">GenomeGaps.ucsc_hg19()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.genome.ContigGaps"><code class="docutils literal notranslate"><span class="pre">ContigGaps</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.ContigGaps.get_arm"><code class="docutils literal notranslate"><span class="pre">ContigGaps.get_arm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.genome.ContigGaps.in_tcmere"><code class="docutils literal notranslate"><span class="pre">ContigGaps.in_tcmere()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.genome.ucsc_hg19_gap_bed"><code class="docutils literal notranslate"><span class="pre">ucsc_hg19_gap_bed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.genome.b37_gap_bed"><code class="docutils literal notranslate"><span class="pre">b37_gap_bed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.genome.ucsc_hg38_gap_bed"><code class="docutils literal notranslate"><span class="pre">ucsc_hg38_gap_bed()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -419,7 +439,7 @@ to this function.</p>
 <h2>DELFI<a class="headerlink" href="#delfi" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="finaletools.frag.delfi">
-<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">delfi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autosomes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blacklist_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcmere_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsample_coverage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preprocessing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.delfi" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">delfi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autosomes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blacklist_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsample_coverage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preprocessing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.delfi" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function that replicates the methodology of Christiano et al
 (2019).</p>
 <dl class="field-list simple">
@@ -431,12 +451,10 @@ fragment reads.</p></li>
 chromosomes</p></li>
 <li><p><strong>reference_file</strong> (<em>str</em>) – Path string to .2bit file.</p></li>
 <li><p><strong>blacklist_file</strong> (<em>str</em>) – Path string to bed file containing genome blacklist.</p></li>
-<li><p><strong>tcmere_file</strong> (<em>str</em>) – Path string to a BED4+ file where each interval is a centromere
-or telomere. For hg19, the gaps track from the UCSC Genome
-Browser may be used. Otherwise, a bed file can be used
-<strong>only if</strong> the fourth field for each entry corresponding to a
-telomere or centromere is labled “telomere” or “centromere,
-respectively.</p></li>
+<li><p><strong>gap_file</strong> (<em>str</em>) – Path string to a BED4+ file where each interval is a centromere
+or telomere. A bed file can be used <strong>only if</strong> the fourth field
+for each entry corresponding to a telomere or centromere is
+labled “telomere” or “centromere, respectively.</p></li>
 <li><p><strong>window_size</strong> (<em>int</em>) – Size of non-overlapping windows to cover genome. Default is
 5 megabases.</p></li>
 <li><p><strong>subsample_coverage</strong> (<em>int</em><em>, </em><em>optional</em>) – The depth at which to subsample the input_bam. Default is 2.</p></li>
@@ -614,6 +632,219 @@ filtered.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="genome-utilities">
+<h2>Genome Utilities<a class="headerlink" href="#genome-utilities" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="finaletools.genome.GenomeGaps">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">finaletools.genome.</span></span><span class="sig-name descname"><span class="pre">GenomeGaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gaps_bed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.GenomeGaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads telomere, centromere, and short_arm intervals from a bed file
+or generates these intervals from UCSC gap and centromere tracks for
+hg19 and hg38.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.GenomeGaps.b37">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b37</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.GenomeGaps.b37" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a GenomeGaps for the Broad Institute GRCh37 reference
+genome i.e b37. This reference genome is also based on GRCh37,
+but differs from the UCSC hg19 reference in a few ways,
+including the absence of the ‘chr’ prefix. We generate this
+GenomeGap using an ad hoc method where we take the UCSC hg19
+gap track and drop ‘chr’ from the chromosome names. Because
+there are other differences between hg19 and b37, this is not
+a perfect solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gaps</strong> – GenomeGaps for the b37 reference genome.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#finaletools.genome.GenomeGaps" title="finaletools.genome.GenomeGaps">GenomeGaps</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.GenomeGaps.get_arm">
+<span class="sig-name descname"><span class="pre">get_arm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#finaletools.genome.GenomeGaps.get_arm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the chromosome arm the interval is in. If in
+the short arm of an acrocentric chromosome or intersects a
+centromere, returns an empty string.</p>
+<dl class="simple">
+<dt>contig<span class="classifier">str</span></dt><dd><p>Chromosome of interval.</p>
+</dd>
+<dt>start<span class="classifier">int</span></dt><dd><p>Start of interval.</p>
+</dd>
+<dt>stop<span class="classifier">int</span></dt><dd><p>End of interval.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>arm</strong> – Arm that interval is in.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – Raised for invalid coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.GenomeGaps.get_contig_gaps">
+<span class="sig-name descname"><span class="pre">get_contig_gaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#finaletools.genome.ContigGaps" title="finaletools.genome.gaps.ContigGaps"><span class="pre">ContigGaps</span></a></span></span><a class="headerlink" href="#finaletools.genome.GenomeGaps.get_contig_gaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a ContigGaps for the specified chromosome</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>contig</strong> (<em>str</em>) – Chromosome to make ContigGaps for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Contains centromere and telomere intervals for chromosome</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#finaletools.genome.ContigGaps" title="finaletools.genome.ContigGaps">ContigGaps</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.GenomeGaps.in_tcmere">
+<span class="sig-name descname"><span class="pre">in_tcmere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#finaletools.genome.GenomeGaps.in_tcmere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if specified interval is in a centromere or telomere</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>contig</strong> (<em>str</em>) – Chromosome name</p></li>
+<li><p><strong>start</strong> (<em>int</em>) – Start of interval</p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – End of interval</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>in_telomere_or_centromere</strong> – True if in a centromere or telomere</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.GenomeGaps.to_bed">
+<span class="sig-name descname"><span class="pre">to_bed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.GenomeGaps.to_bed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints gap intervals in GenomeGaps to a BED4 file where the name
+is the type of gap interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output_file</strong> (<em>str</em>) – File to write to. Optionally gzipped. If output_file == ‘-‘,
+results will be writted to stdout.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.GenomeGaps.ucsc_hg19">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ucsc_hg19</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.GenomeGaps.ucsc_hg19" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a GenomeGaps for the UCSC hg19 reference genome. This
+sequences uses chromosome names that start with ‘chr’ and is
+based on a version of the GRCh37 reference genome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gaps</strong> – GenomeGaps for the UCSC hg19 reference genome.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#finaletools.genome.GenomeGaps" title="finaletools.genome.GenomeGaps">GenomeGaps</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="finaletools.genome.ContigGaps">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">finaletools.genome.</span></span><span class="sig-name descname"><span class="pre">ContigGaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centromere</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">telomeres</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_short_arm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.ContigGaps" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.ContigGaps.get_arm">
+<span class="sig-name descname"><span class="pre">get_arm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.ContigGaps.get_arm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns name of chromosome arm the interval is in. Returns a
+blank string if in a centromere, telomere, or short arm of an
+acrocentric chromosome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>int</em>) – Start of interval.</p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – End of interval.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Name of the chromosome arm.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Raised if invalid coordinates are given.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.genome.ContigGaps.in_tcmere">
+<span class="sig-name descname"><span class="pre">in_tcmere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#finaletools.genome.ContigGaps.in_tcmere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if specified interval is in a centromere or telomere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>int</em>) – Start of interval.</p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – End of Interval.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if there is an overlap.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.genome.ucsc_hg19_gap_bed">
+<span class="sig-prename descclassname"><span class="pre">finaletools.genome.</span></span><span class="sig-name descname"><span class="pre">ucsc_hg19_gap_bed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.ucsc_hg19_gap_bed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates BED4 of centromeres, telomeres, and short arms for the UCSC
+hg19 reference sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output_file</strong> (<em>str</em>) – Output path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.genome.b37_gap_bed">
+<span class="sig-prename descclassname"><span class="pre">finaletools.genome.</span></span><span class="sig-name descname"><span class="pre">b37_gap_bed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.b37_gap_bed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates BED4 of centromeres, telomeres, and short arms for the Broad
+Institute GRCh37 (b37) reference sequence. Also useful for
+files aligned to human_g1k_v37 (1000 Genomes Project).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output_file</strong> (<em>str</em>) – Output path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.genome.ucsc_hg38_gap_bed">
+<span class="sig-prename descclassname"><span class="pre">finaletools.genome.</span></span><span class="sig-name descname"><span class="pre">ucsc_hg38_gap_bed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.genome.ucsc_hg38_gap_bed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates BED4 of centromeres, telomeres, and short arms for the UCSC
+hg38 reference sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output_file</strong> (<em>str</em>) – Output path</p>
 </dd>
 </dl>
 </dd></dl>
