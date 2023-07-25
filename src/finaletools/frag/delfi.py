@@ -272,11 +272,10 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 region_contig, region_start, region_stop, name, *_ = line.split()
                 region_start = int(region_start)
                 region_stop = int(region_stop)
-                if (contig == region_contig
-                    and (name == 'centromere'
-                         or name == 'telomere')
-                ):
-                    tcmeres.append((region_contig, region_start,region_stop, name))
+                if (name == 'centromere' or name == 'telomere'):
+                    tcmeres.append(
+                        (region_contig, region_start, region_stop, name)
+                    )
 
     if verbose:
         stderr.write(f'Generating windows\n')
