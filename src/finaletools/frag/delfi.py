@@ -199,13 +199,19 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         Path string pointing to a bam file containing PE
         fragment reads.
     autosomes: str
-        Path string to a .genome file containing only autosomal chromosomes
+        Path string to a .genome file containing only autosomal
+        chromosomes
     reference_file: str
         Path string to .2bit file.
     blacklist_file: str
         Path string to bed file containing genome blacklist.
     tcmere_file: str
-        Path string to a BED4+ file where each interval is a centromere or
+        Path string to a BED4+ file where each interval is a centromere
+        or telomere. For hg19, the gaps track from the UCSC Genome
+        Browser may be used. Otherwise, a bed file can be used
+        **only if** the fourth field for each entry corresponding to a
+        telomere or centromere is labled "telomere" or "centromere,
+        respectively.
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
