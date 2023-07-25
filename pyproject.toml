@@ -7,12 +7,12 @@ include-package-data = true
 
 [project]
 name = "FinaleTools"
-version = "0.0.7"
+version = "0.2.2"
 authors = [
     {name="James Li", email="jameswli2021@gmail.com"},
     {name="Yaping Liu", email="yaping.liu@cchmc.org"},
 ]
-description = "A package containing functions to process paired-end reads of cfDNA fragment WGS."
+description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
 readme = "README.md"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
@@ -35,6 +35,8 @@ dependencies = [
     "pandas",
     "cython",
     "statsmodels",
+    "sphinx<7.0.0",
+    "sphinx_rtd_theme",
 ]
 
 [project.scripts]

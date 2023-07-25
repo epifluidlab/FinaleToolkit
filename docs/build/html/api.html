@@ -1,0 +1,664 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API &mdash; FinaleTools  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> FinaleTools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-features">Basic Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.coverage"><code class="docutils literal notranslate"><span class="pre">coverage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.frag_length"><code class="docutils literal notranslate"><span class="pre">frag_length()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.frag_length_bins"><code class="docutils literal notranslate"><span class="pre">frag_length_bins()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#window-protection-score">Window Protection Score</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.wps"><code class="docutils literal notranslate"><span class="pre">wps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.multi_wps"><code class="docutils literal notranslate"><span class="pre">multi_wps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.adjust_wps"><code class="docutils literal notranslate"><span class="pre">adjust_wps()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.agg_wps"><code class="docutils literal notranslate"><span class="pre">agg_wps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#delfi">DELFI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.delfi"><code class="docutils literal notranslate"><span class="pre">delfi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.delfi_gc_correct"><code class="docutils literal notranslate"><span class="pre">delfi_gc_correct()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#end-motifs">End-motifs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.EndMotifFreqs"><code class="docutils literal notranslate"><span class="pre">EndMotifFreqs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.frag.EndMotifFreqs.from_file"><code class="docutils literal notranslate"><span class="pre">EndMotifFreqs.from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.frag.EndMotifFreqs.motif_diversity_score"><code class="docutils literal notranslate"><span class="pre">EndMotifFreqs.motif_diversity_score()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finaletools.frag.EndMotifFreqs.to_tsv"><code class="docutils literal notranslate"><span class="pre">EndMotifFreqs.to_tsv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.region_end_motifs"><code class="docutils literal notranslate"><span class="pre">region_end_motifs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.frag.end_motifs"><code class="docutils literal notranslate"><span class="pre">end_motifs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#frag-file-utilities">Frag File Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.utils.filter_bam"><code class="docutils literal notranslate"><span class="pre">filter_bam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finaletools.utils.genome2list"><code class="docutils literal notranslate"><span class="pre">genome2list()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">FinaleTools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this heading">¶</a></h1>
+<section id="basic-features">
+<h2>Basic Features<a class="headerlink" href="#basic-features" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.coverage">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AlignmentFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.coverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return estimated fragment coverage over intervals specified in
+<cite>intervals</cite>. Fragments are read from <cite>input_file</cite> which may be
+either a BAM or SAM file. Uses an algorithm where the midpoints of
+fragments are calculated and coverage is tabulated from the
+midpoints that fall into the specified region. Not suitable for
+fragments of size approaching interval size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>pysam.AlignmentFile</em>) – BAM, SAM, or CRAM file containing paired-end fragment reads or
+its path. <cite>AlignmentFile</cite> must be opened in read mode.</p></li>
+<li><p><strong>intervals</strong> (<em>str</em>) – Path for BAM file containing intervals</p></li>
+<li><p><strong>output_file</strong> (<em>string</em><em>, </em><em>optional</em>) – Path for bed file to print coverages to. If output_file = <cite>_</cite>,
+results will be printed to stdout.</p></li>
+<li><p><strong>scale_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – Amount to multiply coverages by. Default is 10^6.</p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>verbose</strong> (<em>int</em><em> or </em><em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>coverage</strong> – Fragment coverage over contig and region.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.frag_length">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">frag_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AlignmentFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#finaletools.frag.frag_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>np.ndarray</cite> containing lengths of fragments in <cite>input_file</cite>
+that are above the quality threshold and are proper-paired reads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>pysam.AlignmentFile</em>) – BAM, SAM, or CRAM file containing paired-end fragment reads or
+its path. <cite>AlignmentFile</cite> must be opened in read mode.</p></li>
+<li><p><strong>contig</strong> (<em>string</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>output_file</strong> (<em>string</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>lengths</strong> – <cite>ndarray</cite> of fragment lengths from file and contig if
+specified.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.frag_length_bins">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">frag_length_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AlignmentFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig_by_contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">histogram</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#finaletools.frag.frag_length_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes input_file, computes frag lengths of fragments and returns
+two arrays containing bins and counts by size. Optionally prints
+data to output as a tab delimited table or histogram.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>AlignmentFile</em>) – </p></li>
+<li><p><strong>contig</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>start</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>stop</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>bin_size</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>output_file</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>bins</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>counts</strong> (<em>ndarray</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="window-protection-score">
+<h2>Window Protection Score<a class="headerlink" href="#window-protection-score" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.wps">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AlignmentFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#finaletools.frag.wps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return (raw) Windowed Protection Scores as specified in Snyder et al
+(2016) over a region [start,stop).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>pysam.AlignmentFile</em>) – BAM or SAM file containing paired-end fragment reads or its
+path. <cite>AlignmentFile</cite> must be opened in read mode.</p></li>
+<li><p><strong>contig</strong> (<em>str</em>) – </p></li>
+<li><p><strong>start</strong> (<em>int</em>) – </p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – </p></li>
+<li><p><strong>output_file</strong> (<em>string</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of window to calculate WPS. Default is k = 120, equivalent
+to L-WPS.</p></li>
+<li><p><strong>fraction_low</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies lowest fragment length included in calculation.
+Default is 120, equivalent to long fraction.</p></li>
+<li><p><strong>fraction_high</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies highest fragment length included in calculation.
+Default is 120, equivalent to long fraction.</p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>scores</strong> – np array of shape (n, 2) where column 1 is the coordinate and
+column 2 is the score and n is the number of coordinates in
+region [start,stop)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.multi_wps">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">multi_wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AlignmentFile</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_bed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#finaletools.frag.multi_wps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that aggregates WPS over sites in BED file according to the
+method described by Snyder et al (2016).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>pysam.AlignmentFile</em>) – BAM or SAM file containing paired-end fragment reads or its
+path. <cite>AlignmentFile</cite> must be opened in read mode.</p></li>
+<li><p><strong>site_bed</strong> (<em>str</em>) – Bed file containing intervals to perform WPS on.</p></li>
+<li><p><strong>output_file</strong> (<em>string</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of window to calculate WPS. Default is k = 120, equivalent
+to L-WPS.</p></li>
+<li><p><strong>interval_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of each interval specified in the bed file. Should be the
+same for every interbal. Default is 5000.</p></li>
+<li><p><strong>fraction_low</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies lowest fragment length included in calculation.
+Default is 120, equivalent to long fraction.</p></li>
+<li><p><strong>fraction_high</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies highest fragment length included in calculation.
+Default is 120, equivalent to long fraction.</p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>scores</strong> – np array of shape (n, 2) where column 1 is the coordinate and
+column 2 is the score and n is the number of coordinates in
+region [start,stop)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.adjust_wps">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">adjust_wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">median_window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savgol_window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">21</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savgol_poly_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtract_edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union(bool,</span> <span class="pre">int)</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.adjust_wps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjusts raw WPS data in a BigWig by applying a median filter and
+Savitsky-Golay filter (Savitsky and Golay, 1964).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Path string to a BigWig containing raw WPS data.</p></li>
+<li><p><strong>interval_file</strong> (<em>str</em>) – BED format file containing intervals over which WPS was
+calculated on.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – BigWig file to write adjusted WPS to.</p></li>
+<li><p><strong>genome_file</strong> (<em>str</em>) – The genome file for the reference genome that WGS was aligned
+to. A tab delimited file where column 1 contains the name of
+chromosomes and column 2 contains chromosome length.</p></li>
+<li><p><strong>median_window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of median filter window. Default is 1000.</p></li>
+<li><p><strong>savgol_window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of Savitsky Golay filter window. Default is 21.</p></li>
+<li><p><strong>savgol_poly_deg</strong> (<em>int</em><em>, </em><em>optional</em>) – Degree polynomial for Savitsky Golay filter. Default is 2.</p></li>
+<li><p><strong>mean</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, a mean filter is used instead of median. Default is
+False.</p></li>
+<li><p><strong>subtract_edges</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, take the median of the first and last 500 bases in a
+window and subtract from the whole interval. Default is False.</p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of processes to use. Default is 1.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Default is False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.agg_wps">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">agg_wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">median_window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.agg_wps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a BigWig containing adjusted WPS scores and an interval BED and
+aggregates scores along the intervals.</p>
+<p>Note that the median filter trims the ends of each interval by half
+of the window size of the filter while adjusting raw WPS data. There
+are two way this can be approached in aggregation:
+1. supply an interval file containing smaller intervals. e.g. if
+you used 5kb intervals for WPS and used a median filter window
+of 1kb, supply a BED file with 4kb windows to this function.</p>
+<p>2. provide the size of the median filter window in
+<cite>median_window_size</cite> along with the original intervals. e.g if
+5kb intervals were used for WPS and a 1kb median filter window
+was used, supply the 5kb bed file and median filter window size
+to this function.</p>
+<p>Do not do both of these at once.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – </p></li>
+<li><p><strong>interval_file</strong> (<em>str</em>) – </p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – </p></li>
+<li><p><strong>median_window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – default is 0</p></li>
+<li><p><strong>verbose</strong> (<em>int</em><em> or </em><em>bool</em><em>, </em><em>optional</em>) – default is False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>agg_scores</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="delfi">
+<h2>DELFI<a class="headerlink" href="#delfi" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.delfi">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">delfi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autosomes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blacklist_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centromere_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsample_coverage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preprocessing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.delfi" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function that replicates the methodology of Christiano et al
+(2019).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Path string pointing to a bam file containing PE
+fragment reads.</p></li>
+<li><p><strong>autosomes</strong> (<em>str</em>) – Path string to a .genome file containing only autosomal chromosomes</p></li>
+<li><p><strong>reference_file</strong> (<em>str</em>) – Path string to .2bit file.</p></li>
+<li><p><strong>blacklist_file</strong> (<em>str</em>) – Path string to bed file containing genome blacklist.</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Size of non-overlapping windows to cover genome. Default is
+5 megabases.</p></li>
+<li><p><strong>subsample_coverage</strong> (<em>int</em><em>, </em><em>optional</em>) – The depth at which to subsample the input_bam. Default is 2.</p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of worker processes to use. Default is 1.</p></li>
+<li><p><strong>preprocessing</strong> (<em>bool</em><em>, </em><em>optional</em>) – Christiano et al (2019)</p></li>
+<li><p><strong>verbose</strong> (<em>int</em><em> or </em><em>bool</em><em>, </em><em>optional</em>) – Determines how many print statements and loading bars appear in
+stdout. Default is False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.delfi_gc_correct">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">delfi_gc_correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">windows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.delfi_gc_correct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function that takes window data and performs GC adjustment.</p>
+</dd></dl>
+
+</section>
+<section id="end-motifs">
+<h2>End-motifs<a class="headerlink" href="#end-motifs" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="finaletools.frag.EndMotifFreqs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">EndMotifFreqs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kmer_frequencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.EndMotifFreqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that stores frequencies of end-motif k-mer frequencies and
+contains methods to manipulate this data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kmer_frequencies</strong> (<em>Iterable</em>) – A Iterable of tuples, each containing a str representing a k-mer
+and a float representing its frequency</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – Size of k-mers</p></li>
+<li><p><strong>refseq_file</strong> (<em>str</em>) – A 2bit file containing the reference sequence that cfDNA
+fragments were aligned to</p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum mapping quality used. Default is 30.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.frag.EndMotifFreqs.from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\t'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#finaletools.frag.EndMotifFreqs" title="finaletools.frag.end_motifs.EndMotifFreqs"><span class="pre">EndMotifFreqs</span></a></span></span><a class="headerlink" href="#finaletools.frag.EndMotifFreqs.from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads kmer frequency from a two-column tab-delimited file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – Path string containing path to file.</p></li>
+<li><p><strong>sep</strong> (<em>str</em><em>, </em><em>optional</em>) – Delimiter used in file.</p></li>
+<li><p><strong>header</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of lines to ignore at the head of the file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>kmer_freqs</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#finaletools.frag.EndMotifFreqs" title="finaletools.frag.EndMotifFreqs">EndMotifFreqs</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.frag.EndMotifFreqs.motif_diversity_score">
+<span class="sig-name descname"><span class="pre">motif_diversity_score</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#finaletools.frag.EndMotifFreqs.motif_diversity_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a motif diversity score (MDS) using normalized
+Shannon entropy as described by Jiang et al (2020). This
+function is generalized for any k instead of just 4-mers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="finaletools.frag.EndMotifFreqs.to_tsv">
+<span class="sig-name descname"><span class="pre">to_tsv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\t'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.frag.EndMotifFreqs.to_tsv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints k-mer frequencies to a tsv</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.region_end_motifs">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">region_end_motifs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refseq_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union(None,</span> <span class="pre">str)</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union(bool,</span> <span class="pre">int)</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#finaletools.frag.region_end_motifs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that reads fragments in the specified region from a BAM,
+SAM, or tabix indexed file and returns the 5’ k-mer (default is
+4-mer) end motif counts as a structured array. This function
+reproduces the methodology of Zhou et al (2023).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – </p></li>
+<li><p><strong>contig</strong> (<em>str</em>) – </p></li>
+<li><p><strong>start</strong> (<em>int</em>) – </p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – </p></li>
+<li><p><strong>refseq_file</strong> (<em>str</em>) – </p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>output_file</strong> (<em>None</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>end_motif_freq</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.frag.end_motifs">
+<span class="sig-prename descclassname"><span class="pre">finaletools.frag.</span></span><span class="sig-name descname"><span class="pre">end_motifs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refseq_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union(None,</span> <span class="pre">str)</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union(bool,</span> <span class="pre">int)</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#finaletools.frag.EndMotifFreqs" title="finaletools.frag.EndMotifFreqs"><span class="pre">EndMotifFreqs</span></a></span></span><a class="headerlink" href="#finaletools.frag.end_motifs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that reads fragments from a BAM, SAM, or tabix indexed
+file and returns the 5’ k-mer (default is 4-mer) end motif
+frequencies as a dictionary. Optionally writes data to a tsv. This
+function reproduces the methodology of Zhou et al (2023).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – </p></li>
+<li><p><strong>refseq_file</strong> (<em>str</em>) – </p></li>
+<li><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>output_file</strong> (<em>None</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>end_motif_freq</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="frag-file-utilities">
+<h2>Frag File Utilities<a class="headerlink" href="#frag-file-utilities" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.utils.filter_bam">
+<span class="sig-prename descclassname"><span class="pre">finaletools.utils.</span></span><span class="sig-name descname"><span class="pre">filter_bam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletools.utils.filter_bam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts the path to a BAM file and creates a bam file where all
+reads are read1 in a proper pair, exceed the specified quality
+threshold, do not intersect a region in the given blacklist
+file, and intersects with a region in the region bed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_bam</strong> (<em>str</em>) – Path string or AlignmentFile pointing to the BAM file to be
+filtered.</p></li>
+<li><p><strong>region_file</strong> (<em>str</em><em>, </em><em>option</em>) – </p></li>
+<li><p><strong>output_file</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>output_file</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="finaletools.utils.genome2list">
+<span class="sig-prename descclassname"><span class="pre">finaletools.utils.</span></span><span class="sig-name descname"><span class="pre">genome2list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">genome_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#finaletools.utils.genome2list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a GENOME text file into a list of tuples (chrom, length)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>genome_file</strong> (<em>str</em>) – String containing path to GENOME format file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>chroms</strong> – List of tuples containing chrom/contig names and lengths</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2023, James Li, Yaping Liu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

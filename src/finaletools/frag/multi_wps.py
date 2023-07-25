@@ -21,17 +21,18 @@ def _wps_star(args):
     return wps(*args)
 
 
-def multi_wps(input_file: Union[pysam.AlignmentFile, str],
-                  site_bed: str,
-                  output_file: str=None,
-                  window_size: int=120,
-                  interval_size: int=5000,
-                  fraction_low: int=120,
-                  fraction_high: int=180,
-                  quality_threshold: int=30,
-                  workers: int=1,
-                  verbose: Union[bool, int]=0
-                  ) -> np.ndarray:
+def multi_wps(
+        input_file: Union[pysam.AlignmentFile, str],
+        site_bed: str,
+        output_file: Union[str, None]=None,
+        window_size: int=120,
+        interval_size: int=5000,
+        fraction_low: int=120,
+        fraction_high: int=180,
+        quality_threshold: int=30,
+        workers: int=1,
+        verbose: Union[bool, int]=0
+        ) -> np.ndarray:
     """
     Function that aggregates WPS over sites in BED file according to the
     method described by Snyder et al (2016).
@@ -102,7 +103,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
         with pysam.TabixFile(input_file, 'r') as tbx:
             raise NotImplementedError('tabix files not yet supported!')
 
-    if (verbose):
+    if (verbose > 1):
         stderr.write(f'header is {header}\n')
 
     # read tss contigs and coordinates from bed
@@ -181,7 +182,7 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
         interval_scores = pool.imap(
             _wps_star,
             tss_list,
-            chunksize=min(10000, int(count/workers//2+1))
+            chunksize=min(500, int(count/workers//2+1))
         )
 
         # output
@@ -220,6 +221,20 @@ def multi_wps(input_file: Union[pysam.AlignmentFile, str],
                                 'encountered. Skipping to next.\n'
                             )
                             continue
+            elif (output_file.endswith('.bed.gz')
+                  or output_file.endswith('bedGraph.gz')):
+                with gzip.open(output_file, 'wt') as bedgraph:
+                    for interval_score in interval_scores:
+                        contigs = interval_score['contig']
+                        starts = interval_score['start']
+                        scores = interval_score['wps']
+                        stops = starts + 1
+
+                        lines = ''.join(f'{contig}\t{start}\t{stop}\t{score}\n'
+                                 for contig, start, stop, score
+                                 in zip(contigs, starts, stops, scores))
+
+                        bedgraph.write(lines)
 
             else:   # unaccepted file type
                 raise ValueError(

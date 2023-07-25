@@ -72,7 +72,8 @@ def single_coverage(
         for read1 in sam_file.fetch(
             contig=contig,
             start=0 if (tempstart:=start-500) < 0 else tempstart,
-            stop=stop+500 if stop is not None else None):
+            stop=stop+500 if stop is not None else None
+        ):
             # Only select forward strand and filter out
             # non-paired-end reads and low-quality reads
             if _not_read1_or_low_quality(read1, quality_threshold):
@@ -118,7 +119,7 @@ def coverage(
         input_file: Union[str, pysam.AlignmentFile],
         interval_file: str,
         output_file: str,
-        scale_factor: int=1e6,
+        scale_factor: float=1e6,
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False):

@@ -12,7 +12,6 @@ import pysam
 import numpy as np
 from numba import jit
 from tqdm import tqdm
-from memory_profiler import profile
 
 from finaletools.utils import frag_array
 
@@ -38,37 +37,6 @@ def _single_wps(contig: str,
 
     # calculate wps and return
     return (contig, window_position, num_spanning - num_end_in)
-
-def _wps_loop(frag_ends: np.ndarray,
-              contig: str,
-              start: int,
-              stop: int,
-              window_size: int):
-    window_centers = np.arange(start, stop, dtype=np.int64)
-    window_starts = np.zeros(stop-start)
-    window_stops = np.zeros(stop-start)
-    np.rint(window_centers - window_size * 0.5, window_starts)
-    np.rint(window_centers + window_size * 0.5 - 1, window_stops)
-    # stops are inclusive
-    # array to store positions and scores
-    scores = np.zeros(
-        stop-start,
-        dtype=[
-            ('contig', 'U16'),
-            ('start', 'i8'),
-            ('wps', 'i8'),
-        ]
-    )
-    for i in range(stop-start):
-        scores[i] = _single_wps(
-            contig,
-            window_starts[i],
-            window_stops[i],
-            window_centers[i],
-            frag_ends
-        )
-
-    return scores
 
 
 def wps(input_file: Union[str, pysam.AlignmentFile],
@@ -127,15 +95,15 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     # set minimum and maximum values for fragments. These extend farther
     # than needed
-    minimum = round(start - fraction_high)
+    minimum = max(round(start - fraction_high), 0)
     maximum = round(stop + fraction_high)
 
     # read fragments from file
     frag_ends = frag_array(input_file,
                            contig,
                            quality_threshold,
-                           minimum=minimum,
-                           maximum=maximum,
+                           start=minimum,
+                           stop=maximum,
                            fraction_low=fraction_low,
                            fraction_high=fraction_high,
                            verbose=(verbose>=2))
@@ -156,8 +124,30 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         scores['start'] = np.arange(start, stop, dtype=int)
         scores['contig'] = contig
     else:
-        scores = _wps_loop(frag_ends, contig, start, stop, window_size)
 
+        window_centers = np.arange(start, stop, dtype=np.int64)
+        window_starts = np.zeros(stop-start)
+        window_stops = np.zeros(stop-start)
+        np.rint(window_centers - window_size * 0.5, window_starts)
+        np.rint(window_centers + window_size * 0.5 - 1, window_stops)
+        # stops are inclusive
+        # array to store positions and scores
+        scores = np.zeros(
+            stop-start,
+            dtype=[
+                ('contig', 'U16'),
+                ('start', 'i8'),
+                ('wps', 'i8'),
+            ]
+        )
+        for i in range(stop-start):
+            scores[i] = _single_wps(
+                contig,
+                window_starts[i],
+                window_stops[i],
+                window_centers[i],
+                frag_ends
+            )
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
