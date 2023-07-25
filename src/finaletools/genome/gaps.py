@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union
+from typing import Union, Tuple, Iterable
 import gzip
 try:
     from importlib.resources import files
@@ -136,12 +136,12 @@ class GenomeGaps:
             return None
         else:
             in_centromere = np.logical_and(
-                start >= centromere['start'],
-                stop <= centromere['stop'],
+                stop > centromere['start'],
+                start < centromere['stop'],
             )
             in_telomeres = np.sum(np.logical_and(
-                start >= telomeres['start'],
-                stop <= telomeres['stop'],
+                stop > telomeres['start'],
+                start < telomeres['stop'],
             )) > 0
             return in_centromere or in_telomeres
 
@@ -185,6 +185,22 @@ class GenomeGaps:
         else:
             return ''
 
+    def get_contig_gaps(self, contig):
+        # get centromere and telomeres for contig
+        centromere = self.centromeres[self.centromeres['contig'] == contig]
+        centromere_ends = (centromere[0]['start'], centromere[0]['stop'])
+        telomeres = self.telomeres[self.telomeres['contig'] == contig]
+        telomere_ends = [
+            (telomeres[0]['start'], telomeres[0]['stop']),
+            (telomeres[1]['start'], telomeres[1]['stop']),
+        ]
+        # get short_arm for contig
+        short_arm = self.short_arms[self.short_arms['contig'] == contig]
+        has_short_arm = short_arm.shape[0] > 0
+        contig_gaps = ContigGaps(
+            contig, centromere_ends, telomere_ends, has_short_arm
+        )
+        return contig_gaps
 
     def to_bed(self, output_file: str):
         """
@@ -211,6 +227,42 @@ class GenomeGaps:
                         f"{interval['contig']}\t{interval['start']}\t"
                         f"{interval['stop']}\t{interval['type']}\n"
                     )
+
+
+class ContigGaps():
+    def __init__(self,
+                 contig: str,
+                 centromere: Tuple[int, int],
+                 telomeres:Iterable[Tuple[int, int]],
+                 has_short_arm: bool=False):
+        self.contig = contig
+        self.centromere = centromere
+        self.telomeres = telomeres
+        self.has_short_arm = has_short_arm
+
+    def in_tcmere(self, start: int, stop: int):
+        in_centromere = (
+            stop > self.centromere[0] and start < self.centromere[1]
+        )
+        in_telomeres = all(
+            stop > telomere[0] and start < telomere[1]
+            for telomere in self.telomeres
+        )
+        return in_centromere or in_telomeres
+
+    def get_arm(self, start: int, stop: int):
+        if stop < start:
+            raise ValueError('start must be less than stop')
+
+        if stop < self.centromere[0]:
+            if not self.has_short_arm:
+                return f"p{self.contig.replace('chr', '')}"
+            else:
+                return ''
+        elif start > self.centromere[1]:
+            return f"q{self.contig.replace('chr', '')}"
+        else:
+            return ''
 
 
 def ucsc_hg19_gap_bed(output_file: str):
