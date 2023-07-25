@@ -51,12 +51,15 @@ def _delfi_single_window(
         # UCSC
         with open(centromere_file) as centromere_list:
             for line in centromere_list:
-                region_contig, region_start, region_stop, *_ = line.split()
+                region_contig, region_start, region_stop, name, *_ = line.split()
                 region_start = int(region_start)
                 region_stop = int(region_stop)
                 if (contig == region_contig
                     and window_start <= region_start
-                    and window_stop >= region_stop ):
+                    and window_stop >= region_stop
+                    and (name == 'centromere'
+                         or name == 'telomere')
+                ):
                     centromeres.append((region_start,region_stop))
 
     short_lengths = []
