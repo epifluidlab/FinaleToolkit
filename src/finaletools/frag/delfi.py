@@ -22,7 +22,7 @@ def _delfi_single_window(
         window_start: int,
         window_stop: int,
         blacklist_file: str=None,
-        centromeres: list=None,
+        tcmeres: list=None,
         quality_threshold: int=30,
         verbose: Union[int,bool]=False) -> tuple:
     """
@@ -98,18 +98,18 @@ def _delfi_single_window(
                         blacklisted = True
                         break
 
-                # check if in centromere
-                in_centromere = False
-                for tc_contig, tc_start, tc_stop, _ in centromeres:
+                # check if in centromere or telomere
+                in_tcmere = False
+                for tc_contig, tc_start, tc_stop, _ in tcmeres:
                     if (tc_contig == region_contig
                         and (frag_start >= tc_start and frag_start < tc_stop)
                         and (frag_stop >= tc_start and frag_stop < tc_stop)
                     ):
-                        in_centromere = True
+                        in_tcmere = True
                         break
 
                 if (not blacklisted
-                    and not in_centromere
+                    and not in_tcmere
                     and frag_length >= 100
                     and frag_length <= 220
                 ):
@@ -181,7 +181,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           autosomes: str,
           reference_file: str,
           blacklist_file: str=None,
-          centromere_file: str=None,
+          tcmere_file: str=None,
           output_file: str=None,
           window_size: int=100000,
           subsample_coverage: float=2,
@@ -204,6 +204,8 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         Path string to .2bit file.
     blacklist_file: str
         Path string to bed file containing genome blacklist.
+    tcmere_file: str
+        Path string to a BED4+ file where each interval is a centromere or
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
@@ -255,12 +257,12 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
             if len(contents) > 1:
                 contigs.append((contents[0],  int(contents[1])))
 
-    centromeres = []
-    if (centromere_file is not None):
+    tcmeres = []
+    if (tcmere_file is not None):
         # TODO: find a standard way to get centromeres, like a track on
         # UCSC
-        with open(centromere_file) as centromere_list:
-            for line in centromere_list:
+        with open(tcmere_file) as tcmere_bed:
+            for line in tcmere_bed:
                 region_contig, region_start, region_stop, name, *_ = line.split()
                 region_start = int(region_start)
                 region_stop = int(region_stop)
@@ -268,7 +270,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                     and (name == 'centromere'
                          or name == 'telomere')
                 ):
-                    centromeres.append((region_contig, region_start,region_stop, name))
+                    tcmeres.append((region_contig, region_start,region_stop, name))
 
     if verbose:
         stderr.write(f'Generating windows\n')
@@ -285,7 +287,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 coordinate,
                 coordinate + window_size,
                 blacklist_file,
-                centromeres,
+                tcmeres,
                 quality_threshold,
                 verbose - 1 if verbose > 1 else 0))
 
