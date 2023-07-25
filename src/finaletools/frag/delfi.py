@@ -22,7 +22,7 @@ def _delfi_single_window(
         window_start: int,
         window_stop: int,
         blacklist_file: str=None,
-        centromere_file: str=None,
+        centromeres: list=None,
         quality_threshold: int=30,
         verbose: Union[int,bool]=False) -> tuple:
     """
@@ -43,24 +43,6 @@ def _delfi_single_window(
                     and window_start <= region_start
                     and window_stop >= region_stop ):
                     blacklist_regions.append((region_start,region_stop))
-
-    centromeres = []
-
-    if (centromere_file is not None):
-        # TODO: find a standard way to get centromeres, like a track on
-        # UCSC
-        with open(centromere_file) as centromere_list:
-            for line in centromere_list:
-                region_contig, region_start, region_stop, name, *_ = line.split()
-                region_start = int(region_start)
-                region_stop = int(region_stop)
-                if (contig == region_contig
-                    and window_start <= region_start
-                    and window_stop >= region_stop
-                    and (name == 'centromere'
-                         or name == 'telomere')
-                ):
-                    centromeres.append((region_start,region_stop))
 
     short_lengths = []
     long_lengths = []
@@ -118,10 +100,10 @@ def _delfi_single_window(
 
                 # check if in centromere
                 in_centromere = False
-                for region in centromeres:
-                    if (
-                        (frag_start >= region[0] and frag_start < region[1])
-                        and (frag_stop >= region[0] and frag_stop < region[1])
+                for tc_contig, tc_start, tc_stop, _ in centromeres:
+                    if (tc_contig == region_contig
+                        and (frag_start >= tc_start and frag_start < tc_stop)
+                        and (frag_stop >= tc_start and frag_stop < tc_stop)
                     ):
                         in_centromere = True
                         break
@@ -273,6 +255,21 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
             if len(contents) > 1:
                 contigs.append((contents[0],  int(contents[1])))
 
+    centromeres = []
+    if (centromere_file is not None):
+        # TODO: find a standard way to get centromeres, like a track on
+        # UCSC
+        with open(centromere_file) as centromere_list:
+            for line in centromere_list:
+                region_contig, region_start, region_stop, name, *_ = line.split()
+                region_start = int(region_start)
+                region_stop = int(region_stop)
+                if (contig == region_contig
+                    and (name == 'centromere'
+                         or name == 'telomere')
+                ):
+                    centromeres.append((region_contig, region_start,region_stop, name))
+
     if verbose:
         stderr.write(f'Generating windows\n')
 
@@ -288,7 +285,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 coordinate,
                 coordinate + window_size,
                 blacklist_file,
-                centromere_file,
+                centromeres,
                 quality_threshold,
                 verbose - 1 if verbose > 1 else 0))
 
