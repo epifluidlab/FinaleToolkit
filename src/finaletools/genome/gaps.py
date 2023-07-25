@@ -112,6 +112,23 @@ class GenomeGaps:
         return NotImplemented
 
     def in_tcmere(self, contig: str, start: int, stop: int) -> bool:
+        """
+        Checks if specified interval is in a centromere or telomere
+
+        Parameters
+        ----------
+        contig : str
+            Chromosome name
+        start : int
+            Start of interval
+        stop : int
+            End of interval
+
+        Returns
+        -------
+        in_telomere_or_centromere : bool
+            True if in a centromere or telomere
+        """
         # get centromere and telomeres for contig
         centromere = self.centromeres[self.centromeres['contig'] == contig]
         telomeres = self.telomeres[self.telomeres['contig'] == contig]
@@ -127,6 +144,47 @@ class GenomeGaps:
                 stop <= telomeres['stop'],
             )) > 0
             return in_centromere or in_telomeres
+
+    def get_arm(self, contig: str, start: int, stop: int) -> str:
+        """
+        Returns the chromosome arm the interval is in. If in
+        the short arm of an acrocentric chromosome or intersects a
+        centromere, returns an empty string.
+
+        contig : str
+            Chromosome of interval.
+        start : int
+            Start of interval.
+        stop : int
+            End of interval.
+
+        Returns
+        -------
+        arm : str
+            Arm that interval is in.
+
+        Raises
+        ------
+        ValueError
+            Raised for invalid coordinates
+        """
+        if stop < start:
+            raise ValueError('start must be less than stop')
+
+        # get centromere and short_arm for contig
+        centromere = self.centromeres[self.centromeres['contig'] == contig]
+        short_arm = self.short_arms[self.short_arms['contig'] == contig]
+        has_short_arm = short_arm.shape[0] > 0
+        if stop < centromere['start'][0]:
+            if not has_short_arm:
+                return f"p{contig.replace('chr', '')}"
+            else:
+                return ''
+        elif start > centromere['stop'][0]:
+            return f"q{contig.replace('chr', '')}"
+        else:
+            return ''
+
 
     def to_bed(self, output_file: str):
         """
