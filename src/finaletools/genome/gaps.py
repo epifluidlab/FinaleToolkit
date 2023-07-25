@@ -318,4 +318,30 @@ def ucsc_hg38_gap_bed(output_file: str):
     output_file : str
         Output path
     """
-    return NotImplemented
+    raise NotImplementedError()
+
+
+def _cli_gap_bed(reference_genome, output_file):
+    """
+    Creates BED4 of centromeres, telomeres, and short arms for the UCSC
+    hg19 reference sequence.
+
+    Parameters
+    ----------
+    output_file : str
+        Output path
+    """
+    if reference_genome == 'hg19':
+        ucsc_hg19_gap_bed(output_file)
+    elif (reference_genome == 'b37'
+          or reference_genome == 'human_g1k_v37'):
+        b37_gap_bed(output_file)
+    elif reference_genome == 'hg38' or reference_genome == 'GRCh38':
+        ucsc_hg38_gap_bed(output_file)
+    else:
+        raise ValueError(
+            f'Gap track for {reference_genome} is currently unavailable'
+            '. It is possible to create a gap track de novo if '
+            'inverval data for centromeres, telomers, and short_arms '
+            'exist for the reference sequence of interest.'
+        )

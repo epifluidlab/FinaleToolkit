@@ -14,6 +14,7 @@ from finaletools.frag.adjust_wps import adjust_wps
 from finaletools.frag.agg_wps import agg_wps
 from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
 from finaletools.frag.end_motifs import end_motifs, _cli_mds
+from finaletools.genome.gaps import _cli_gap_bed
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
@@ -230,7 +231,7 @@ def main_cli():
     parser_command5.add_argument('autosomes')
     parser_command5.add_argument('reference_file')
     parser_command5.add_argument('-b', '--blacklist_file')
-    parser_command5.add_argument('-tc', '--tcmere_file')
+    parser_command5.add_argument('-g', '--gap_file')
     parser_command5.add_argument('-o', '--output_file')
     parser_command5.add_argument('-W', '--window_size', default=100000, type=int)
     parser_command5.add_argument('-q', '--quality_threshold', default=30, type=int)
@@ -524,6 +525,30 @@ def main_cli():
         help='Number of header rows to ignore. Default is 0'
     )
     parser_command11.set_defaults(func=_cli_mds)
+
+    # Subcommand 12: gap bed
+    parser_command12 = subparsers.add_parser(
+        'gap-bed',
+        prog='finaletools-gap-bed',
+        description='Creates a BED4 file containing centromeres, '
+        'telomeres, and short-arm intervals, similar to the gaps '
+        'annotation track for hg19 found on the UCSC Genome Browser '
+        '(Kent et al 2002). Currently only supports hg19, b37, '
+        'human_g1k_v37, hg38, and GRCh38',
+        epilog='Gap is used liberally in this command, and in the case '
+        'hg38/GRCh38, may refer to regions where there no longer are '
+        'gaps in the reference sequence.'
+    )
+    parser_command12.add_argument(
+        'reference_genome',
+        choices=['hg19', 'b37','human_g1k_v37', 'hg38', 'GRCh38'],
+        help='Reference genome to provide gaps for.'
+    )
+    parser_command12.add_argument(
+        'output_file',
+        help='Path to write bed file to. If "-" used, writes to stdout.'
+    )
+    parser_command12.set_defaults(func=_cli_gap_bed)
 
     args = parser.parse_args()
     function = args.func
