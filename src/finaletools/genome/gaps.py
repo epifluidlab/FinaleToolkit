@@ -6,6 +6,7 @@ try:
 except ImportError:
     from importlib_resources import files
 from pathlib import Path
+from sys import stdout
 
 import numpy as np
 from numpy.typing import NDArray
@@ -210,13 +211,20 @@ class GenomeGaps:
         Parameters
         ----------
         output_file : str
-            File to write to. Optionally gzipped.
+            File to write to. Optionally gzipped. If output_file == '-',
+            results will be writted to stdout.
         """
         gaps = np.sort(np.append(np.append(self.centromeres, self.telomeres), self.short_arms))
         if output_file.endswith('.gz'):
             with gzip.open(output_file, 'w') as output:
                 for interval in gaps:
                     output.write(
+                        f"{interval['contig']}\t{interval['start']}\t"
+                        f"{interval['stop']}\t{interval['type']}\n"
+                    )
+        elif output_file == '-':
+            for interval in gaps:
+                    stdout.write(
                         f"{interval['contig']}\t{interval['start']}\t"
                         f"{interval['stop']}\t{interval['type']}\n"
                     )
