@@ -208,10 +208,10 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     tcmere_file: str
         Path string to a BED4+ file where each interval is a centromere
         or telomere. For hg19, the gaps track from the UCSC Genome
-        Browser may be used. Otherwise, a bed file can be used
-        **only if** the fourth field for each entry corresponding to a
-        telomere or centromere is labled "telomere" or "centromere,
-        respectively.
+        Browser may be used after converting to the BED4+ format.
+        Otherwise, a bed file can be used **only if** the fourth field
+        for each entry corresponding to a telomere or centromere is
+        labled "telomere" or "centromere, respectively.
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
