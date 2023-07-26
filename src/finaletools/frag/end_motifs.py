@@ -260,19 +260,27 @@ def region_end_motifs(
     try:
         refseq = py2bit.open(refseq_file, 'r')
         for frag in frag_ends:
-            # forward end-motif
-            forward_kmer = refseq.sequence(
-                contig, int(frag[1]), int(frag[1]+k)
-            )
-            if 'N' not in forward_kmer:
-                end_motif_counts[forward_kmer] += 1
+            if frag[3]:
+                # forward end-motif
+                forward_kmer = refseq.sequence(
+                    contig, int(frag[1]), int(frag[1]+k)
+                )
+                if 'N' not in forward_kmer:
+                    end_motif_counts[forward_kmer] += 1
+            else:
+                # reverse end-motif
+                try:
+                    reverse_kmer = refseq.sequence(
+                        contig, int(frag[2]-k), int(frag[2])
+                    )
+                    if 'N' not in reverse_kmer:
+                        end_motif_counts[_reverse_complement(reverse_kmer)] += 1
+                except RuntimeError:
+                    stderr.write(
+                        f'Attempt to read interval at {contig}:'
+                        f'{int(frag[2]-k)}-{int(frag[2])} failed. Skipping.')
+                    continue
 
-            # reverse end-motif
-            reverse_kmer = refseq.sequence(
-                contig, int(frag[2]-k), int(frag[2])
-            )
-            if 'N' not in reverse_kmer:
-                end_motif_counts[_reverse_complement(reverse_kmer)] += 1
     finally:
         refseq.close()
 

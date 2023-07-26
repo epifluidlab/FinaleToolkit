@@ -207,13 +207,18 @@ def frag_generator(
                 if (read1.is_read2
                     or low_quality_read_pairs(read1, quality_threshold)):
                     pass
-                else:
-                    read_length = read1.template_length
-                    read_start = read1.reference_start
-                    read_stop = read1.reference_start + read_length
-                    if ((read_length >= fraction_low)
-                        and (read_length <= fraction_high)):
-                        yield contig, read_start, read_stop
+                elif (
+                    abs(read_length := read1.template_length) >= fraction_low
+                    and abs(read_length) <= fraction_high
+                ):
+                    read_pos = read1.reference_start
+                    read_mate_pos = read1.reference_start + read_length
+                    if read_pos < read_mate_pos:
+                        read_start, read_stop = read_pos, read_mate_pos
+                    else:
+                        read_start, read_stop = read_mate_pos, read_pos
+                    read_on_plus = read1.is_forward
+                    yield contig, read_start, read_stop, read_on_plus
         else:
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
@@ -221,8 +226,9 @@ def frag_generator(
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
+                read_on_plus = int('+' in line[4])
                 if read_length >= fraction_low and read_length <= fraction_high:
-                    yield contig, read_start, read_stop
+                    yield contig, read_start, read_stop, read_on_plus
     finally:
         if input_file_is_str and is_sam:
             sam_file.close()
@@ -261,10 +267,11 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     Returns
     -------
     frag_ends : NDArray
-        'NDArray' with shape (n, 2) where column 1 contains fragment
-        start positions and column 2 contains fragment stop positions.
+        'NDArray' with shape (n, 3) where column 1 contains fragment
+        start position and column 2 contains fragment stop position, and
+        column3 is 1 of on the + strand and is 0 if on the - strand.
         If no fragments exist in the specified minimum-maximum interval,
-        the returned 'ndarray' will have a shape of (0, 2)
+        the returned 'ndarray' will have a shape of (0, 3)
     """
     try:
         # check type of input and open if needed
@@ -305,13 +312,17 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 if (read1.is_read2
                     or low_quality_read_pairs(read1, quality_threshold)):
                     pass
-                else:
-                    read_length = read1.template_length
-                    read_start = read1.reference_start
-                    read_stop = read1.reference_start + read_length
-                    if ((read_length >= fraction_low)
-                        and (read_length <= fraction_high)):
-                        frag_ends.append((read_start, read_stop))
+                # HACK: dealing with negative TLENs
+                elif (
+                    abs(read_length := read1.template_length) >= fraction_low
+                    and abs(read_length) <= fraction_high
+                ):
+                    read_pos = read1.reference_start
+                    read_mate_pos = read1.reference_start + read_length
+                    read_start = min(read_pos, read_mate_pos)
+                    read_stop = max(read_pos, read_mate_pos)
+                    read_on_plus = read1.is_forward
+                    frag_ends.append((read_start, read_stop, read_on_plus))
         else:
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
@@ -319,8 +330,9 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
+                read_on_plus = int('+' in line[4])
                 if read_length >= fraction_low and read_length <= fraction_high:
-                    frag_ends.append((read_start, read_stop))
+                    frag_ends.append((read_start, read_stop, read_on_plus))
     finally:
         if input_file_is_str and is_sam:
             sam_file.close()
