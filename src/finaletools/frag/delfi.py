@@ -13,21 +13,22 @@ import py2bit
 import numpy as np
 
 from finaletools.utils.utils import _not_read1_or_low_quality
+from finaletools.genome.gaps import GenomeGaps, ContigGaps
 
 
 def _delfi_single_window(
         input_file: str,
         reference_file: str,
-        contig: str,
+        contig_gaps: ContigGaps,
         window_start: int,
         window_stop: int,
         blacklist_file: str=None,
-        tcmeres: list=None,
         quality_threshold: int=30,
         verbose: Union[int,bool]=False) -> tuple:
     """
     Calculates DELFI for one window.
     """
+    contig = contig_gaps.contig
 
     blacklist_regions = []
 
@@ -99,14 +100,9 @@ def _delfi_single_window(
                         break
 
                 # check if in centromere or telomere
-                in_tcmere = False
-                for tc_contig, tc_start, tc_stop, _ in tcmeres:
-                    if (tc_contig == region_contig
-                        and (frag_start >= tc_start and frag_start < tc_stop)
-                        and (frag_stop >= tc_start and frag_stop < tc_stop)
-                    ):
-                        in_tcmere = True
-                        break
+                in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
+                if in_tcmere:
+                    continue
 
                 if (not blacklisted
                     and not in_tcmere
@@ -181,7 +177,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           autosomes: str,
           reference_file: str,
           blacklist_file: str=None,
-          tcmere_file: str=None,
+          gap_file: Union(str, GenomeGaps)=None,
           output_file: str=None,
           window_size: int=100000,
           subsample_coverage: float=2,
@@ -205,11 +201,9 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         Path string to .2bit file.
     blacklist_file: str
         Path string to bed file containing genome blacklist.
-    tcmere_file: str
+    gap_file: str
         Path string to a BED4+ file where each interval is a centromere
-        or telomere. For hg19, the gaps track from the UCSC Genome
-        Browser may be used after converting to the BED4+ format.
-        Otherwise, a bed file can be used **only if** the fourth field
+        or telomere. A bed file can be used **only if** the fourth field
         for each entry corresponding to a telomere or centromere is
         labled "telomere" or "centromere, respectively.
     window_size: int
@@ -263,36 +257,36 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
             if len(contents) > 1:
                 contigs.append((contents[0],  int(contents[1])))
 
-    tcmeres = []
-    if (tcmere_file is not None):
-        # TODO: find a standard way to get centromeres, like a track on
-        # UCSC
-        with open(tcmere_file) as tcmere_bed:
-            for line in tcmere_bed:
-                region_contig, region_start, region_stop, name, *_ = line.split()
-                region_start = int(region_start)
-                region_stop = int(region_stop)
-                if (name == 'centromere' or name == 'telomere'):
-                    tcmeres.append(
-                        (region_contig, region_start, region_stop, name)
-                    )
+    gaps = None
+    if (gap_file is not None):
+        if type(gap_file) == str:
+            gaps = GenomeGaps(gap_file)
+        elif type(gap_file) == GenomeGaps:
+            gaps = gap_file
+        else:
+            raise TypeError(
+                f'{type(gap_file)} is not accepted type for gap_file'
+            )
 
     if verbose:
         stderr.write(f'Generating windows\n')
 
     # generate DELFI windows
     window_args = []
+    contig_gaps = None
     for contig, size in contigs:
+        if gaps is not None:
+            print(contig)
+            contig_gaps = gaps.get_contig_gaps(contig)
         for coordinate in range(0, size, window_size):
             # (contig, start, stop)
             window_args.append((
                 input_file,
                 reference_file,
-                contig,
+                contig_gaps,
                 coordinate,
                 coordinate + window_size,
                 blacklist_file,
-                tcmeres,
                 quality_threshold,
                 verbose - 1 if verbose > 1 else 0))
 
