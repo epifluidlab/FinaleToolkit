@@ -1,0 +1,1 @@
+This folder contains files generated while manually testing FinaleTools.

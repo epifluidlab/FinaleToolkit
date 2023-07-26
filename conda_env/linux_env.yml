@@ -1,4 +1,4 @@
-name: samenv3
+name: finaletools
 channels:
   - conda-forge
   - bioconda

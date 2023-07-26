@@ -119,7 +119,7 @@ def coverage(
         input_file: Union[str, pysam.AlignmentFile],
         interval_file: str,
         output_file: str,
-        scale_factor: int=1e6,
+        scale_factor: float=1e6,
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False):

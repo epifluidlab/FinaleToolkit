@@ -12,7 +12,6 @@ import pysam
 import numpy as np
 from numba import jit
 from tqdm import tqdm
-from memory_profiler import profile
 
 from finaletools.utils import frag_array
 
