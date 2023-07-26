@@ -212,10 +212,10 @@ class GenomeGaps:
         centromere = self.centromeres[self.centromeres['contig'] == contig]
         centromere_ends = (centromere[0]['start'], centromere[0]['stop'])
         telomeres = self.telomeres[self.telomeres['contig'] == contig]
-        telomere_ends = [
-            (telomeres[0]['start'], telomeres[0]['stop']),
-            (telomeres[1]['start'], telomeres[1]['stop']),
-        ]
+
+        telomere_ends = []
+        for telomere in telomeres:
+            telomere_ends.append((telomere['start'], telomere['stop']))
         # get short_arm for contig
         short_arm = self.short_arms[self.short_arms['contig'] == contig]
         has_short_arm = short_arm.shape[0] > 0
