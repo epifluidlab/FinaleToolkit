@@ -276,9 +276,11 @@ def region_end_motifs(
                     if 'N' not in reverse_kmer:
                         end_motif_counts[_reverse_complement(reverse_kmer)] += 1
                 except RuntimeError:
-                    stderr.write(
-                        f'Attempt to read interval at {contig}:'
-                        f'{int(frag[2]-k)}-{int(frag[2])} failed. Skipping.')
+                    if verbose > 1:
+                        stderr.write(
+                            f'Attempt to read interval at {contig}:'
+                            f'{int(frag[2]-k)}-{int(frag[2])} failed.'
+                            'Skipping.')
                     continue
 
     finally:
