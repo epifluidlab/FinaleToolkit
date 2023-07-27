@@ -226,7 +226,7 @@ def frag_generator(
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
-                read_on_plus = int('+' in line[4])
+                read_on_plus = '+' in line[5]
                 if read_length >= fraction_low and read_length <= fraction_high:
                     yield contig, read_start, read_stop, read_on_plus
     finally:
