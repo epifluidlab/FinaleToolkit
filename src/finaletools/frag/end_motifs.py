@@ -9,7 +9,7 @@ try:
     from importlib.resources import files
 except ImportError:
     from importlib_resources import files
-from pathlib import PosixPath
+from pathlib import Path
 from collections import UserDict
 
 import tqdm
@@ -21,7 +21,7 @@ from finaletools.utils.utils import frag_generator
 import finaletools.frag as pkg_data
 
 # path to tsv containing f-profiles from Zhou et al (2023)
-FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
+FPROFILE_PATH: Path = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
 
 
 class EndMotifFreqs():
