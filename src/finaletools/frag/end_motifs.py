@@ -211,6 +211,8 @@ def region_end_motifs(
     stop: int,
     refseq_file: str,
     k: int = 4,
+    fraction_low: int = 10,
+    fraction_high: int = 600,
     output_file: Union(None, str) = None,
     quality_threshold: int = 30,
     verbose: Union(bool, int) = False,
@@ -240,15 +242,15 @@ def region_end_motifs(
     if verbose:
         start_time = time()
 
-    # numpy array of fragments
+    # iterable of fragments
     frag_ends = frag_generator(
         input_file,
         contig,
         quality_threshold,
         start,
         stop,
-        fraction_low=4,
-        fraction_high=100000,
+        fraction_low=fraction_low,
+        fraction_high=fraction_high,
     )
     # create dict where keys are kmers and values are counts
     bases='ACGT'
@@ -304,6 +306,8 @@ def end_motifs(
     input_file: str,
     refseq_file: str,
     k: int = 4,
+    fraction_low: int = 10,
+    fraction_high: int = 600,
     output_file: Union(None, str) = None,
     quality_threshold: int = 30,
     workers: int = 1,
@@ -354,6 +358,8 @@ def end_motifs(
                 start+window_size,
                 refseq_file,
                 k,
+                fraction_low,
+                fraction_high,
                 None,
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0
