@@ -227,8 +227,13 @@ def frag_generator(
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
                 read_on_plus = '+' in line[4]
-                if read_length >= fraction_low and read_length <= fraction_high:
-                    yield contig, read_start, read_stop, read_on_plus
+                try:
+                    if read_length >= fraction_low and read_length <= fraction_high:
+                        yield contig, read_start, read_stop, read_on_plus
+                # HACK: for some reason read_length is sometimes None
+                except TypeError:
+                    continue
+
     finally:
         if input_file_is_str and is_sam:
             sam_file.close()
