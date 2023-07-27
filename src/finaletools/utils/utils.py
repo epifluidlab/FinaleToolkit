@@ -226,7 +226,7 @@ def frag_generator(
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
-                read_on_plus = '+' in line[5]
+                read_on_plus = '+' in line[4]
                 if read_length >= fraction_low and read_length <= fraction_high:
                     yield contig, read_start, read_stop, read_on_plus
     finally:
@@ -330,7 +330,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
-                read_on_plus = int('+' in line[5])
+                read_on_plus = int('+' in line[4])
                 if read_length >= fraction_low and read_length <= fraction_high:
                     frag_ends.append((read_start, read_stop, read_on_plus))
     finally:
