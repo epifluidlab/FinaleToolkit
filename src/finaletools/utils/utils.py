@@ -382,8 +382,7 @@ def low_quality_read_pairs(read, min_mapq=30):
             or read.mapping_quality < min_mapq
             or read.is_qcfail
             or read.is_supplementary
-            or (not read.is_proper_pair)
-            or read.reference_name != read.next_reference_name)
+            or (not read.is_proper_pair))
 
 
 def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
