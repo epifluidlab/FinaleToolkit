@@ -51,6 +51,17 @@ def _delfi_single_window(
 
     num_frags = 0
 
+    # check if interval in centromere or telomere
+    in_tcmere = contig_gaps.in_tcmere(window_start, window_stop)
+    if in_tcmere:
+        return (contig,
+            window_start,
+            window_stop,
+            np.NaN,
+            np.NaN,
+            np.NaN,
+            np.NaN)
+
     try:
         # read from tabix or bam/bam
         if input_file.endswith('.bam') or input_file.endswith('.sam'):
