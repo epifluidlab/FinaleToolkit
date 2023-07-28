@@ -319,7 +319,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         dtype=[('contig', '<U32'),
            ('start', 'u8'),
            ('stop', 'u8'),
-           ('arm', <'U32'),
+           ('arm', '<U32'),
            ('short', 'f8'),
            ('long', 'f8'),
            ('gc', 'f8'),
@@ -359,7 +359,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
             'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
         )
 
-    num_frags = sum(window[3] for window in windows)
+    num_frags = sum(window[7] for window in windows)
 
     if (verbose):
         end_time = time.time()
