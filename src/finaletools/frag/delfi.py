@@ -57,10 +57,13 @@ def _delfi_single_window(
         return (contig,
             window_start,
             window_stop,
+            '',
             np.NaN,
             np.NaN,
             np.NaN,
             0)
+
+    arm = contig_gaps.get_arm(window_start, window_stop)
 
     try:
         # read from tabix or bam/bam
@@ -159,6 +162,7 @@ def _delfi_single_window(
     return (contig,
             window_start,
             window_stop,
+            arm,
             coverage_short,
             coverage_long,
             gc_content,
@@ -315,6 +319,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         dtype=[('contig', '<U32'),
            ('start', 'u8'),
            ('stop', 'u8'),
+           ('arm', <'U32'),
            ('short', 'f8'),
            ('long', 'f8'),
            ('gc', 'f8'),
@@ -327,11 +332,11 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     # output
     def _write_out(out: TextIO):
-        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
+        out.write('#contig\tstart\tstop\tarm\tshort\tlong\tgc%\tfrag_count\n')
         for window in trimmed_windows:
             out.write(
                 f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                f'{window[4]}\t{window[5]}\t{window[6]}\n')
+                f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\n')
 
     if output_file.endswith('.tsv'):
         with open(output_file, 'w') as out:
