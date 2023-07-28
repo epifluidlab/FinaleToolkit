@@ -57,7 +57,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM or SAM file containing paired-end fragment reads or its
+        BAM, SAM or tabix file containing paired-end fragment reads or its
         path. `AlignmentFile` must be opened in read mode.
     contig : str
     start : int
