@@ -111,7 +111,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     if (verbose):
         stderr.write("Done reading fragments, preparing for WPS calculation.\n")
     # check if no fragments exist on this interval
-    if (frag_ends.shape == (0, 2)):
+    if (frag_ends.shape == (0, 3)):
 
         scores = np.zeros(
         stop-start,

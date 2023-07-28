@@ -201,19 +201,22 @@ def frag_generator(
             )
 
         if is_sam:
-            for read1 in sam_file.fetch(contig, start, stop):
+            for read in sam_file.fetch(contig, start, stop):
                 # Only select forward strand and filter out non-paired-end
                 # reads and low-quality reads
-                if (read1.is_read2
-                    or low_quality_read_pairs(read1, quality_threshold)):
+                if (low_quality_read_pairs(read, quality_threshold)
+                    or read.is_reverse):
                     pass
-                else:
-                    read_length = read1.template_length
-                    read_start = read1.reference_start
-                    read_stop = read1.reference_start + read_length
-                    if ((read_length >= fraction_low)
-                        and (read_length <= fraction_high)):
-                        yield contig, read_start, read_stop
+                # HACK: using leftmost read, not read1, to find ends
+                elif (
+                    abs(read_length := read.template_length) >= fraction_low
+                    and abs(read_length) <= fraction_high
+                ):
+                    read_start = read.reference_start
+                    read_stop = read_start + read_length
+                    # if read2, read1 is reverse
+                    read_on_plus = read.is_read1
+                    yield contig, read_start, read_stop, read_on_plus
         else:
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
@@ -221,8 +224,14 @@ def frag_generator(
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
-                if read_length >= fraction_low and read_length <= fraction_high:
-                    yield contig, read_start, read_stop
+                read_on_plus = '+' in line[4]
+                try:
+                    if read_length >= fraction_low and read_length <= fraction_high:
+                        yield contig, read_start, read_stop, read_on_plus
+                # HACK: for some reason read_length is sometimes None
+                except TypeError:
+                    continue
+
     finally:
         if input_file_is_str and is_sam:
             sam_file.close()
@@ -261,10 +270,11 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     Returns
     -------
     frag_ends : NDArray
-        'NDArray' with shape (n, 2) where column 1 contains fragment
-        start positions and column 2 contains fragment stop positions.
+        'NDArray' with shape (n, 3) where column 1 contains fragment
+        start position and column 2 contains fragment stop position, and
+        column3 is 1 of on the + strand and is 0 if on the - strand.
         If no fragments exist in the specified minimum-maximum interval,
-        the returned 'ndarray' will have a shape of (0, 2)
+        the returned 'ndarray' will have a shape of (0, 3)
     """
     try:
         # check type of input and open if needed
@@ -299,19 +309,22 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
         # based on file type, read into an array
         frag_ends = []
         if is_sam:
-            for read1 in sam_file.fetch(contig, start, stop):
+            for read in sam_file.fetch(contig, start, stop):
                 # Only select forward strand and filter out non-paired-end
                 # reads and low-quality reads
-                if (read1.is_read2
-                    or low_quality_read_pairs(read1, quality_threshold)):
+                if (low_quality_read_pairs(read, quality_threshold)
+                    or read.is_reverse):
                     pass
-                else:
-                    read_length = read1.template_length
-                    read_start = read1.reference_start
-                    read_stop = read1.reference_start + read_length
-                    if ((read_length >= fraction_low)
-                        and (read_length <= fraction_high)):
-                        frag_ends.append((read_start, read_stop))
+                # HACK: using leftmost read, not read1, to find ends
+                elif (
+                    abs(read_length := read.template_length) >= fraction_low
+                    and abs(read_length) <= fraction_high
+                ):
+                    read_start = read.reference_start
+                    read_stop = read_start + read_length
+                    # if read2, read1 is reverse
+                    read_on_plus = read.is_read1
+                    frag_ends.append((read_start, read_stop, read_on_plus))
         else:
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
@@ -319,8 +332,9 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
+                read_on_plus = int('+' in line[4])
                 if read_length >= fraction_low and read_length <= fraction_high:
-                    frag_ends.append((read_start, read_stop))
+                    frag_ends.append((read_start, read_stop, read_on_plus))
     finally:
         if input_file_is_str and is_sam:
             sam_file.close()
@@ -331,12 +345,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     frag_ends = np.array(frag_ends, dtype=np.int64)
 
     if frag_ends.ndim == 1:
-        frag_ends = frag_ends.reshape((0, 2))
+        frag_ends = frag_ends.reshape((0, 3))
 
     assert frag_ends.ndim == 2, (f'frag_ends has dims {frag_ends.ndim} and '
                                  f'shape {frag_ends.shape}')
-    assert (frag_ends.shape == (0, 2)
-            or frag_ends.shape[1] == 2),('frag_ends has shape'
+    assert (frag_ends.shape == (0, 3)
+            or frag_ends.shape[1] == 3),('frag_ends has shape'
                                           f'{frag_ends.shape}')
     return frag_ends
 
@@ -370,8 +384,7 @@ def low_quality_read_pairs(read, min_mapq=30):
             or read.mapping_quality < min_mapq
             or read.is_qcfail
             or read.is_supplementary
-            or (not read.is_proper_pair)
-            or read.reference_name != read.next_reference_name)
+            or (not read.is_proper_pair))
 
 
 def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
