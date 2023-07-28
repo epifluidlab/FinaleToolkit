@@ -322,11 +322,11 @@ class ContigGaps():
 
         if stop < self.centromere[0]:
             if not self.has_short_arm:
-                return f"p{self.contig.replace('chr', '')}"
+                return f"{self.contig.replace('chr', '')}p"
             else:
                 return ''
         elif start > self.centromere[1]:
-            return f"q{self.contig.replace('chr', '')}"
+            return f"{self.contig.replace('chr', '')}q"
         else:
             return ''
 
