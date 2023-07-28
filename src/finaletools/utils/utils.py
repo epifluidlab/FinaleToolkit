@@ -201,23 +201,21 @@ def frag_generator(
             )
 
         if is_sam:
-            for read1 in sam_file.fetch(contig, start, stop):
+            for read in sam_file.fetch(contig, start, stop):
                 # Only select forward strand and filter out non-paired-end
                 # reads and low-quality reads
-                if (read1.is_read2
-                    or low_quality_read_pairs(read1, quality_threshold)):
+                if (low_quality_read_pairs(read, quality_threshold)
+                    or read.is_reverse):
                     pass
+                # HACK: using leftmost read, not read1, to find ends
                 elif (
-                    abs(read_length := read1.template_length) >= fraction_low
+                    abs(read_length := read.template_length) >= fraction_low
                     and abs(read_length) <= fraction_high
                 ):
-                    read_pos = read1.reference_start
-                    read_mate_pos = read1.reference_start + read_length
-                    if read_pos < read_mate_pos:
-                        read_start, read_stop = read_pos, read_mate_pos
-                    else:
-                        read_start, read_stop = read_mate_pos, read_pos
-                    read_on_plus = read1.is_forward
+                    read_start = read.reference_start
+                    read_stop = read_start + read_length
+                    # if read2, read1 is reverse
+                    read_on_plus = read.is_read1
                     yield contig, read_start, read_stop, read_on_plus
         else:
             for line in tbx.fetch(
@@ -311,22 +309,21 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
         # based on file type, read into an array
         frag_ends = []
         if is_sam:
-            for read1 in sam_file.fetch(contig, start, stop):
+            for read in sam_file.fetch(contig, start, stop):
                 # Only select forward strand and filter out non-paired-end
                 # reads and low-quality reads
-                if (read1.is_read2
-                    or low_quality_read_pairs(read1, quality_threshold)):
+                if (low_quality_read_pairs(read, quality_threshold)
+                    or read.is_reverse):
                     pass
-                # HACK: dealing with negative TLENs
+                # HACK: using leftmost read, not read1, to find ends
                 elif (
-                    abs(read_length := read1.template_length) >= fraction_low
+                    abs(read_length := read.template_length) >= fraction_low
                     and abs(read_length) <= fraction_high
                 ):
-                    read_pos = read1.reference_start
-                    read_mate_pos = read1.reference_start + read_length
-                    read_start = min(read_pos, read_mate_pos)
-                    read_stop = max(read_pos, read_mate_pos)
-                    read_on_plus = read1.is_forward
+                    read_start = read.reference_start
+                    read_stop = read_start + read_length
+                    # if read2, read1 is reverse
+                    read_on_plus = read.is_read1
                     frag_ends.append((read_start, read_stop, read_on_plus))
         else:
             for line in tbx.fetch(
@@ -348,12 +345,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     frag_ends = np.array(frag_ends, dtype=np.int64)
 
     if frag_ends.ndim == 1:
-        frag_ends = frag_ends.reshape((0, 2))
+        frag_ends = frag_ends.reshape((0, 3))
 
     assert frag_ends.ndim == 2, (f'frag_ends has dims {frag_ends.ndim} and '
                                  f'shape {frag_ends.shape}')
-    assert (frag_ends.shape == (0, 2)
-            or frag_ends.shape[1] == 2),('frag_ends has shape'
+    assert (frag_ends.shape == (0, 3)
+            or frag_ends.shape[1] == 3),('frag_ends has shape'
                                           f'{frag_ends.shape}')
     return frag_ends
 
