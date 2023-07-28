@@ -60,7 +60,7 @@ def _delfi_single_window(
             np.NaN,
             np.NaN,
             np.NaN,
-            np.NaN)
+            0)
 
     try:
         # read from tabix or bam/bam
