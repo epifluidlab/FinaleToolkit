@@ -188,11 +188,11 @@ class GenomeGaps:
             if not has_short_arm:
                 return f"{contig.replace('chr', '')}p"
             else:
-                return ''
+                return 'NOARM'
         elif start > centromere['stop'][0]:
             return f"{contig.replace('chr', '')}q"
         else:
-            return ''
+            return 'NOARM'
 
     def get_contig_gaps(self, contig: str) -> ContigGaps:
         """
