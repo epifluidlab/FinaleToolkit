@@ -186,11 +186,11 @@ class GenomeGaps:
         has_short_arm = short_arm.shape[0] > 0
         if stop < centromere['start'][0]:
             if not has_short_arm:
-                return f"p{contig.replace('chr', '')}"
+                return f"{contig.replace('chr', '')}p"
             else:
                 return ''
         elif start > centromere['stop'][0]:
-            return f"q{contig.replace('chr', '')}"
+            return f"{contig.replace('chr', '')}q"
         else:
             return ''
 
