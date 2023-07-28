@@ -9,7 +9,7 @@ try:
     from importlib.resources import files
 except ImportError:
     from importlib_resources import files
-from pathlib import PosixPath
+from pathlib import Path
 from collections import UserDict
 
 import tqdm
@@ -21,7 +21,7 @@ from finaletools.utils.utils import frag_generator
 import finaletools.frag as pkg_data
 
 # path to tsv containing f-profiles from Zhou et al (2023)
-FPROFILE_PATH: PosixPath = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
+FPROFILE_PATH: Path = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
 
 
 class EndMotifFreqs():
@@ -211,6 +211,8 @@ def region_end_motifs(
     stop: int,
     refseq_file: str,
     k: int = 4,
+    fraction_low: int = 10,
+    fraction_high: int = 600,
     output_file: Union(None, str) = None,
     quality_threshold: int = 30,
     verbose: Union(bool, int) = False,
@@ -240,15 +242,15 @@ def region_end_motifs(
     if verbose:
         start_time = time()
 
-    # numpy array of fragments
+    # iterable of fragments
     frag_ends = frag_generator(
         input_file,
         contig,
         quality_threshold,
         start,
         stop,
-        fraction_low=4,
-        fraction_high=100000,
+        fraction_low=fraction_low,
+        fraction_high=fraction_high,
     )
     # create dict where keys are kmers and values are counts
     bases='ACGT'
@@ -260,19 +262,29 @@ def region_end_motifs(
     try:
         refseq = py2bit.open(refseq_file, 'r')
         for frag in frag_ends:
-            # forward end-motif
-            forward_kmer = refseq.sequence(
-                contig, int(frag[1]), int(frag[1]+k)
-            )
-            if 'N' not in forward_kmer:
-                end_motif_counts[forward_kmer] += 1
+            if frag[3]:
+                # forward end-motif
+                forward_kmer = refseq.sequence(
+                    contig, int(frag[1]), int(frag[1]+k)
+                )
+                if 'N' not in forward_kmer:
+                    end_motif_counts[forward_kmer] += 1
+            else:
+                # reverse end-motif
+                try:
+                    reverse_kmer = refseq.sequence(
+                        contig, int(frag[2]-k), int(frag[2])
+                    )
+                    if 'N' not in reverse_kmer:
+                        end_motif_counts[_reverse_complement(reverse_kmer)] += 1
+                except RuntimeError:
+                    if verbose > 1:
+                        stderr.write(
+                            f'Attempt to read interval at {contig}:'
+                            f'{int(frag[2]-k)}-{int(frag[2])} failed.'
+                            'Skipping.')
+                    continue
 
-            # reverse end-motif
-            reverse_kmer = refseq.sequence(
-                contig, int(frag[2]-k), int(frag[2])
-            )
-            if 'N' not in reverse_kmer:
-                end_motif_counts[_reverse_complement(reverse_kmer)] += 1
     finally:
         refseq.close()
 
@@ -294,6 +306,8 @@ def end_motifs(
     input_file: str,
     refseq_file: str,
     k: int = 4,
+    fraction_low: int = 10,
+    fraction_high: int = 600,
     output_file: Union(None, str) = None,
     quality_threshold: int = 30,
     workers: int = 1,
@@ -344,6 +358,8 @@ def end_motifs(
                 start+window_size,
                 refseq_file,
                 k,
+                fraction_low,
+                fraction_high,
                 None,
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0
