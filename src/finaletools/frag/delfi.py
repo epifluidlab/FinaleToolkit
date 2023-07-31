@@ -57,14 +57,23 @@ def _delfi_single_window(
         return (contig,
             window_start,
             window_stop,
-            '',
+            'NOARM',
             np.NaN,
             np.NaN,
             np.NaN,
             0)
 
     arm = contig_gaps.get_arm(window_start, window_stop)
-
+    # if in short arm
+    if arm == 'NOARM':
+        return (contig,
+            window_start,
+            window_stop,
+            'NOARM',
+            np.NaN,
+            np.NaN,
+            np.NaN,
+            0)
     try:
         # read from tabix or bam/bam
         if input_file.endswith('.bam') or input_file.endswith('.sam'):
