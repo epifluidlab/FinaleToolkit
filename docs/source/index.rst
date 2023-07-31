@@ -16,7 +16,11 @@ Welcome to FinaleTools's documentation!
    :caption: Contents:
 
    usage
+   quick_start
+   cli
    api
+   releases
+   GitHub <https://github.com/epifluidlab/FinaleTools>
 
 Indices and tables
 ==================
