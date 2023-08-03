@@ -1,6 +1,6 @@
 # FinaleTools
 
-Python tools for analysis of cell free DNA fragment data. FinaleTools refers to FragmentatIoN AnaLysis of cEll-free DNA Tools.
+Lightweight Python library and standalone program for analysis of cell free DNA fragment data. FinaleTools refers to FragmentatIoN AnaLysis of cEll-free DNA Tools.
 
 ### Installation
 This package is currently work-in-progress. Here is how to install (wip):
