@@ -178,9 +178,6 @@ def _delfi_single_window(
             num_frags)
 
 
-
-
-
 def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     """
     function to trim lowest 10% of bins by coverage. If a window is
