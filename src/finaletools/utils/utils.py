@@ -208,15 +208,20 @@ def frag_generator(
                     or read.is_reverse):
                     pass
                 # HACK: using leftmost read, not read1, to find ends
-                elif (
-                    abs(read_length := read.template_length) >= fraction_low
-                    and abs(read_length) <= fraction_high
-                ):
-                    read_start = read.reference_start
-                    read_stop = read_start + read_length
-                    # if read2, read1 is reverse
-                    read_on_plus = read.is_read1
-                    yield contig, read_start, read_stop, read_on_plus
+                else:
+                    # HACK: dealing with Nonetype read_length
+                    try:
+                        if (
+                                abs(read_length:=read.template_length) >= fraction_low
+                            and abs(read_length) <= fraction_high
+                        ):
+                            read_start = read.reference_start
+                            read_stop = read_start + read_length
+                            # if read2, read1 is reverse
+                            read_on_plus = read.is_read1
+                            yield contig, read_start, read_stop, read_on_plus
+                    except TypeError:
+                        continue
         else:
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
