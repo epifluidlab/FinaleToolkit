@@ -23,6 +23,8 @@ import finaletools.frag as pkg_data
 # path to tsv containing f-profiles from Zhou et al (2023)
 FPROFILE_PATH: Path = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
 
+# quality threshold used by Jiang et al (2020)
+MIN_QUALITY: int = 20
 
 class EndMotifFreqs():
     """
@@ -48,7 +50,7 @@ class EndMotifFreqs():
         self,
         kmer_frequencies: Iterable[tuple[str, float]],
         k: int,
-        quality_threshold: int = 30,
+        quality_threshold: int = MIN_QUALITY,
     ):
         self._dict = dict(kmer_frequencies)
         self.k = k
@@ -177,11 +179,6 @@ class EndMotifFreqs():
         return cls(freq_list, k, quality_threshold)
 
 
-
-
-
-
-
 def _gen_kmers(k: int, bases: str) -> list:
         """Function to recursively create a list of k-mers."""
         if k == 1:
@@ -214,7 +211,7 @@ def region_end_motifs(
     fraction_low: int = 10,
     fraction_high: int = 600,
     output_file: Union(None, str) = None,
-    quality_threshold: int = 30,
+    quality_threshold: int = MIN_QUALITY,
     verbose: Union(bool, int) = False,
 ) -> dict:
     """
