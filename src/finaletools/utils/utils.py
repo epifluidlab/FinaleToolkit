@@ -200,33 +200,44 @@ def frag_generator(
                 f'{type(input_file)} is invalid type for input_file.'
             )
 
+        # TODO: check boundaries of region so that no fragment is read
+        # into two regions. This can be done by checking location of 
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
-                # Only select forward strand and filter out non-paired-end
+                # Only select read1 and filter out non-paired-end
                 # reads and low-quality reads
-                if (low_quality_read_pairs(read, quality_threshold)
-                    or read.is_reverse):
-                    pass
-                # HACK: using leftmost read, not read1, to find ends
-                elif (
-                    abs(read_length := read.template_length) >= fraction_low
-                    and abs(read_length) <= fraction_high
-                ):
-                    read_start = read.reference_start
-                    read_stop = read_start + read_length
-                    # if read2, read1 is reverse
-                    read_on_plus = read.is_read1
-                    yield contig, read_start, read_stop, read_on_plus
+                try:
+                    if (low_quality_read_pairs(read, quality_threshold)
+                        or read.is_read2):
+                        pass
+                    elif (
+                        abs(frag_length := read.template_length) >= fraction_low
+                        and abs(frag_length) <= fraction_high
+                    ):
+                        read_start = read.reference_start
+                        read_stop = read_start + frag_length
+                        # if read2, read1 is reverse
+                        read_on_plus = read.is_forward
+                        yield contig, read_start, read_stop, read_on_plus
+                # HACK: for some reason read_length is sometimes None
+                except TypeError as e:
+                    stderr.writelines(["Type error encountered.\n",
+                                       f"Fragment length: {frag_length}\n",
+                                       f"fraction_low: {fraction_low}\n",
+                                       f"fraction_high: {fraction_high}\n",
+                                       "Skipping interval.\n",
+                                       f"Error: {e}\n"])
+
         else:
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
-                read_length = read_stop - read_start
+                frag_length = read_stop - read_start
                 read_on_plus = '+' in line[4]
                 try:
-                    if read_length >= fraction_low and read_length <= fraction_high:
+                    if frag_length >= fraction_low and frag_length <= fraction_high:
                         yield contig, read_start, read_stop, read_on_plus
                 # HACK: for some reason read_length is sometimes None
                 except TypeError:
