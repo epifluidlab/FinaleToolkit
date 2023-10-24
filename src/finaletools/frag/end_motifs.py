@@ -259,11 +259,14 @@ def region_end_motifs(
     try:
         refseq = py2bit.open(refseq_file, 'r')
         for frag in frag_ends:
-            if frag[3]:
+            if frag[3]: # is on forward strand or not
+                # py2bit uses 0-based for start, 1-based for end
                 # forward end-motif
                 forward_kmer = refseq.sequence(
                     contig, int(frag[1]), int(frag[1]+k)
                 )
+                assert len(forward_kmer) == k    
+
                 if 'N' not in forward_kmer:
                     end_motif_counts[forward_kmer] += 1
             else:
@@ -272,6 +275,8 @@ def region_end_motifs(
                     reverse_kmer = refseq.sequence(
                         contig, int(frag[2]-k), int(frag[2])
                     )
+                    assert len(reverse_kmer) == k
+
                     if 'N' not in reverse_kmer:
                         end_motif_counts[_reverse_complement(reverse_kmer)] += 1
                 except RuntimeError:
