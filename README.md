@@ -26,14 +26,14 @@ This package is currently work-in-progress. Here is how to install (wip):
 ## Usage
 FinaleTools functions generally accept reads in two file formats:
 - Binary Alignment Map (BAM) Files
-- FinaleDB Frag Files
+- FinaleDB Frag.gz Files
 
-Frag files are BED3+2 files with the following format:
+Frag.gz files are block-gzipped BED3+2 files with the following format:
 `chrom  start  stop  mapq  strand(+/-)`
 
-Frag files can be retrieved from http://finaledb.research.cchmc.org/
+Frag.gz files can be retrieved from http://finaledb.research.cchmc.org/
 
-Because FinaleTools uses pysam, BAM files should be bai-indexed and Frag files should be tabix-indexed.
+Because FinaleTools uses pysam, BAM files should be bai-indexed and Frag.gz files should be tabix-indexed.
 
 To verify FinaleTools has been successfully installed, try
 ```
