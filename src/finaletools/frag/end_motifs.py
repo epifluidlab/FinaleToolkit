@@ -210,6 +210,7 @@ def region_end_motifs(
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
+    both_strands: bool = False,
     output_file: Union(None, str) = None,
     quality_threshold: int = MIN_QUALITY,
     verbose: Union(bool, int) = False,
@@ -258,8 +259,8 @@ def region_end_motifs(
     # count end motifs
     try:
         refseq = py2bit.open(refseq_file, 'r')
-        for frag in frag_ends:
-            if frag[3]: # is on forward strand or not
+        if both_strands:   # both strands of fragment
+            for frag in frag_ends:
                 # py2bit uses 0-based for start, 1-based for end
                 # forward end-motif
                 forward_kmer = refseq.sequence(
@@ -269,7 +270,7 @@ def region_end_motifs(
 
                 if 'N' not in forward_kmer:
                     end_motif_counts[forward_kmer] += 1
-            else:
+                    
                 # reverse end-motif
                 try:
                     reverse_kmer = refseq.sequence(
@@ -286,6 +287,36 @@ def region_end_motifs(
                             f'{int(frag[2]-k)}-{int(frag[2])} failed.'
                             'Skipping.')
                     continue
+        else:
+            for frag in frag_ends:
+                if frag[3]: # is on forward strand or not
+                    # py2bit uses 0-based for start, 1-based for end
+                    # forward end-motif
+                    forward_kmer = refseq.sequence(
+                        contig, int(frag[1]), int(frag[1]+k)
+                    )
+                    assert len(forward_kmer) == k    
+
+                    if 'N' not in forward_kmer:
+                        end_motif_counts[forward_kmer] += 1
+                    
+                else:
+                    # reverse end-motif
+                    try:
+                        reverse_kmer = refseq.sequence(
+                            contig, int(frag[2]-k), int(frag[2])
+                        )
+                        assert len(reverse_kmer) == k
+
+                        if 'N' not in reverse_kmer:
+                            end_motif_counts[_reverse_complement(reverse_kmer)] += 1
+                    except RuntimeError:
+                        if verbose > 1:
+                            stderr.write(
+                                f'Attempt to read interval at {contig}:'
+                                f'{int(frag[2]-k)}-{int(frag[2])} failed.'
+                                'Skipping.')
+                        continue
 
     finally:
         refseq.close()
@@ -310,6 +341,7 @@ def end_motifs(
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
+    both_strands: bool = False,
     output_file: Union(None, str) = None,
     quality_threshold: int = 30,
     workers: int = 1,
@@ -362,6 +394,7 @@ def end_motifs(
                 k,
                 fraction_low,
                 fraction_high,
+                both_strands,
                 None,
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0
@@ -373,6 +406,9 @@ def end_motifs(
             chrom_length,
             refseq_file,
             k,
+            fraction_low,
+            fraction_high,
+            both_strands,
             None,
             quality_threshold,
             verbose - 2 if verbose > 2 else 0
