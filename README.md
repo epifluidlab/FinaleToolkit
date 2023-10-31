@@ -54,7 +54,7 @@ subcommands:
 To view fragment length distribution
 ```
 $ finaletools frag-length-bins --contig 22 --histogram sample.bam
-Fragment Lengths for 22:67-289
+Fragment Lengths for 22:-
 10.61%                            ▇                              mean      :169.28
 09.85%                           ▆█▁                             median    :169.00
 09.09%                           ███                             stdev     :25.52
