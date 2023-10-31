@@ -196,7 +196,7 @@ def frag_length_bins(
     if bin_size is None:
         if histogram:
             term_width, term_height = get_terminal_size((80, 24))
-            n_bins = term_width - 24
+            n_bins = (term_width - 24)
 
             start = np.min(frag_lengths)
             stop = np.max(frag_lengths)
