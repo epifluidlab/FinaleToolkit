@@ -198,18 +198,18 @@ def frag_length_bins(
             term_width, term_height = get_terminal_size((80, 24))
             n_bins = (term_width - 24)
 
-            start = np.min(frag_lengths)
-            stop = np.max(frag_lengths)
+            bin_start = np.min(frag_lengths)
+            bin_stop = np.max(frag_lengths)
 
-            bin_size = round((stop - start) / n_bins)
+            bin_size = round((bin_stop - bin_start) / n_bins)
         else:
             bin_size = 5
 
-    start = np.min(frag_lengths)
-    stop = np.max(frag_lengths)
-    n_bins = (stop - start) // bin_size
+    bin_start = np.min(frag_lengths)
+    bin_stop = np.max(frag_lengths)
+    n_bins = (bin_stop - bin_start) // bin_size
 
-    bins = np.arange(start, stop, bin_size)
+    bins = np.arange(bin_start, bin_stop, bin_size)
     counts = []
 
     # generate histogram
@@ -245,6 +245,10 @@ def frag_length_bins(
                 out.close()
     elif histogram:
         if contig is not None:
+            if start is None:
+                start = ""
+            if stop is None:
+                stop = ""
             title = f'Fragment Lengths for {contig}:{start}-{stop}'
         else:
             title = f'Fragment Lengths'
