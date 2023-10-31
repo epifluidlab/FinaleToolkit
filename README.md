@@ -51,3 +51,23 @@ subcommands:
   {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
 ```
 
+To view fragment length distribution
+```
+$ finaletools frag-length-bins --contig 22 --histogram sample.bam
+Fragment Lengths for 22:67-289
+10.61%                            ▇                              mean      :169.28
+09.85%                           ▆█▁                             median    :169.00
+09.09%                           ███                             stdev     :25.52
+08.34%                           ████                            min       :67.00
+07.58%                          ▁████                            max       :289.00
+06.82%                          █████▂                          
+06.06%                          ██████                          
+05.31%                         ▆██████▂                         
+04.55%                        ▄████████▁                        
+03.79%                       ▃██████████                        
+03.03%                     ▂████████████▆                       
+02.27%                     ██████████████▇▃                     
+01.52%                   ▇█████████████████▅▂                   
+00.76%     ▂▂▂▂▂▂▃▃▄▅▄████████████████████████▆▅▄▃▂▂▂▂▂▂▂▁▁▂▂▂▁▁
+len (nt)067   091   115   139   163   187   211   235   259   283
+```
