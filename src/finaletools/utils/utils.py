@@ -343,8 +343,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
+                mapq = int(line[3])
                 read_on_plus = int('+' in line[4])
-                if read_length >= fraction_low and read_length <= fraction_high:
+                if (read_length >= fraction_low
+                    and read_length <= fraction_high
+                    and mapq >= quality_threshold
+                    ):
                     frag_ends.append((read_start, read_stop, read_on_plus))
     finally:
         if input_file_is_str and is_sam:
