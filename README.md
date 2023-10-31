@@ -23,7 +23,7 @@ This package is currently work-in-progress. Here is how to install (wip):
 - Run `pip install -e .`
 - Run `finaletools -h` to see if you did this right
 
-## Quick Start
+## Usage
 FinaleTools functions generally accept reads in two file formats:
 - Binary Alignment Map (BAM) Files
 - FinaleDB Frag Files
