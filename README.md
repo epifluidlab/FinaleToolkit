@@ -31,6 +31,21 @@ FinaleTools functions generally accept reads in two file formats:
 Frag.gz files are block-gzipped BED3+2 files with the following format:
 `chrom  start  stop  mapq  strand(+/-)`
 
+The below script can be used to convert from bam to frag.gz:
+```
+INPUT=input.bam
+OUTPUT=output.frag.gz
+
+samtools sort -n -o qsorted.bam -@ 16 input.bam;
+samtools view -h -f 3 -F 3852 -G 48 --incl-flags 48 \
+  qsorted.bam |\
+  bamToBed -bedpe -mate1 -i stdin |\
+  awk -F'\t' -v OFS="\t" '{if ($1!=$4) next; if ($9=="+") {s=$2;e=$6} else {s=$5;e=$3} if (e>s) print $1,s,e,$8,$9}' |\
+  sort -k1,1V -k2,2n |\
+  bgzip > $OUTPUT;
+tabix -p bed $OUTPUT;
+```
+
 Frag.gz files can be retrieved from http://finaledb.research.cchmc.org/
 
 Because FinaleTools uses pysam, BAM files should be bai-indexed and Frag.gz files should be tabix-indexed.
