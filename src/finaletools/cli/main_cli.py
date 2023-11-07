@@ -474,9 +474,9 @@ def main_cli():
     parser_command10.add_argument(
         '-q',
         '--quality-threshold',
-        default=30,
+        default=20,
         type=int,
-        help='Minimum MAPQ of reads. Default is 30.'
+        help='Minimum MAPQ of reads. Default is 20.'
     )
     parser_command10.add_argument(
         '-w',
