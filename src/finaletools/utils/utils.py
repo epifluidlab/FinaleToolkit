@@ -214,11 +214,24 @@ def frag_generator(
                         abs(frag_length := read.template_length) >= fraction_low
                         and abs(frag_length) <= fraction_high
                     ):
-                        read_start = read.reference_start
-                        read_stop = read_start + frag_length
-                        # if read2, read1 is reverse
-                        read_on_plus = read.is_forward
-                        yield contig, read_start, read_stop, read_on_plus
+                        # NOTE: read_start is a misnomer here, and only 
+                        # denotes the first coordinate in the bam
+                        if read.is_forward:
+                            yield (
+                                read.reference_name,
+                                read.reference_start,
+                                read.reference_start + read.template_length,
+                                read.mapping_quality,
+                                read.is_forward
+                            )
+                        else:
+                            yield (
+                                read.reference_name,
+                                read.reference_end + read.template_length,
+                                read.reference_end,
+                                read.mapping_quality,
+                                read.is_forward 
+                            )
                 # HACK: for some reason read_length is sometimes None
                 except TypeError as e:
                     stderr.writelines(["Type error encountered.\n",
@@ -381,6 +394,8 @@ def low_quality_read_pairs(read, min_mapq=30):
     on https://github.com/epifluidlab/cofragr/blob/master/python/frag_su
     mmary_in_intervals.py
 
+    Equivalent to -F 3852 -f 3
+
     Parameters
     ----------
     read : pysam.AlignedSegment
@@ -395,15 +410,16 @@ def low_quality_read_pairs(read, min_mapq=30):
         True if read is low quality, unmapped, not properly paired.
     """
 
-    return (read.is_unmapped
-            or read.is_secondary
-            or (not read.is_paired)
-            or read.mate_is_unmapped
-            or read.is_duplicate
+    return (read.is_unmapped    # 0x4
+            or read.is_secondary    # 0x100
+            or (not read.is_paired) # not 0x1
+            or read.mate_is_unmapped    # 0x8
+            or read.is_duplicate    # 0x400
             or read.mapping_quality < min_mapq
-            or read.is_qcfail
-            or read.is_supplementary
-            or (not read.is_proper_pair))
+            or read.is_qcfail   # 0x200
+            or read.is_supplementary    # 0x800
+            or (not read.is_proper_pair)   # not 0x2
+            or (read.is_reverse and read.mate_is_reverse))   # -G 48
 
 
 def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
