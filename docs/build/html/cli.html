@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API &mdash; FinaleTools  documentation</title>
+  <title>CLI &mdash; FinaleTools  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +18,8 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="API" href="api.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,9 +42,76 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subcommands">subcommands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Sub-commands">Sub-commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coverage">coverage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#frag-length">frag-length</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat1">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat1">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#frag-length-bins">frag-length-bins</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat2">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat2">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#frag-length-intervals">frag-length-intervals</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat3">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat3">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#wps">wps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat4">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat4">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#delfi">delfi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat5">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat5">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#filter-bam">filter-bam</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat6">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat6">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#adjust-wps">adjust-wps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat7">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat7">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#agg-wps">agg-wps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat8">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat8">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#delfi-gc-correct">delfi-gc-correct</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat9">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat9">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#end-motifs">end-motifs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat10">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat10">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mds">mds</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#positional-arguments_repeat11">Positional Arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#named-arguments_repeat11">Named Arguments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -60,7 +128,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">API</li>
+      <li class="breadcrumb-item active">CLI</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/cli.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -70,8 +138,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="api">
-<h1>API<a class="headerlink" href="#api" title="Link to this heading"></a></h1>
+  <section id="cli">
+<h1>CLI<a class="headerlink" href="#cli" title="Link to this heading"></a></h1>
 <p><p>Calculates fragmentation features given a CRAM/BAM/SAM file</p>
 </p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">finaletools</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span>
@@ -534,8 +602,8 @@
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
-<dd><p>Minimum MAPQ of reads. Default is 30.</p>
-<p>Default: 30</p>
+<dd><p>Minimum MAPQ of reads. Default is 20.</p>
+<p>Default: 20</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of subprocesses to use. Default is 1.</p>
@@ -583,7 +651,9 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
