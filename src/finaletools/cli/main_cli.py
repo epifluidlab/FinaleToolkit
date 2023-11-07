@@ -17,7 +17,8 @@ from finaletools.frag.end_motifs import end_motifs, _cli_mds
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
-def main_cli():
+
+def main_cli_parser():
     parser = argparse.ArgumentParser(
         description='Calculates fragmentation features given a CRAM/BAM/SAM '
         'file',
@@ -524,6 +525,10 @@ def main_cli():
         help='Number of header rows to ignore. Default is 0'
     )
     parser_command11.set_defaults(func=_cli_mds)
+    return parser
+
+def main_cli():
+    parser = main_cli_parser()
 
     args = parser.parse_args()
     function = args.func

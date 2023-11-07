@@ -17,6 +17,7 @@ Welcome to FinaleTools's documentation!
 
    usage
    api
+   cli
 
 Indices and tables
 ==================

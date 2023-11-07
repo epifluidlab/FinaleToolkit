@@ -37,6 +37,7 @@ dependencies = [
     "statsmodels",
     "sphinx<7.0.0",
     "sphinx_rtd_theme",
+    "sphinx-argparse",
 ]
 
 [project.scripts]
