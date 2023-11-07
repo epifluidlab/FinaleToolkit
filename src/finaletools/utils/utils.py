@@ -200,33 +200,61 @@ def frag_generator(
                 f'{type(input_file)} is invalid type for input_file.'
             )
 
+        # TODO: check boundaries of region so that no fragment is read
+        # into two regions. This can be done by checking location of 
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
-                # Only select forward strand and filter out non-paired-end
+                # Only select read1 and filter out non-paired-end
                 # reads and low-quality reads
-                if (low_quality_read_pairs(read, quality_threshold)
-                    or read.is_reverse):
-                    pass
-                # HACK: using leftmost read, not read1, to find ends
-                elif (
-                    abs(read_length := read.template_length) >= fraction_low
-                    and abs(read_length) <= fraction_high
-                ):
-                    read_start = read.reference_start
-                    read_stop = read_start + read_length
-                    # if read2, read1 is reverse
-                    read_on_plus = read.is_read1
-                    yield contig, read_start, read_stop, read_on_plus
+                try:
+                    if (low_quality_read_pairs(read, quality_threshold)
+                        or read.is_read2):
+                        pass
+                    elif (
+                        abs(frag_length := read.template_length) >= fraction_low
+                        and abs(frag_length) <= fraction_high
+                    ):
+                        # NOTE: read_start is a misnomer here, and only 
+                        # denotes the first coordinate in the bam
+                        if read.is_forward:
+                            yield (
+                                read.reference_name,
+                                read.reference_start,
+                                read.reference_start + read.template_length,
+                                read.mapping_quality,
+                                read.is_forward
+                            )
+                        else:
+                            yield (
+                                read.reference_name,
+                                read.reference_end + read.template_length,
+                                read.reference_end,
+                                read.mapping_quality,
+                                read.is_forward 
+                            )
+                # HACK: for some reason read_length is sometimes None
+                except TypeError as e:
+                    stderr.writelines(["Type error encountered.\n",
+                                       f"Fragment length: {frag_length}\n",
+                                       f"fraction_low: {fraction_low}\n",
+                                       f"fraction_high: {fraction_high}\n",
+                                       "Skipping interval.\n",
+                                       f"Error: {e}\n"])
+
         else:
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
-                read_length = read_stop - read_start
+                mapq = int(line[3])
+                frag_length = read_stop - read_start
                 read_on_plus = '+' in line[4]
                 try:
-                    if read_length >= fraction_low and read_length <= fraction_high:
+                    if (frag_length >= fraction_low
+                        and frag_length <= fraction_high
+                        and mapq >= quality_threshold
+                        ):
                         yield contig, read_start, read_stop, read_on_plus
                 # HACK: for some reason read_length is sometimes None
                 except TypeError:
@@ -332,8 +360,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 read_length = read_stop - read_start
+                mapq = int(line[3])
                 read_on_plus = int('+' in line[4])
-                if read_length >= fraction_low and read_length <= fraction_high:
+                if (read_length >= fraction_low
+                    and read_length <= fraction_high
+                    and mapq >= quality_threshold
+                    ):
                     frag_ends.append((read_start, read_stop, read_on_plus))
     finally:
         if input_file_is_str and is_sam:
@@ -362,6 +394,8 @@ def low_quality_read_pairs(read, min_mapq=30):
     on https://github.com/epifluidlab/cofragr/blob/master/python/frag_su
     mmary_in_intervals.py
 
+    Equivalent to -F 3852 -f 3
+
     Parameters
     ----------
     read : pysam.AlignedSegment
@@ -376,15 +410,16 @@ def low_quality_read_pairs(read, min_mapq=30):
         True if read is low quality, unmapped, not properly paired.
     """
 
-    return (read.is_unmapped
-            or read.is_secondary
-            or (not read.is_paired)
-            or read.mate_is_unmapped
-            or read.is_duplicate
+    return (read.is_unmapped    # 0x4
+            or read.is_secondary    # 0x100
+            or (not read.is_paired) # not 0x1
+            or read.mate_is_unmapped    # 0x8
+            or read.is_duplicate    # 0x400
             or read.mapping_quality < min_mapq
-            or read.is_qcfail
-            or read.is_supplementary
-            or (not read.is_proper_pair))
+            or read.is_qcfail   # 0x200
+            or read.is_supplementary    # 0x800
+            or (not read.is_proper_pair)   # not 0x2
+            or (read.is_reverse and read.mate_is_reverse))   # -G 48
 
 
 def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
