@@ -234,10 +234,14 @@ def frag_generator(
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
+                mapq = int(line[3])
                 frag_length = read_stop - read_start
                 read_on_plus = '+' in line[4]
                 try:
-                    if frag_length >= fraction_low and frag_length <= fraction_high:
+                    if (frag_length >= fraction_low
+                        and frag_length <= fraction_high
+                        and mapq >= quality_threshold
+                        ):
                         yield contig, read_start, read_stop, read_on_plus
                 # HACK: for some reason read_length is sometimes None
                 except TypeError:
