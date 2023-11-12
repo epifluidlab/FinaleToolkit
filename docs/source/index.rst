@@ -19,7 +19,7 @@ Welcome to FinaleTools's documentation!
    quick_start
    cli
    api
-   cli
+   releases
 
 Indices and tables
 ==================
