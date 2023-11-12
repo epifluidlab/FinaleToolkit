@@ -19,8 +19,7 @@ Welcome to FinaleTools's documentation!
    quick_start
    cli
    api
-   releases
-   GitHub <https://github.com/epifluidlab/FinaleTools>
+   cli
 
 Indices and tables
 ==================

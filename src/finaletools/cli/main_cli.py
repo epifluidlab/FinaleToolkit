@@ -18,7 +18,8 @@ from finaletools.genome.gaps import _cli_gap_bed
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
-def main_cli():
+
+def main_cli_parser():
     parser = argparse.ArgumentParser(
         description='Calculates fragmentation features given a CRAM/BAM/SAM '
         'file',
@@ -475,9 +476,9 @@ def main_cli():
     parser_command10.add_argument(
         '-q',
         '--quality-threshold',
-        default=30,
+        default=20,
         type=int,
-        help='Minimum MAPQ of reads. Default is 30.'
+        help='Minimum MAPQ of reads. Default is 20.'
     )
     parser_command10.add_argument(
         '-w',
@@ -525,6 +526,10 @@ def main_cli():
         help='Number of header rows to ignore. Default is 0'
     )
     parser_command11.set_defaults(func=_cli_mds)
+    return parser
+
+def main_cli():
+    parser = main_cli_parser()
 
     # Subcommand 12: gap bed
     parser_command12 = subparsers.add_parser(
