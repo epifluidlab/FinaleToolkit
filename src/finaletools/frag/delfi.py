@@ -13,21 +13,22 @@ import py2bit
 import numpy as np
 
 from finaletools.utils.utils import _not_read1_or_low_quality
+from finaletools.genome.gaps import GenomeGaps, ContigGaps
 
 
 def _delfi_single_window(
         input_file: str,
         reference_file: str,
-        contig: str,
+        contig_gaps: ContigGaps,
         window_start: int,
         window_stop: int,
         blacklist_file: str=None,
-        centromere_file: str=None,
         quality_threshold: int=30,
         verbose: Union[int,bool]=False) -> tuple:
     """
     Calculates DELFI for one window.
     """
+    contig = contig_gaps.contig
 
     blacklist_regions = []
 
@@ -44,27 +45,35 @@ def _delfi_single_window(
                     and window_stop >= region_stop ):
                     blacklist_regions.append((region_start,region_stop))
 
-    centromeres = []
-
-    if (centromere_file is not None):
-        # TODO: find a standard way to get centromeres, like a track on
-        # UCSC
-        with open(centromere_file) as centromere_list:
-            for line in centromere_list:
-                region_contig, region_start, region_stop, *_ = line.split()
-                region_start = int(region_start)
-                region_stop = int(region_stop)
-                if (contig == region_contig
-                    and window_start <= region_start
-                    and window_stop >= region_stop ):
-                    centromeres.append((region_start,region_stop))
-
     short_lengths = []
     long_lengths = []
     frag_pos = []
 
     num_frags = 0
 
+    # check if interval in centromere or telomere
+    in_tcmere = contig_gaps.in_tcmere(window_start, window_stop)
+    if in_tcmere:
+        return (contig,
+            window_start,
+            window_stop,
+            'NOARM',
+            np.NaN,
+            np.NaN,
+            np.NaN,
+            0)
+
+    arm = contig_gaps.get_arm(window_start, window_stop)
+    # if in short arm
+    if arm == 'NOARM':
+        return (contig,
+            window_start,
+            window_stop,
+            'NOARM',
+            np.NaN,
+            np.NaN,
+            np.NaN,
+            0)
     try:
         # read from tabix or bam/bam
         if input_file.endswith('.bam') or input_file.endswith('.sam'):
@@ -113,18 +122,13 @@ def _delfi_single_window(
                         blacklisted = True
                         break
 
-                # check if in centromere
-                in_centromere = False
-                for region in centromeres:
-                    if (
-                        (frag_start >= region[0] and frag_start < region[1])
-                        and (frag_stop >= region[0] and frag_stop < region[1])
-                    ):
-                        in_centromere = True
-                        break
+                # check if in centromere or telomere
+                in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
+                if in_tcmere:
+                    continue
 
                 if (not blacklisted
-                    and not in_centromere
+                    and not in_tcmere
                     and frag_length >= 100
                     and frag_length <= 220
                 ):
@@ -167,13 +171,11 @@ def _delfi_single_window(
     return (contig,
             window_start,
             window_stop,
+            arm,
             coverage_short,
             coverage_long,
             gc_content,
             num_frags)
-
-
-
 
 
 def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
@@ -196,7 +198,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
           autosomes: str,
           reference_file: str,
           blacklist_file: str=None,
-          centromere_file: str=None,
+          gap_file: Union(str, GenomeGaps)=None,
           output_file: str=None,
           window_size: int=100000,
           subsample_coverage: float=2,
@@ -214,11 +216,17 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         Path string pointing to a bam file containing PE
         fragment reads.
     autosomes: str
-        Path string to a .genome file containing only autosomal chromosomes
+        Path string to a .genome file containing only autosomal
+        chromosomes
     reference_file: str
         Path string to .2bit file.
     blacklist_file: str
         Path string to bed file containing genome blacklist.
+    gap_file: str
+        Path string to a BED4+ file where each interval is a centromere
+        or telomere. A bed file can be used **only if** the fourth field
+        for each entry corresponding to a telomere or centromere is
+        labled "telomere" or "centromere, respectively.
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
@@ -270,22 +278,36 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
             if len(contents) > 1:
                 contigs.append((contents[0],  int(contents[1])))
 
+    gaps = None
+    if (gap_file is not None):
+        if type(gap_file) == str:
+            gaps = GenomeGaps(gap_file)
+        elif type(gap_file) == GenomeGaps:
+            gaps = gap_file
+        else:
+            raise TypeError(
+                f'{type(gap_file)} is not accepted type for gap_file'
+            )
+
     if verbose:
         stderr.write(f'Generating windows\n')
 
     # generate DELFI windows
     window_args = []
+    contig_gaps = None
     for contig, size in contigs:
+        if gaps is not None:
+            print(contig)
+            contig_gaps = gaps.get_contig_gaps(contig)
         for coordinate in range(0, size, window_size):
             # (contig, start, stop)
             window_args.append((
                 input_file,
                 reference_file,
-                contig,
+                contig_gaps,
                 coordinate,
                 coordinate + window_size,
                 blacklist_file,
-                centromere_file,
                 quality_threshold,
                 verbose - 1 if verbose > 1 else 0))
 
@@ -303,6 +325,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         dtype=[('contig', '<U32'),
            ('start', 'u8'),
            ('stop', 'u8'),
+           ('arm', '<U32'),
            ('short', 'f8'),
            ('long', 'f8'),
            ('gc', 'f8'),
@@ -315,11 +338,11 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     # output
     def _write_out(out: TextIO):
-        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
+        out.write('#contig\tstart\tstop\tarm\tshort\tlong\tgc%\tfrag_count\n')
         for window in trimmed_windows:
             out.write(
                 f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                f'{window[4]}\t{window[5]}\t{window[6]}\n')
+                f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\n')
 
     if output_file.endswith('.tsv'):
         with open(output_file, 'w') as out:
@@ -342,7 +365,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
             'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
         )
 
-    num_frags = sum(window[3] for window in windows)
+    num_frags = sum(window[7] for window in windows)
 
     if (verbose):
         end_time = time.time()
