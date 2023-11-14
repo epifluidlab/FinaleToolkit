@@ -550,6 +550,7 @@ def main_cli_parser():
         help='Path to write bed file to. If "-" used, writes to stdout.'
     )
     parser_command12.set_defaults(func=_cli_gap_bed)
+    return parser
 
 def main_cli():
     parser = main_cli_parser()
