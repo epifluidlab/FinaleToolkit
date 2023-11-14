@@ -24,6 +24,8 @@ This package is currently work-in-progress. Here is how to install (wip):
 - Run `finaletools -h` to see if you did this right
 
 ## Usage
+Documentation can be found at https://epifluidlab.github.io/finaletools-docs/
+
 FinaleTools functions generally accept reads in two file formats:
 - Binary Alignment Map (BAM) Files
 - FinaleDB Frag.gz Files
