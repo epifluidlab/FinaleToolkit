@@ -227,6 +227,8 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         or telomere. A bed file can be used **only if** the fourth field
         for each entry corresponding to a telomere or centromere is
         labled "telomere" or "centromere, respectively.
+    output_file: str, optional
+        Path to output tsv.
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
@@ -297,7 +299,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     contig_gaps = None
     for contig, size in contigs:
         if gaps is not None:
-            print(contig)
+            # print(contig)
             contig_gaps = gaps.get_contig_gaps(contig)
         for coordinate in range(0, size, window_size):
             # (contig, start, stop)
