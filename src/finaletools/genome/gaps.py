@@ -296,8 +296,8 @@ class ContigGaps():
 
     def get_arm(self, start: int, stop: int):
         """
-        Returns name of chromosome arm the interval is in. Returns a
-        blank string if in a centromere, telomere, or short arm of an
+        Returns name of chromosome arm the interval is in. Returns
+        "NOARM" if in a centromere, telomere, or short arm of an
         acrocentric chromosome.
 
         Parameters
@@ -324,11 +324,11 @@ class ContigGaps():
             if not self.has_short_arm:
                 return f"{self.contig.replace('chr', '')}p"
             else:
-                return ''
+                return 'NOARM'
         elif start > self.centromere[1]:
             return f"{self.contig.replace('chr', '')}q"
         else:
-            return ''
+            return 'NOARM'
 
 
 def ucsc_hg19_gap_bed(output_file: str):

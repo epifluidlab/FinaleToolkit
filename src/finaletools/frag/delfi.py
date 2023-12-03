@@ -348,11 +348,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
 
     if output_file.endswith('.tsv'):
         with open(output_file, 'w') as out:
-            out.write('contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
-            for window in trimmed_windows:
-                out.write(
-                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
+            _write_out(out)
     elif output_file.endswith('.bed'):
         with open(output_file, 'w') as out:
             _write_out(out)

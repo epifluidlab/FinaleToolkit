@@ -77,6 +77,7 @@ def cli_delfi_gc_correct(
             ('contig', '<U32'),
             ('start', 'u8'),
             ('stop', 'u8'),
+            ('arm', '<U32'),
             ('short', 'f8'),
             ('long', 'f8'),
             ('gc', 'f8'),
@@ -88,19 +89,15 @@ def cli_delfi_gc_correct(
 
     # output
     def _write_out(out: TextIO):
-        out.write('#contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
+        out.write('#contig\tstart\tstop\tarm\tshort\tlong\tgc%\tfrag_count\n')
         for window in corrected_delfi:
             out.write(
                 f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                f'{window[4]}\t{window[5]}\t{window[6]}\n')
+                f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\n')
 
     if output_file.endswith('.tsv'):
         with open(output_file, 'w') as out:
-            out.write('contig\tstart\tstop\tshort\tlong\tgc%\tfrag_count\n')
-            for window in corrected_delfi:
-                out.write(
-                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                    f'{window[4]}\t{window[5]}\t{window[6]}\n')
+            _write_out(out)
     elif output_file.endswith('.bed'):
         with open(output_file, 'w') as out:
             _write_out(out)
