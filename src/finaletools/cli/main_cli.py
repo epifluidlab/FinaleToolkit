@@ -526,10 +526,6 @@ def main_cli_parser():
         help='Number of header rows to ignore. Default is 0'
     )
     parser_command11.set_defaults(func=_cli_mds)
-    return parser
-
-def main_cli():
-    parser = main_cli_parser()
 
     # Subcommand 12: gap bed
     parser_command12 = subparsers.add_parser(
@@ -562,6 +558,11 @@ def main_cli():
     funcargs.pop('subcommand')
 
     function(**funcargs)
+
+    return parser
+
+def main_cli():
+    parser = main_cli_parser()
 
 if __name__ == '__main__':
     main_cli()
