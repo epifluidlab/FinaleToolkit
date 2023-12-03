@@ -201,7 +201,7 @@ def frag_generator(
             )
 
         # TODO: check boundaries of region so that no fragment is read
-        # into two regions. This can be done by checking location of 
+        # into two regions. This can be done by checking location of center
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
                 # Only select read1 and filter out non-paired-end
