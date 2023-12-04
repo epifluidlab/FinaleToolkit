@@ -23,15 +23,15 @@ def _single_wps(contig: str,
                 frag_ends: np.ndarray
                 ) -> tuple:
     # count number of totally spanning fragments
-    is_spanning = ((frag_ends[:, 0] < window_start)
-                   * (frag_ends[:, 1] > window_stop))
+    is_spanning = ((frag_ends["start"] < window_start)
+                   * (frag_ends["stop"] > window_stop))
     num_spanning = np.sum(is_spanning)
 
     # count number of fragments with end in window
-    is_start_in = ((frag_ends[:, 0] >= window_start)
-                   * (frag_ends[:, 0] <= window_stop))
-    is_stop_in = ((frag_ends[:, 1] >= window_start)
-                  * (frag_ends[:, 1] <= window_stop))
+    is_start_in = ((frag_ends["start"] >= window_start)
+                   * (frag_ends["start"] <= window_stop))
+    is_stop_in = ((frag_ends["stop"] >= window_start)
+                  * (frag_ends["stop"] <= window_stop))
     is_end_in = np.logical_or(is_start_in, is_stop_in)
     num_end_in = np.sum(is_end_in)
 
@@ -111,16 +111,16 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     if (verbose):
         stderr.write("Done reading fragments, preparing for WPS calculation.\n")
     # check if no fragments exist on this interval
-    if (frag_ends.shape == (0, 3)):
+    if (frag_ends.shape == (0)):
 
         scores = np.zeros(
-        stop-start,
-        dtype=[
-            ('contig', 'U16'),
-            ('start', 'i8'),
-            ('wps', 'i8'),
-        ]
-    )
+            stop-start,
+            dtype=[
+                ('contig', 'U16'),
+                ('start', 'i8'),
+                ('wps', 'i8'),
+            ]
+        )
         scores['start'] = np.arange(start, stop, dtype=int)
         scores['contig'] = contig
     else:

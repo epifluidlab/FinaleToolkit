@@ -319,17 +319,11 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
         )
     ]
 
-    # convert to ndarray
-    frag_ends = np.array(frag_list, dtype=np.int64)
+    # convert to struct array
+    frag_ends = np.array(frag_list, dtype=[("start", "i8"),("stop", "i8"),("strand", "?")])
 
-    if frag_ends.ndim == 1:
-        frag_ends = frag_ends.reshape((0, 3))
-
-    assert frag_ends.ndim == 2, (f'frag_ends has dims {frag_ends.ndim} and '
+    assert frag_ends.ndim == 1, (f'frag_ends has dims {frag_ends.ndim} and '
                                  f'shape {frag_ends.shape}')
-    assert (frag_ends.shape == (0, 3)
-            or frag_ends.shape[1] == 3),('frag_ends has shape'
-                                          f'{frag_ends.shape}')
     return frag_ends
 
 
