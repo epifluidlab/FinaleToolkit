@@ -12,7 +12,7 @@ import pysam
 import py2bit
 import numpy as np
 
-from finaletools.utils.utils import _not_read1_or_low_quality
+from finaletools.utils.utils import _not_read1_or_low_quality, frag_generator
 from finaletools.genome.gaps import GenomeGaps, ContigGaps
 
 
@@ -74,75 +74,51 @@ def _delfi_single_window(
             np.NaN,
             np.NaN,
             0)
-    try:
-        # read from tabix or bam/bam
-        if input_file.endswith('.bam') or input_file.endswith('.sam'):
-            file = pysam.AlignmentFile(input_file)
-            is_sam = True
-        elif (
-            input_file.endswith('.bed')
-            or input_file.endswith('.bed.gz')
-            or input_file.endswith('.frag.gz')
-            or input_file.endswith('.frag')
+    
+    # Iterating on each read in file in specified contig/chromosome
+    for _, frag_start, frag_stop, _ in frag_generator(
+        input_file,
+        contig,
+        quality_threshold,
+        window_start,
+        window_stop,
+        fraction_low=60,
+        fraction_high=2000):
+
+        frag_length = frag_stop - frag_start
+
+        assert frag_length > 0, (f"Frag length of {frag_length} found at"
+            f"{contig}:{frag_start}-{frag_stop}.")
+
+        # check if in blacklist
+        blacklisted = False
+        for region in blacklist_regions:
+            if (
+                (frag_start >= region[0] and frag_start < region[1])
+                and (frag_stop >= region[0] and frag_stop < region[1])
+            ):
+                blacklisted = True
+                break
+
+        # check if in centromere or telomere
+        in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
+        if in_tcmere:
+            continue
+
+        if (not blacklisted
+            and not in_tcmere
+            and frag_length >= 100
+            and frag_length <= 220
         ):
-            file = pysam.TabixFile(input_file, parser=pysam.asBed())
-            is_sam = False
-        else:
-            raise ValueError(
-                'Unsupported type. Only BAM, SAM, and tabix indexed files'
-                'accepted.'
-            )
-        # Iterating on each read in file in specified contig/chromosome
-        for read1 in (file.fetch(contig, window_start, window_stop)):
-
-            # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads.
-            # relies on short circuit evaluation to avoid calling sam
-            # method on tabix.
-            if is_sam and _not_read1_or_low_quality(read1, quality_threshold):
-                pass
+            # append length of fragment to list
+            if (frag_length >= 151):
+                long_lengths.append(abs(frag_length))
             else:
-                # TODO: fix tabix reading
-                if is_sam:
-                    frag_start = read1.reference_start
-                    frag_length = read1.template_length
-                    frag_stop = frag_start + frag_length
-                else:
-                    frag_start = read1.start
-                    frag_stop = read1.end
-                    frag_length = frag_stop - frag_start
+                short_lengths.append(abs(frag_length))
 
-                # check if in blacklist
-                blacklisted = False
-                for region in blacklist_regions:
-                    if (
-                        (frag_start >= region[0] and frag_start < region[1])
-                        and (frag_stop >= region[0] and frag_stop < region[1])
-                    ):
-                        blacklisted = True
-                        break
+            frag_pos.append((frag_start, frag_stop))
 
-                # check if in centromere or telomere
-                in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
-                if in_tcmere:
-                    continue
-
-                if (not blacklisted
-                    and not in_tcmere
-                    and frag_length >= 100
-                    and frag_length <= 220
-                ):
-                    # append length of fragment to list
-                    if (frag_length >= 151):
-                        long_lengths.append(abs(frag_length))
-                    else:
-                        short_lengths.append(abs(frag_length))
-
-                    frag_pos.append((frag_start, frag_stop))
-
-                    num_frags += 1
-    finally:
-        file.close()
+            num_frags += 1
 
     num_gc = 0  # cumulative sum of gc bases
 
