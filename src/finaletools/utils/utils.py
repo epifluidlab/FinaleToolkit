@@ -147,7 +147,7 @@ def frag_generator(
 ) -> Generator[Tuple]:
     """
     Reads from BAM, SAM, or BED file and returns tuples containing
-    contig (chromosome), start, and stop (end) for each fragment.
+    contig (chromosome), start, stop (end), mapq, and strand for each fragment.
 
     Parameters
     ----------
@@ -200,10 +200,8 @@ def frag_generator(
                 f'{type(input_file)} is invalid type for input_file.'
             )
 
-        # TODO: check boundaries of region so that no fragment is read
-        # into two regions. This can be done by checking location of center
         if is_sam:
-            for read in sam_file.fetch(contig, start, stop):
+            for read in sam_file.fetch(contig, start-50, stop+50):
                 # Only select read1 and filter out non-paired-end
                 # reads and low-quality reads
                 try:
@@ -214,24 +212,36 @@ def frag_generator(
                         abs(frag_length := read.template_length) >= fraction_low
                         and abs(frag_length) <= fraction_high
                     ):
-                        # NOTE: read_start is a misnomer here, and only 
-                        # denotes the first coordinate in the bam
                         if read.is_forward:
-                            yield (
-                                read.reference_name,
-                                read.reference_start,
-                                read.reference_start + read.template_length,
-                                read.mapping_quality,
-                                read.is_forward
-                            )
+                            # midpoint calculated to exclude frag from
+                            # one region or another
+                            midpoint = (read.reference_start
+                                + read.template_length // 2 
+                                + read.template_length % 2)
+                            # short circuit eval to avoid type error
+                            if ((start is None or midpoint >= start)
+                                and (stop is None or midpoint < stop)):
+                                yield (
+                                    read.reference_name,
+                                    read.reference_start,
+                                    read.reference_start + read.template_length,
+                                    read.mapping_quality,
+                                    read.is_forward
+                                )
                         else:
-                            yield (
-                                read.reference_name,
-                                read.reference_end + read.template_length,
-                                read.reference_end,
-                                read.mapping_quality,
-                                read.is_forward 
-                            )
+                            # see above
+                            midpoint = (read.reference_end
+                                + read.template_length // 2
+                                + read.template_length % 2)
+                            if ((start is None or midpoint >= start)
+                                and (stop is None or midpoint < stop)):
+                                yield (
+                                    read.reference_name,
+                                    read.reference_end + read.template_length,
+                                    read.reference_end,
+                                    read.mapping_quality,
+                                    read.is_forward 
+                                )
                 # HACK: for some reason read_length is sometimes None
                 except TypeError as e:
                     stderr.writelines(["Type error encountered.\n",
