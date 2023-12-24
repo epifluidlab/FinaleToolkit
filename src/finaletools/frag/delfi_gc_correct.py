@@ -5,6 +5,8 @@ import gzip
 
 import numpy as np
 from statsmodels.nonparametric.smoothers_lowess import lowess
+from loess.loess_1d import loess_1d
+
 
 def delfi_gc_correct(
         windows: np.ndarray,
@@ -15,24 +17,30 @@ def delfi_gc_correct(
     """
     Helper function that takes window data and performs GC adjustment.
     """
-    #LOESS/LOWESS regression for short and long
-    # BUG: x and y are switched
+    #LOESS regression for short and long
+    
+    """
     short_loess = lowess(
-        windows['gc'],
         windows['short'],
+        windows['gc'],
         alpha,
         it,
         return_sorted=False,
         missing='drop',
     )
     long_loess = lowess(
-        windows['gc'],
         windows['long'],
+        windows['gc'],
         alpha,
         it,
         return_sorted=False,
         missing='drop',
     )
+    """
+
+    _, short_loess, _ = loess_1d.loess_1d(windows['gc'], windows['short'], degree=2, frac=alpha)
+    _, long_loess, _ = loess_1d.loess_1d(windows['gc'], windows['short'], degree=2, frac=alpha)
+
 
     corrected_windows = windows.copy()
 
