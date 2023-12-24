@@ -4,15 +4,13 @@ from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
 from typing import Union, TextIO
-from tempfile import TemporaryDirectory
 from sys import stderr, stdout
 import gzip
 
-import pysam
 import py2bit
 import numpy as np
 
-from finaletools.utils.utils import _not_read1_or_low_quality, frag_generator
+from finaletools.utils.utils import frag_generator
 from finaletools.genome.gaps import GenomeGaps, ContigGaps
 
 
