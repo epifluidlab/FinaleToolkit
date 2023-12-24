@@ -16,6 +16,7 @@ def delfi_gc_correct(
     Helper function that takes window data and performs GC adjustment.
     """
     #LOESS/LOWESS regression for short and long
+    # BUG: x and y are switched
     short_loess = lowess(
         windows['gc'],
         windows['short'],

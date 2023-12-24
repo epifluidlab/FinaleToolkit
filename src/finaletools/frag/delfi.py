@@ -26,7 +26,7 @@ def _delfi_single_window(
         quality_threshold: int=30,
         verbose: Union[int,bool]=False) -> tuple:
     """
-    Calculates DELFI for one window.
+    Calculates short and long counts for one window.
     """
     contig = contig_gaps.contig
 
@@ -248,6 +248,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     if verbose:
         stderr.write(f'Reading genome file...\n')
 
+    # Read chromosome names and lengths from .genome file
     contigs = []
     with open(autosomes) as genome:
         for line in genome:
@@ -256,6 +257,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
             if len(contents) > 1:
                 contigs.append((contents[0],  int(contents[1])))
 
+    # Prepare genome gaps using GenomeGaps class
     gaps = None
     if (gap_file is not None):
         if type(gap_file) == str:
@@ -271,6 +273,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         stderr.write(f'Generating windows\n')
 
     # generate DELFI windows
+    # TODO: use a bed file like the DELFI scripts
     window_args = []
     contig_gaps = None
     for contig, size in contigs:
