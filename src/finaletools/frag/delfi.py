@@ -105,8 +105,6 @@ def _delfi_single_window(
 
         if (not blacklisted
             and not in_tcmere
-            and frag_length >= 100
-            and frag_length <= 220
         ):
             # append length of fragment to list
             if (frag_length >= 151):
