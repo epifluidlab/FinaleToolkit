@@ -36,6 +36,7 @@ class GenomeGaps:
         self.centromeres: NDArray
         self.telomeres: NDArray
         self.short_arms: NDArray
+        self.gaps: NDArray
         if gaps_bed is None:
             pass
         else:
@@ -51,6 +52,7 @@ class GenomeGaps:
             self.centromeres = gaps[gaps['type'] == 'centromere']
             self.telomeres = gaps[gaps['type'] == 'telomere']
             self.short_arms = gaps[gaps['type'] == 'short_arm']
+            self.gaps = gaps
 
     @classmethod
     def ucsc_hg19(cls):
@@ -78,6 +80,7 @@ class GenomeGaps:
         genome_gaps.centromeres = gaps[gaps['type'] == 'centromere']
         genome_gaps.telomeres = gaps[gaps['type'] == 'telomere']
         genome_gaps.short_arms = gaps[gaps['type'] == 'short_arm']
+        genome_gaps.gaps = gaps
 
         return genome_gaps
 
@@ -113,6 +116,7 @@ class GenomeGaps:
         genome_gaps.centromeres = gaps[gaps['type'] == 'centromere']
         genome_gaps.telomeres = gaps[gaps['type'] == 'telomere']
         genome_gaps.short_arms = gaps[gaps['type'] == 'short_arm']
+        genome_gaps.gaps = gaps
 
         return genome_gaps
 
@@ -153,6 +157,38 @@ class GenomeGaps:
                 start < telomeres['stop'],
             )) > 0
             return in_centromere or in_telomeres
+        
+    def overlaps_gap(self, contig: str, start: int, stop: int) -> bool:
+        """
+        Checks if specified interval overlaps a gap interval
+
+        Parameters
+        ----------
+        contig : str
+            Chromosome name
+        start : int
+            Start of interval
+        stop : int
+            End of interval
+
+        Returns
+        -------
+        in_telomere_or_centromere : bool
+            True if in a centromere or telomere
+        """
+        # get gap for contig
+        gaps = self.gaps[self.gaps['contig'] == contig]
+        if not gaps.shape[0]:   # check if gaps exist on this contig
+            return None
+        else:
+            # Check for overlap in intervals
+            in_gap = np.any(
+                np.logical_and(
+                    start < gaps['stop'],
+                    stop > gaps['start'],
+                )
+            )
+            return in_gap
 
     def get_arm(self, contig: str, start: int, stop: int) -> str:
         """
@@ -272,6 +308,31 @@ class ContigGaps():
     def in_tcmere(self, start: int, stop: int) -> bool:
         """
         Checks if specified interval is in a centromere or telomere.
+
+        Parameters
+        ----------
+        start : int
+            Start of interval.
+        stop : int
+            End of Interval.
+
+        Returns
+        -------
+        bool
+            True if there is an overlap.
+        """
+        in_centromere = (
+            stop > self.centromere[0] and start < self.centromere[1]
+        )
+        in_telomeres = all(
+            stop > telomere[0] and start < telomere[1]
+            for telomere in self.telomeres
+        )
+        return in_centromere or in_telomeres
+    
+    def in_gap(self, start: int, stop: int) -> bool:
+        """
+        Checks if specified interval is in a gap.
 
         Parameters
         ----------
