@@ -91,7 +91,6 @@ def main_cli_parser():
     parser_command2.add_argument('--start', type=int)
     parser_command2.add_argument('--stop', type=int)
     parser_command2.add_argument('-o', '--output_file')
-    parser_command2.add_argument('-w', '--workers', default=1, type=int)
     parser_command2.add_argument('-q', '--quality_threshold', default=30, type=int)
     parser_command2.add_argument('-v', '--verbose', action='count', default=0)
     parser_command2.set_defaults(func=frag_length)
