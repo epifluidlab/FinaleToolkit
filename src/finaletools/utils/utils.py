@@ -451,3 +451,34 @@ def genome2list(genome_file: str) -> list:
                     int(contents[1])
                 ))
     return chroms
+
+
+def overlaps(
+    contigs_1: NDArray,
+    starts_1: NDArray,
+    stops_1: NDArray,
+    contigs_2: NDArray,
+    starts_2: NDArray,
+    stops_2: NDArray,
+) -> NDArray:
+    """
+    Function that performs vectorized computation of overlaps. Returns
+    an array of same shape as contig_1 that is true if the intervals
+    for set 1 each have any overlap with an interval in set 2.
+    """
+    contigs_1 = contigs_1[:, np.newaxis]
+    starts_1 = starts_1[:, np.newaxis]
+    stops_1 = stops_1[:, np.newaxis]
+
+    contigs_2 = contigs_2[np.newaxis]
+    starts_2 = starts_2[np.newaxis]
+    stops_2 = stops_2[np.newaxis]
+
+    contig_blind_overlaps = np.logical_and(
+        (starts_1 < stops_2),
+        (stops_1 > starts_2)
+    )
+    in_same_contig = contigs_1 == contigs_2
+    raw_overlaps = np.logical_and(contig_blind_overlaps, in_same_contig)
+    any_overlaps = np.any(raw_overlaps, axis=1)
+    return any_overlaps
