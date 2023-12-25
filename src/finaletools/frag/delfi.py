@@ -9,8 +9,9 @@ import gzip
 
 import py2bit
 import numpy as np
+import pandas
 
-from finaletools.utils.utils import frag_generator
+from finaletools.utils.utils import frag_generator, overlaps
 from finaletools.genome.gaps import GenomeGaps, ContigGaps
 
 
@@ -80,8 +81,8 @@ def _delfi_single_window(
         quality_threshold,
         window_start,
         window_stop,
-        fraction_low=60,
-        fraction_high=2000):
+        fraction_low=100,
+        fraction_high=220):
 
         frag_length = frag_stop - frag_start
 
@@ -166,8 +167,9 @@ def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     return trimmed
 
 
-def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
+def delfi(input_file: str,
           autosomes: str,
+          bins_file: str,
           reference_file: str,
           blacklist_file: str=None,
           gap_file: Union(str, GenomeGaps)=None,
@@ -190,10 +192,13 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
     autosomes: str
         Path string to a .genome file containing only autosomal
         chromosomes
+    bins_file: str
+        Path string to a BED file containing 100kb bins for reference
+        genome of choice. Cristiano et al uses 
     reference_file: str
         Path string to .2bit file.
     blacklist_file: str
-        Path string to bed file containing genome blacklist.
+        Path string to BED file containing genome blacklist.
     gap_file: str
         Path string to a BED4+ file where each interval is a centromere
         or telomere. A bed file can be used **only if** the fourth field
@@ -238,8 +243,7 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
         workers: {workers}
         preprocessing: {preprocessing}
         verbose: {verbose}
-
-        """)
+        \n""")
 
     if verbose:
         stderr.write(f'Reading genome file...\n')
@@ -265,25 +269,95 @@ def delfi(input_file: str,  # TODO: allow AlignmentFile to be used
                 f'{type(gap_file)} is not accepted type for gap_file'
             )
 
+    # Read 100kb bins and filter out bins that overlap gaps, darkregions
+    
+    # opening 100kb bins BED file into a dataframe
     if verbose:
-        stderr.write(f'Generating windows\n')
+        stderr.write(f'Opening bins file...\n')
 
-    # generate DELFI windows
-    # TODO: use a bed file like the DELFI scripts
+    bins = pandas.read_csv(
+        bins_file,
+        names=["contig", "start", "stop"],
+        usecols=[0, 1, 2],
+        dtype={"contig":str, "start":np.int32, "stop":np.int32},
+        delimiter='\t'
+    )
+
+    if verbose:
+        stderr.write(f'Filtering gaps...\n')
+    # filtering for gaps
+    if gaps is not None:
+        # finding overlap
+        overlaps_gap = overlaps(
+            bins['contig'].to_numpy(),
+            bins['start'].to_numpy(),
+            bins['stop'].to_numpy(),
+            gaps.gaps['contig'],
+            gaps.gaps['start'],
+            gaps.gaps['stop'],
+        )
+        # masking by overlap
+        gapless_bins = bins.loc[~overlaps_gap]
+        if verbose:
+            stderr.write(f'Done.\n')
+    else:
+        if verbose:
+            stderr.write(f'No gaps specified, skipping.\n')
+        gapless_bins = bins
+
+    # filtering for darkregions
+    if verbose:
+        stderr.write(f'Filtering darkregions...\n')
+    if blacklist_file is not None:
+        # opening blacklist file into a dataframe
+        darkregions = pandas.read_csv(
+            blacklist_file,
+            names=["contig", "start", "stop"],
+            usecols=[0, 1, 2],
+            dtype={"contig":str, "start":np.int32, "stop":np.int32},
+            delimiter='\t'
+        )
+        # finding overlap
+        overlaps_darkregion = overlaps(
+            gapless_bins['contig'].to_numpy(),
+            gapless_bins['start'].to_numpy(),
+            gapless_bins['stop'].to_numpy(),
+            darkregions['contig'].to_numpy(),
+            darkregions['start'].to_numpy(),
+            darkregions['stop'].to_numpy(),
+        )
+        # masking by overlap
+        darkless_bins = gapless_bins.loc[~overlaps_darkregion]
+        if verbose:
+            stderr.write(f'Done.\n')
+    else:
+        if verbose:
+            stderr.write(f'No darkregions given, skipping.\n')
+        darkless_bins = gapless_bins
+    
+    # generating args for pooled processes
+    if verbose:
+        stderr.write(f'Preparing to generate short and long coverages.\n')
+
     window_args = []
     contig_gaps = None
+
     for contig, size in contigs:
         if gaps is not None:
             # print(contig)
             contig_gaps = gaps.get_contig_gaps(contig)
-        for coordinate in range(0, size, window_size):
-            # (contig, start, stop)
+        else:
+            contig_gaps = None
+        for _, start, stop, *_ in (
+            darkless_bins.loc[darkless_bins.loc[:,'contig']==contig]
+            .itertuples(index=False, name=None)
+        ):
             window_args.append((
                 input_file,
                 reference_file,
                 contig_gaps,
-                coordinate,
-                coordinate + window_size,
+                start,
+                stop,
                 blacklist_file,
                 quality_threshold,
                 verbose - 1 if verbose > 1 else 0))
