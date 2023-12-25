@@ -80,8 +80,8 @@ def _delfi_single_window(
         quality_threshold,
         window_start,
         window_stop,
-        fraction_low=100,
-        fraction_high=220):
+        fraction_low=60,
+        fraction_high=2000):
 
         frag_length = frag_stop - frag_start
 
@@ -105,8 +105,6 @@ def _delfi_single_window(
 
         if (not blacklisted
             and not in_tcmere
-            and frag_length >= 100
-            and frag_length <= 220
         ):
             # append length of fragment to list
             if (frag_length >= 151):
