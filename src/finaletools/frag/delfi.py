@@ -10,6 +10,7 @@ import gzip
 import py2bit
 import numpy as np
 import pandas
+from tqdm import tqdm
 
 from finaletools.utils.utils import frag_generator, overlaps
 from finaletools.genome.gaps import GenomeGaps, ContigGaps
@@ -149,7 +150,7 @@ def _delfi_single_window(
             coverage_long,
             gc_content,
             num_frags)
-
+    
 
 def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     """
@@ -179,7 +180,7 @@ def delfi(input_file: str,
           quality_threshold: int=30,
           workers: int=1,
           preprocessing: bool=True,
-          verbose: Union[int, bool]=False):
+          verbose: Union[int, bool]=False) -> pandas.DataFrame:
     """
     A function that replicates the methodology of Christiano et al
     (2019).
@@ -372,9 +373,16 @@ def delfi(input_file: str,
 
     # pool process to find window frag coverages, gc content
     with Pool(workers) as pool:
-        windows = pool.starmap(_delfi_single_window, window_args)
+        windows = pool.starmap(
+            _delfi_single_window, tqdm(window_args), 50)
 
-    # move to structured array
+
+    # move to dataframe
+    if (verbose):
+        stderr.write('Done.\n')
+        stderr.write('Removing bottom 10th percentile of bins by '
+                     'coverage...\n')
+    """    
     window_array = np.array(
         windows,
         dtype=[('contig', '<U32'),
@@ -387,30 +395,47 @@ def delfi(input_file: str,
            ('num_frags', 'u8')
         ]
     )
-
+    """
+    window_df = pandas.DataFrame(
+        windows,
+        columns=[
+            'contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
+            'num_frags']
+    )
     # remove bottom 10 percentile
-    trimmed_windows = trim_coverage(window_array, 10)
+    # trimmed_windows = trim_coverage(window_array, 10)
+    ten_percentile = np.nanpercentile(window_df['num_frags'], 10)
+    trimmed_windows = window_df[window_df['num_frags'] >= ten_percentile]
 
     # output
-    def _write_out(out: TextIO):
-        out.write('#contig\tstart\tstop\tarm\tshort\tlong\tgc%\tfrag_count\n')
-        for window in trimmed_windows:
-            out.write(
-                f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\n')
+    if (verbose):
+        stderr.write(f'{len(window_args)-trimmed_windows.shape[0]} bins removed.\n')
 
     if output_file.endswith('.tsv'):
-        with open(output_file, 'w') as out:
-            _write_out(out)
+        trimmed_windows.to_csv(output_file, sep='\t', index=False)
     elif output_file.endswith('.bed'):
-        with open(output_file, 'w') as out:
-            _write_out(out)
+        trimmed_windows.to_csv(
+            output_file,
+            header=[
+                '#contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
+                'num_frags'],
+            sep='\t',
+            index=False)
     elif output_file.endswith('.bed.gz'):
-        with gzip.open(output_file, 'w') as out:
-            _write_out(out)
+        trimmed_windows.to_csv(
+            output_file,
+            header=[
+                '#contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
+                'num_frags'],
+            sep='\t',
+            index=False,
+            encoding='gzip')
     elif output_file == '-':
         with stdout as out:
-            _write_out(out)
+            for window in trimmed_windows.itertuples():
+                out.write(
+                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
+                    f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\n')
     else:
         raise ValueError(
             'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
@@ -422,4 +447,4 @@ def delfi(input_file: str,
         end_time = time.time()
         stderr.write(f'{num_frags} fragments included.\n')
         stderr.write(f'delfi took {end_time - start_time} s to complete\n')
-    return None
+    return trimmed_windows
