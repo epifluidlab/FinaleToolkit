@@ -284,7 +284,9 @@ def delfi(input_file: str,
     )
 
     if verbose:
+        stderr.write(f'{bins.shape[0]} bins read from file.\n')
         stderr.write(f'Filtering gaps...\n')
+        
     # filtering for gaps
     if gaps is not None:
         # finding overlap
@@ -299,7 +301,8 @@ def delfi(input_file: str,
         # masking by overlap
         gapless_bins = bins.loc[~overlaps_gap]
         if verbose:
-            stderr.write(f'Done.\n')
+            stderr.write(f'{bins.shape[0]-gapless_bins.shape[0]} bins removed'
+                         '\n')
     else:
         if verbose:
             stderr.write(f'No gaps specified, skipping.\n')
@@ -329,7 +332,8 @@ def delfi(input_file: str,
         # masking by overlap
         darkless_bins = gapless_bins.loc[~overlaps_darkregion]
         if verbose:
-            stderr.write(f'Done.\n')
+            stderr.write(f'{gapless_bins.shape[0]-darkless_bins.shape[0]} bins'
+                         ' removed\n')
     else:
         if verbose:
             stderr.write(f'No darkregions given, skipping.\n')
