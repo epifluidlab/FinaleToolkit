@@ -382,20 +382,7 @@ def delfi(input_file: str,
         stderr.write('Done.\n')
         stderr.write('Removing bottom 10th percentile of bins by '
                      'coverage...\n')
-    """    
-    window_array = np.array(
-        windows,
-        dtype=[('contig', '<U32'),
-           ('start', 'u8'),
-           ('stop', 'u8'),
-           ('arm', '<U32'),
-           ('short', 'f8'),
-           ('long', 'f8'),
-           ('gc', 'f8'),
-           ('num_frags', 'u8')
-        ]
-    )
-    """
+   
     window_df = pandas.DataFrame(
         windows,
         columns=[
@@ -404,12 +391,16 @@ def delfi(input_file: str,
     )
     # remove bottom 10 percentile
     # trimmed_windows = trim_coverage(window_array, 10)
-    ten_percentile = np.nanpercentile(window_df['num_frags'], 10)
+    ten_percentile = np.nanpercentile(window_df['num_frags'], 0)
     trimmed_windows = window_df[window_df['num_frags'] >= ten_percentile]
+
+    # calculating ratio
+    trimmed_windows['ratio'] = trimmed_windows['short']/trimmed_windows['long']
 
     # output
     if (verbose):
-        stderr.write(f'{len(window_args)-trimmed_windows.shape[0]} bins removed.\n')
+        stderr.write(f'{len(window_args)-trimmed_windows.shape[0]} bins '
+                     'removed.\n')
 
     if output_file.endswith('.tsv'):
         trimmed_windows.to_csv(output_file, sep='\t', index=False)
@@ -418,7 +409,7 @@ def delfi(input_file: str,
             output_file,
             header=[
                 '#contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
-                'num_frags'],
+                'num_frags', 'ratio'],
             sep='\t',
             index=False)
     elif output_file.endswith('.bed.gz'):
@@ -426,7 +417,7 @@ def delfi(input_file: str,
             output_file,
             header=[
                 '#contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
-                'num_frags'],
+                'num_frags', 'ratio'],
             sep='\t',
             index=False,
             encoding='gzip')
@@ -435,7 +426,8 @@ def delfi(input_file: str,
             for window in trimmed_windows.itertuples():
                 out.write(
                     f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                    f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\n')
+                    f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\t'
+                    f'{window[8]}\n')
     else:
         raise ValueError(
             'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
