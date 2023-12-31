@@ -91,7 +91,6 @@ def main_cli_parser():
     parser_command2.add_argument('--start', type=int)
     parser_command2.add_argument('--stop', type=int)
     parser_command2.add_argument('-o', '--output_file')
-    parser_command2.add_argument('-w', '--workers', default=1, type=int)
     parser_command2.add_argument('-q', '--quality_threshold', default=30, type=int)
     parser_command2.add_argument('-v', '--verbose', action='count', default=0)
     parser_command2.set_defaults(func=frag_length)
@@ -526,6 +525,7 @@ def main_cli_parser():
         help='Number of header rows to ignore. Default is 0'
     )
     parser_command11.set_defaults(func=_cli_mds)
+
     
     # Subcommand 12: gap bed
     parser_command12 = subparsers.add_parser(
@@ -562,6 +562,11 @@ def main_cli():
     funcargs.pop('subcommand')
 
     function(**funcargs)
+
+    return parser
+
+def main_cli():
+    parser = main_cli_parser()
 
 if __name__ == '__main__':
     main_cli()

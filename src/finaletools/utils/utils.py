@@ -136,7 +136,7 @@ def frags_in_region(frag_array: NDArray[np.int64],
 
 
 def frag_generator(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
     contig: str,
     quality_threshold: int=30,
     start: int=None,
@@ -147,7 +147,7 @@ def frag_generator(
 ) -> Generator[Tuple]:
     """
     Reads from BAM, SAM, or BED file and returns tuples containing
-    contig (chromosome), start, and stop (end) for each fragment.
+    contig (chromosome), start, stop (end), mapq, and strand for each fragment.
 
     Parameters
     ----------
@@ -200,10 +200,8 @@ def frag_generator(
                 f'{type(input_file)} is invalid type for input_file.'
             )
 
-        # TODO: check boundaries of region so that no fragment is read
-        # into two regions. This can be done by checking location of 
         if is_sam:
-            for read in sam_file.fetch(contig, start, stop):
+            for read in sam_file.fetch(contig, start-50, stop+50):
                 # Only select read1 and filter out non-paired-end
                 # reads and low-quality reads
                 try:
@@ -214,24 +212,36 @@ def frag_generator(
                         abs(frag_length := read.template_length) >= fraction_low
                         and abs(frag_length) <= fraction_high
                     ):
-                        # NOTE: read_start is a misnomer here, and only 
-                        # denotes the first coordinate in the bam
                         if read.is_forward:
-                            yield (
-                                read.reference_name,
-                                read.reference_start,
-                                read.reference_start + read.template_length,
-                                read.mapping_quality,
-                                read.is_forward
-                            )
+                            # midpoint calculated to exclude frag from
+                            # one region or another
+                            midpoint = (read.reference_start
+                                + read.template_length // 2 
+                                + read.template_length % 2)
+                            # short circuit eval to avoid type error
+                            if ((start is None or midpoint >= start)
+                                and (stop is None or midpoint < stop)):
+                                yield (
+                                    read.reference_name,
+                                    read.reference_start,
+                                    read.reference_start + read.template_length,
+                                    read.mapping_quality,
+                                    read.is_forward
+                                )
                         else:
-                            yield (
-                                read.reference_name,
-                                read.reference_end + read.template_length,
-                                read.reference_end,
-                                read.mapping_quality,
-                                read.is_forward 
-                            )
+                            # see above
+                            midpoint = (read.reference_end
+                                + read.template_length // 2
+                                + read.template_length % 2)
+                            if ((start is None or midpoint >= start)
+                                and (stop is None or midpoint < stop)):
+                                yield (
+                                    read.reference_name,
+                                    read.reference_end + read.template_length,
+                                    read.reference_end,
+                                    read.mapping_quality,
+                                    read.is_forward 
+                                )
                 # HACK: for some reason read_length is sometimes None
                 except TypeError as e:
                     stderr.writelines(["Type error encountered.\n",
@@ -275,7 +285,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                fraction_low: int=120,
                fraction_high: int=180,
                verbose: bool=False
-               ) -> NDArray[np.int64]:
+               ) -> NDArray:
     """
     Reads from BAM, SAM, or BED file and returns a two column matrix
     with fragment start and stop positions.
@@ -304,86 +314,26 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
         If no fragments exist in the specified minimum-maximum interval,
         the returned 'ndarray' will have a shape of (0, 3)
     """
-    try:
-        # check type of input and open if needed
-        input_file_is_str = False   # file was opened in this context
-        is_sam = False  # file is SAM/BAM, not tabix indexed
-        if type(input_file) == str:   # path string
-            input_file_is_str == True
-            # check file type
-            if (
-                input_file.endswith('.sam')
-                or input_file.endswith('.bam')
-            ):
-                is_sam = True
-                sam_file = pysam.AlignmentFile(input_file, 'r')
-            elif (
-                input_file.endswith('frag.gz')
-                or input_file.endswith('bed.gz')
-                or input_file.endswith('frag.gz')
-                or input_file.endswith('bed.gz')
-            ):
-                tbx = pysam.TabixFile(input_file, 'r')
-        elif type(input_file) == pysam.AlignmentFile:
-            is_sam = True
-            sam_file = input_file
-        elif type(input_file) == pysam.TabixFile:
-            tbx = input_file
-        else:
-            raise TypeError(
-                f'{type(input_file)} is invalid type for input_file.'
-            )
+    # use the frag_generator to create a list of intervals
+    frag_list = [
+        (frag_start, frag_stop, strand)
+        for _, frag_start, frag_stop, _, strand
+        in frag_generator(
+            input_file,
+            contig,
+            quality_threshold,
+            start,
+            stop,
+            fraction_low,
+            fraction_high
+        )
+    ]
 
-        # based on file type, read into an array
-        frag_ends = []
-        if is_sam:
-            for read in sam_file.fetch(contig, start, stop):
-                # Only select forward strand and filter out non-paired-end
-                # reads and low-quality reads
-                if (low_quality_read_pairs(read, quality_threshold)
-                    or read.is_reverse):
-                    pass
-                # HACK: using leftmost read, not read1, to find ends
-                elif (
-                    abs(read_length := read.template_length) >= fraction_low
-                    and abs(read_length) <= fraction_high
-                ):
-                    read_start = read.reference_start
-                    read_stop = read_start + read_length
-                    # if read2, read1 is reverse
-                    read_on_plus = read.is_read1
-                    frag_ends.append((read_start, read_stop, read_on_plus))
-        else:
-            for line in tbx.fetch(
-                contig, start, stop, parser=pysam.asTuple()
-            ):
-                read_start = int(line[1])
-                read_stop = int(line[2])
-                read_length = read_stop - read_start
-                mapq = int(line[3])
-                read_on_plus = int('+' in line[4])
-                if (read_length >= fraction_low
-                    and read_length <= fraction_high
-                    and mapq >= quality_threshold
-                    ):
-                    frag_ends.append((read_start, read_stop, read_on_plus))
-    finally:
-        if input_file_is_str and is_sam:
-            sam_file.close()
-        elif input_file_is_str:
-            tbx.close()
+    # convert to struct array
+    frag_ends = np.array(frag_list, dtype=[("start", "i8"),("stop", "i8"),("strand", "?")])
 
-    # convert to ndarray
-    frag_ends = np.array(frag_ends, dtype=np.int64)
-
-    if frag_ends.ndim == 1:
-        frag_ends = frag_ends.reshape((0, 3))
-
-    assert frag_ends.ndim == 2, (f'frag_ends has dims {frag_ends.ndim} and '
+    assert frag_ends.ndim == 1, (f'frag_ends has dims {frag_ends.ndim} and '
                                  f'shape {frag_ends.shape}')
-    assert (frag_ends.shape == (0, 3)
-            or frag_ends.shape[1] == 3),('frag_ends has shape'
-                                          f'{frag_ends.shape}')
     return frag_ends
 
 
@@ -501,3 +451,34 @@ def genome2list(genome_file: str) -> list:
                     int(contents[1])
                 ))
     return chroms
+
+
+def overlaps(
+    contigs_1: NDArray,
+    starts_1: NDArray,
+    stops_1: NDArray,
+    contigs_2: NDArray,
+    starts_2: NDArray,
+    stops_2: NDArray,
+) -> NDArray:
+    """
+    Function that performs vectorized computation of overlaps. Returns
+    an array of same shape as contig_1 that is true if the intervals
+    for set 1 each have any overlap with an interval in set 2.
+    """
+    contigs_1 = contigs_1[:, np.newaxis]
+    starts_1 = starts_1[:, np.newaxis]
+    stops_1 = stops_1[:, np.newaxis]
+
+    contigs_2 = contigs_2[np.newaxis]
+    starts_2 = starts_2[np.newaxis]
+    stops_2 = stops_2[np.newaxis]
+
+    contig_blind_overlaps = np.logical_and(
+        (starts_1 < stops_2),
+        (stops_1 > starts_2)
+    )
+    in_same_contig = contigs_1 == contigs_2
+    raw_overlaps = np.logical_and(contig_blind_overlaps, in_same_contig)
+    any_overlaps = np.any(raw_overlaps, axis=1)
+    return any_overlaps
