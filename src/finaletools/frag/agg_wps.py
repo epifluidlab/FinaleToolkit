@@ -78,10 +78,19 @@ def agg_wps(
         # get size of interval based on first entry in interval_file
         interval_size = intervals[0][2] - intervals[0][1] - median_window_size
         agg_scores = np.zeros(interval_size, dtype=np.int64)
+        # HACK: excepting for random intervals with wrong size or improperly
+        # formatted BigWigs
         for contig, start, stop, strand in intervals:
-            values = np.array(raw_wps.values(contig, start, stop))
+            try:
+                values = np.array(raw_wps.values(contig, start, stop))
+            except RuntimeError as e:
+                print(e)
+                continue
             # trimmed from median filter
             trimmed = values[median_window_size//2:-median_window_size//2]
+            if trimmed.shape[0] != interval_size:
+                print(f"Trimmed size {trimmed.shape[0]} is not equal to interval size {interval_size}. Skipping.")
+                continue
             # flip scores if on reverse strand
             if strand == '+':
                 agg_scores = agg_scores + trimmed
