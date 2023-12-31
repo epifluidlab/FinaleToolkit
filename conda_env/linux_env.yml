@@ -1,4 +1,4 @@
-name: samenv3
+name: finaletools
 channels:
   - conda-forge
   - bioconda
@@ -235,4 +235,5 @@ dependencies:
   - zstd=1.5.2=h3eb15da_6
   - pip:
       - finaletools==0.1.2
+      - loess
 prefix: /jet/home/jli18/.conda/envs/samenv3
