@@ -265,7 +265,7 @@ def frag_generator(
                         and frag_length <= fraction_high
                         and mapq >= quality_threshold
                         ):
-                        yield contig, read_start, read_stop, read_on_plus
+                        yield contig, read_start, read_stop, mapq, read_on_plus
                 # HACK: for some reason read_length is sometimes None
                 except TypeError:
                     continue
