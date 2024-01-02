@@ -201,7 +201,7 @@ def frag_generator(
             )
 
         if is_sam:
-            for read in sam_file.fetch(contig, start-50, stop+50):
+            for read in sam_file.fetch(contig, start, stop):
                 # Only select read1 and filter out non-paired-end
                 # reads and low-quality reads
                 try:
