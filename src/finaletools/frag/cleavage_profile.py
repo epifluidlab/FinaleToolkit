@@ -8,5 +8,12 @@ CpG site.
 """
 
 from __future__ import annotations
+from typing import Union
 
-# FIXME: implement
+
+def cleavage_profile(
+    input_file: str,
+    verbose: Union[int, bool]=False
+):
+    
+    return NotImplementedError
