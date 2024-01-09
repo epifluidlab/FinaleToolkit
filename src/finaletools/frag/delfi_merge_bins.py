@@ -59,3 +59,5 @@ def delfi_merge_bins(
         five_mb_bins.iloc[[i],[7]] = subset['num_frags_corrected'].sum()
     
     return five_mb_bins
+
+# TODO: add CLI, make binning customizable
