@@ -1,5 +1,3 @@
-# TODO: still wip, need to fully implement
-
 from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
@@ -12,6 +10,7 @@ import numpy as np
 import pandas
 from tqdm import tqdm
 
+from finaletools.frag.delfi_gc_correct import delfi_gc_correct
 from finaletools.utils.utils import frag_generator, overlaps
 from finaletools.genome.gaps import GenomeGaps, ContigGaps
 
@@ -76,7 +75,7 @@ def _delfi_single_window(
             0)
     
     # Iterating on each read in file in specified contig/chromosome
-    for _, frag_start, frag_stop, _ in frag_generator(
+    for _, frag_start, frag_stop, _, _ in frag_generator(
         input_file,
         contig,
         quality_threshold,
@@ -175,6 +174,7 @@ def delfi(input_file: str,
           blacklist_file: str=None,
           gap_file: Union(str, GenomeGaps)=None,
           output_file: str=None,
+          gc_correct:bool=True,
           window_size: int=100000,
           subsample_coverage: float=2,
           quality_threshold: int=30,
@@ -240,6 +240,7 @@ def delfi(input_file: str,
         output_file: {output_file}
         window_size: {window_size}
         subsample_coverage: {subsample_coverage}
+        gc_correct: {gc_correct}
         quality_threshold: {quality_threshold}
         workers: {workers}
         preprocessing: {preprocessing}
@@ -281,7 +282,8 @@ def delfi(input_file: str,
         names=["contig", "start", "stop"],
         usecols=[0, 1, 2],
         dtype={"contig":str, "start":np.int32, "stop":np.int32},
-        delimiter='\t'
+        delimiter='\t',
+        comment='#',
     )
 
     if verbose:
@@ -310,6 +312,7 @@ def delfi(input_file: str,
         gapless_bins = bins
 
     # filtering for darkregions
+    """
     if verbose:
         stderr.write(f'Filtering darkregions...\n')
     if blacklist_file is not None:
@@ -339,7 +342,9 @@ def delfi(input_file: str,
         if verbose:
             stderr.write(f'No darkregions given, skipping.\n')
         darkless_bins = gapless_bins
-    
+    """
+    darkless_bins = gapless_bins
+
     # generating args for pooled processes
     if verbose:
         stderr.write(f'Preparing to generate short and long coverages.\n')
@@ -380,8 +385,7 @@ def delfi(input_file: str,
     # move to dataframe
     if (verbose):
         stderr.write('Done.\n')
-        stderr.write('Removing bottom 10th percentile of bins by '
-                     'coverage...\n')
+        stderr.write('Removing remaining accrocentric bins...\n')
    
     window_df = pandas.DataFrame(
         windows,
@@ -389,45 +393,51 @@ def delfi(input_file: str,
             'contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
             'num_frags']
     )
-    # remove bottom 10 percentile
-    # trimmed_windows = trim_coverage(window_array, 10)
-    ten_percentile = np.nanpercentile(window_df['num_frags'], 0)
-    trimmed_windows = window_df[window_df['num_frags'] >= ten_percentile]
+    # remove remaining NOARM bins
+    trimmed_windows = window_df[window_df['arm']!='NOARM']
 
     # calculating ratio
+    if (verbose):
+        stderr.write('Calculating ratio...\n')
+
     trimmed_windows['ratio'] = trimmed_windows['short']/trimmed_windows['long']
+
+    # gc correct
+    if (verbose):
+        stderr.write('GC bias correction...\n')
+
+    if gc_correct:
+        gc_corrected = delfi_gc_correct(trimmed_windows, 0.75, 8, verbose)
+    else:
+        gc_corrected = trimmed_windows
+
 
     # output
     if (verbose):
-        stderr.write(f'{len(window_args)-trimmed_windows.shape[0]} bins '
+        stderr.write(f'{len(window_args)-gc_corrected.shape[0]} bins '
                      'removed.\n')
+        
+    output_delfi = gc_corrected.rename(columns={'contig':'#contig'})
 
     if output_file.endswith('.tsv'):
-        trimmed_windows.to_csv(output_file, sep='\t', index=False)
+        output_delfi.to_csv(output_file, sep='\t', index=False)
     elif output_file.endswith('.bed'):
-        trimmed_windows.to_csv(
+        output_delfi.to_csv(
             output_file,
-            header=[
-                '#contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
-                'num_frags', 'ratio'],
             sep='\t',
             index=False)
     elif output_file.endswith('.bed.gz'):
-        trimmed_windows.to_csv(
+        output_delfi.to_csv(
             output_file,
-            header=[
-                '#contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
-                'num_frags', 'ratio'],
             sep='\t',
             index=False,
             encoding='gzip')
     elif output_file == '-':
         with stdout as out:
-            for window in trimmed_windows.itertuples():
+            for window in gc_corrected.itertuples():
+                tab_separated = "\t".join(window)
                 out.write(
-                    f'{window[0]}\t{window[1]}\t{window[2]}\t{window[3]}\t'
-                    f'{window[4]}\t{window[5]}\t{window[6]}\t{window[7]}\t'
-                    f'{window[8]}\n')
+                    f'{tab_separated}\n')
     else:
         raise ValueError(
             'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
@@ -439,4 +449,4 @@ def delfi(input_file: str,
         end_time = time.time()
         stderr.write(f'{num_frags} fragments included.\n')
         stderr.write(f'delfi took {end_time - start_time} s to complete\n')
-    return trimmed_windows
+    return gc_corrected

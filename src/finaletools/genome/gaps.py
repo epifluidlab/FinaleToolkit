@@ -145,17 +145,23 @@ class GenomeGaps:
         # get centromere and telomeres for contig
         centromere = self.centromeres[self.centromeres['contig'] == contig]
         telomeres = self.telomeres[self.telomeres['contig'] == contig]
-        if not (centromere.shape[0] or telomeres.shape[0]):
+        if not centromere.shape[0]:
             return None
         else:
             in_centromere = np.logical_and(
                 stop > centromere['start'],
                 start < centromere['stop'],
             )
-            in_telomeres = np.sum(np.logical_and(
-                stop > telomeres['start'],
-                start < telomeres['stop'],
-            )) > 0
+            # chr17 has no telomere in the gap track for some reason
+            if not telomeres.shape[0]:
+                in_telomeres = np.sum(np.logical_and(
+                    stop > telomeres['start'],
+                    start < telomeres['stop'],
+                )) > 0
+            else:
+                in_telomeres = False
+            if(contig=="17"):
+                print(in_centromere or in_telomeres)
             return in_centromere or in_telomeres
         
     def overlaps_gap(self, contig: str, start: int, stop: int) -> bool:
@@ -220,6 +226,7 @@ class GenomeGaps:
         centromere = self.centromeres[self.centromeres['contig'] == contig]
         short_arm = self.short_arms[self.short_arms['contig'] == contig]
         has_short_arm = short_arm.shape[0] > 0
+        
         if stop < centromere['start'][0]:
             if not has_short_arm:
                 return f"{contig.replace('chr', '')}p"
@@ -324,10 +331,13 @@ class ContigGaps():
         in_centromere = (
             stop > self.centromere[0] and start < self.centromere[1]
         )
-        in_telomeres = all(
-            stop > telomere[0] and start < telomere[1]
-            for telomere in self.telomeres
-        )
+        if not len(self.telomeres):
+            in_telomeres = False
+        else:
+            in_telomeres = all(
+                stop > telomere[0] and start < telomere[1]
+                for telomere in self.telomeres
+            )
         return in_centromere or in_telomeres
     
     def in_gap(self, start: int, stop: int) -> bool:

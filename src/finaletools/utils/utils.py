@@ -201,7 +201,7 @@ def frag_generator(
             )
 
         if is_sam:
-            for read in sam_file.fetch(contig, start-50, stop+50):
+            for read in sam_file.fetch(contig, start, stop):
                 # Only select read1 and filter out non-paired-end
                 # reads and low-quality reads
                 try:
@@ -265,7 +265,7 @@ def frag_generator(
                         and frag_length <= fraction_high
                         and mapq >= quality_threshold
                         ):
-                        yield contig, read_start, read_stop, read_on_plus
+                        yield contig, read_start, read_stop, mapq, read_on_plus
                 # HACK: for some reason read_length is sometimes None
                 except TypeError:
                     continue
