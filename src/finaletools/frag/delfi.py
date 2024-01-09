@@ -387,8 +387,7 @@ def delfi(input_file: str,
     # move to dataframe
     if (verbose):
         stderr.write('Done.\n')
-        stderr.write('Removing bottom 10th percentile of bins by '
-                     'coverage...\n')
+        stderr.write('Removing remaining accrocentric bins...\n')
    
     window_df = pandas.DataFrame(
         windows,
@@ -396,15 +395,19 @@ def delfi(input_file: str,
             'contig', 'start', 'stop', 'arm', 'short', 'long', 'gc',
             'num_frags']
     )
-    # remove bottom 10 percentile
-    # trimmed_windows = trim_coverage(window_array, 10)
-    ten_percentile = np.nanpercentile(window_df['num_frags'], 0)
-    trimmed_windows = window_df[window_df['num_frags'] >= ten_percentile]
+    # remove remaining NOARM bins
+    trimmed_windows = window_df[window_df['arm']!='NOARM']
 
     # calculating ratio
+    if (verbose):
+        stderr.write('Calculating ratio...\n')
+
     trimmed_windows['ratio'] = trimmed_windows['short']/trimmed_windows['long']
 
     # gc correct
+    if (verbose):
+        stderr.write('GC bias correction...\n')
+
     if gc_correct:
         gc_corrected = delfi_gc_correct(trimmed_windows, 0.75, 8, verbose)
     else:
