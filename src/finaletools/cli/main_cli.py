@@ -552,6 +552,7 @@ def main_cli_parser():
     parser_command12.set_defaults(func=_cli_gap_bed)
     return parser
 
+
 def main_cli():
     parser = main_cli_parser()
 
@@ -565,8 +566,6 @@ def main_cli():
 
     return parser
 
-def main_cli():
-    parser = main_cli_parser()
 
 if __name__ == '__main__':
     main_cli()
