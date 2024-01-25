@@ -11,6 +11,7 @@ import pandas
 from tqdm import tqdm
 
 from finaletools.frag.delfi_gc_correct import delfi_gc_correct
+from finaletools.frag.delfi_merge_bins import delfi_merge_bins
 from finaletools.utils.utils import frag_generator, overlaps
 from finaletools.genome.gaps import GenomeGaps, ContigGaps
 
@@ -175,6 +176,7 @@ def delfi(input_file: str,
           gap_file: Union(str, GenomeGaps)=None,
           output_file: str=None,
           gc_correct:bool=True,
+          merge_bins:bool=True,
           window_size: int=100000,
           subsample_coverage: float=2,
           quality_threshold: int=30,
@@ -241,6 +243,7 @@ def delfi(input_file: str,
         window_size: {window_size}
         subsample_coverage: {subsample_coverage}
         gc_correct: {gc_correct}
+        merge_bins: {merge_bins}
         quality_threshold: {quality_threshold}
         workers: {workers}
         preprocessing: {preprocessing}
@@ -396,6 +399,9 @@ def delfi(input_file: str,
     # remove remaining NOARM bins
     trimmed_windows = window_df[window_df['arm']!='NOARM']
 
+    if (verbose):
+        stderr.write(f'{trimmed_windows.shape[0]} bins remaining...\n')
+
     # calculating ratio
     if (verbose):
         stderr.write('Calculating ratio...\n')
@@ -403,29 +409,30 @@ def delfi(input_file: str,
     trimmed_windows['ratio'] = trimmed_windows['short']/trimmed_windows['long']
 
     # gc correct
-    if (verbose):
-        stderr.write('GC bias correction...\n')
-
     if gc_correct:
+        if (verbose):
+            stderr.write('GC bias correction...\n')
         gc_corrected = delfi_gc_correct(trimmed_windows, 0.75, 8, verbose)
     else:
         gc_corrected = trimmed_windows
 
-
+    if merge_bins:
+        if (verbose):
+            stderr.write('Merging bins...\n')
+        final_bins = delfi_merge_bins(gc_corrected, True, verbose=verbose)
+    else:
+        final_bins = gc_corrected
+    
     # output
     if (verbose):
-        stderr.write(f'{len(window_args)-gc_corrected.shape[0]} bins '
-                     'removed.\n')
+        stderr.write(f'{final_bins.shape[0]} bins remaining.\n')
         
-    output_delfi = gc_corrected.rename(columns={'contig':'#contig'})
+    output_delfi = final_bins.rename(columns={'contig':'#contig'})
 
-    if output_file.endswith('.tsv'):
+    if output_file.endswith('.bed') or output_file.endswith('.tsv'):
         output_delfi.to_csv(output_file, sep='\t', index=False)
-    elif output_file.endswith('.bed'):
-        output_delfi.to_csv(
-            output_file,
-            sep='\t',
-            index=False)
+    elif output_file.endswith('.csv'):
+        output_delfi.to_csv(output_file, sep=',', index=False)
     elif output_file.endswith('.bed.gz'):
         output_delfi.to_csv(
             output_file,

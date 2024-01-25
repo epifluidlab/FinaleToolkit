@@ -143,11 +143,13 @@ def frag_generator(
     stop: int=None,
     fraction_low: int=120,
     fraction_high: int=180,
+    intersect_policy: str="midpoint",
     verbose: bool=False
 ) -> Generator[Tuple]:
     """
     Reads from BAM, SAM, or BED file and returns tuples containing
     contig (chromosome), start, stop (end), mapq, and strand for each fragment.
+    Optionally may filter for mapq, size, and intersection with a region.
 
     Parameters
     ----------
@@ -162,6 +164,12 @@ def frag_generator(
     fraction_high : int, optional
         Specifies highest fragment length included in array. Default is
         120, equivalent to long fraction.
+    intersect_policy : str, optional
+        Specifies what policy is used to include fragments in the
+        given interval. Default is "midpoint". Policies include:
+        - midpoint: the average of end coordinates of a fragment lies
+        in the interval.
+        - any: any part of the fragment is in the interval.
     verbose : bool, optional
 
     Returns
@@ -199,6 +207,20 @@ def frag_generator(
             raise TypeError(
                 f'{type(input_file)} is invalid type for input_file.'
             )
+        
+        # setting filter based on intersect policy
+        if intersect_policy == 'midpoint':
+            check_intersect = lambda r_start, r_stop, f_start, f_stop : (
+                (r_start is None or ((f_start+f_stop)/2) >= r_start)
+                and (r_stop is None or ((f_start+f_stop)/2) < r_stop)
+            )
+        elif intersect_policy == 'any':
+            check_intersect = lambda r_start, r_stop, f_start, f_stop : (
+                (r_start is None or f_stop > r_start)
+                and (r_stop is None or f_start < r_stop)
+            )
+        else:
+            raise ValueError(f'{intersect_policy} is not a valid policy')
 
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
@@ -212,15 +234,11 @@ def frag_generator(
                         abs(frag_length := read.template_length) >= fraction_low
                         and abs(frag_length) <= fraction_high
                     ):
-                        if read.is_forward:
-                            # midpoint calculated to exclude frag from
-                            # one region or another
-                            midpoint = (read.reference_start
-                                + read.template_length // 2 
-                                + read.template_length % 2)
-                            # short circuit eval to avoid type error
-                            if ((start is None or midpoint >= start)
-                                and (stop is None or midpoint < stop)):
+                        if read.template_length > 0:
+                            f_start = read.reference_start
+                            f_stop = read.reference_start + read.template_length
+                            if (check_intersect(start, stop, f_start, f_stop)):
+                                assert read.reference_start < read.reference_start + read.template_length, f"forward start {read.reference_start} after stop {read.reference_start + read.template_length} on chrom {read.reference_name} with read_is_forward {read.is_forward}."
                                 yield (
                                     read.reference_name,
                                     read.reference_start,
@@ -228,13 +246,11 @@ def frag_generator(
                                     read.mapping_quality,
                                     read.is_forward
                                 )
-                        else:
-                            # see above
-                            midpoint = (read.reference_end
-                                + read.template_length // 2
-                                + read.template_length % 2)
-                            if ((start is None or midpoint >= start)
-                                and (stop is None or midpoint < stop)):
+                        elif read.template_length < 0:
+                            f_start = read.reference_end + read.template_length
+                            f_stop = read.reference_end
+                            if (check_intersect(start, stop, f_start, f_stop)):
+                                assert read.reference_end + read.template_length < read.reference_end, f"reverse start {read.reference_end + read.template_length} after stop {read.reference_end} on chrom {read.reference_name} with read_is_forward {read.is_forward}."
                                 yield (
                                     read.reference_name,
                                     read.reference_end + read.template_length,
