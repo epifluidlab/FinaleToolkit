@@ -300,6 +300,7 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
                stop: int=None,
                fraction_low: int=120,
                fraction_high: int=180,
+               intersect_policy: str="midpoint",
                verbose: bool=False
                ) -> NDArray:
     """
@@ -331,6 +332,9 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
         the returned 'ndarray' will have a shape of (0, 3)
     """
     # use the frag_generator to create a list of intervals
+    if verbose:
+        stderr.write("frag_array: fetching fragments\n")
+
     frag_list = [
         (frag_start, frag_stop, strand)
         for _, frag_start, frag_stop, _, strand
@@ -341,10 +345,13 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
             start,
             stop,
             fraction_low,
-            fraction_high
+            fraction_high,
+            intersect_policy,
+            verbose
         )
     ]
-
+    if verbose:
+        stderr.write("frag_array: converting to array\n")
     # convert to struct array
     frag_ends = np.array(frag_list, dtype=[("start", "i8"),("stop", "i8"),("strand", "?")])
 
