@@ -230,10 +230,13 @@ def main_cli_parser():
     parser_command5.add_argument('input_file')
     parser_command5.add_argument('autosomes')
     parser_command5.add_argument('reference_file')
+    parser_command5.add_argument('bins_file')
     parser_command5.add_argument('-b', '--blacklist_file')
     parser_command5.add_argument('-g', '--gap_file')
     parser_command5.add_argument('-o', '--output_file')
     parser_command5.add_argument('-W', '--window_size', default=100000, type=int)
+    parser_command5.add_argument('-gc', '--gc_correct', action='store_true')
+    parser_command5.add_argument('-m', '--merge_bins', action='store_true')
     parser_command5.add_argument('-q', '--quality_threshold', default=30, type=int)
     parser_command5.add_argument('-w', '--workers', default=1, type=int)
     parser_command5.add_argument('-v', '--verbose', action='count', default=0)
@@ -563,8 +566,6 @@ def main_cli():
     funcargs.pop('subcommand')
 
     function(**funcargs)
-
-    return parser
 
 
 if __name__ == '__main__':

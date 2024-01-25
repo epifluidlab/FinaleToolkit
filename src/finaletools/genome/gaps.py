@@ -278,7 +278,7 @@ class GenomeGaps:
             File to write to. Optionally gzipped. If output_file == '-',
             results will be writted to stdout.
         """
-        gaps = np.sort(np.append(np.append(self.centromeres, self.telomeres), self.short_arms))
+        gaps = np.sort(self.gaps)
         if output_file.endswith('.gz'):
             with gzip.open(output_file, 'w') as output:
                 for interval in gaps:

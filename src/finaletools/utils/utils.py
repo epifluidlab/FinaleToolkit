@@ -212,7 +212,7 @@ def frag_generator(
                         abs(frag_length := read.template_length) >= fraction_low
                         and abs(frag_length) <= fraction_high
                     ):
-                        if read.is_forward:
+                        if read.template_length > 0:
                             # midpoint calculated to exclude frag from
                             # one region or another
                             midpoint = (read.reference_start
@@ -221,6 +221,7 @@ def frag_generator(
                             # short circuit eval to avoid type error
                             if ((start is None or midpoint >= start)
                                 and (stop is None or midpoint < stop)):
+                                assert read.reference_start < read.reference_start + read.template_length, f"forward start {read.reference_start} after stop {read.reference_start + read.template_length} on chrom {read.reference_name} with read_is_forward {read.is_forward}."
                                 yield (
                                     read.reference_name,
                                     read.reference_start,
@@ -235,6 +236,7 @@ def frag_generator(
                                 + read.template_length % 2)
                             if ((start is None or midpoint >= start)
                                 and (stop is None or midpoint < stop)):
+                                assert read.reference_end + read.template_length < read.reference_end, f"reverse start {read.reference_end + read.template_length} after stop {read.reference_end} on chrom {read.reference_name} with read_is_forward {read.is_forward}."
                                 yield (
                                     read.reference_name,
                                     read.reference_end + read.template_length,
