@@ -10,10 +10,30 @@ CpG site.
 from __future__ import annotations
 from typing import Union
 
+import numpy as np
+
+from finaletools.utils.utils import frag_array, overlaps
+
 
 def cleavage_profile(
     input_file: str,
-    verbose: Union[int, bool]=False
-):
-    
+    contig: str,
+    start: int,
+    stop: int,
+    fraction_low: int=None,
+    fraction_high: int=None,
+    quality_threshold: int=30,
+    verbose: Union[bool, int]=0
+) -> np.ndarray:
+    frags = frag_array(
+        input_file=input_file,
+        contig=contig,
+        quality_threshold=quality_threshold,
+        start=start,
+        stop=stop,
+        fraction_low=fraction_low,
+        fraction_high=fraction_high
+    )
+
+
     return NotImplementedError
