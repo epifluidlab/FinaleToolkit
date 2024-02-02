@@ -16,6 +16,7 @@ def _cli_hist(
     term_width, term_height = get_terminal_size((80, 24))
 
     max_count = np.max(counts)
+    total_count = np.sum(counts)
     max_height = term_height - 5
     block_height = max_height * 8 - 1    # height for utf-8 block elements
     block_counts = np.rint(counts / max_count * block_height)
@@ -45,10 +46,13 @@ def _cli_hist(
     stat_len = len(stats)
     for i in range(max_height):
         row = hist_array[i]
+        out.write(f'{((max_height - i) / max_height) * max_count/total_count*100:0>5.2f}%   ')
         out.write(''.join([bars[num] for num in row]))
         if i < stat_len:
             stat = stats[i]
-            out.write(f' {(stat[0]+"          ")[:10]}:{stat[1]:6.2f}\n')
+            out.write(f' {(stat[0]+"          ")[:10]}:{stat[1]:02.2f}\n')
         else:
             out.write('\n')
-
+    out.write('len (nt)')
+    out.write('   '.join([f'{loc:0>3d}' for loc in bins[0::6]]))
+    out.write('\n')

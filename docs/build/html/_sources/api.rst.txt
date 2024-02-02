@@ -45,3 +45,17 @@ Frag File Utilities
 .. autofunction:: finaletools.utils.filter_bam
 
 .. autofunction:: finaletools.utils.genome2list
+
+Genome Utilities
+================
+.. autoclass:: finaletools.genome.GenomeGaps
+   :members:
+
+.. autoclass:: finaletools.genome.ContigGaps
+   :members:
+
+.. autofunction:: finaletools.genome.ucsc_hg19_gap_bed
+
+.. autofunction:: finaletools.genome.b37_gap_bed
+
+.. autofunction:: finaletools.genome.ucsc_hg38_gap_bed

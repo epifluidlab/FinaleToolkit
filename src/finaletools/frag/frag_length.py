@@ -12,13 +12,13 @@ import tqdm
 from numba import jit
 
 from finaletools.utils.utils import (
-    _not_read1_or_low_quality, _get_intervals
+    _not_read1_or_low_quality, _get_intervals, frag_generator
 )
 from finaletools.utils.cli_hist import _cli_hist
 
 
 def frag_length(
-        input_file: Union[str, pysam.AlignmentFile],
+        input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
         contig: str=None,
         start: int=None,
         stop: int=None,
@@ -51,50 +51,26 @@ def frag_length(
         stderr.write("Finding frag lengths.\n")
 
     lengths = []    # list of fragment lengths
+    
+    frag_gen = frag_generator(
+        input_file,
+        contig,
+        quality_threshold,
+        start,
+        stop,
+        0,
+        1000000000,
+        verbose,
+    )
 
-    input_is_file = False
-    try:
-        # handling input types
-        if (type(input_file) == pysam.AlignmentFile):
-            sam_file = input_file
-        elif input_file.endswith('bam') or input_file == '-':
-            input_is_file = True
-            if (verbose):
-                stderr.write(f'Opening {input_file}\n')
-            sam_file = pysam.AlignmentFile(input_file)
-        else:
-            raise ValueError(
-                'Invalid input_file type. Only BAM or SAM files are allowed.'
-            )
+    for contig, frag_start, frag_stop, strand in frag_gen:
+        lengths.append(frag_stop - frag_start)
 
-        if (verbose):
-            stderr.write('Counting reads')
-        count = sam_file.count(contig=contig,
-                            start=start,
-                            stop=stop) if verbose else None
-        if (verbose):
-            stderr.write(f'{count} reads counted\n')
-        # Iterating on each read in file in specified contig/chromosome
-        for read1 in (tqdm.tqdm(sam_file.fetch(contig=contig,
-                                        start=start,
-                                        stop=stop), total=count)
-                    if verbose
-                    else sam_file.fetch(contig=contig,
-                                        start=start,
-                                        stop=stop)):
-            # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads
-            if (_not_read1_or_low_quality(read1, quality_threshold)):
-                pass
-            else:
-                # append length of fragment to list
-                lengths.append(abs(read1.template_length))
-    finally:
-        if input_is_file:
-            sam_file.close()
+    if (verbose):
+        stderr.write("Converting to array.\n")
 
     # convert to array
-    lengths = np.array(lengths)
+    lengths = np.array(lengths, dtype=np.int32)
 
     # check if output specified
     if (type(output_file) == str):
@@ -196,20 +172,20 @@ def frag_length_bins(
     if bin_size is None:
         if histogram:
             term_width, term_height = get_terminal_size((80, 24))
-            n_bins = term_width - 24
+            n_bins = (term_width - 24)
 
-            start = np.min(frag_lengths)
-            stop = np.max(frag_lengths)
+            bin_start = np.min(frag_lengths)
+            bin_stop = np.max(frag_lengths)
 
-            bin_size = round((stop - start) / n_bins)
+            bin_size = round((bin_stop - bin_start) / n_bins)
         else:
             bin_size = 5
 
-    start = np.min(frag_lengths)
-    stop = np.max(frag_lengths)
-    n_bins = (stop - start) // bin_size
+    bin_start = np.min(frag_lengths)
+    bin_stop = np.max(frag_lengths)
+    n_bins = (bin_stop - bin_start) // bin_size
 
-    bins = np.arange(start, stop, bin_size)
+    bins = np.arange(bin_start, bin_stop, bin_size)
     counts = []
 
     # generate histogram
@@ -245,6 +221,10 @@ def frag_length_bins(
                 out.close()
     elif histogram:
         if contig is not None:
+            if start is None:
+                start = ""
+            if stop is None:
+                stop = ""
             title = f'Fragment Lengths for {contig}:{start}-{stop}'
         else:
             title = f'Fragment Lengths'

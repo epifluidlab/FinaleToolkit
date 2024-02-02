@@ -16,7 +16,10 @@ Welcome to FinaleTools's documentation!
    :caption: Contents:
 
    usage
+   quick_start
+   cli
    api
+   releases
 
 Indices and tables
 ==================
