@@ -35,5 +35,22 @@ def cleavage_profile(
         fraction_high=fraction_high
     )
 
+    profiles = np.zeros(stop-start, dtype=[
+        ('pos', 'i8'),
+        ('ends', 'i8'),
+        ('overlap', 'i8'),
+        ('proportion', 'f8'),
+    ])
+
+    profiles['pos'] = np.arange(start, stop)
+
+    # finding depth at sites
+    fragwise_overlaps = np.logical_and(
+        np.greater_equal(profiles['pos'], frags['start'][:,np.newaxis]),
+        np.less(profiles['pos'], frags['stop'][:,np.newaxis])
+    )
+    profiles['overlaps'] = np.sum(fragwise_overlaps, axis=0)
+
+    # TODO: finding number of 5' ends at sites
 
     return NotImplementedError
