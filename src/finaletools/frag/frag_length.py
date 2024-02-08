@@ -115,6 +115,8 @@ def frag_length(
     return lengths
 
 
+# NOTE: I'm not sure what contig by contig was supposed to be.
+# It doesn't do anything.
 def frag_length_bins(
     input_file: Union[str, pysam.AlignmentFile],
     contig: str=None,

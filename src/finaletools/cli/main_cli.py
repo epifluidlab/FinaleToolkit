@@ -84,15 +84,67 @@ def main_cli_parser():
     # Subcommand 2: frag-length
     parser_command2 = subparsers.add_parser(
         'frag-length', prog='finaletools-frag-length',
-        description='Calculates fragment lengths given a CRAM/BAM/SAM file'
+        description='Calculates fragment lengths given a CRAM/BAM/SAM file',
         )
-    parser_command2.add_argument('input_file')
-    parser_command2.add_argument('-c', '--contig')
-    parser_command2.add_argument('--start', type=int)
-    parser_command2.add_argument('--stop', type=int)
-    parser_command2.add_argument('-o', '--output_file')
-    parser_command2.add_argument('-q', '--quality_threshold', default=30, type=int)
-    parser_command2.add_argument('-v', '--verbose', action='count', default=0)
+    parser_command2.add_argument(
+        'input_file',
+        type=str,
+        help='bam or frag.gz file containing fragment data.',
+    )
+    parser_command2.add_argument(
+        '-c',
+        '--contig',
+        type=str,
+        help='contig or chromosome to select fragments from. Required if '
+        'using --start or --stop.',
+    )
+    parser_command2.add_argument(
+        '-S',
+        '--start',
+        type=int,
+        help='0-based left-most coordinate of interval to select fragments'
+        'from. Must also use --contig.',
+    )
+    parser_command2.add_argument(
+        '-E',
+        '--stop',
+        help='1-based right-most coordinate of interval to select fragments'
+        'from. Must also use --contig.',
+        type=int,
+    )
+    parser_command2.add_argument(
+        '-p',
+        '--intersect_policy',
+        default='midpoint',
+        type=str,
+        help='Specifies what policy is used to include fragments in the given '
+        'interval. Default is "midpoint". Policies include:\n'
+        '- midpoint: the average of end coordinates of a fragment lies'
+        'in the interval.\n'
+        '- any: any part of the fragment is in the interval.',
+    )
+    parser_command2.add_argument(
+        '-o',
+        '--output_file',
+        default='-',
+        type=str,
+        help='File to write results to. "-" may be used to write to stdout. '
+        'Default is "-".',
+    )
+    parser_command2.add_argument(
+        '-q',
+        '--quality_threshold',
+        default=30,
+        type=int,
+        help="Minimum MAPQ. Default is 30."
+    )
+    parser_command2.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='Verbose logging.'
+    )
     parser_command2.set_defaults(func=frag_length)
 
     # Subcommand 3: frag_length_bins()
@@ -101,16 +153,79 @@ def main_cli_parser():
         description='computes frag lengths of fragments and either prints'
         'bins and counts to tsv or prints a histogram'
         )
-    parser_command3.add_argument('input_file')
-    parser_command3.add_argument('--contig')
-    parser_command3.add_argument('--start', type=int)
-    parser_command3.add_argument('--stop', type=int)
-    parser_command3.add_argument('--bin-size', type=int)
-    parser_command3.add_argument('-o', '--output-file')
-    parser_command3.add_argument('--contig-by-contig', action='store_true')
-    parser_command3.add_argument('--histogram', action='store_true')
-    parser_command3.add_argument('--quality-threshold', default=30, type=int)
-    parser_command3.add_argument('-v', '--verbose', action='count', default=0)
+    parser_command3.add_argument(
+        'input_file',
+        help='BAM or SAM file containing fragment data'
+    )
+    parser_command3.add_argument(
+        '-c',
+        '--contig',
+        type=str,
+        help='contig or chromosome to select fragments from. Required if '
+        'using --start or --stop.',
+    )
+    parser_command3.add_argument(
+        '-S',
+        '--start',
+        type=int,
+        help='0-based left-most coordinate of interval to select fragments'
+        'from. Must also use --contig.',
+    )
+    parser_command3.add_argument(
+        '-p',
+        '--intersect_policy',
+        default='midpoint',
+        type=str,
+        help='Specifies what policy is used to include fragments in the given '
+        'interval. Default is "midpoint". Policies include:\n'
+        '- midpoint: the average of end coordinates of a fragment lies'
+        'in the interval.\n'
+        '- any: any part of the fragment is in the interval.',
+    )
+    parser_command3.add_argument(
+        '-E',
+        '--stop',
+        help='1-based right-most coordinate of interval to select fragments'
+        'from. Must also use --contig.',
+        type=int,
+    )
+    parser_command3.add_argument(
+        '--bin-size',
+        type=int,
+        help='Used to specify a custom bin size instead of automatically'
+        ' calculating one.')
+    parser_command3.add_argument(
+        '-o',
+        '--output_file',
+        default='-',
+        type=str,
+        help='File to write results to. "-" may be used to write to stdout. '
+        'Default is "-".',
+    )
+    parser_command3.add_argument(
+        '--contig-by-contig',
+        action='store_true',
+        help='Placeholder, not implemented.'
+    )
+    parser_command3.add_argument(
+        '--histogram',
+        action='store_true',
+        help='Draws a histogram in the terminal.'
+    )
+    parser_command3.add_argument(
+        '-q',
+        '--quality_threshold',
+        default=30,
+        type=int,
+        help="Minimum MAPQ. Default is 30."
+    )
+    parser_command3.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='Verbose logging.'
+    )
     parser_command3.set_defaults(func=frag_length_bins)
 
     # Subcommand 3_1: frag_length_intervals
@@ -125,6 +240,17 @@ def main_cli_parser():
     parser_command3_1.add_argument(
         'interval_file',
         help='BED file containing intervals over which to produce statistics'
+    )
+    parser_command3_1.add_argument(
+        '-p',
+        '--intersect_policy',
+        default='midpoint',
+        type=str,
+        help='Specifies what policy is used to include fragments in the given '
+        'interval. Default is "midpoint". Policies include:\n'
+        '- midpoint: the average of end coordinates of a fragment lies'
+        'in the interval.\n'
+        '- any: any part of the fragment is in the interval.',
     )
     parser_command3_1.add_argument(
         '-o',
