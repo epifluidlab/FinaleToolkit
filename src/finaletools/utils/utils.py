@@ -222,6 +222,7 @@ def frag_generator(
         else:
             raise ValueError(f'{intersect_policy} is not a valid policy')
 
+        #FIXME: raise exception if start and stop specified but not contig
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
                 # Only select read1 and filter out non-paired-end
@@ -320,6 +321,12 @@ def frag_array(input_file: Union[str, pysam.AlignmentFile],
     fraction_high : int, optional
         Specifies highest fragment length included in array. Default is
         120, equivalent to long fraction.
+        intersect_policy : str, optional
+        Specifies what policy is used to include fragments in the
+        given interval. Default is "midpoint". Policies include:
+        - midpoint: the average of end coordinates of a fragment lies
+        in the interval.
+        - any: any part of the fragment is in the interval.v
     verbose : bool, optional
 
     Returns
@@ -421,6 +428,7 @@ def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
 def _get_intervals(
     input_file: Union[str, pysam.AlignmentFile],
     interval_file: str,
+    intersect_policy: str,
     quality_threshold: int,
     verbose: Union[bool, int]
 ) -> list:
@@ -442,6 +450,7 @@ def _get_intervals(
                         start,
                         stop,
                         name,
+                        intersect_policy,
                         quality_threshold,
                         verbose - 1 if verbose > 1 else 0
                     )
