@@ -22,6 +22,7 @@ def frag_length(
         contig: str=None,
         start: int=None,
         stop: int=None,
+        intersect_policy: str="midpoint",
         output_file: str=None,
         quality_threshold: int=30,
         verbose: bool=False
@@ -36,6 +37,17 @@ def frag_length(
         BAM, SAM, or CRAM file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
     contig : string, optional
+        Contig or chromosome to get fragments from
+    start : int, optional
+        0-based left-most coordinate of interval
+    stop : int, optional
+        1-based right-most coordinate of interval
+    intersect_policy : str, optional
+        Specifies what policy is used to include fragments in the
+        given interval. Default is "midpoint". Policies include:
+        - midpoint: the average of end coordinates of a fragment lies
+        in the interval.
+        - any: any part of the fragment is in the interval.
     output_file : string, optional
     quality_threshold : int, optional
     verbose : bool, optional
@@ -53,17 +65,18 @@ def frag_length(
     lengths = []    # list of fragment lengths
     
     frag_gen = frag_generator(
-        input_file,
-        contig,
-        quality_threshold,
-        start,
-        stop,
-        0,
-        1000000000,
-        verbose,
+        input_file=input_file,
+        contig=contig,
+        quality_threshold=quality_threshold,
+        start=start,
+        stop=stop,
+        fraction_low=0,
+        fraction_high=1000000000,   #TODO: allow to have None
+        intersect_policy=intersect_policy,
+        verbose=verbose,
     )
 
-    for contig, frag_start, frag_stop, strand in frag_gen:
+    for contig, frag_start, frag_stop, _, _ in frag_gen:
         lengths.append(frag_stop - frag_start)
 
     if (verbose):
@@ -102,6 +115,8 @@ def frag_length(
     return lengths
 
 
+# NOTE: I'm not sure what contig by contig was supposed to be.
+# It doesn't do anything.
 def frag_length_bins(
     input_file: Union[str, pysam.AlignmentFile],
     contig: str=None,
@@ -111,6 +126,7 @@ def frag_length_bins(
     output_file: str=None,
     contig_by_contig: bool=False,
     histogram: bool=False,
+    intersect_policy: str="midpoint",
     quality_threshold: int=30,
     verbose: Union[bool, int]=False
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -127,6 +143,14 @@ def frag_length_bins(
     stop : int, optional
     bin_size : int, optional
     output_file : str, optional
+    contig_by_contig: bool, optional
+    histogram: bool, optional
+    intersect_policy : str, optional
+        Specifies what policy is used to include fragments in the
+        given interval. Default is "midpoint". Policies include:
+        - midpoint: the average of end coordinates of a fragment lies
+        in the interval.
+        - any: any part of the fragment is in the interval.
     workers : int, optional
 
     Returns
@@ -153,10 +177,11 @@ def frag_length_bins(
 
     # generating fragment lengths
     frag_lengths = frag_length(
-        input_file,
-        contig,
-        start,
-        stop,
+        input_file=input_file,
+        contig=contig,
+        start=start,
+        stop=stop,
+        intersect_policy=intersect_policy,
         quality_threshold=quality_threshold,
         verbose=verbose-1 if verbose>1 else 0
     )
@@ -245,15 +270,17 @@ def _frag_length_stats(
     start: int,
     stop: int,
     name: str,
+    intersect_policy: str,
     quality_threshold: int,
     verbose: Union(bool, int)
 ):
     # generating fragment lengths
     frag_lengths = frag_length(
-        input_file,
-        contig,
-        start,
-        stop,
+        input_file=input_file,
+        contig=contig,
+        start=start,
+        stop=stop,
+        intersect_policy=intersect_policy,
         quality_threshold=quality_threshold,
         verbose=verbose
     )
@@ -278,6 +305,7 @@ def frag_length_intervals(
     interval_file: str,
     output_file: str=None,
     quality_threshold: int=30,
+    intersect_policy: str="midpoint",
     workers: int=1,
     verbose: Union[bool, int]=False
 ):
@@ -315,7 +343,8 @@ def frag_length_intervals(
     intervals = _get_intervals(
         input_file,
         interval_file,
-        quality_threshold,
+        intersect_policy=intersect_policy,
+        quality_threshold=quality_threshold,
         verbose=verbose
     )
 
