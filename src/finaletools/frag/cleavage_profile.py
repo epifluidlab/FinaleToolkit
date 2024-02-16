@@ -20,8 +20,8 @@ def cleavage_profile(
     contig: str,
     start: int,
     stop: int,
-    fraction_low: int=None,
-    fraction_high: int=None,
+    fraction_low: int=1,
+    fraction_high: int=10000000,
     quality_threshold: int=30,
     verbose: Union[bool, int]=0
 ) -> np.ndarray:
@@ -35,22 +35,32 @@ def cleavage_profile(
         fraction_high=fraction_high
     )
 
-    profiles = np.zeros(stop-start, dtype=[
-        ('pos', 'i8'),
-        ('ends', 'i8'),
-        ('overlap', 'i8'),
-        ('proportion', 'f8'),
-    ])
-
-    profiles['pos'] = np.arange(start, stop)
+    positions = np.arange(start, stop)
 
     # finding depth at sites
     fragwise_overlaps = np.logical_and(
-        np.greater_equal(profiles['pos'], frags['start'][:,np.newaxis]),
-        np.less(profiles['pos'], frags['stop'][:,np.newaxis])
+        np.greater_equal(positions[np.newaxis], frags['start'][:,np.newaxis]),
+        np.less(positions[np.newaxis], frags['stop'][:,np.newaxis])
     )
-    profiles['overlaps'] = np.sum(fragwise_overlaps, axis=0)
+    depth = np.sum(fragwise_overlaps, axis=0)
 
-    # TODO: finding number of 5' ends at sites
+    # finding ends
+    forward_ends = np.logical_and(
+        np.equal(
+            positions[np.newaxis], frags['start'][:, np.newaxis]
+        ), frags['strand'][:, np.newaxis]
+    )
+    reverse_ends = np.logical_and(
+        np.equal(
+            positions[np.newaxis], frags['stop'][:, np.newaxis]
+        ), np.logical_not(frags['strand'][:, np.newaxis])
+    )
+    ends = np.sum(np.logical_or(forward_ends, reverse_ends), axis=0)
+    proportions = ends/depth*100
 
-    return NotImplementedError
+    results = np.zeros_like(proportions, dtype=[
+        ('pos', 'i8'),
+        ('proportion', 'f8'),
+    ])
+
+    return proportions
