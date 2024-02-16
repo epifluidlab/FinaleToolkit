@@ -114,6 +114,103 @@ def frag_length(
 
     return lengths
 
+def _cli_frag_length(
+        input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
+        contig: str=None,
+        start: int=None,
+        stop: int=None,
+        intersect_policy: str="midpoint",
+        output_file: str=None,
+        quality_threshold: int=30,
+        verbose: bool=False
+    ) -> np.ndarray:
+    """
+    frag_length optimized for pipelining.
+
+    Parameters
+    ----------
+    input_file : str or pysam.AlignmentFile
+        BAM, SAM, or CRAM file containing paired-end fragment reads or
+        its path. `AlignmentFile` must be opened in read mode.
+    contig : string, optional
+        Contig or chromosome to get fragments from
+    start : int, optional
+        0-based left-most coordinate of interval
+    stop : int, optional
+        1-based right-most coordinate of interval
+    intersect_policy : str, optional
+        Specifies what policy is used to include fragments in the
+        given interval. Default is "midpoint". Policies include:
+        - midpoint: the average of end coordinates of a fragment lies
+        in the interval.
+        - any: any part of the fragment is in the interval.
+    output_file : string, optional
+    quality_threshold : int, optional
+    verbose : bool, optional
+
+    Returns
+    -------
+    lengths : numpy.ndarray
+        `ndarray` of fragment lengths from file and contig if
+        specified.
+    """
+    if (verbose):
+        start_time = time.time()
+        stderr.write("Finding frag lengths.\n")
+
+    lengths = []    # list of fragment lengths
+    
+    frag_gen = frag_generator(
+        input_file=input_file,
+        contig=contig,
+        quality_threshold=quality_threshold,
+        start=start,
+        stop=stop,
+        fraction_low=0,
+        fraction_high=1000000000,   #TODO: allow to have None
+        intersect_policy=intersect_policy,
+        verbose=verbose,
+    )
+
+    # check if output specified
+    if (type(output_file) == str):
+        if output_file.endswith(".bin"): # binary file
+
+            for contig, frag_start, frag_stop, _, _ in frag_gen:
+                lengths.append(frag_stop - frag_start)
+
+            # convert to array
+            lengths = np.array(lengths, dtype=np.int32)
+
+            # write to file
+            with open(output_file, 'wt') as out:
+                lengths.tofile(out)
+
+        elif output_file == '-':
+            for contig, frag_start, frag_stop, _, _ in frag_gen:
+                stdout.write(f'{frag_stop - frag_start}\n')
+
+        else:   # all other file types
+            with open(output_file, 'wt') as out:
+                for contig, frag_start, frag_stop, _, _ in frag_gen:
+                    out.write(f'{frag_stop - frag_start}\n')
+            
+
+    elif (output_file is not None):
+        raise TypeError(
+            f'output_file is unsupported type "{type(input_file)}". '
+            'output_file should be a string specifying the path of the file '
+            'to write output scores to.'
+            )
+
+    if (verbose):
+        end_time = time.time()
+        stderr.write(
+            f'frag_length took {end_time - start_time} s to complete\n'
+        )
+
+    return None
+
 
 # NOTE: I'm not sure what contig by contig was supposed to be.
 # It doesn't do anything.
