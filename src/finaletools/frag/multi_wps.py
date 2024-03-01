@@ -89,7 +89,9 @@ def multi_wps(
         raise ValueError('input_file and site_bed cannot both read from stdin')
 
     # get header from input_file
-    if input_file.endswith('.sam') or input_file.endswith('.bam'):
+    if (input_file.endswith('.sam')
+        or input_file.endswith('.bam')
+        or input_file.endswith('.cram')):
         with pysam.AlignmentFile(input_file, 'r') as bam:
             references = bam.references
             lengths = bam.lengths
@@ -102,6 +104,8 @@ def multi_wps(
     ):
         with pysam.TabixFile(input_file, 'r') as tbx:
             raise NotImplementedError('tabix files not yet supported!')
+    else:
+        raise ValueError("Not a supported file type.")
 
     if (verbose > 1):
         stderr.write(f'header is {header}\n')
