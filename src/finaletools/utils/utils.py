@@ -188,13 +188,12 @@ def frag_generator(
             if (
                 input_file.endswith('.sam')
                 or input_file.endswith('.bam')
+                or input_file.endswith('.cram')
             ):
                 is_sam = True
                 sam_file = pysam.AlignmentFile(input_file, 'r')
             elif (
                 input_file.endswith('frag.gz')
-                or input_file.endswith('bed.gz')
-                or input_file.endswith('frag.gz')
                 or input_file.endswith('bed.gz')
             ):
                 tbx = pysam.TabixFile(input_file, 'r')
