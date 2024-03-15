@@ -156,8 +156,8 @@ def frag_generator(
     input_file : str or AlignmentFile
     contig : str
     quality_threshold : int, optional
-    minimum : int, optional
-    maximum : int, optional
+    start : int, optional
+    stop : int, optional
     fraction_low : int, optional
         Specifies lowest fragment length included in array. Default is
         120, equivalent to long fraction.
