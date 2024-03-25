@@ -164,7 +164,7 @@ def multi_wps(
     if (verbose):
         stderr.write('Zipping inputs\n')
 
-    tss_list = zip(
+    interval_list = zip(
         count*[input_file],
         contigs,
         starts,
@@ -185,8 +185,8 @@ def multi_wps(
         # chunksize limited for memory
         interval_scores = pool.imap(
             _wps_star,
-            tss_list,
-            chunksize=min(500, int(count/workers//2+1))
+            interval_list,
+            chunksize=100
         )
 
         # output
@@ -204,8 +204,8 @@ def multi_wps(
                         starts = interval_score['start']
                         scores = interval_score['wps']
                         stops = starts + 1
-                        # skip empty intervals
 
+                        # skip empty intervals
                         if contigs.shape == (0,):
                             continue
 
