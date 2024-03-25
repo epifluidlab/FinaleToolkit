@@ -14,6 +14,7 @@ from finaletools.frag.adjust_wps import adjust_wps
 from finaletools.frag.agg_wps import agg_wps
 from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
 from finaletools.frag.end_motifs import end_motifs, _cli_mds
+from finaletools.frag.cleavage_profile import _cli_cleavage_profile
 from finaletools.genome.gaps import _cli_gap_bed
 
 # TODO: implement subcommands read from stdin
@@ -679,6 +680,62 @@ def main_cli_parser():
         help='Path to write bed file to. If "-" used, writes to stdout.'
     )
     parser_command12.set_defaults(func=_cli_gap_bed)
+
+    # Subcommand 13: cleavage profile
+    parser_command13 = subparsers.add_parser(
+        'cleavage-profile',
+        prog='finaletools-cleavage-profile',
+        description='wip'
+    )
+    parser_command13.add_argument(
+        'input_file',
+        help='BAM, CRAM, or frag.gz containing fragment coordinates.'
+    )
+    parser_command13.add_argument(
+        'interval_file',
+        help='BED file containing intervals to calculate cleavage profile '
+        'over.'
+    )
+    parser_command13.add_argument(
+        'output_file',
+        help='Path to write bed file to. If "-" used, writes to stdout.'
+    )
+    parser_command13.add_argument(
+        '-lo',
+        '--fraction_low',
+        default=120,
+        type=int
+    )
+    parser_command13.add_argument(
+        '-hi',
+        '--fraction_high',
+        default=180,
+        type=int
+    )
+    parser_command13.add_argument(
+        '-q',
+        '--quality-threshold',
+        default=20,
+        type=int,
+        help='Minimum MAPQ of reads. Default is 20.'
+    )
+    parser_command13.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of subprocesses to use. Default is 1.'
+    )
+    # TODO: include what each level of verbosity entails.
+    parser_command13.add_argument(
+        '-v',
+        '--verbose',
+        default=0,
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional '
+        'to number of vs.'
+    )
+    parser_command13.set_defaults(func=_cli_cleavage_profile)
     return parser
 
 
