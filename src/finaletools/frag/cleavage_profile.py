@@ -260,7 +260,9 @@ def _cli_cleavage_profile(
                             )
                             continue
             elif (output_file.endswith('.bed.gz')
-                  or output_file.endswith('bedGraph.gz')):
+                  or output_file.endswith('bedgraph.gz'))
+                  or output_file == "-":
+                  # XXX: writing to stdout is untested and may not work.
                 with gzip.open(output_file, 'wt') as bedgraph:
                     for interval_score in interval_scores:
                         contigs = interval_score['contig']

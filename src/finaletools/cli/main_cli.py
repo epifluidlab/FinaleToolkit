@@ -697,8 +697,13 @@ def main_cli_parser():
         'over.'
     )
     parser_command13.add_argument(
-        'output_file',
-        help='Path to write bed file to. If "-" used, writes to stdout.'
+        '-o',
+        '--output_file',
+        default='-',
+        help='Path to write output file to. If "-" used, writes bed.gz to '
+        'stdout. Writes in BigWig format if ".bw" or ".bigwig" used, and '
+        'writes in gzip compressed bed file if ".bed.gz" or ".bedGraph.gz" '
+        'suffixes used. Default is "-".',
     )
     parser_command13.add_argument(
         '-lo',
