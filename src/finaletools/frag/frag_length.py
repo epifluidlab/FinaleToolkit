@@ -9,7 +9,6 @@ import gzip
 import numpy as np
 import pysam
 import tqdm
-from numba import jit
 
 from finaletools.utils.utils import (
     _not_read1_or_low_quality, _get_intervals, frag_generator

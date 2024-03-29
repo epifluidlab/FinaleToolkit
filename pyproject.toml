@@ -7,7 +7,7 @@ include-package-data = true
 
 [project]
 name = "FinaleTools"
-version = "0.4.0"
+version = "0.4.1"
 authors = [
     {name="James Li", email="jameswli2021@gmail.com"},
     {name="Yaping Liu", email="yaping.liu@cchmc.org"},
@@ -38,6 +38,7 @@ dependencies = [
     "sphinx<7.0.0",
     "sphinx_rtd_theme",
     "sphinx-argparse",
+    "loess",
 ]
 
 [project.scripts]

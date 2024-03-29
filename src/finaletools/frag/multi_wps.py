@@ -8,9 +8,7 @@ from sys import stderr, stdout, stdin
 import pysam
 import numpy as np
 from numpy.typing import NDArray
-from numba import jit
 from tqdm import tqdm
-from memory_profiler import profile
 import pyBigWig as pbw
 
 from finaletools.frag.wps import wps

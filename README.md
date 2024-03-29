@@ -1,33 +1,38 @@
 # FinaleTools
+Lightweight Python library and standalone program to extract features from
+cfDNA paired-end reads. FinaleTools refers to FragmentatIoN AnaLysis of
+cEll-free DNA Tools.
 
-Lightweight Python library and standalone program for analysis of cell free DNA fragment data. FinaleTools refers to FragmentatIoN AnaLysis of cEll-free DNA Tools.
+FinaleTools is in active development, and all API is subject to change and
+should be considered unstable.
 
 ## Installation
-This package is currently work-in-progress. Here is how to install (wip):
+Instructions:
+- (Optional) create a conda or venv environment to use FinaleTools in.
+- Run `pip install finaletools`
 
-- Clone repo from https://github.com/epifluidlab/FinaleTools/
-- Create a conda environment with all of the dependencies. If only using pip to install dependencies, create venv/conda env and go to next step.
-  Pip might not install all non-python dependencies. Currently only samtools needs to be installed in addition.
-    - For conda, run the following:
-    ```
-    conda create -n <env_name> -c bioconda -c conda-forge python=3.<version>
-    <dependencies>
-    - see pyproject.toml for dependencies
-    ```
-    - Alternatively if using Linux, you can also use the attached YAML file by navigating to the project directory and running:
-      ```
-      conda create -f conda_env/environment.yml
-      ```
-      The resulting environment should be called `samenv3`.
-- cd to project directory
-- Run `pip install -e .`
-- Run `finaletools -h` to see if you did this right
+To verify FinaleTools has been successfully installed, try
+```
+$ finaletools -h
+usage: finaletools [-h]
+                   {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
+                   ...
+
+Calculates fragmentation features given a CRAM/BAM/SAM file
+
+options:
+  -h, --help            show this help message and exit
+
+subcommands:
+  {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
+```
 
 ## Usage
 Documentation can be found at https://epifluidlab.github.io/finaletools-docs/
 
-FinaleTools functions generally accept reads in two file formats:
+FinaleTools functions generally accept reads in a few file formats:
 - Binary Alignment Map (BAM) Files
+- Compressed Reference-oriented Alignment Map
 - FinaleDB Frag.gz Files
 
 Frag.gz files are block-gzipped BED3+2 files with the following format:
@@ -51,22 +56,6 @@ tabix -p bed $OUTPUT;
 Frag.gz files can be retrieved from http://finaledb.research.cchmc.org/
 
 Because FinaleTools uses pysam, BAM files should be bai-indexed and Frag.gz files should be tabix-indexed.
-
-To verify FinaleTools has been successfully installed, try
-```
-$ finaletools -h
-usage: finaletools [-h]
-                   {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
-                   ...
-
-Calculates fragmentation features given a CRAM/BAM/SAM file
-
-options:
-  -h, --help            show this help message and exit
-
-subcommands:
-  {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
-```
 
 To view fragment length distribution
 ```

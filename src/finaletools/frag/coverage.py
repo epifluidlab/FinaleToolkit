@@ -7,7 +7,6 @@ from multiprocessing import Pool
 
 import pysam
 import gzip
-from numba import jit
 from tqdm import tqdm
 
 from finaletools.utils.utils import (
