@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 
 from finaletools.frag.frag_length import (
-    frag_length, frag_length_bins, frag_length_intervals
+    _cli_frag_length, frag_length_bins, frag_length_intervals
 )
 from finaletools.utils.filter_bam import filter_bam
 from finaletools.frag.coverage import coverage
@@ -146,7 +146,7 @@ def main_cli_parser():
         default=0,
         help='Verbose logging.'
     )
-    parser_command2.set_defaults(func=frag_length)
+    parser_command2.set_defaults(func=_cli_frag_length)
 
     # Subcommand 3: frag_length_bins()
     parser_command3 = subparsers.add_parser(
