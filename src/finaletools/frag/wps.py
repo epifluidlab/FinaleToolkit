@@ -71,7 +71,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         Default is 120, equivalent to long fraction.
     fraction_high : int, optional
         Specifies highest fragment length included in calculation.
-        Default is 120, equivalent to long fraction.
+        Default is 180, equivalent to long fraction.
     quality_threshold : int, optional
     workers : int, optional
     verbose : bool, optional

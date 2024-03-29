@@ -1,94 +1,138 @@
+"""Cleavage Profiler
+
+This module is used to find the cleavage profile as described in Zhou
+et al 2022 (https://doi.org/10.1073/pnas.2209852119). Cleavage profile
+describes the proportion of fragment ends at a site over the depth at
+the site (cleavage proportion) calculated over a 5+/- nt window around a
+CpG site.
+"""
+
 from __future__ import annotations
+from typing import Union
+from sys import stderr, stdout, stdin
+from multiprocessing import Pool
 import gzip
 import time
-from multiprocessing.pool import Pool
-from typing import Union, Iterator, Generator
-from sys import stderr, stdout, stdin
 
-import pysam
 import numpy as np
-from numpy.typing import NDArray
-from numba import jit
-from tqdm import tqdm
-from memory_profiler import profile
 import pyBigWig as pbw
+from pybedtools import BedTool
+import pysam
 
-from finaletools.frag.wps import wps
-
-
-def _wps_star(args):
-    """Helper function to be used with imap"""
-    return wps(*args)
+from finaletools.utils.utils import frag_array, overlaps
 
 
-def multi_wps(
-        input_file: Union[pysam.AlignmentFile, str],
-        site_bed: str,
-        output_file: Union[str, None]=None,
-        window_size: int=120,
-        interval_size: int=5000,
-        fraction_low: int=120,
-        fraction_high: int=180,
-        quality_threshold: int=30,
-        workers: int=1,
-        verbose: Union[bool, int]=0
-        ) -> np.ndarray:
-    """
-    Function that aggregates WPS over sites in BED file according to the
-    method described by Snyder et al (2016).
-
-    Parameters
-    ----------
-    input_file : str or pysam.AlignmentFile
-        BAM, SAM, or tabix file containing paired-end fragment reads or its
-        path. `AlignmentFile` must be opened in read mode.
-    site_bed: str
-        Bed file containing intervals to perform WPS on.
-    output_file : string, optional
-    window_size : int, optional
-        Size of window to calculate WPS. Default is k = 120, equivalent
-        to L-WPS.
-    interval_size : int, optional
-        Size of each interval specified in the bed file. Should be the
-        same for every interbal. Default is 5000.
-    fraction_low : int, optional
-        Specifies lowest fragment length included in calculation.
-        Default is 120, equivalent to long fraction.
-    fraction_high : int, optional
-        Specifies highest fragment length included in calculation.
-        Default is 120, equivalent to long fraction.
-    quality_threshold : int, optional
-    workers : int, optional
-    verbose : bool, optional
-
-    Returns
-    -------
-    scores : numpy.ndarray
-        np array of shape (n, 2) where column 1 is the coordinate and
-        column 2 is the score and n is the number of coordinates in
-        region [start,stop)
-    """
+def cleavage_profile(
+    input_file: str,
+    contig: str,
+    start: int,
+    stop: int,
+    fraction_low: int=1,
+    fraction_high: int=10000000,
+    quality_threshold: int=30,
+    verbose: Union[bool, int]=0
+) -> np.ndarray:
     if (verbose):
         start_time = time.time()
         stderr.write(
             f"""
-            Calculating aggregate WPS
+            Calculating cleavage profile
             input_file: {input_file}
-            site_bed: {site_bed}
-            output_file: {output_file}
-            window_size: {window_size}
-            interval_size: {interval_size}
+            contig: {contig}
+            start: {start}
+            stop: {stop}
+            fraction_low: {fraction_low}
+            fraction_high: {fraction_high}
             quality_threshold: {quality_threshold}
-            workers: {workers}
             verbose: {verbose}
-
             """
         )
 
-    if (input_file == '-' and site_bed == '-'):
-        raise ValueError('input_file and site_bed cannot both read from stdin')
+    frags = frag_array(
+        input_file=input_file,
+        contig=contig,
+        quality_threshold=quality_threshold,
+        start=start,
+        stop=stop,
+        fraction_low=fraction_low,
+        fraction_high=fraction_high
+    )
 
-    # get header from input_file
+    positions = np.arange(start, stop)
+
+    # finding depth at sites
+    fragwise_overlaps = np.logical_and(
+        np.greater_equal(positions[np.newaxis], frags['start'][:,np.newaxis]),
+        np.less(positions[np.newaxis], frags['stop'][:,np.newaxis])
+    )
+    depth = np.sum(fragwise_overlaps, axis=0)
+
+    # finding ends
+    forward_ends = np.logical_and(
+        np.equal(
+            positions[np.newaxis], frags['start'][:, np.newaxis]
+        ), frags['strand'][:, np.newaxis]
+    )
+    reverse_ends = np.logical_and(
+        np.equal(
+            positions[np.newaxis], frags['stop'][:, np.newaxis]
+        ), np.logical_not(frags['strand'][:, np.newaxis])
+    )
+    ends = np.sum(np.logical_or(forward_ends, reverse_ends), axis=0)
+    proportions = ends/depth*100
+
+    results = np.zeros_like(proportions, dtype=[
+        ('contig', 'U16'),
+        ('pos', 'i8'),
+        ('proportion', 'f8'),
+    ])
+    results['contig'] = contig
+    results['pos'] = np.arange(start, stop)
+    results['proportion'] = proportions
+
+
+    return results
+
+
+def _cleavage_profile_star(args):
+    return cleavage_profile(*args)
+
+
+def _cli_cleavage_profile(
+    input_file: str,
+    interval_file: str,
+    fraction_low: int=1,
+    fraction_high: int=10000000,
+    quality_threshold: int=30,
+    output_file: str='-',
+    workers: int=1,
+    verbose: Union[bool, int]=0
+):
+    """
+    Function called when running cleavage profile subcommand in cli.
+    Multithreaded implementation over intervals in bed.
+    """
+
+    if (verbose):
+        start_time = time.time()
+        stderr.write(
+            f"""
+            Calculating cleavage profile
+            input_file: {input_file}
+            interval_file: {interval_file}
+            fraction_low: {fraction_low}
+            fraction_high: {fraction_high}
+            quality_threshold: {quality_threshold}
+            output_file: {output_file}
+            workers: {workers}
+            verbose: {verbose}
+            """
+        )
+    
+    if (input_file == '-' and interval_file == '-'):
+        raise ValueError('input_file and site_bed cannot both read from stdin')
+    
+      # get header from input_file
     if (input_file.endswith('.sam')
         or input_file.endswith('.bam')
         or input_file.endswith('.cram')):
@@ -109,19 +153,17 @@ def multi_wps(
 
     if (verbose > 1):
         stderr.write(f'header is {header}\n')
-
-    # read tss contigs and coordinates from bed
-    if (verbose):
-        stderr.write('Reading intervals from bed\n')
-
+    
+    # reading intervals from bed and removing overlaps
+    # NOTE: assumes that bed file is sorted.
     contigs = []
     starts = []
     stops = []
     try:
-        if site_bed == '-':
+        if interval_file == '-':
             bed = stdin
         else:
-            bed = open(site_bed)
+            bed = open(interval_file)
 
         # for overlap checking
         prev_contig = None
@@ -149,16 +191,10 @@ def multi_wps(
         contigs.append(prev_contig)
         starts.append(prev_start)
         stops.append(prev_stop)
-
     finally:
-        if site_bed != '-':
+        if interval_file != '-':
             bed.close()
-
-    left_of_site = round(-interval_size / 2)
-    right_of_site = round(interval_size / 2)
-
-    assert right_of_site - left_of_site == interval_size
-
+    
     count = len(contigs)
 
     if (verbose):
@@ -169,22 +205,20 @@ def multi_wps(
         contigs,
         starts,
         stops,
-        count*[None],
-        count*[window_size],
         count*[fraction_low],
         count*[fraction_high],
         count*[quality_threshold],
-        count*[verbose-2 if verbose>2 else 0]
+        count*[max(verbose-1, 0)]
     )
 
     if (verbose):
-        stderr.write('Calculating wps...\n')
+        stderr.write('Calculating cleavage profile...\n')
 
     try:
         pool = Pool(workers, maxtasksperchild=500)
         # chunksize limited for memory
         interval_scores = pool.imap(
-            _wps_star,
+            _cleavage_profile_star,
             interval_list,
             chunksize=100
         )
@@ -201,8 +235,8 @@ def multi_wps(
                     bigwig.addHeader(header)
                     for interval_score in interval_scores:
                         contigs = interval_score['contig']
-                        starts = interval_score['start']
-                        scores = interval_score['wps']
+                        starts = interval_score['pos']
+                        scores = interval_score['proportion']
                         stops = starts + 1
 
                         # skip empty intervals
@@ -226,12 +260,14 @@ def multi_wps(
                             )
                             continue
             elif (output_file.endswith('.bed.gz')
-                  or output_file.endswith('bedGraph.gz')):
+                  or output_file.endswith('bedgraph.gz')
+                  or output_file == "-"):
+                  # XXX: writing to stdout is untested and may not work.
                 with gzip.open(output_file, 'wt') as bedgraph:
                     for interval_score in interval_scores:
                         contigs = interval_score['contig']
-                        starts = interval_score['start']
-                        scores = interval_score['wps']
+                        starts = interval_score['pos']
+                        scores = interval_score['proportion']
                         stops = starts + 1
 
                         lines = ''.join(f'{contig}\t{start}\t{stop}\t{score}\n'
@@ -257,7 +293,7 @@ def multi_wps(
     if (verbose):
         end_time = time.time()
         stderr.write(
-            f'multi_wps took {end_time - start_time} s to complete\n'
+            f'cleavage profile took {end_time - start_time} s to complete\n'
         )
-
-    return scores
+    
+    return None
