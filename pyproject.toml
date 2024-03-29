@@ -7,10 +7,10 @@ include-package-data = true
 
 [project]
 name = "FinaleTools"
-version = "0.4.1"
+version = "0.4.2"
 authors = [
-    {name="James Li", email="jameswli2021@gmail.com"},
-    {name="Yaping Liu", email="yaping.liu@cchmc.org"},
+    {name="James Li", email="lijw21@wfu.edu"},
+    {name="Yaping Liu", email="yaping@northwestern.edu"},
 ]
 description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
 readme = "README.md"
