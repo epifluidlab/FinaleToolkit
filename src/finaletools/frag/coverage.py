@@ -135,8 +135,9 @@ def coverage(
     input_file : str or pysam.AlignmentFile
         BAM, SAM, or CRAM file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
-    intervals : str
-        Path for BAM file containing intervals
+    interval_file : str
+        BED4 file containing intervals over which to generate coverage
+        statistics.
     output_file : string, optional
         Path for bed file to print coverages to. If output_file = `_`,
         results will be printed to stdout.
@@ -150,6 +151,7 @@ def coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
+    #FIXME update docstring
     if (verbose):
         start_time = time.time()
         sys.stderr.write(
