@@ -14,11 +14,11 @@ This package is currently work-in-progress. Here is how to install (wip):
   Pip might not install all non-python dependencies.
 
     - For conda, run the following:
-    ```
-    conda create -n <env_name> -c bioconda -c conda-forge python=3.<version>
-    <dependencies>
+        ```
+        conda create -n <env_name> -c bioconda -c conda-forge python=3.<version>
+        <dependencies>
+        ```
     - see pyproject.toml for dependencies
-    ```
     - Alternatively if using Linux, you can also use the attached YAML file by navigating to the project directory and running:
       ```
       conda create -f conda_env/environment.yml
