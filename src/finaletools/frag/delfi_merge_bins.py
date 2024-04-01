@@ -61,4 +61,4 @@ def delfi_merge_bins(
     
     return five_mb_bins
 
-# TODO: add CLI, make binning customizable
+# TODO: make binning customizable
