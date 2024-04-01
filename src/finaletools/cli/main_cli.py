@@ -355,10 +355,7 @@ def main_cli_parser():
         description='Calculates DELFI score over genome.'
         '\nNOTE: due to some '
         'ad hoc implementation details, currently the only accepted reference '
-        "genome is the Broad Institute's b37 or hg19 from phase 1 of the "
-        "1000 genomes project. The only major difference between hg19 and b37 "
-        'is that a different mitochondria reference is used and the "chr" '
-        'prefix is omitted.'
+        "genome is hg19.'
         )
     parser_command5.add_argument(
         'input_file',
