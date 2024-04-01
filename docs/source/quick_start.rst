@@ -15,6 +15,7 @@ Instructions:
 - Run `pip install finaletools`
 
 To verify FinaleTools has been successfully installed, try::
+    
     $ finaletools -h
     usage: finaletools [-h]
                     {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
