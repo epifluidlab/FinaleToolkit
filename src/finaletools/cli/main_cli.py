@@ -352,20 +352,63 @@ def main_cli_parser():
     parser_command5 = subparsers.add_parser(
         'delfi',
         prog='finaletools-delfi',
-        description='Calculates DELFI score over genome'
+        description='Calculates DELFI score over genome.'
+        '\nNOTE: due to some '
+        'ad hoc implementation details, currently the only accepted reference '
+        "genome is the Broad Institute's b37 or hg19 from phase 1 of the "
+        "1000 genomes project. The only major difference between hg19 and b37 "
+        'is that a different mitochondria reference is used and the "chr" '
+        'prefix is omitted.'
         )
-    parser_command5.add_argument('input_file')
-    parser_command5.add_argument('autosomes')
-    parser_command5.add_argument('reference_file')
-    parser_command5.add_argument('bins_file')
-    parser_command5.add_argument('-b', '--blacklist_file')
-    parser_command5.add_argument('-g', '--gap_file')
-    parser_command5.add_argument('-o', '--output_file')
-    parser_command5.add_argument('-W', '--window_size', default=100000, type=int)
-    parser_command5.add_argument('-gc', '--gc_correct', action='store_true')
-    parser_command5.add_argument('-m', '--merge_bins', action='store_true')
-    parser_command5.add_argument('-q', '--quality_threshold', default=30, type=int)
-    parser_command5.add_argument('-w', '--workers', default=1, type=int)
+    parser_command5.add_argument(
+        'input_file',
+        help="SAM, BAM, CRAM, or Frag.gz file containing fragment reads.")
+    parser_command5.add_argument(
+        'autosomes',
+        help="Tab-delimited file where column one is chromosomes and column "
+        "two is the length of said chromosome."
+        )
+    parser_command5.add_argument(
+        'reference_file',
+        help="2bit file for reference sequence used during alignment."
+        )
+    parser_command5.add_argument(
+        'bins_file',
+        help="BED format file containing bins over which to calculate delfi. "
+        "To replicate Cristiano and colleage's methodology, use 100kb bins "
+        "over human autosomes."
+        )
+    parser_command5.add_argument(
+        '-b', '--blacklist_file',
+        "BED file containing darkregions to ignore when calculating DELFI."
+        )
+    parser_command5.add_argument(
+        '-g', '--gap_file',
+        'BED4 format file with columns "chrom","start","stop","type". '
+        '"type" should be "centromere", "telomere", or "short arm"; all others'
+        ' are ignored. This information corresponds to "gap" track for hg19 in'
+        ' UCSC Genome Browser.'
+        )
+    parser_command5.add_argument(
+        '-o', '--output_file', default='-',
+        help='BED, bed.gz, tsv, or csv file to write results to. If "-", '
+        'writes tab-deliniated data to stdout. Default is "-".')
+    parser_command5.add_argument(
+        '-W', '--window_size', default=5000000, type=int,
+        help="Currently unused.")
+    parser_command5.add_argument(
+        '-gc', '--gc_correct', action='store_true',
+        help="Indicate whther or not gc correction is applied.")
+    parser_command5.add_argument(
+        '-m', '--merge_bins', action='store_true',
+        help="Indicate whther or not bins are merged to 5Mb bins.")
+    parser_command5.add_argument(
+        '-q', '--quality_threshold', default=30, type=int,
+        help="MAPQ to be filtered.")
+    parser_command5.add_argument(
+        '-w', '--workers', default=1, type=int,
+        help="Maximum number of subprocesses to spawn. Should be close to "
+        "number of cores.")
     parser_command5.add_argument('-v', '--verbose', action='count', default=0)
     parser_command5.set_defaults(func=delfi)
 

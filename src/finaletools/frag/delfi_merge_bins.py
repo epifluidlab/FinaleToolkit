@@ -19,6 +19,7 @@ def delfi_merge_bins(
         add_chr:bool=False,
         verbose:bool=False
 ):
+    #FIXME: find a way to calculate this that is not dependent on b37 format
     delfi_scripts_5mb_bins = pd.read_csv(BINS_PATH)
 
     if add_chr:
