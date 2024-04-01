@@ -355,7 +355,7 @@ def main_cli_parser():
         description='Calculates DELFI score over genome.'
         '\nNOTE: due to some '
         'ad hoc implementation details, currently the only accepted reference '
-        "genome is hg19.'
+        "genome is hg19."
         )
     parser_command5.add_argument(
         'input_file',
@@ -377,11 +377,11 @@ def main_cli_parser():
         )
     parser_command5.add_argument(
         '-b', '--blacklist_file',
-        "BED file containing darkregions to ignore when calculating DELFI."
+        help="BED file containing darkregions to ignore when calculating DELFI."
         )
     parser_command5.add_argument(
         '-g', '--gap_file',
-        'BED4 format file with columns "chrom","start","stop","type". '
+        help='BED4 format file with columns "chrom","start","stop","type". '
         '"type" should be "centromere", "telomere", or "short arm"; all others'
         ' are ignored. This information corresponds to "gap" track for hg19 in'
         ' UCSC Genome Browser.'

@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quick-start Guide &mdash; FinaleTools  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -83,42 +81,36 @@
              
   <section id="quick-start-guide">
 <h1>Quick-start Guide<a class="headerlink" href="#quick-start-guide" title="Permalink to this heading"></a></h1>
-<p>Python tools for analysis of cell free DNA fragment data. FinaleTools refers to FragmentatIoN AnaLysis of cEll-free DNA Tools.</p>
+<p>A package and standalone program to extract fragmentation patterns of cell-free
+DNA from paired-end sequencing data. FinaleTools refers to FragmentatIoN
+AnaLysis of cEll-free DNA Tools.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
-<p>This package is currently work-in-progress. Here is how to install (wip):</p>
-<ul>
-<li><p>Clone repo from <a class="reference external" href="https://github.com/epifluidlab/FinaleTools/">https://github.com/epifluidlab/FinaleTools/</a></p></li>
-<li><p>Create a conda environment with all of the dependencies. If only using pip to install dependencies, create venv/conda env and go to next step.
-Pip might not install all non-python dependencies.</p>
+<p>Instructions:</p>
+<ul class="simple">
+<li><p>(Optional) create a conda or venv environment to use FinaleTools in.</p></li>
+<li><p>Run <cite>pip install finaletools</cite></p></li>
+</ul>
+<dl>
+<dt>To verify FinaleTools has been successfully installed, try::</dt><dd><p>$ finaletools -h
+usage: finaletools [-h]</p>
 <blockquote>
-<div><ul class="simple">
-<li><dl class="simple">
-<dt>For conda, run the following:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">&lt;env_name&gt;</span> <span class="pre">-c</span> <span class="pre">bioconda</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">python=3.&lt;version&gt;</span>
-<span class="pre">&lt;dependencies&gt;</span>
-<span class="pre">`</span></code></p>
+<div><p>{coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
+…</p>
+</div></blockquote>
+<p>Calculates fragmentation features given a CRAM/BAM/SAM file</p>
+<p>options:
+-h, –help            show this help message and exit</p>
+<p>subcommands:
+{coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}</p>
 </dd>
 </dl>
-</li>
-<li><p>see pyproject.toml for dependencies</p></li>
-<li><p>Alternatively if using Linux, you can also use the attached YAML file by navigating to the project directory and running:
-<code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-f</span> <span class="pre">conda_env/environment.yml</span>
-<span class="pre">`</span></code>
-The resulting environment should be called <cite>samenv3</cite>.</p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p>cd to project directory</p></li>
-<li><p>Run <cite>pip install -e .</cite></p></li>
-<li><p>Run <cite>finaletools -h</cite> to see if you did this right</p></li>
-</ul>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
-<p>FinaleTools functions generally accept reads in two file formats:
+<p>FinaleTools functions generally accept reads in a few file formats:
 - Binary Alignment Map (BAM) Files
+- Compressed Reference-oriented Alignment Map (CRAM) files
 - FinaleDB Frag.gz Files</p>
 <p>Frag.gz files are block-gzipped BED3+2 files with the following format:
 <code class="docutils literal notranslate"><span class="pre">chrom</span>&#160; <span class="pre">start</span>&#160; <span class="pre">stop</span>&#160; <span class="pre">mapq</span>&#160; <span class="pre">strand(+/-)</span></code></p>

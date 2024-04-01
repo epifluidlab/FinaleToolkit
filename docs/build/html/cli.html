@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CLI &mdash; FinaleTools  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -415,7 +413,8 @@
 </section>
 <section id="delfi">
 <h3>delfi<a class="headerlink" href="#delfi" title="Permalink to this heading"></a></h3>
-<p>Calculates DELFI score over genome</p>
+<p>Calculates DELFI score over genome.
+NOTE: due to some ad hoc implementation details, currently the only accepted reference genome is hg19.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletools</span> <span class="n">delfi</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">GAP_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gc</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                   <span class="n">input_file</span> <span class="n">autosomes</span> <span class="n">reference_file</span> <span class="n">bins_file</span>
 </pre></div>
@@ -424,38 +423,51 @@
 <h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat5" title="Permalink to this heading"></a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd></dd>
+<dd><p>SAM, BAM, CRAM, or Frag.gz file containing fragment reads.</p>
+</dd>
 <dt><kbd>autosomes</kbd></dt>
-<dd></dd>
+<dd><p>Tab-delimited file where column one is chromosomes and column two is the length of said chromosome.</p>
+</dd>
 <dt><kbd>reference_file</kbd></dt>
-<dd></dd>
+<dd><p>2bit file for reference sequence used during alignment.</p>
+</dd>
 <dt><kbd>bins_file</kbd></dt>
-<dd></dd>
+<dd><p>BED format file containing bins over which to calculate delfi. To replicate Cristiano and colleage’s methodology, use 100kb bins over human autosomes.</p>
+</dd>
 </dl>
 </section>
 <section id="named-arguments_repeat5">
 <h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Permalink to this heading"></a></h4>
 <dl class="option-list">
 <dt><kbd>-b, --blacklist_file</kbd></dt>
-<dd></dd>
+<dd><p>BED file containing darkregions to ignore when calculating DELFI.</p>
+</dd>
 <dt><kbd>-g, --gap_file</kbd></dt>
-<dd></dd>
+<dd><p>BED4 format file with columns “chrom”,”start”,”stop”,”type”. “type” should be “centromere”, “telomere”, or “short arm”; all others are ignored. This information corresponds to “gap” track for hg19 in UCSC Genome Browser.</p>
+</dd>
 <dt><kbd>-o, --output_file</kbd></dt>
-<dd></dd>
+<dd><p>BED, bed.gz, tsv, or csv file to write results to. If “-”, writes tab-deliniated data to stdout. Default is “-“.</p>
+<p>Default: “-”</p>
+</dd>
 <dt><kbd>-W, --window_size</kbd></dt>
-<dd><p>Default: 100000</p>
+<dd><p>Currently unused.</p>
+<p>Default: 5000000</p>
 </dd>
 <dt><kbd>-gc, --gc_correct</kbd></dt>
-<dd><p>Default: False</p>
+<dd><p>Indicate whther or not gc correction is applied.</p>
+<p>Default: False</p>
 </dd>
 <dt><kbd>-m, --merge_bins</kbd></dt>
-<dd><p>Default: False</p>
+<dd><p>Indicate whther or not bins are merged to 5Mb bins.</p>
+<p>Default: False</p>
 </dd>
 <dt><kbd>-q, --quality_threshold</kbd></dt>
-<dd><p>Default: 30</p>
+<dd><p>MAPQ to be filtered.</p>
+<p>Default: 30</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
-<dd><p>Default: 1</p>
+<dd><p>Maximum number of subprocesses to spawn. Should be close to number of cores.</p>
+<p>Default: 1</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Default: 0</p>
@@ -692,7 +704,7 @@
 <dl class="option-list">
 <dt><kbd>-s, --sep</kbd></dt>
 <dd><p>Separator used in tabular file. Default is tab.</p>
-<p>Default: “      “</p>
+<p>Default: ”      “</p>
 </dd>
 <dt><kbd>--header</kbd></dt>
 <dd><p>Number of header rows to ignore. Default is 0</p>
