@@ -430,8 +430,13 @@ def _get_intervals(
     intersect_policy: str,
     quality_threshold: int,
     verbose: Union[bool, int]
-) -> list:
-    """Helper function to read intervals from bed file."""
+) -> list[Tuple[str, str, int, int, str, str, int]]:
+    """
+    Helper function to read intervals from bed file.
+    Returns list of tuples:
+    (input_file, chrom, start, stop, name, intersect_policy,
+    quality_threshold, verbosity)
+    """
     intervals = []  # list of inputs for single_coverage
 
     with open(interval_file) as bed:
