@@ -22,8 +22,8 @@ from finaletools.genome.gaps import _cli_gap_bed
 
 def main_cli_parser():
     parser = argparse.ArgumentParser(
-        description='Calculates fragmentation features given a CRAM/BAM/SAM '
-        'file',
+        description='Calculates fragmentation features given a CRAM, BAM, SAM,'
+        ' or Frag.gz file.',
         epilog='')
     subparsers = parser.add_subparsers(title='subcommands',
                                        dest='subcommand')
@@ -151,8 +151,8 @@ def main_cli_parser():
     # Subcommand 3: frag_length_bins()
     parser_command3 = subparsers.add_parser(
         'frag-length-bins', prog='finaletools-frag-length-bins',
-        description='computes frag lengths of fragments and either prints'
-        'bins and counts to tsv or prints a histogram'
+        description='computes frag lengths of fragments and agregates in bins '
+        'by length. Either writes bins and counts to tsv or prints a histogram'
         )
     parser_command3.add_argument(
         'input_file',
@@ -232,7 +232,8 @@ def main_cli_parser():
     # Subcommand 3_1: frag_length_intervals
     parser_command3_1 = subparsers.add_parser(
         'frag-length-intervals',
-        description='Calculates frag lengths statistics for intervals'
+        description='Calculates frag lengths statistics over user-specified '
+        'genomic intervals.'
     )
     parser_command3_1.add_argument(
         'input_file',
@@ -289,7 +290,7 @@ def main_cli_parser():
         prog='finaletools-wps',
         description='Calculates Windowed Protection Score over a region '
         'around sites specified in a BED file from alignments in a '
-        'CRAM/BAM/SAM file'
+        'CRAM/BAM/SAM/Frag.gz file'
     )
     parser_command4.add_argument(
         'input_file',
