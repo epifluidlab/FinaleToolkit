@@ -273,7 +273,7 @@ def region_end_motifs(
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
-    both_strands: bool = False,
+    both_strands: bool = True,
     output_file: Union[None, str] = None,
     quality_threshold: int = MIN_QUALITY,
     verbose: Union[bool, int] = False,
@@ -292,6 +292,9 @@ def region_end_motifs(
     stop : int
     refseq_file : str
     k : int, optional
+    fraction_low: int
+    fraction_high: int
+    both_strands: bool
     output_file : None or str, optional
     quality_threshold : int, optional
     verbose : bool or int, optional
@@ -536,7 +539,7 @@ def interval_end_motifs(
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
-    both_strands: bool = False,
+    both_strands: bool = True,
     output_file: Union[None, str] = None,
     quality_threshold: int = 30,
     workers: int = 1,
@@ -632,9 +635,9 @@ def interval_end_motifs(
     finally:
         pool.close()
     results = EndMotifsIntervals(
-        ((interval, counts)
+        [(interval, counts)
          for interval, counts
-         in zip(intervals_tuples, counts_iter)),
+         in zip(intervals_tuples, counts_iter)],
          k,
          quality_threshold,
     )
