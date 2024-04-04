@@ -241,6 +241,115 @@ class EndMotifsIntervals():
         mds.append((interval, interval_mds))
 
         return mds
+    
+    def to_tsv(self, output_file: str, calc_freq: bool=True, sep: str='\t'):
+        """
+        Writes all intervals and associated frquencies to file.
+        
+        Parameters
+        ----------
+        output_file: str
+            File to write frequencies to.
+        calc_freq: bool, optional
+            Calculates frequency of motifs if true. Otherwise, writes counts
+            for each motif. Default is true.
+        sep: str, optional
+            Separator for table. Tab-separated by default.
+        """
+        if type(output_file) == str:
+            try:
+                # open file based on name
+                output_is_file = False
+                if output_file == '-':
+                    output = stdout
+                else:
+                    output_is_file = True
+                    output = open(output_file, 'w')
+
+                # write to file
+                kmers = _gen_kmers(self.k, 'ACGT')
+                # header
+                output.write(sep.join(['contig','start','stop','count',*kmers]))
+                output.write('\n')
+                # data
+                for interval, freqs in self.intervals:
+                    count = sum(freqs.values())
+                    output.write(
+                        sep.join([
+                            interval[0],
+                            str(interval[1]),
+                            str(interval[2]),
+                            str(count), 
+                            *([str(freq) for freq in freqs.values()]
+                             if not calc_freq
+                             else [f"{(freq/count):.6f}"
+                                   if count!=0
+                                   else "NaN" 
+                                for freq
+                                in freqs.values()])
+                        ])
+                    )
+                    output.write('\n')
+
+            finally:
+                if output_is_file:
+                    output.close()
+        else:
+            raise TypeError(f'output_file must be a string.')
+    
+    def to_bedgraph(
+            self,
+            kmer: str,
+            output_file: str,
+            calc_freq: bool=True,
+            sep: str='\t'
+        ):
+        """
+        Take frequency of specified kmer and writes to BED.
+        
+        Parameters
+        ----------
+        output_file: str
+            File to write frequencies to.
+        calc_freq: bool, optional
+            Calculates frequency of motifs if true. Otherwise, writes counts
+            for each motif. Default is true.
+        sep: str, optional
+            Separator for table. Tab-separated by default.
+        """
+        if type(output_file) == str:
+            try:
+                # open file based on name
+                output_is_file = False
+                if output_file == '-':
+                    output = stdout
+                else:
+                    output_is_file = True
+                    output = open(output_file, 'w')
+
+                # write to file
+                for interval, freqs in self.intervals:
+                    count = sum(freqs.values())
+                    output.write(
+                        sep.join([
+                            interval[0],
+                            str(interval[1]),
+                            str(interval[2]),
+                            (self.freq[kmer] if not calc_freq
+                             else f"{(freqs[kmer]/count):.6f}"
+                                if count!=0
+                                else "NaN"
+                            )
+                        ])
+                    )
+                    output.write('\n')
+
+            finally:
+                if output_is_file:
+                    output.close()
+        else:
+            raise TypeError(f'output_file must be a string.')
+
 
 def _gen_kmers(k: int, bases: str) -> list:
         """Function to recursively create a list of k-mers."""
