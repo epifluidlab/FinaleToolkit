@@ -287,14 +287,24 @@ def region_end_motifs(
     Parameters
     ----------
     input_file : str
+        Path of SAM, BAM, CRAM, or Frag.gz containing pair-end reads.
     contig : str
+        Name of contig or chromosome for region.
     start : int
+        0-based start coordinate.
     stop : int
+        1-based end coordinate.
     refseq_file : str
+        2bit file with reference sequence `input_file` was aligned to.
     k : int, optional
-    fraction_low: int
-    fraction_high: int
-    both_strands: bool
+        Length of end motif kmer. Default is 4.
+    fraction_low: int, optional
+        Minimum fragment length.
+    fraction_high: int, optional
+        Maximum fragment length.
+    both_strands: bool, optional
+        Choose whether to use forward 5' ends only or use 5' ends for
+        both ends of PE reads.
     output_file : None or str, optional
     quality_threshold : int, optional
     verbose : bool or int, optional
@@ -303,6 +313,8 @@ def region_end_motifs(
     ------
     end_motif_freq : dict
     """
+    # NOTE: consider renaming to interval_end_motif
+
     if verbose:
         start_time = time()
 
@@ -428,7 +440,10 @@ def end_motifs(
     Parameters
     ----------
     input_file : str
+        SAM, BAM, CRAM, or Frag.gz file with paired-end reads.
     refseq_file : str
+        2bit file with sequence of reference genome input_file is
+        aligned to.
     k : int, optional
         Length of end motif kmer. Default is 4.
     output_file : None or str, optional
