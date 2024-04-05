@@ -1,7 +1,7 @@
 # FinaleTools
-Lightweight Python library and standalone program to extract features from
-cfDNA paired-end reads. FinaleTools refers to FragmentatIoN AnaLysis of
-cEll-free DNA Tools.
+A package and standalone program to extract fragmentation patterns of cell-free
+DNA from paired-end sequencing data. FinaleTools refers to FragmentatIoN
+AnaLysis of cEll-free DNA Tools.
 
 FinaleTools is in active development, and all API is subject to change and
 should be considered unstable.
@@ -77,3 +77,9 @@ Fragment Lengths for 22:-
 00.76%     ▂▂▂▂▂▂▃▃▄▅▄████████████████████████▆▅▄▃▂▂▂▂▂▂▂▁▁▂▂▂▁▁
 len (nt)067   091   115   139   163   187   211   235   259   283
 ```
+
+## FAQ
+Q: When running on an ARM64 Mac, I can install FinaleTools without errors.
+However, I get an `ImportError` when I run it.
+
+A: Try `brew install curl`. Otherwise, email me and I will try to help you.

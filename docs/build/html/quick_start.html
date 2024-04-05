@@ -11,16 +11,16 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="CLI" href="cli.html" />
-    <link rel="prev" title="Usage" href="usage.html" /> 
+    <link rel="prev" title="Welcome to FinaleTools’s documentation!" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,7 +44,6 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quick-start Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
@@ -80,42 +79,38 @@
            <div itemprop="articleBody">
              
   <section id="quick-start-guide">
-<h1>Quick-start Guide<a class="headerlink" href="#quick-start-guide" title="Link to this heading"></a></h1>
-<p>Python tools for analysis of cell free DNA fragment data. FinaleTools refers to FragmentatIoN AnaLysis of cEll-free DNA Tools.</p>
+<h1>Quick-start Guide<a class="headerlink" href="#quick-start-guide" title="Permalink to this heading"></a></h1>
+<p>A package and standalone program to extract fragmentation patterns of cell-free
+DNA from paired-end sequencing data. FinaleTools refers to FragmentatIoN
+AnaLysis of cEll-free DNA Tools.</p>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>This package is currently work-in-progress. Here is how to install (wip):</p>
-<ul>
-<li><p>Clone repo from <a class="reference external" href="https://github.com/epifluidlab/FinaleTools/">https://github.com/epifluidlab/FinaleTools/</a></p></li>
-<li><p>Create a conda environment with all of the dependencies. If only using pip to install dependencies, create venv/conda env and go to next step.
-Pip might not install all non-python dependencies.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>For conda, run the following:</p></li>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>Instructions:</p>
+<ul class="simple">
+<li><p>(Optional) create a conda or venv environment to use FinaleTools in.</p></li>
+<li><p>Run <cite>pip install finaletools</cite></p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">&lt;env_name&gt;</span> <span class="pre">-c</span> <span class="pre">bioconda</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">python=3.&lt;version&gt;</span>
-<span class="pre">&lt;dependencies&gt;</span>
-<span class="pre">-</span> <span class="pre">see</span> <span class="pre">pyproject.toml</span> <span class="pre">for</span> <span class="pre">dependencies</span>
-<span class="pre">`</span></code>
-- Alternatively if using Linux, you can also use the attached YAML file by navigating to the project directory and running:</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-f</span> <span class="pre">conda_env/environment.yml</span>
-<span class="pre">`</span></code>
-The resulting environment should be called <cite>samenv3</cite>.</p>
-</div></blockquote>
-</div></blockquote>
-</li>
-<li><p>cd to project directory</p></li>
-<li><p>Run <cite>pip install -e .</cite></p></li>
-<li><p>Run <cite>finaletools -h</cite> to see if you did this right</p></li>
-</ul>
+<p>To verify FinaleTools has been successfully installed, try:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ finaletools -h
+usage: finaletools [-h]
+                {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
+                ...
+
+Calculates fragmentation features given a CRAM/BAM/SAM file
+
+options:
+-h, --help            show this help message and exit
+
+subcommands:
+{coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
+</pre></div>
+</div>
 </section>
 <section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
-<p>FinaleTools functions generally accept reads in two file formats:
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
+<p>FinaleTools functions generally accept reads in a few file formats:
 - Binary Alignment Map (BAM) Files
+- Compressed Reference-oriented Alignment Map (CRAM) files
 - FinaleDB Frag.gz Files</p>
 <p>Frag.gz files are block-gzipped BED3+2 files with the following format:
 <code class="docutils literal notranslate"><span class="pre">chrom</span>&#160; <span class="pre">start</span>&#160; <span class="pre">stop</span>&#160; <span class="pre">mapq</span>&#160; <span class="pre">strand(+/-)</span></code></p>
@@ -177,7 +172,7 @@ len (nt)067   091   115   139   163   187   211   235   259   283
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to FinaleTools’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="cli.html" class="btn btn-neutral float-right" title="CLI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

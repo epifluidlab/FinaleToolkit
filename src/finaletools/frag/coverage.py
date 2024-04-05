@@ -10,7 +10,7 @@ import gzip
 from tqdm import tqdm
 
 from finaletools.utils.utils import (
-    _not_read1_or_low_quality, _get_contigs, _get_intervals
+    _not_read1_or_low_quality, _get_contigs, _get_intervals, frag_generator
 )
 
 
@@ -20,6 +20,7 @@ def single_coverage(
         start: int=0,
         stop: int=None,
         name: str='.',
+        intersect_policy: str="midpoint",
         quality_threshold: int=30,
         verbose: Union[bool, int]=False
     ) -> Tuple[str, int, int, str, float]:
@@ -33,7 +34,7 @@ def single_coverage(
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, or CRAM file containing paired-end fragment reads or
+        BAM, SAM, CRAM, or Frag.gz file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
     contig : string
     start : int
@@ -51,52 +52,39 @@ def single_coverage(
     # TODO: consider including region string (like in pysam)
     if verbose:
         start_time = time.time()
+        tqdm.write(
+            f"""
+input_file: 
+contig: {contig}
+start: {start}
+stop: {stop}
+name: {name}
+intersect_policy: {intersect_policy}
+quality_threshold: {quality_threshold}
+verbose: {verbose}
+"""
+        )
 
     # initializing variable for coverage tuple outside of with statement
     coverage = 0
 
     input_type = type(input_file)
 
-    try:
-        # Handling different input types
-        if input_type == pysam.AlignmentFile:
-            sam_file = input_file
-        elif input_type == str:
-            sam_file = pysam.AlignmentFile(input_file, 'r')
-        else:
-            raise TypeError('input_file should be str or pysam.AlignmentFile')
+    frags = frag_generator(
+        input_file=input_file,
+        contig=contig,
+        quality_threshold=quality_threshold,
+        start=start,
+        stop=stop,
+        fraction_low=10,
+        fraction_high=10000000,
+        intersect_policy=intersect_policy)
 
-        # Iterating on each read in file in
-        # specified contig/chromosome
-        for read1 in sam_file.fetch(
-            contig=contig,
-            start=0 if (tempstart:=start-500) < 0 else tempstart,
-            stop=stop+500 if stop is not None else None
-        ):
-            # Only select forward strand and filter out
-            # non-paired-end reads and low-quality reads
-            if _not_read1_or_low_quality(read1, quality_threshold):
-                pass
-            else:
-                # calculate mid-point of fragment
-                center = read1.reference_start + read1.template_length // 2
-                if start is None and stop is None:
-                    coverage += 1
-                elif start is None:
-                    if center < stop:
-                        coverage += 1
-                elif stop is None:
-                    if center >= start:
-                        coverage += 1
-                elif (center >= start) and (center < stop):
-                    coverage += 1
-                else:
-                    pass
-    finally:
-        if input_type == str:
-            sam_file.close()
-
-
+    # Iterating on each frag in file in
+    # specified contig/chromosome
+    for frag in frags:
+        coverage += 1
+        
     if verbose:
         end_time = time.time()
         tqdm.write(
@@ -125,7 +113,7 @@ def coverage(
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
-    either a BAM or SAM file. Uses an algorithm where the midpoints of
+     a SAM, BAM, CRAM, or Frag.gz file. Uses an algorithm where the midpoints of
     fragments are calculated and coverage is tabulated from the
     midpoints that fall into the specified region. Not suitable for
     fragments of size approaching interval size.
@@ -133,10 +121,11 @@ def coverage(
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, or CRAM file containing paired-end fragment reads or
-        its path. `AlignmentFile` must be opened in read mode.
-    intervals : str
-        Path for BAM file containing intervals
+        SAM, BAM, CRAM, or Frag.gz file containing paired-end fragment 
+        reads or its path. `AlignmentFile` must be opened in read mode.
+    interval_file : str
+        BED4 file containing intervals over which to generate coverage
+        statistics.
     output_file : string, optional
         Path for bed file to print coverages to. If output_file = `_`,
         results will be printed to stdout.
@@ -150,6 +139,7 @@ def coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
+    #FIXME update docstring
     if (verbose):
         start_time = time.time()
         sys.stderr.write(
@@ -163,23 +153,6 @@ def coverage(
             """
         )
 
-    contigs = _get_contigs(
-        input_file,
-        verbose=verbose-1 if verbose>1 else 0
-    )
-
-    # calculating coverage for each contig in the input_file
-    contig_intervals = []
-    for contig, length in contigs:
-        contig_intervals.append((
-            input_file,
-            contig,
-            0,
-            length,
-            ".",
-            quality_threshold,
-            verbose - 1 if verbose > 1 else 0
-        ))
     if verbose:
         sys.stderr.write('Creating process pool\n')
     try:
@@ -187,22 +160,19 @@ def coverage(
         if verbose:
             sys.stderr.write('Calculating total coverage for file,\n')
 
-        total_coverage_results = pool.imap(
-            _single_coverage_star,
-            tqdm(
-                contig_intervals,
-                desc='Genome contigs',
-                position=0
-            ) if verbose else contig_intervals
+        total_coverage_results = pool.apply_async(
+            single_coverage,
+            (input_file, None, 0, None, '.', "midpoint", quality_threshold, False)
         )
 
         if verbose:
             tqdm.write('reading intervals\n')
 
-        intervals = pool.apply(
-            _get_intervals,
-            (input_file, interval_file, quality_threshold, verbose)
-        )
+        intervals = _get_intervals(
+            input_file, interval_file,
+            intersect_policy="midpoint",
+            quality_threshold=quality_threshold,
+            verbose=verbose)
 
         if verbose:
             tqdm.write('calculating coverage\n')
@@ -214,12 +184,12 @@ def coverage(
                 desc='Intervals',
                 position=2
             ) if verbose else intervals,
-            len(intervals) // 2 // workers + 1
+            min(len(intervals) // 2 // workers + 1, 40)
         )
 
         if verbose:
             tqdm.write('Retrieving total coverage for file\n')
-        total_coverage = sum(coverage[4] for coverage in total_coverage_results)
+        total_coverage = total_coverage_results.get()
         if verbose:
                 tqdm.write(f'Total coverage is {total_coverage}\n')
 
@@ -231,7 +201,9 @@ def coverage(
                 tqdm.write('Writing results to output\n')
             try:
                 # handle output types
-                if output_file.endswith('.bed'):
+                if (output_file.endswith('.bed')
+                    or output_file.endswith('.bedgraph')
+                ):
                     output_is_file = True
                     output = open(output_file, 'w')
                 elif output_file.endswith('.bed.gz'):
@@ -245,12 +217,19 @@ def coverage(
                     )
 
                 # print to files
-                for coverage in coverages:
-                    output.write(
-                        f'{coverage[0]}\t{coverage[1]}\t{coverage[2]}\t'
-                        f'{coverage[3]}\t'
-                        f'{coverage[4]/total_coverage*scale_factor}\n'
-                    )
+                if output_file.endswith(".bedgraph"):
+                    for contig, start, stop, name, coverage in coverages:
+                        output.write(
+                            f'{contig}\t{start}\t{stop}\t'
+                            f'{coverage/total_coverage[4]*scale_factor}\n'
+                        )
+                else:
+                    for contig, start, stop, name, coverage in coverages:
+                        output.write(
+                            f'{contig}\t{start}\t{stop}\t'
+                            f'{name}\t'
+                            f'{coverage/total_coverage*scale_factor}\n'
+                        )
 
             finally:
                 if output_is_file:
