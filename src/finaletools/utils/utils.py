@@ -443,11 +443,10 @@ def _get_intervals(
         for line in bed:
             if ~line.startswith('#'):
                 if line != '':
-                    contents = line.split()
-                    contig = contents[0].strip()
-                    start = int(contents[1])
-                    stop = int(contents[2])
-                    name = contents[3] if len(contents) > 3 else '.'
+                    contig, start, stop, *name = line.split()
+                    start = int(start)
+                    stop = int(stop)
+                    name = name[0] if len(name) > 1 else '.'
                     interval = (
                         input_file,
                         contig,

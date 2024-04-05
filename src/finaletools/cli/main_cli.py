@@ -35,14 +35,14 @@ def main_cli_parser():
         'coverage',
         description=(
         'Calculates fragmentation coverage over intervals in a BED file given '
-        'a BAM/SAM file'
+        'a SAM, BAM, CRAM, or Frag.gz file'
         )
     )
     # TODO: accept tabix
 
     parser_command1.add_argument(
         'input_file',
-        help='BAM or SAM file containing fragment data'
+        help='SAM, BAM, CRAM, or Frag.gz file containing fragment data'
     )
     parser_command1.add_argument(
         'interval_file',
