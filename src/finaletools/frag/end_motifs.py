@@ -241,6 +241,14 @@ class EndMotifsIntervals():
         mds.append((interval, interval_mds))
 
         return mds
+
+    def mds_bed(self, output_file: str, sep: str='\t'):
+        """Writes MDS for each interval to a bed/bedgraph file."""
+        mds = self.motif_diversity_score()
+        with open(output_file) as out:
+            for interval, interval_mds in mds:
+                out.write("sep".join([*interval, interval_mds]))
+                out.write('\n')
     
     def to_tsv(self, output_file: str, calc_freq: bool=True, sep: str='\t'):
         """
