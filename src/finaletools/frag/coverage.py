@@ -228,7 +228,7 @@ def coverage(
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
                             f'{name}\t'
-                            f'{coverage/total_coverage*scale_factor}\n'
+                            f'{coverage/total_coverage[4]*scale_factor}\n'
                         )
 
             finally:
