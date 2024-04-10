@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections.abc import Iterator
-from typing import Union, Iterable
+from typing import Union, Iterable, Tuple
 from multiprocessing import Pool
 from time import time
 from sys import stderr, stdout, stdin
@@ -17,7 +17,7 @@ import py2bit
 import numpy as np
 from numpy.typing import NDArray
 
-from finaletools.utils.utils import frag_generator
+from finaletools.utils.utils import frag_generator, _get_intervals
 import finaletools.frag as pkg_data
 
 # path to tsv containing f-profiles from Zhou et al (2023)
@@ -38,12 +38,8 @@ class EndMotifFreqs():
         and a float representing its frequency
     k : int
         Size of k-mers
-    refseq_file: str
-        A 2bit file containing the reference sequence that cfDNA
-        fragments were aligned to
     quality_threshold: int, optional
         Minimum mapping quality used. Default is 30.
-
     """
 
     def __init__(
@@ -179,6 +175,182 @@ class EndMotifFreqs():
         return cls(freq_list, k, quality_threshold)
 
 
+class EndMotifsIntervals():
+    """
+    Class that stores frequencies of end-motif k-mers over
+    user-specified intervals and contains methods to manipulate this
+    data.
+
+    Parameters
+    ----------
+    intervals : Iterable
+        A collection of tuples, each containing a tuple representing
+        a genomic interval (chrom, 0-based start, 1-based stop) and a
+        dict that maps kmers to frequencies in the interval.
+    k : int
+        Size of k-mers
+    quality_threshold: int, optional
+        Minimum mapping quality used. Default is 30.
+    """
+
+    def __init__(
+        self,
+        intervals: Iterable[tuple[tuple, dict]],
+        k: int,
+        quality_threshold: int = MIN_QUALITY,
+    ):
+        self.intervals = intervals
+        self.k = k
+        self.quality_threshold = quality_threshold
+        if not all(len(freqs) == 4**k for _, freqs in intervals):
+            raise ValueError(
+                'bins contains results for kmer with length not equal'
+                ' to k.'
+            )
+
+    def __iter__(self) -> Iterator:
+        return (interval for interval in self.intervals)
+
+    def __len__(self) -> int:
+        return self.intervals.__len__()
+
+    def __str__(self) -> str:
+        return f'EndMotifsIntervals over {len(self.intervals)} intervals.'
+
+    def freq(self, kmer: str) -> list[Tuple[str, int, int, float]]:
+        """
+        Returns a list of intervals and associated frquency for given
+        kmer. Results are in the form (chrom, 0-based start, 1-based
+        stop, frequency).
+        """
+        return dict(
+            [(*interval, freq[kmer]) for interval, freq in self.intervals]
+        )
+
+    def motif_diversity_score(self) -> list[tuple[tuple, float]]:
+        """
+        Calculates a motif diversity score (MDS) for each interval using
+        normalized Shannon entropy as described by Jiang et al (2020). This
+        function is generalized for any k instead of just 4-mers.
+        """
+        num_kmers = 4**self.k
+        mds = []
+        for interval, kmers in self.intervals:
+            freq = np.array(kmers.values())
+            interval_mds = np.sum(-freq*np.log(freq)/np.log(num_kmers))
+        mds.append((interval, interval_mds))
+
+        return mds
+    
+    def to_tsv(self, output_file: str, calc_freq: bool=True, sep: str='\t'):
+        """
+        Writes all intervals and associated frquencies to file.
+        
+        Parameters
+        ----------
+        output_file: str
+            File to write frequencies to.
+        calc_freq: bool, optional
+            Calculates frequency of motifs if true. Otherwise, writes counts
+            for each motif. Default is true.
+        sep: str, optional
+            Separator for table. Tab-separated by default.
+        """
+        if type(output_file) == str:
+            try:
+                # open file based on name
+                output_is_file = False
+                if output_file == '-':
+                    output = stdout
+                else:
+                    output_is_file = True
+                    output = open(output_file, 'w')
+
+                # write to file
+                kmers = _gen_kmers(self.k, 'ACGT')
+                # header
+                output.write(sep.join(['contig','start','stop','count',*kmers]))
+                output.write('\n')
+                # data
+                for interval, freqs in self.intervals:
+                    count = sum(freqs.values())
+                    output.write(
+                        sep.join([
+                            interval[0],
+                            str(interval[1]),
+                            str(interval[2]),
+                            str(count), 
+                            *([str(freq) for freq in freqs.values()]
+                             if not calc_freq
+                             else [f"{(freq/count):.6f}"
+                                   if count!=0
+                                   else "NaN" 
+                                for freq
+                                in freqs.values()])
+                        ])
+                    )
+                    output.write('\n')
+
+            finally:
+                if output_is_file:
+                    output.close()
+        else:
+            raise TypeError(f'output_file must be a string.')
+    
+    def to_bedgraph(
+            self,
+            kmer: str,
+            output_file: str,
+            calc_freq: bool=True,
+            sep: str='\t'
+        ):
+        """
+        Take frequency of specified kmer and writes to BED.
+        
+        Parameters
+        ----------
+        output_file: str
+            File to write frequencies to.
+        calc_freq: bool, optional
+            Calculates frequency of motifs if true. Otherwise, writes counts
+            for each motif. Default is true.
+        sep: str, optional
+            Separator for table. Tab-separated by default.
+        """
+        if type(output_file) == str:
+            try:
+                # open file based on name
+                output_is_file = False
+                if output_file == '-':
+                    output = stdout
+                else:
+                    output_is_file = True
+                    output = open(output_file, 'w')
+
+                # write to file
+                for interval, freqs in self.intervals:
+                    count = sum(freqs.values())
+                    output.write(
+                        sep.join([
+                            interval[0],
+                            str(interval[1]),
+                            str(interval[2]),
+                            (self.freq[kmer] if not calc_freq
+                             else f"{(freqs[kmer]/count):.6f}"
+                                if count!=0
+                                else "NaN"
+                            )
+                        ])
+                    )
+                    output.write('\n')
+
+            finally:
+                if output_is_file:
+                    output.close()
+        else:
+            raise TypeError(f'output_file must be a string.')
+
+
 def _gen_kmers(k: int, bases: str) -> list:
         """Function to recursively create a list of k-mers."""
         if k == 1:
@@ -210,25 +382,38 @@ def region_end_motifs(
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
-    both_strands: bool = False,
-    output_file: Union(None, str) = None,
+    both_strands: bool = True,
+    output_file: Union[None, str] = None,
     quality_threshold: int = MIN_QUALITY,
-    verbose: Union(bool, int) = False,
+    verbose: Union[bool, int] = False,
 ) -> dict:
     """
     Function that reads fragments in the specified region from a BAM,
     SAM, or tabix indexed file and returns the 5' k-mer (default is
-    4-mer) end motif counts as a structured array. This function
+    4-mer) end motif counts as a dictionary. This function
     reproduces the methodology of Zhou et al (2023).
 
     Parameters
     ----------
     input_file : str
+        Path of SAM, BAM, CRAM, or Frag.gz containing pair-end reads.
     contig : str
+        Name of contig or chromosome for region.
     start : int
+        0-based start coordinate.
     stop : int
+        1-based end coordinate.
     refseq_file : str
+        2bit file with reference sequence `input_file` was aligned to.
     k : int, optional
+        Length of end motif kmer. Default is 4.
+    fraction_low: int, optional
+        Minimum fragment length.
+    fraction_high: int, optional
+        Maximum fragment length.
+    both_strands: bool, optional
+        Choose whether to use forward 5' ends only or use 5' ends for
+        both ends of PE reads.
     output_file : None or str, optional
     quality_threshold : int, optional
     verbose : bool or int, optional
@@ -237,6 +422,8 @@ def region_end_motifs(
     ------
     end_motif_freq : dict
     """
+    # NOTE: consider renaming to interval_end_motif
+
     if verbose:
         start_time = time()
 
@@ -309,7 +496,8 @@ def region_end_motifs(
                         assert len(reverse_kmer) == k
 
                         if 'N' not in reverse_kmer:
-                            end_motif_counts[_reverse_complement(reverse_kmer)] += 1
+                            rc_reverse_kmer = _reverse_complement(reverse_kmer)
+                            end_motif_counts[rc_reverse_kmer] += 1
                     except RuntimeError:
                         if verbose > 1:
                             stderr.write(
@@ -330,9 +518,14 @@ def region_end_motifs(
     return end_motif_counts
 
 
-def _region_end_motifs_star(args) -> NDArray:
+def _region_end_motifs_star(args) -> dict:
     results_dict = region_end_motifs(*args)
     return np.array(list(results_dict.values()), dtype='<f8')
+
+
+def _region_end_motifs_dict_star(args) -> dict:
+    results_dict = region_end_motifs(*args)
+    return results_dict
 
 
 def end_motifs(
@@ -342,10 +535,10 @@ def end_motifs(
     fraction_low: int = 10,
     fraction_high: int = 600,
     both_strands: bool = False,
-    output_file: Union(None, str) = None,
+    output_file: Union[None, str] = None,
     quality_threshold: int = 30,
     workers: int = 1,
-    verbose: Union(bool, int) = False,
+    verbose: Union[bool, int] = False,
 ) -> EndMotifFreqs:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
@@ -356,16 +549,23 @@ def end_motifs(
     Parameters
     ----------
     input_file : str
+        SAM, BAM, CRAM, or Frag.gz file with paired-end reads.
     refseq_file : str
+        2bit file with sequence of reference genome input_file is
+        aligned to.
     k : int, optional
+        Length of end motif kmer. Default is 4.
     output_file : None or str, optional
+        File path to write results to. Either tsv or csv.
     quality_threshold : int, optional
+        Minimum MAPQ to filter.
     workers : int, optional
+        Number of worker processes.
     verbose : bool or int, optional
 
     Return
     ------
-    end_motif_freq : list
+    end_motif_freq : EndMotifFreqs
     """
     if verbose:
         start_time = time()
@@ -439,6 +639,131 @@ def end_motifs(
         zip(kmer_list, frequencies),
         k,
         quality_threshold,
+    )
+
+    if output_file is not None:
+        if output_file.endswith('.csv'):
+            results.to_tsv(output_file, sep=',')
+        else:
+            results.to_tsv(output_file)
+
+    if verbose:
+        stop_time = time()
+        tqdm.tqdm.write(
+            f'end_motifs took {stop_time-start_time} seconds to run\n'
+        )
+
+    return results
+
+
+def interval_end_motifs(
+    input_file: str,
+    refseq_file: str,
+    intervals: Union[str, list[Tuple[str,int,int]]],
+    k: int = 4,
+    fraction_low: int = 10,
+    fraction_high: int = 600,
+    both_strands: bool = True,
+    output_file: Union[None, str] = None,
+    quality_threshold: int = 30,
+    workers: int = 1,
+    verbose: Union[bool, int] = False,
+) -> EndMotifFreqs:
+    """
+    Function that reads fragments from a BAM, SAM, or tabix indexed
+    file and user-specified intervals and returns the 5' k-mer
+    (default is 4-mer) end motif. Optionally writes data to a tsv.
+
+    Parameters
+    ----------
+    input_file : str
+        Path of SAM, BAM, CRAM, or Frag.gz containing pair-end reads.
+    refseq_file : str
+        Path of 2bit file for reference genome that reads are aligned to.
+    intervals : str or tuple
+        Path of BED file containing intervals or list of tuples
+        (chrom, start, stop).
+    k : int, optional
+        Length of end motif kmer. Default is 4.
+    output_file : None or str, optional
+        File path to write results to. Either tsv or csv.
+    quality_threshold : int, optional
+        Minimum MAPQ to filter.
+    workers : int, optional
+        Number of worker processes.
+    verbose : bool or int, optional
+
+    Return
+    ------
+    end_motif_freq : EndMotifIntervals
+    """
+    if verbose:
+        start_time = time()
+
+    bases='ACGT'
+    kmer_list = _gen_kmers(k, bases)
+
+    # read chromosomes from py2bit
+    try:
+        refseq = py2bit.open(refseq_file, 'r')
+        chroms: dict = refseq.chroms()
+    finally:
+        refseq.close()
+
+    # generate list of inputs
+    if type(intervals) is str:
+        with open(intervals, 'r') as interval_file:
+            intervals_tuples = [
+                (chrom, int(start), int(stop))
+                for chrom, start, stop, *_
+                in [line.split() for line in interval_file.readlines()]
+                ]
+    elif type(intervals) is tuple:
+        intervals_tuples = intervals
+    else:
+        raise TypeError("Intervals should be string or tuple.")
+    
+    mp_intervals = []   # args to be fed into pool processes
+    for chrom, start, stop in intervals_tuples:
+        mp_intervals.append((
+            input_file,
+            chrom,
+            start,
+            stop,
+            refseq_file,
+            k,
+            fraction_low,
+            fraction_high,
+            both_strands,
+            None,
+            quality_threshold,
+            verbose - 2 if verbose > 2 else 0
+        )
+    )
+
+    # use process pool to aggregate kmers
+    try:
+        # open pool
+        pool = Pool(workers)
+
+        # uses tqdm loading bar if verbose == True
+        counts_iter = pool.imap(
+            _region_end_motifs_dict_star,
+            tqdm.tqdm(
+                mp_intervals,
+                'Reading intervals',
+                position=0) if verbose else mp_intervals,
+            chunksize=min(int(len(intervals)/workers/2+1), 1000)
+        )
+
+    finally:
+        pool.close()
+    results = EndMotifsIntervals(
+        [(interval, counts)
+         for interval, counts
+         in zip(intervals_tuples, counts_iter)],
+         k,
+         quality_threshold,
     )
 
     if output_file is not None:
