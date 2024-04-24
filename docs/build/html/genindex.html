@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Index &mdash; FinaleTools  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -43,7 +41,6 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick-start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
@@ -120,10 +117,12 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#finaletools.genome.ContigGaps">ContigGaps (class in finaletools.genome)</a>
+      <li><a href="api.html#finaletools.frag.cleavage_profile">cleavage_profile() (in module finaletools.frag)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#finaletools.genome.ContigGaps">ContigGaps (class in finaletools.genome)</a>
+</li>
       <li><a href="api.html#finaletools.frag.coverage">coverage() (in module finaletools.frag)</a>
 </li>
   </ul></td>
@@ -138,6 +137,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#finaletools.frag.delfi_gc_correct">delfi_gc_correct() (in module finaletools.frag)</a>
 </li>
+      <li><a href="api.html#finaletools.frag.delfi_merge_bins">delfi_merge_bins() (in module finaletools.frag)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -150,6 +151,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#finaletools.frag.EndMotifFreqs">EndMotifFreqs (class in finaletools.frag)</a>
 </li>
+      <li><a href="api.html#finaletools.frag.EndMotifsIntervals">EndMotifsIntervals (class in finaletools.frag)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -160,12 +163,18 @@
 </li>
       <li><a href="api.html#finaletools.frag.frag_length">frag_length() (in module finaletools.frag)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#finaletools.frag.frag_length_bins">frag_length_bins() (in module finaletools.frag)</a>
 </li>
-      <li><a href="api.html#finaletools.frag.EndMotifFreqs.from_file">from_file() (finaletools.frag.EndMotifFreqs class method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#finaletools.frag.EndMotifsIntervals.freq">freq() (finaletools.frag.EndMotifsIntervals method)</a>
 </li>
+      <li><a href="api.html#finaletools.frag.EndMotifFreqs.from_file">from_file() (finaletools.frag.EndMotifFreqs class method)</a>
+
+      <ul>
+        <li><a href="api.html#finaletools.frag.EndMotifsIntervals.from_file">(finaletools.frag.EndMotifsIntervals class method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -194,8 +203,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#finaletools.genome.ContigGaps.in_gap">in_gap() (finaletools.genome.ContigGaps method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#finaletools.genome.ContigGaps.in_tcmere">in_tcmere() (finaletools.genome.ContigGaps method)</a>
 
       <ul>
@@ -203,13 +210,23 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#finaletools.frag.interval_end_motifs">interval_end_motifs() (in module finaletools.frag)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#finaletools.frag.EndMotifFreqs.motif_diversity_score">motif_diversity_score() (finaletools.frag.EndMotifFreqs method)</a>
+      <li><a href="api.html#finaletools.frag.EndMotifsIntervals.mds_bed">mds_bed() (finaletools.frag.EndMotifsIntervals method)</a>
 </li>
+      <li><a href="api.html#finaletools.frag.EndMotifFreqs.motif_diversity_score">motif_diversity_score() (finaletools.frag.EndMotifFreqs method)</a>
+
+      <ul>
+        <li><a href="api.html#finaletools.frag.EndMotifsIntervals.motif_diversity_score">(finaletools.frag.EndMotifsIntervals method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#finaletools.frag.multi_wps">multi_wps() (in module finaletools.frag)</a>
@@ -236,12 +253,22 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#finaletools.genome.GenomeGaps.to_bed">to_bed() (finaletools.genome.GenomeGaps method)</a>
+      <li><a href="api.html#finaletools.frag.EndMotifsIntervals.to_bed">to_bed() (finaletools.frag.EndMotifsIntervals method)</a>
+
+      <ul>
+        <li><a href="api.html#finaletools.genome.GenomeGaps.to_bed">(finaletools.genome.GenomeGaps method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#finaletools.frag.EndMotifFreqs.to_tsv">to_tsv() (finaletools.frag.EndMotifFreqs method)</a>
+      <li><a href="api.html#finaletools.frag.EndMotifsIntervals.to_bedgraph">to_bedgraph() (finaletools.frag.EndMotifsIntervals method)</a>
 </li>
+      <li><a href="api.html#finaletools.frag.EndMotifFreqs.to_tsv">to_tsv() (finaletools.frag.EndMotifFreqs method)</a>
+
+      <ul>
+        <li><a href="api.html#finaletools.frag.EndMotifsIntervals.to_tsv">(finaletools.frag.EndMotifsIntervals method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
