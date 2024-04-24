@@ -7,7 +7,7 @@ include-package-data = true
 
 [project]
 name = "FinaleTools"
-version = "0.6.0"
+version = "0.5.0"
 authors = [
     {name="James Li", email="lijw21@wfu.edu"},
     {name="Yaping Liu", email="yaping@northwestern.edu"},
