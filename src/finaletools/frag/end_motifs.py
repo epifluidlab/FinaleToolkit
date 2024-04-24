@@ -277,7 +277,7 @@ class EndMotifsIntervals():
                 # write to file
                 kmers = _gen_kmers(self.k, 'ACGT')
                 # header
-                output.write(sep.join(['contig','start','stop','count',*kmers]))
+                output.write(sep.join(['contig','start','stop','name','count',*kmers]))
                 output.write('\n')
                 # data
                 for interval, freqs in self.intervals:
@@ -287,6 +287,7 @@ class EndMotifsIntervals():
                             interval[0],
                             str(interval[1]),
                             str(interval[2]),
+                            str(interval[3]),
                             str(count), 
                             *([str(freq) for freq in freqs.values()]
                              if not calc_freq
@@ -711,28 +712,22 @@ def interval_end_motifs(
     bases='ACGT'
     kmer_list = _gen_kmers(k, bases)
 
-    # read chromosomes from py2bit
-    try:
-        refseq = py2bit.open(refseq_file, 'r')
-        chroms: dict = refseq.chroms()
-    finally:
-        refseq.close()
-
     # generate list of inputs
     if type(intervals) is str:
         with open(intervals, 'r') as interval_file:
-            intervals_tuples = [
-                (chrom, int(start), int(stop))
-                for chrom, start, stop, *_
-                in [line.split() for line in interval_file.readlines()]
-                ]
+            intervals_tuples = [    # parses file lines into a tuple generator
+                (chrom, int(start), int(stop),
+                    name[0] if len(name) > 0 else '.')
+                for chrom, start, stop, *name
+                in (line.split() for line in interval_file.readlines())
+            ]
     elif type(intervals) is tuple:
         intervals_tuples = intervals
     else:
         raise TypeError("Intervals should be string or tuple.")
     
     mp_intervals = []   # args to be fed into pool processes
-    for chrom, start, stop in intervals_tuples:
+    for chrom, start, stop, _ in intervals_tuples:
         mp_intervals.append((
             input_file,
             chrom,

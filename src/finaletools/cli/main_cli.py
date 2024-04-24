@@ -13,7 +13,8 @@ from finaletools.frag.delfi import delfi
 from finaletools.frag.adjust_wps import adjust_wps
 from finaletools.frag.agg_wps import agg_wps
 from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
-from finaletools.frag.end_motifs import end_motifs, _cli_mds
+from finaletools.frag.end_motifs import (
+    end_motifs, _cli_mds, interval_end_motifs)
 from finaletools.frag.cleavage_profile import _cli_cleavage_profile
 from finaletools.genome.gaps import _cli_gap_bed
 
@@ -667,6 +668,74 @@ def main_cli_parser():
     )
     parser_command10.set_defaults(func=end_motifs)
 
+    # subcommand 10a: interval-end-motifs
+    parser_command10a = subparsers.add_parser(
+        'interval-end-motifs',
+        prog='finaletools-interval-end-motifs',
+        description="Measures frequency of k-mer 5' end motifs in each "
+        "region specified in a BED file and writes data into a table."
+    )
+    parser_command10a.add_argument(
+        'input_file',
+        help='SAM, BAM, or tabix-indexed file with fragment data.'
+    )
+    parser_command10a.add_argument(
+        'refseq_file',
+        help='2bit file containing reference sequence that fragments were'
+        ' aligned to.'
+    )
+    parser_command10a.add_argument(
+        'intervals',
+        help='BED file containing intervals or list of tuples'
+    )
+    parser_command10a.add_argument(
+        '-k',
+        default=4,
+        type=int,
+        help='Length of k-mer. Default is 4.'
+    )
+    parser_command10a.add_argument(
+        '-lo', '--fraction-low',
+        default=10,
+        type=int,
+        help='Smallest fragment length to consider. Default is 10'
+    )
+    parser_command10a.add_argument(
+        '-hi', '--fraction-high',
+        default=600,
+        type=int,
+        help='Longest fragment length to consider. Default is 600'
+    )
+    parser_command10a.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help="File path to write results to. Either tsv or csv."
+    )
+    parser_command10a.add_argument(
+        '-q',
+        '--quality-threshold',
+        default=20,
+        type=int,
+        help='Minimum MAPQ of reads. Default is 20.'
+    )
+    parser_command10a.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of subprocesses to use. Default is 1.'
+    )
+    parser_command10a.add_argument(
+        '-v',
+        '--verbose',
+        default=0,
+        action='count',
+        help='Specify verbosity. Number of printed statements is proportional '
+        'to number of vs.'
+    )
+    parser_command10a.set_defaults(func=interval_end_motifs)
+
     # Subcommand 11: MDS
     parser_command11 = subparsers.add_parser(
         'mds',
@@ -789,13 +858,15 @@ def main_cli():
     parser = main_cli_parser()
 
     args = parser.parse_args()
-    function = args.func
-    funcargs = vars(args)
-    funcargs.pop('func')
-    funcargs.pop('subcommand')
+    try:
+        function = args.func
+        funcargs = vars(args)
+        funcargs.pop('func')
+        funcargs.pop('subcommand')
 
-    function(**funcargs)
-
-
+        function(**funcargs)
+    except AttributeError:
+        parser.print_help()
+    
 if __name__ == '__main__':
     main_cli()
