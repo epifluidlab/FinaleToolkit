@@ -109,11 +109,12 @@ def coverage(
         scale_factor: float=1e6,
         quality_threshold: int=30,
         workers: int=1,
-        verbose: Union[bool, int]=False):
+        verbose: Union[bool, int]=False
+    ):
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
-     a SAM, BAM, CRAM, or Frag.gz file. Uses an algorithm where the midpoints of
+    a SAM, BAM, CRAM, or Frag.gz file. Uses an algorithm where the midpoints of
     fragments are calculated and coverage is tabulated from the
     midpoints that fall into the specified region. Not suitable for
     fragments of size approaching interval size.
