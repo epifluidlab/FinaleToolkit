@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [UNRELEASED] - 2024-04-xx
+
+### Added
+- Added finaletools.interval_end_motifs function to calculate end-motifs
+over genomic intervals. Stores results in an IntervalEndMotifs object.
+- Added CLI subcommand interval-end-motifs to calculate end-motifs over
+genomic intervals.
+
+### Changed
+- Added gc_correct option to delfi_merge_bins so that merging is possible
+without GC correction
+
+### Fixed
+- delfi can now be run with `gc_correct=false` and `merge_bins=true`
+
 ## [0.4.5] - 2024-04-9
 
 ### Added
