@@ -397,7 +397,7 @@ def delfi(input_file: str,
             'num_frags']
     )
     # remove remaining NOARM bins
-    trimmed_windows = window_df[window_df['arm']!='NOARM']
+    trimmed_windows = window_df.loc[window_df['arm']!='NOARM', :].copy()
 
     if (verbose):
         stderr.write(f'{trimmed_windows.shape[0]} bins remaining...\n')
@@ -419,7 +419,8 @@ def delfi(input_file: str,
     if merge_bins:
         if (verbose):
             stderr.write('Merging bins...\n')
-        final_bins = delfi_merge_bins(gc_corrected, True, verbose=verbose)
+        final_bins = delfi_merge_bins(
+            gc_corrected, gc_correct, True, verbose=verbose)
     else:
         final_bins = gc_corrected
     

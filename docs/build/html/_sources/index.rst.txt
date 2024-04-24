@@ -15,7 +15,6 @@ Welcome to FinaleTools's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   usage
    quick_start
    cli
    api
