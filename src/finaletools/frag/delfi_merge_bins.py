@@ -16,8 +16,9 @@ BINS_PATH: Path = (
 
 def delfi_merge_bins(
         hundred_kb_bins: pd.DataFrame,
-        add_chr:bool=False,
-        verbose:bool=False
+        gc_corrected: bool=True,
+        add_chr: bool=False,
+        verbose: bool=False
 ):
     #FIXME: find a way to calculate this that is not dependent on b37 format
     delfi_scripts_5mb_bins = pd.read_csv(BINS_PATH)
@@ -50,14 +51,22 @@ def delfi_merge_bins(
 
     # merging bins
     ft_5mb_indices = np.arange(five_mb_bins.shape[0])
-    for i in ft_5mb_indices:
-        subset = (chr_bins.loc[overlaps[:,i],:])
-        assert subset.shape[0] == 50, "5mb bin does not have 50 100bins."
-        
-        five_mb_bins.iloc[[i],[4]] = subset['short_corrected'].sum()
-        five_mb_bins.iloc[[i],[5]] = subset['long_corrected'].sum()
-        five_mb_bins.iloc[[i],[6]] = subset['ratio_corrected'].mean()
-        five_mb_bins.iloc[[i],[7]] = subset['num_frags_corrected'].sum()
+    if gc_corrected:
+        for i in ft_5mb_indices:
+            subset = (chr_bins.loc[overlaps[:,i],:])
+            assert subset.shape[0] == 50, "5mb bin does not have 50 100bins."
+            five_mb_bins.iloc[[i],[4]] = subset['short_corrected'].sum()
+            five_mb_bins.iloc[[i],[5]] = subset['long_corrected'].sum()
+            five_mb_bins.iloc[[i],[6]] = subset['ratio_corrected'].mean()
+            five_mb_bins.iloc[[i],[7]] = subset['num_frags_corrected'].sum()
+    else:
+        for i in ft_5mb_indices:
+            subset = (chr_bins.loc[overlaps[:,i],:])
+            assert subset.shape[0] == 50, "5mb bin does not have 50 100bins."
+            five_mb_bins.iloc[[i],[4]] = subset['short'].sum()
+            five_mb_bins.iloc[[i],[5]] = subset['long'].sum()
+            five_mb_bins.iloc[[i],[6]] = subset['ratio'].mean()
+            five_mb_bins.iloc[[i],[7]] = subset['num_frags'].sum()
     
     return five_mb_bins
 
