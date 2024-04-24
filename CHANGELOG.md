@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 over genomic intervals. Stores results in an IntervalEndMotifs object.
 - Added CLI subcommand interval-end-motifs to calculate end-motifs over
 genomic intervals.
+- Added CLI subcommand interval-mds to calculate MDS over intervals from
+interval end-motifs table.
 
 ### Changed
 - Added gc_correct option to delfi_merge_bins so that merging is possible

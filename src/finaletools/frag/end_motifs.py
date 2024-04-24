@@ -216,6 +216,55 @@ class EndMotifsIntervals():
 
     def __str__(self) -> str:
         return f'EndMotifsIntervals over {len(self.intervals)} intervals.'
+    
+    @classmethod
+    def from_file(
+            cls,
+            file_path: str,
+            quality_threshold: int,
+            sep: str=',') -> EndMotifFreqs:
+        """
+        Reads kmer frequency from a tab-delimited file
+
+        Parameters
+        ---------
+        file_path : str
+            Path string containing path to file.
+        sep : str, optional
+            Delimiter used in file.
+
+        Return
+        ------
+        kmer_freqs : EndMotifFreqs
+        """
+        try:
+            # open file
+            is_file = False
+            if file_path.endswith('gz'):
+                is_file = True
+                file = gzip.open(file_path)
+            elif file_path == '-':
+                file = stdin
+            else:
+                is_file = True
+                file = open(file_path)
+
+            intervals = []
+            lines = file.readlines()
+            _,_,_,_,_,*kmers = lines[0].split(sep)
+            k = round(np.log(len(kmers))/np.log(4))
+            assert 4**k == len(kmers), f"We got k={k} but there are {len(kmers)} kmers."
+
+            for line in lines[1:]:
+                contig, start, stop, name, *freqs = line.split(sep)
+                start, stop = int(start), int(stop)
+                float_freqs = [float(freq) for freq in freqs]
+                dict_freqs = dict(zip(kmers, float_freqs))
+                intervals.append(((contig, start, stop, name), dict_freqs))
+        finally:
+            if is_file:
+                file.close()
+        return cls(intervals, k, quality_threshold)
 
     def freq(self, kmer: str) -> list[Tuple[str, int, int, float]]:
         """
@@ -236,19 +285,26 @@ class EndMotifsIntervals():
         num_kmers = 4**self.k
         mds = []
         for interval, kmers in self.intervals:
-            freq = np.array(kmers.values())
-            interval_mds = np.sum(-freq*np.log(freq)/np.log(num_kmers))
-        mds.append((interval, interval_mds))
-
+            freq = np.array(list(kmers.values()))
+            try:
+                interval_mds = np.sum(-freq*np.log(freq))/np.log(num_kmers)
+            except RuntimeWarning:
+                interval_mds = np.NaN
+            mds.append((interval, interval_mds))
         return mds
 
     def mds_bed(self, output_file: str, sep: str='\t'):
         """Writes MDS for each interval to a bed/bedgraph file."""
         mds = self.motif_diversity_score()
-        with open(output_file) as out:
+        with open(output_file, 'w') as out:
             for interval, interval_mds in mds:
-                out.write("sep".join([*interval, interval_mds]))
-                out.write('\n')
+                contig, start, stop, name = interval
+                temp_str = sep.join(
+                        [contig, str(start), str(stop), name, str(interval_mds)]
+                    )
+                out.write(
+                    f"{temp_str}\n"
+                )
     
     def to_tsv(self, output_file: str, calc_freq: bool=True, sep: str='\t'):
         """
@@ -314,6 +370,59 @@ class EndMotifsIntervals():
             sep: str='\t'
         ):
         """
+        Take frequency of specified kmer and writes to bedgraph.
+        
+        Parameters
+        ----------
+        output_file: str
+            File to write frequencies to.
+        calc_freq: bool, optional
+            Calculates frequency of motifs if true. Otherwise, writes counts
+            for each motif. Default is true.
+        sep: str, optional
+            Separator for table. Tab-separated by default.
+        """
+        if type(output_file) == str:
+            try:
+                # open file based on name
+                output_is_file = False
+                if output_file == '-':
+                    output = stdout
+                else:
+                    output_is_file = True
+                    output = open(output_file, 'w')
+
+                # write to file
+                for interval, freqs in self.intervals:
+                    count = sum(freqs.values())
+                    output.write(
+                        sep.join([
+                            interval[0],
+                            str(interval[1]),
+                            str(interval[2]),
+                            (self.freq[kmer] if not calc_freq
+                             else f"{(freqs[kmer]/count):.6f}"
+                                if count!=0
+                                else "NaN"
+                            )
+                        ])
+                    )
+                    output.write('\n')
+
+            finally:
+                if output_is_file:
+                    output.close()
+        else:
+            raise TypeError(f'output_file must be a string.')
+        
+    def to_bed(
+            self,
+            kmer: str,
+            output_file: str,
+            calc_freq: bool=True,
+            sep: str='\t'
+        ):
+        """
         Take frequency of specified kmer and writes to BED.
         
         Parameters
@@ -344,6 +453,7 @@ class EndMotifsIntervals():
                             interval[0],
                             str(interval[1]),
                             str(interval[2]),
+                            interval[3],
                             (self.freq[kmer] if not calc_freq
                              else f"{(freqs[kmer]/count):.6f}"
                                 if count!=0
@@ -800,3 +910,18 @@ def _cli_mds(
     )
     mds = motifs.motif_diversity_score()
     stdout.write(f'{mds}\n')
+
+def _cli_interval_mds(
+    file_path: str,
+    file_out: str,
+    sep: str = ',',
+    header: int = 0,
+) -> float:
+    # 30 is used as a placeholder for the quality threshold. It is not
+    # used to calculate MDS and can be ignored.
+    motifs = EndMotifsIntervals.from_file(
+        file_path,
+        30,
+        sep,
+    )
+    motifs.mds_bed(file_out)
