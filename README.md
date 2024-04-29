@@ -12,5 +12,5 @@ conda create -n r_finale python=3.11
 conda activate r_finale
 mkdir r_finale
 cd r_finale
-
+git clone -b ravi https://github.com/epifluidlab/FinaleToolkit.git
 ```
