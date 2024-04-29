@@ -21,9 +21,8 @@ from numpy.typing import NDArray
 
 import finaletools.genome as genome
 
-HG19GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt.gz')
-HG38GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt.gz')
-HG38CENTROMERES: Path = (files(genome) / 'data' / 'hg38.centromeres.txt.gz')
+HG19GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt')
+HG38GAPS: Path = (files(genome) / 'data' / 'hg38.gap.txt')
 
 
 class GenomeGaps:
@@ -122,7 +121,33 @@ class GenomeGaps:
 
     @classmethod
     def ucsc_hg38(cls):
-        return NotImplemented
+        """
+        Creates a GenomeGaps for the UCSC hg38 reference genome. This
+        sequences uses chromosome names that start with 'chr' and is
+        based on a version of the GRCh38 reference genome.
+
+        Returns
+        -------
+        gaps : GenomeGaps
+            GenomeGaps for the UCSC hg38 reference genome.
+        """
+        genome_gaps = cls()
+        gaps = np.genfromtxt(
+            HG38GAPS,
+            usecols=[1, 2, 3, 7],
+            dtype=[
+                ('contig', '<U32'),
+                ('start', '<i8'),
+                ('stop', '<i8'),
+                ('type', '<U32'),
+            ]
+        )
+        genome_gaps.centromeres = gaps[gaps['type'] == 'centromere']
+        genome_gaps.telomeres = gaps[gaps['type'] == 'telomere']
+        genome_gaps.short_arms = gaps[gaps['type'] == 'short_arm']
+        genome_gaps.gaps = gaps
+
+        return genome_gaps
 
     def in_tcmere(self, contig: str, start: int, stop: int) -> bool:
         """
@@ -439,10 +464,9 @@ def ucsc_hg38_gap_bed(output_file: str):
     output_file : str
         Output path
     """
-    raise NotImplementedError()
+    raise GenomeGaps.ucsc_hg38().to_bed(output_file)
 
-
-def _cli_gap_bed(reference_genome, output_file):
+def gap_bed(reference_genome, output_file):
     """
     Creates BED4 of centromeres, telomeres, and short arms for the UCSC
     hg19 reference sequence.
