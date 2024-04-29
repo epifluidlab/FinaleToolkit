@@ -6,10 +6,11 @@ build-backend = "setuptools.build_meta"
 include-package-data = true
 
 [project]
-name = "FinaleTools"
-version = "0.5.0"
+name = "FinaleToolkit"
+version = "0.5.1"
 authors = [
     {name="James Li", email="lijw21@wfu.edu"},
+    {name="Ravi Bandaru", email="ravi.bandaru@northwestern.edu"}, 
     {name="Yaping Liu", email="yaping@northwestern.edu"},
 ]
 description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
@@ -24,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
+    "click",
     "pysam",
     "pybedtools",
     "pybigwig",
