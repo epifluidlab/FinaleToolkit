@@ -83,7 +83,7 @@ def multi_wps(
     if (verbose):
         stderr.write('Reading intervals from bed\n')
 
-    reduced_intervals = _reduce_overlaps_in_file(interval_file)
+    reduced_intervals = _reduce_overlaps_in_file(interval_file) # WARNING THIS NEEDS TO BE CHANGED BECAUSE IT DOES NOT LEAVE ADJACENT INTERVALS INTACT
     converted_intervals = _convert_to_list(reduced_intervals)
     all_intervals = _merge_all_intervals(converted_intervals)
     contigs, starts, stops = zip(*all_intervals)
