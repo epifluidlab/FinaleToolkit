@@ -13,4 +13,6 @@ conda activate r_finale
 mkdir r_finale
 cd r_finale
 git clone -b ravi https://github.com/epifluidlab/FinaleToolkit.git
+pip install -e ./FinaleToolkit/
+finaletools
 ```
