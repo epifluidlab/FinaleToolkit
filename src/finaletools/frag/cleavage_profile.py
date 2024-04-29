@@ -160,7 +160,7 @@ def cleavage_profile_intervals(
     if (verbose > 1):
         stderr.write(f'Header is {header}\n')
     
-    reduced_intervals = _reduce_overlaps_in_file(interval_file)
+    reduced_intervals = _reduce_overlaps_in_file(interval_file) # WARNING THIS NEEDS TO BE CHANGED BECAUSE IT DOES NOT LEAVE ADJACENT INTERVALS INTACT
     converted_intervals = _convert_to_list(reduced_intervals)
     all_intervals = _merge_all_intervals(converted_intervals)
     contigs, starts, stops = zip(*all_intervals)
