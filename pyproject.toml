@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
+    "click",
     "pysam",
     "pybedtools",
     "pybigwig",
