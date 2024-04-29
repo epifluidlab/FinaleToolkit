@@ -1,903 +1,278 @@
-#!/usr/bin/env python3
+import click
 
-from __future__ import annotations
-import argparse
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'], max_content_width=200)
 
-from finaletools.frag.frag_length import (
-    _cli_frag_length, frag_length_bins, frag_length_intervals
-)
-from finaletools.utils.filter_bam import filter_bam
-from finaletools.frag.coverage import coverage
-from finaletools.frag.multi_wps import multi_wps
-from finaletools.frag.delfi import delfi
-from finaletools.frag.adjust_wps import adjust_wps
-from finaletools.frag.agg_wps import agg_wps
-from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
-from finaletools.frag.end_motifs import (
-    end_motifs, _cli_mds, _cli_interval_mds, interval_end_motifs)
-from finaletools.frag.cleavage_profile import _cli_cleavage_profile
-from finaletools.genome.gaps import _cli_gap_bed
-
-# TODO: implement subcommands read from stdin
-# TODO: implement pipelining
-
-def main_cli_parser():
-    parser = argparse.ArgumentParser(
-        description='Calculates fragmentation features given a CRAM, BAM, SAM,'
-        ' or Frag.gz file.',
-        epilog='')
-    subparsers = parser.add_subparsers(title='subcommands',
-                                       dest='subcommand')
-
-    # Common arguments
-
-    # Subcommand 1: frag-coverage
-    parser_command1 = subparsers.add_parser(
-        'coverage',
-        description=(
-        'Calculates fragmentation coverage over intervals in a BED file given '
-        'a SAM, BAM, CRAM, or Frag.gz file'
-        )
-    )
-    # TODO: accept tabix
-
-    parser_command1.add_argument(
-        'input_file',
-        help='SAM, BAM, CRAM, or Frag.gz file containing fragment data'
-    )
-    parser_command1.add_argument(
-        'interval_file',
-        help='BED file containing intervals over which coverage is calculated'
-    )
-    parser_command1.add_argument(
-        '-o',
-        '--output_file',
-        default='-',
-        help='BED file where coverage is printed'
-    )
-    parser_command1.add_argument(
-        '-s',
-        '--scale-factor',
-        default=1e6,
-        type=float,
-        help='Amount coverage will be multiplied by'
-    )
-    parser_command1.add_argument(
-        '-q',
-        '--quality_threshold',
-        default=30,
-        type=int
-    )
-    parser_command1.add_argument(
-        '-w',
-        '--workers',
-        default=1,
-        type=int,
-        help='Number of worker processes to use. Default is 1.'
-    )
-    parser_command1.add_argument(
-        '-v',
-        '--verbose',
-        action='store_true',
-        default=0
-    )
-    parser_command1.set_defaults(func=coverage)
-
-    # Subcommand 2: frag-length
-    parser_command2 = subparsers.add_parser(
-        'frag-length', prog='finaletools-frag-length',
-        description='Calculates fragment lengths given a CRAM/BAM/SAM file',
-        )
-    parser_command2.add_argument(
-        'input_file',
-        type=str,
-        help='bam or frag.gz file containing fragment data.',
-    )
-    parser_command2.add_argument(
-        '-c',
-        '--contig',
-        type=str,
-        help='contig or chromosome to select fragments from. Required if '
-        'using --start or --stop.',
-    )
-    parser_command2.add_argument(
-        '-S',
-        '--start',
-        type=int,
-        help='0-based left-most coordinate of interval to select fragments'
-        'from. Must also use --contig.',
-    )
-    parser_command2.add_argument(
-        '-E',
-        '--stop',
-        help='1-based right-most coordinate of interval to select fragments'
-        'from. Must also use --contig.',
-        type=int,
-    )
-    parser_command2.add_argument(
-        '-p',
-        '--intersect_policy',
-        default='midpoint',
-        type=str,
-        help='Specifies what policy is used to include fragments in the given '
-        'interval. Default is "midpoint". Policies include:\n'
-        '- midpoint: the average of end coordinates of a fragment lies'
-        'in the interval.\n'
-        '- any: any part of the fragment is in the interval.',
-    )
-    parser_command2.add_argument(
-        '-o',
-        '--output_file',
-        default='-',
-        type=str,
-        help='File to write results to. "-" may be used to write to stdout. '
-        'Default is "-".',
-    )
-    parser_command2.add_argument(
-        '-q',
-        '--quality_threshold',
-        default=30,
-        type=int,
-        help="Minimum MAPQ. Default is 30."
-    )
-    parser_command2.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0,
-        help='Verbose logging.'
-    )
-    parser_command2.set_defaults(func=_cli_frag_length)
-
-    # Subcommand 3: frag_length_bins()
-    parser_command3 = subparsers.add_parser(
-        'frag-length-bins', prog='finaletools-frag-length-bins',
-        description='computes frag lengths of fragments and agregates in bins '
-        'by length. Either writes bins and counts to tsv or prints a histogram'
-        )
-    parser_command3.add_argument(
-        'input_file',
-        help='BAM or SAM file containing fragment data'
-    )
-    parser_command3.add_argument(
-        '-c',
-        '--contig',
-        type=str,
-        help='contig or chromosome to select fragments from. Required if '
-        'using --start or --stop.',
-    )
-    parser_command3.add_argument(
-        '-S',
-        '--start',
-        type=int,
-        help='0-based left-most coordinate of interval to select fragments'
-        'from. Must also use --contig.',
-    )
-    parser_command3.add_argument(
-        '-p',
-        '--intersect_policy',
-        default='midpoint',
-        type=str,
-        help='Specifies what policy is used to include fragments in the given '
-        'interval. Default is "midpoint". Policies include:\n'
-        '- midpoint: the average of end coordinates of a fragment lies'
-        'in the interval.\n'
-        '- any: any part of the fragment is in the interval.',
-    )
-    parser_command3.add_argument(
-        '-E',
-        '--stop',
-        help='1-based right-most coordinate of interval to select fragments'
-        'from. Must also use --contig.',
-        type=int,
-    )
-    parser_command3.add_argument(
-        '--bin-size',
-        type=int,
-        help='Used to specify a custom bin size instead of automatically'
-        ' calculating one.')
-    parser_command3.add_argument(
-        '-o',
-        '--output_file',
-        default='-',
-        type=str,
-        help='File to write results to. "-" may be used to write to stdout. '
-        'Default is "-".',
-    )
-    parser_command3.add_argument(
-        '--contig-by-contig',
-        action='store_true',
-        help='Placeholder, not implemented.'
-    )
-    parser_command3.add_argument(
-        '--histogram',
-        action='store_true',
-        help='Draws a histogram in the terminal.'
-    )
-    parser_command3.add_argument(
-        '-q',
-        '--quality_threshold',
-        default=30,
-        type=int,
-        help="Minimum MAPQ. Default is 30."
-    )
-    parser_command3.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0,
-        help='Verbose logging.'
-    )
-    parser_command3.set_defaults(func=frag_length_bins)
-
-    # Subcommand 3_1: frag_length_intervals
-    parser_command3_1 = subparsers.add_parser(
-        'frag-length-intervals',
-        description='Calculates frag lengths statistics over user-specified '
-        'genomic intervals.'
-    )
-    parser_command3_1.add_argument(
-        'input_file',
-        help='BAM or SAM file containing PE WGS of cfDNA'
-    )
-    parser_command3_1.add_argument(
-        'interval_file',
-        help='BED file containing intervals over which to produce statistics'
-    )
-    parser_command3_1.add_argument(
-        '-p',
-        '--intersect_policy',
-        default='midpoint',
-        type=str,
-        help='Specifies what policy is used to include fragments in the given '
-        'interval. Default is "midpoint". Policies include:\n'
-        '- midpoint: the average of end coordinates of a fragment lies'
-        'in the interval.\n'
-        '- any: any part of the fragment is in the interval.',
-    )
-    parser_command3_1.add_argument(
-        '-o',
-        '--output-file',
-        default='-',
-        help='File to print results to. if "-", will print to stdout. Default'
-        'is "-".'
-    )
-    parser_command3_1.add_argument(
-        '-q',
-        '--quality-threshold',
-        default=30,
-        type=int,
-        help='minimum MAPQ to filter for'
-    )
-    parser_command3_1.add_argument(
-        '-w',
-        '--workers',
-        default=1,
-        type=int,
-        help='Number of subprocesses to use'
-    )
-    parser_command3_1.add_argument(
-        '-v',
-        '--verbose',
-        default=0,
-        action='count',
-        help='Determines how much is written to stderr'
-    )
-    parser_command3_1.set_defaults(func=frag_length_intervals)
-
-    # Subcommand 4: wps (on interval bed file)
-    parser_command4 = subparsers.add_parser(
-        'wps',
-        prog='finaletools-wps',
-        description='Calculates Windowed Protection Score over a region '
-        'around sites specified in a BED file from alignments in a '
-        'CRAM/BAM/SAM/Frag.gz file'
-    )
-    parser_command4.add_argument(
-        'input_file',
-        help='bam or sam file containing paired-end reads of cfDNA WGS'
-    )
-    parser_command4.add_argument(
-        'site_bed',
-        help='bed file containing sites over which to calculate wps'
-    )
-    parser_command4.add_argument(
-        '-o',
-        '--output_file',
-        default='-',
-        help='BigWig file to write results to. Default is stdout'
-    )
-    parser_command4.add_argument(
-        '-i',
-        '--interval_size',
-        default=5000,
-        type=int
-    )
-    parser_command4.add_argument(
-        '-W',
-        '--window_size',
-        default=120,
-        type=int
-    )
-    parser_command4.add_argument(
-        '-lo',
-        '--fraction_low',
-        default=120,
-        type=int
-    )
-    parser_command4.add_argument(
-        '-hi',
-        '--fraction_high',
-        default=180,
-        type=int
-    )
-    parser_command4.add_argument(
-        '-q',
-        '--quality_threshold',
-        default=30,
-        type=int
-    )
-    parser_command4.add_argument(
-        '-w',
-        '--workers',
-        default=1,
-        type=int
-    )
-    parser_command4.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        default=0)
-    parser_command4.set_defaults(func=multi_wps)
-
-    # Subcommand 5: delfi
-    parser_command5 = subparsers.add_parser(
-        'delfi',
-        prog='finaletools-delfi',
-        description='Calculates DELFI score over genome.'
-        '\nNOTE: due to some '
-        'ad hoc implementation details, currently the only accepted reference '
-        "genome is hg19."
-        )
-    parser_command5.add_argument(
-        'input_file',
-        help="SAM, BAM, CRAM, or Frag.gz file containing fragment reads.")
-    parser_command5.add_argument(
-        'autosomes',
-        help="Tab-delimited file where column one is chromosomes and column "
-        "two is the length of said chromosome."
-        )
-    parser_command5.add_argument(
-        'reference_file',
-        help="2bit file for reference sequence used during alignment."
-        )
-    parser_command5.add_argument(
-        'bins_file',
-        help="BED format file containing bins over which to calculate delfi. "
-        "To replicate Cristiano and colleage's methodology, use 100kb bins "
-        "over human autosomes."
-        )
-    parser_command5.add_argument(
-        '-b', '--blacklist_file',
-        help="BED file containing darkregions to ignore when calculating DELFI."
-        )
-    parser_command5.add_argument(
-        '-g', '--gap_file',
-        help='BED4 format file with columns "chrom","start","stop","type". '
-        '"type" should be "centromere", "telomere", or "short arm"; all others'
-        ' are ignored. This information corresponds to "gap" track for hg19 in'
-        ' UCSC Genome Browser.'
-        )
-    parser_command5.add_argument(
-        '-o', '--output_file', default='-',
-        help='BED, bed.gz, tsv, or csv file to write results to. If "-", '
-        'writes tab-deliniated data to stdout. Default is "-".')
-    parser_command5.add_argument(
-        '-W', '--window_size', default=5000000, type=int,
-        help="Currently unused.")
-    parser_command5.add_argument(
-        '-gc', '--gc_correct', action='store_true',
-        help="Indicate whther or not gc correction is applied.")
-    parser_command5.add_argument(
-        '-m', '--merge_bins', action='store_true',
-        help="Indicate whther or not bins are merged to 5Mb bins.")
-    parser_command5.add_argument(
-        '-q', '--quality_threshold', default=30, type=int,
-        help="MAPQ to be filtered.")
-    parser_command5.add_argument(
-        '-w', '--workers', default=1, type=int,
-        help="Maximum number of subprocesses to spawn. Should be close to "
-        "number of cores.")
-    parser_command5.add_argument('-v', '--verbose', action='count', default=0)
-    parser_command5.set_defaults(func=delfi)
-
-    # Subcommand 6: filter_bam
-    parser_command6 = subparsers.add_parser(
-        'filter-bam',
-        prog='finaletools-filter-bam',
-        description='Filters a BAM file so that all reads are in mapped pairs'
-        ', exceed a certain MAPQ, are not flagged for quality, are read1, are'
-        ' not secondary or supplementary alignments, and are on the same '
-        'reference sequence as the mate.'
-    )
-    parser_command6.add_argument(
-        'input_file',
-        help='BAM file with PE WGS'
-    )
-    parser_command6.add_argument(
-        '-r',
-        '--region-file',
-        default=None,
-        help='BED file containing regions to read fragments from. Default is'
-        ' None.'
-    )
-    parser_command6.add_argument(
-        '-o',
-        '--output-file',
-        default='-',
-        help='Path to write filtered BAM. Defualt is "-". If set to "-",'
-        ' the BAM file will be written to stdout.'
-    )
-    parser_command6.add_argument(
-        '-q',
-        '--quality_threshold',
-        type=int,
-        default=30,
-        help='Minimum mapping quality to filter for. Defualt is 30.'
-    )
-    parser_command6.add_argument(
-        '-hi',
-        '--fraction-high',
-        type=int,
-        default=None,
-        help='Maximum fragment size. Default is None'
-    )
-    parser_command6.add_argument(
-        '-lo',
-        '--fraction-low',
-        type=int,
-        default=None,
-        help='Minimum fragment size. Default is None'
-    )
-    parser_command6.add_argument(
-        '-w',
-        '--workers',
-        type=int,
-        default=1,
-        help='Number of worker processes to spawn.'
-    )
-    parser_command6.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        help='Specify verbosity. Number of printed statements is proportional '
-        'to number of vs.'
-    )
-    parser_command6.set_defaults(func=filter_bam)
-
-    # Subcommand 7: adjust WPS
-    parser_command7 = subparsers.add_parser(
-        'adjust-wps',
-        prog='finaletools-adjust-wps',
-        description='Reads WPS data from a WIG file and applies a median filter'
-        ' and a Savitsky-Golay filter (Savitsky and Golay, 1964).'
-    )
-    parser_command7.add_argument(
-        'input_file',
-        help='BigWig file with WPS data.'
-    )
-    parser_command7.add_argument(
-        'interval_file',
-        help='BED file containing intervals over which wps was calculated'
-    )
-    parser_command7.add_argument(
-        'genome_file',
-        help='GENOME file containing chromosome/contig names and lengths. '
-        'Needed to write head for BigWig.'
-    )
-    parser_command7.add_argument(
-        '-o',
-        '--output-file',
-        default='-',
-        help='WIG file to print filtered WPS data. If "-", will write to '
-        'stdout. Default is "-".'
-    )
-    parser_command7.add_argument(
-        '-m',
-        '--median-window-size',
-        default=1000,
-        type=int,
-        help='Size of window for median filter. Default is 1000.'
-    )
-    parser_command7.add_argument(
-        '-s',
-        '--savgol-window-size',
-        default=21,
-        type=int,
-        help='Size of window for Savitsky-Golay filter. Default is 21.'
-    )
-    parser_command7.add_argument(
-        '-p',
-        '--savgol-poly-deg',
-        default=2,
-        type=int,
-        help='Degree polynomial for Savitsky-Golay filter. Default is 2.'
-    )
-    parser_command7.add_argument(
-        '-w',
-        '--workers',
-        default=1,
-        type=int,
-        help='Number of subprocesses to use. Default is 1.'
-    )
-    parser_command7.add_argument(
-        '--mean',
-        action='store_true',
-    )
-    parser_command7.add_argument(
-        '--subtract-edges',
-        action='store_true',
-    )
-    parser_command7.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
-    )
-    parser_command7.set_defaults(func=adjust_wps)
-
-    # Subcommand 8: aggregate WPS
-    parser_command8 = subparsers.add_parser(
-        'agg-wps',
-        prog='finaletools-agg-wps',
-        description='Reads WPS data from a WIG file and aggregates over'
-        ' intervals in a BED file.'
-    )
-    parser_command8.add_argument(
-        'input_file',
-        help='BigWig file with WPS data.'
-    )
-    parser_command8.add_argument(
-        'interval_file',
-        help='BED file containing intervals over which wps was calculated'
-    )
-    parser_command8.add_argument(
-        '-o',
-        '--output-file',
-        default='-',
-        help='WIG file to print filtered WPS data. If "-", will write to '
-        'stdout. Default is "-".'
-    )
-    parser_command8.add_argument(
-        '-m',
-        '--median-window-size',
-        default=1000,
-        type=int,
-        help='Size of window for median filter. Default is 1000.'
-    )
-    parser_command8.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        help='Specify verbosity. Number of printed statements is proportional to number of vs.'
-    )
-    parser_command8.set_defaults(func=agg_wps)
-
-    # Subcommand 9: delfi gc correct
-    parser_command9 = subparsers.add_parser(
-        'delfi-gc-correct',
-        prog='finaletools-delfi-gc-correct',
-        description='Performs gc-correction on raw delfi data.'
-    )
-    parser_command9.add_argument(
-        'input_file',
-        help='BED3+3 file containing raw data'
-    )
-    parser_command9.add_argument(
-        '-o',
-        '--output-file',
-        default='-',
-        help='BED3+3 to print GC-corrected DELFI fractions. If "-", will write'
-        ' to stdout. Default is "-".'
-    )
-    parser_command9.add_argument(
-        '--header-lines',
-        default=1,
-        type=int,
-        help='Number of header lines in BED. Default is 1.'
-    )
-    parser_command9.add_argument(
-        '-v',
-        '--verbose',
-        action='count',
-        help='Specify verbosity. Number of printed statements is proportional '
-        'to number of vs.'
-    )
-    parser_command9.set_defaults(func=cli_delfi_gc_correct)
-
-    # Subcommand 10: end motifs
-    parser_command10 = subparsers.add_parser(
-        'end-motifs',
-        prog='finaletools-end-motifs',
-        description="Measures frequency of k-mer 5' end motifs and tabulates"
-        " data into a tab-delimited file."
-    )
-    parser_command10.add_argument(
-        'input_file',
-        help='SAM, BAM, or tabix-indexed file with fragment data.'
-    )
-    parser_command10.add_argument(
-        'refseq_file',
-        help='2bit file containing reference sequence that fragments were'
-        ' aligned to.'
-    )
-    parser_command10.add_argument(
-        '-k',
-        default=4,
-        type=int,
-        help='Length of k-mer. Default is 4.'
-    )
-    parser_command10.add_argument(
-        '-o',
-        '--output-file',
-        default='-',
-        help='TSV to print k-mer frequencies. If "-", will write'
-        ' to stdout. Default is "-".'
-    )
-    parser_command10.add_argument(
-        '-q',
-        '--quality-threshold',
-        default=20,
-        type=int,
-        help='Minimum MAPQ of reads. Default is 20.'
-    )
-    parser_command10.add_argument(
-        '-w',
-        '--workers',
-        default=1,
-        type=int,
-        help='Number of subprocesses to use. Default is 1.'
-    )
-    parser_command10.add_argument(
-        '-v',
-        '--verbose',
-        default=0,
-        action='count',
-        help='Specify verbosity. Number of printed statements is proportional '
-        'to number of vs.'
-    )
-    parser_command10.set_defaults(func=end_motifs)
-
-    # subcommand 10a: interval-end-motifs
-    parser_command10a = subparsers.add_parser(
-        'interval-end-motifs',
-        prog='finaletools-interval-end-motifs',
-        description="Measures frequency of k-mer 5' end motifs in each "
-        "region specified in a BED file and writes data into a table."
-    )
-    parser_command10a.add_argument(
-        'input_file',
-        help='SAM, BAM, or tabix-indexed file with fragment data.'
-    )
-    parser_command10a.add_argument(
-        'refseq_file',
-        help='2bit file containing reference sequence that fragments were'
-        ' aligned to.'
-    )
-    parser_command10a.add_argument(
-        'intervals',
-        help='BED file containing intervals or list of tuples'
-    )
-    parser_command10a.add_argument(
-        '-k',
-        default=4,
-        type=int,
-        help='Length of k-mer. Default is 4.'
-    )
-    parser_command10a.add_argument(
-        '-lo', '--fraction-low',
-        default=10,
-        type=int,
-        help='Smallest fragment length to consider. Default is 10'
-    )
-    parser_command10a.add_argument(
-        '-hi', '--fraction-high',
-        default=600,
-        type=int,
-        help='Longest fragment length to consider. Default is 600'
-    )
-    parser_command10a.add_argument(
-        '-o',
-        '--output-file',
-        default='-',
-        help="File path to write results to. Either tsv or csv."
-    )
-    parser_command10a.add_argument(
-        '-q',
-        '--quality-threshold',
-        default=20,
-        type=int,
-        help='Minimum MAPQ of reads. Default is 20.'
-    )
-    parser_command10a.add_argument(
-        '-w',
-        '--workers',
-        default=1,
-        type=int,
-        help='Number of subprocesses to use. Default is 1.'
-    )
-    parser_command10a.add_argument(
-        '-v',
-        '--verbose',
-        default=0,
-        action='count',
-        help='Specify verbosity. Number of printed statements is proportional '
-        'to number of vs.'
-    )
-    parser_command10a.set_defaults(func=interval_end_motifs)
-
-
-    # Subcommand 11: MDS
-    parser_command11 = subparsers.add_parser(
-        'mds',
-        prog='finaletools-mds',
-        description='Reads k-mer frequencies from a file and calculates a '
-        'motif diversity score (MDS) using normalized Shannon entropy as '
-        'described by Jiang et al (2020). This function is generalized for '
-        'any k-mer instead of just 4-mers.'
-    )
-    parser_command11.add_argument(
-        'file_path',
-        nargs='?',
-        default='-',
-        help='Tab-delimited or similar file containing one column for all '
-        'k-mers a one column for frequency. Reads from stdin by default.'
-    )
-    parser_command11.add_argument(
-        '-s',
-        '--sep',
-        default='\t',
-        help='Separator used in tabular file. Default is tab.'
-    )
-    parser_command11.add_argument(
-        '--header',
-        default=0,
-        type=int,
-        help='Number of header rows to ignore. Default is 0'
-    )
-    parser_command11.set_defaults(func=_cli_mds)
-
-
-    # Subcommand 11a: interval-mds
-    parser_command11a = subparsers.add_parser(
-        'interval-mds',
-        prog='finaletools-interval-mds',
-        description='Reads k-mer frequencies from a file and calculates a '
-        'motif diversity score (MDS) for each interval using normalized '
-        'Shannon entropy as '
-        'described by Jiang et al (2020). This function is generalized for '
-        'any k-mer instead of just 4-mers.'
-    )
-    parser_command11a.add_argument(
-        'file_path',
-        nargs='?',
-        default='-',
-        help='Tab-delimited or similar file containing one column for all '
-        'k-mers a one column for frequency. Reads from stdin by default.'
-    )
-    parser_command11a.add_argument(
-        '-s',
-        '--sep',
-        default=',',
-        help='Separator used in tabular file. Default is tab.'
-    )
-    parser_command11a.add_argument(
-        'file_out',
-        default='-'
-    )
-    parser_command11a.set_defaults(func=_cli_interval_mds)
-    
-
-    # Subcommand 12: gap bed
-    parser_command12 = subparsers.add_parser(
-        'gap-bed',
-        prog='finaletools-gap-bed',
-        description='Creates a BED4 file containing centromeres, '
-        'telomeres, and short-arm intervals, similar to the gaps '
-        'annotation track for hg19 found on the UCSC Genome Browser '
-        '(Kent et al 2002). Currently only supports hg19, b37, '
-        'human_g1k_v37, hg38, and GRCh38',
-        epilog='Gap is used liberally in this command, and in the case '
-        'hg38/GRCh38, may refer to regions where there no longer are '
-        'gaps in the reference sequence.'
-    )
-    parser_command12.add_argument(
-        'reference_genome',
-        choices=['hg19', 'b37','human_g1k_v37', 'hg38', 'GRCh38'],
-        help='Reference genome to provide gaps for.'
-    )
-    parser_command12.add_argument(
-        'output_file',
-        help='Path to write bed file to. If "-" used, writes to stdout.'
-    )
-    parser_command12.set_defaults(func=_cli_gap_bed)
-
-    # Subcommand 13: cleavage profile
-    parser_command13 = subparsers.add_parser(
-        'cleavage-profile',
-        prog='finaletools-cleavage-profile',
-        description='wip'
-    )
-    parser_command13.add_argument(
-        'input_file',
-        help='BAM, CRAM, or frag.gz containing fragment coordinates.'
-    )
-    parser_command13.add_argument(
-        'interval_file',
-        help='BED file containing intervals to calculate cleavage profile '
-        'over.'
-    )
-    parser_command13.add_argument(
-        '-o',
-        '--output_file',
-        default='-',
-        help='Path to write output file to. If "-" used, writes bed.gz to '
-        'stdout. Writes in BigWig format if ".bw" or ".bigwig" used, and '
-        'writes in gzip compressed bed file if ".bed.gz" or ".bedGraph.gz" '
-        'suffixes used. Default is "-".',
-    )
-    parser_command13.add_argument(
-        '-lo',
-        '--fraction_low',
-        default=120,
-        type=int
-    )
-    parser_command13.add_argument(
-        '-hi',
-        '--fraction_high',
-        default=180,
-        type=int
-    )
-    parser_command13.add_argument(
-        '-q',
-        '--quality-threshold',
-        default=20,
-        type=int,
-        help='Minimum MAPQ of reads. Default is 20.'
-    )
-    parser_command13.add_argument(
-        '-w',
-        '--workers',
-        default=1,
-        type=int,
-        help='Number of subprocesses to use. Default is 1.'
-    )
-    # TODO: include what each level of verbosity entails.
-    parser_command13.add_argument(
-        '-v',
-        '--verbose',
-        default=0,
-        action='count',
-        help='Specify verbosity. Number of printed statements is proportional '
-        'to number of vs.'
-    )
-    parser_command13.set_defaults(func=_cli_cleavage_profile)
-    return parser
-
+@click.group(context_settings=CONTEXT_SETTINGS, no_args_is_help=True)
 
 def main_cli():
-    parser = main_cli_parser()
+    pass
 
-    args = parser.parse_args()
-    try:
-        function = args.func
-        funcargs = vars(args)
-        funcargs.pop('func')
-        funcargs.pop('subcommand')
+@main_cli.command(name='coverage-intervals', short_help="Calculates fragmentation coverage over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('interval_file', type=click.Path(exists=True))
+@click.option('-o', '--output_file', default='-', type=str, help='Output BED file path.')
+@click.option('-s', '--scale_factor', default=1, show_default=True, type=float, help='Scale factor for coverage values.')
+@click.option('-min', '--min_length', default=None, type=int, help='Minimum length for a fragment to be included in coverage.')
+@click.option('-max', '--max_length', default=None, type=int, help='Maximum length for a fragment to be included in coverage.')
+@click.option('-i', '--intersect_policy', default='midpoint', type=str, show_default=True, help='Specifies what policy is used to include fragments in the given interval.')
+@click.option('-q', '--quality', default=30, show_default=True, help='Minimum mapping quality threshold.')
+@click.option('-w', '--workers', default=1, type=int, show_default=True, help='Number of worker processes.')
+@click.option('-n', '--normalize', is_flag=True, help='Normalize (divide) coverage values by the total number of fragments.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
 
-        function(**funcargs)
-    except AttributeError:
-        parser.print_help()
-    
+def coverage_cmd(input_file, interval_file, output_file, scale_factor, min_length, max_length, intersect_policy, quality, workers, verbose, normalize):
+    """
+    Calculates fragmentation coverage over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m Path to a BAM/SAM/CRAM/Fragment file containing fragment data.
+
+        \033[92mINTERVAL_FILE:\033[0m Path to a BED file containing intervals to calculate coverage over.
+
+    \033[91mOUTPUT:\033[0m A BED file containing coverage values over the intervals specified in INTERVAL_FILE.
+    """
+    from finaletools.frag.coverage import coverage_intervals
+    coverage_intervals(input_file, interval_file, output_file=output_file, scale_factor=scale_factor, min_length=min_length, max_length=max_length, intersect_policy=intersect_policy, quality_threshold=quality, workers=workers, normalize=normalize, verbose=verbose)
+
+@main_cli.command(name='frag-length-bins', short_help="Retrieves fragment lengths given a BAM/SAM/CRAM/Fragment file.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.option('-c', '--contig', type=str, help='Specify the contig or chromosome to select fragments from. (Required if using --start or --stop.)')
+@click.option('-s', '--start', type=int, help='Specify the 0-based left-most coordinate of the interval to select fragments from. (Must also specify --contig.)')
+@click.option('-e', '--stop', type=int, help='Specify the 1-based right-most coordinate of the interval to select fragments from. (Must also specify --contig.)')
+@click.option('-min', '--min_length', default=None, type=int, help='Minimum length for a fragment to be included in fragment length.')
+@click.option('-max', '--max_length', default=None, type=int, help='Maximum length for a fragment to be included in fragment length.')
+@click.option('-i', '--intersect_policy', default='midpoint', type=str, show_default=True, help='Specifies what policy is used to include fragments in the given interval.')
+@click.option('-b', '--bin_size', default=1, show_default=True, type=int, help='Specify the size of the bins to group fragment lengths into.')
+@click.option('-o', '--output_file', default='-', type=str, help='Output .tsv file path.')
+@click.option('-q', '--quality', show_default=True, default=30, type=int, help="Minimum mapping quality threshold.")
+@click.option('-H', '--hist_path', default=None, type=str, help='Specifies the directory to which to save the .png histogram plot.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def frag_length_bin(input_file, contig, start, stop, min_length, max_length, intersect_policy, bin_size, output_file, quality, hist_path, verbose):
+    """
+    Retrieves fragment lengths given a BAM/SAM/CRAM/Fragment file.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m Path to a BAM/SAM/CRAM/Fragment file containing fragment data.
+
+    \033[91mOUTPUT:\033[0m A .TSV file containing containing fragment lengths binned according to the specified bin size.
+    """
+    from finaletools.frag.frag_length import frag_length_bins
+    frag_length_bins(input_file, contig=contig, start=start, stop=stop, min_length=min_length, max_length=max_length, intersect_policy=intersect_policy, bin_size=bin_size, output_file=output_file, quality_threshold=quality, histogram_path=hist_path, verbose=verbose)
+
+@main_cli.command(name='frag-length-intervals', short_help="Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('interval_file', type=click.Path(exists=True))
+@click.option('-o', '--output_file', default='-', type=str, help='Output BED file path.')
+@click.option('-i', '--intersect_policy', default='midpoint', type=str, show_default=True, help='Specifies what policy is used to include fragments in the given interval.')
+@click.option('-min', '--min_length', default=None, type=int, help='Minimum length for a fragment to be included in fragment length.')
+@click.option('-max', '--max_length', default=None, type=int, help='Maximum length for a fragment to be included in fragment length.')
+@click.option('-q', '--quality', show_default=True, default=30, type=int, help="Minimum mapping quality threshold.")
+@click.option('-w', '--workers', default=1, type=int, show_default=True, help='Number of worker processes.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def frag_length_intervals(input_file, interval_file, output_file, min_length, max_length, quality, intersect_policy, workers, verbose):
+    """
+    Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m Path to a BAM/SAM/CRAM/Fragment file containing fragment data.
+
+
+        \033[92mINTERVAL_FILE:\033[0m Path to a BED file containing intervals to retrieve fragment length summary statistics over.
+
+    \033[91mOUTPUT:\033[0m A BED file containing fragment length summary statistics (mean, median, st. dev, min, max) over the intervals specified in INTERVAL_FILE.
+    """
+    from finaletools.frag.frag_length import frag_length_intervals
+    frag_length_intervals(input_file, interval_file, output_file=output_file, min_length=min_length, max_length=max_length, intersect_policy=intersect_policy, quality_threshold=quality, workers=workers, verbose=verbose)
+
+
+@main_cli.command(name='cleavage-profile', short_help="Calculates cleavage proportion over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('interval_file', type=click.Path(exists=True))
+@click.argument('output_file', type=str)
+@click.option('--five/--three', default=True, help="Calculate cleavage proportion based on 5' or 3' end of fragments.")
+@click.option('-min', '--min_length', default=None, type=int, help='Minimum length for a fragment to be included in fragment length.')
+@click.option('-max', '--max_length', default=None, type=int, help='Maximum length for a fragment to be included in fragment length.')
+@click.option('-q', '--quality', show_default=True, default=30, type=int, help="Minimum mapping quality threshold.")
+@click.option('-c', '--chrom_sizes', default=None, type=click.Path(exists=True), help='Path to a chrom.sizes file. This is required and only used if a fragment file (.bed.frag.gz) is provided as input.')
+@click.option('-w', '--workers', default=1, type=int, show_default=True, help='Number of worker processes.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def cleavage_profile(input_file, interval_file, output_file, min_length, max_length, quality, chrom_sizes, five, workers, verbose):
+    """
+    Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m Path to a BAM/SAM/CRAM/Fragment file containing fragment data.
+
+
+        \033[92mINTERVAL_FILE:\033[0m Path to a BED file containing intervals to calculates cleavage proportion over.
+
+    \033[91mOUTPUT:\033[0m A bigWig file containing the cleavage proportion results over the intervals specified in INTERVAL_FILE.
+    """
+    from finaletools.frag.cleavage_profile import cleavage_profile_intervals
+    cleavage_profile_intervals(input_file, interval_file, output_file=output_file, min_length=min_length, max_length=max_length, quality_threshold=quality, workers=workers, verbose=verbose, chrom_sizes=chrom_sizes, five=five)
+
+@main_cli.command(name='to-frag', short_help="Converts a BAM file to a Fragment file.", no_args_is_help=True)
+@click.argument('input_bam', type=click.Path(exists=True))
+@click.argument('output_file', type=str)
+@click.option('-w', '--workers', default=1, type=int, show_default=True, help='Number of worker processes.')
+def to_frag(input_bam, output_file, workers):
+    """
+    Converts a BAM file to a Fragment file.
+
+    Arguments:
+
+        \033[92mINPUT_BAM:\033[0m Path to a BAM file containing fragment data.
+
+
+        \033[92mOUTPUT_FILE:\033[0m Path to the output .bed.frag.gz file.
+
+    \033[91mOUTPUT:\033[0m A Fragment file (.bed.frag.gz) containing fragment data.
+    """
+    from finaletools.utils.to_frag import toFrag
+    toFrag(input_bam, output_file, workers=workers)
+
+@main_cli.command(name='wps', short_help="Calculates Windowed Protection Score over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('interval_file', type=click.Path(exists=True))
+@click.argument('output_file', type=str)
+@click.option('-W', '--window_size', default=120, show_default=True, type=int, help='Size of the sliding window used to calculate WPS scores.')
+@click.option('-i', '--intersect_policy', default='midpoint', type=str, show_default=True, help='Specifies what policy is used to include fragments in the given interval.')
+@click.option('-min', '--min_length', default=None, type=int, help='Minimum length for a fragment to be included in fragment length.')
+@click.option('-max', '--max_length', default=None, type=int, help='Maximum length for a fragment to be included in fragment length.')
+@click.option('-c', '--chrom_sizes', default=None, type=click.Path(exists=True), help='Path to a chrom.sizes file. This is required and only used if a fragment file (.bed.frag.gz) is provided as input.')
+@click.option('-q', '--quality', show_default=True, default=30, type=int, help="Minimum mapping quality threshold.")
+@click.option('-w', '--workers', default=1, type=int, show_default=True, help='Number of worker processes.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def wps(input_file, interval_file, output_file, window_size, min_length, max_length, quality, intersect_policy, chrom_sizes, workers, verbose):
+    """
+    Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m Path to a BAM/SAM/CRAM/Fragment file containing fragment data.
+
+
+        \033[92mINTERVAL_FILE:\033[0m Path to a BED file containing intervals to calculate WPS over.
+
+    \033[91mOUTPUT:\033[0m A bigWig file containing the WPS results over the intervals specified in INTERVAL_FILE.
+    """
+    from finaletools.frag.multi_wps import multi_wps
+    multi_wps(input_file, interval_file, output_file, window_size=window_size, chrom_sizes=chrom_sizes, min_length=min_length, max_length=max_length, intersect_policy=intersect_policy, quality_threshold=quality, workers=workers, verbose=verbose)
+
+@main_cli.command(name='wps', short_help="Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('interval_file', type=click.Path(exists=True))
+@click.argument('interval_size', type=int)
+@click.argument('output_file', type=str)
+@click.option('-W', '--window_size', default=120, show_default=True, type=int, help='Size of the sliding window used to calculate WPS scores.')
+@click.option('-i', '--intersect_policy', default='midpoint', type=str, show_default=True, help='Specifies what policy is used to include fragments in the given interval.')
+@click.option('-min', '--min_length', default=None, type=int, help='Minimum length for a fragment to be included in fragment length.')
+@click.option('-max', '--max_length', default=None, type=int, help='Maximum length for a fragment to be included in fragment length.')
+@click.option('-c', '--chrom_sizes', default=None, type=click.Path(exists=True), help='Path to a chrom.sizes file. This is required and only used if a fragment file (.bed.frag.gz) is provided as input.')
+@click.option('-q', '--quality', show_default=True, default=30, type=int, help="Minimum mapping quality threshold.")
+@click.option('-w', '--workers', default=1, type=int, show_default=True, help='Number of worker processes.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def wps(input_file, interval_file, output_file, window_size, interval_size, min_length, max_length, quality, intersect_policy, chrom_sizes, workers, verbose):
+    """
+    Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m Path to a BAM/SAM/CRAM/Fragment file containing fragment data.
+
+
+        \033[92mINTERVAL_FILE:\033[0m Path to a BED file containing intervals to calculate WPS over.
+
+
+        \033[92mINTERVAL_SIZE:\033[0m Constant size of each interval specified in INTERVAL_FILE. 
+
+    \033[91mOUTPUT:\033[0m A bigWig file containing the WPS results over the intervals specified in INTERVAL_FILE.
+    """
+    from finaletools.frag.multi_wps import multi_wps
+    multi_wps(input_file, interval_file, output_file, window_size=window_size, chrom_sizes=chrom_sizes, min_length=min_length, max_length=max_length, interval_size=interval_size, intersect_policy=intersect_policy, quality_threshold=quality, workers=workers, verbose=verbose)
+
+@main_cli.command(name='adjust-wps', short_help="Adjusts raw Windowed Protection Score (WPS) by applying a median filter and Savitsky-Golay filter.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('interval_file', type=click.Path(exists=True))
+@click.argument('output_file', type=str)
+@click.argument('chrom_sizes', type=click.Path(exists=True))
+@click.option('-m', '--median_window_size', default=1000, show_default=True, type=int, help='Size of the median filter window used to adjust WPS scores.')
+@click.option('-s', '--savgol_window_size', default=21, type=int, show_default=True, help='Size of the Savitsky-Golay filter window used to adjust WPS scores.')
+@click.option('-p', '--savgol_poly_deg', default=2, type=int, show_default=True, help='Degree polynomial for Savitsky-Golay filter.')
+@click.option('-M', '--mean', is_flag=True, help='A mean filter is used instead of median.')
+@click.option('-e', '--subtract_edges', is_flag=True, help='Take the median of the first and last --edge_size bases in a window and subtract from the whole interval.')
+@click.option('-E', '--edge_size', default=500, type=int, show_default=False, help='Size of the edge to subtract from the whole interval.')
+@click.option('-w', '--workers', default=1, type=int, show_default=True, help='Number of worker processes.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def adjust_wps(input_file, interval_file, output_file, chrom_sizes, median_window_size, savgol_window_size, savgol_poly_deg, mean, subtract_edges, edge_size, workers, verbose):
+    """
+    Adjusts raw Windowed Protection Score (WPS) by applying a median filter and Savitsky-Golay filter.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m A bigWig file containing the WPS results over the intervals specified in INTERVAL_FILE.
+
+
+        \033[92mINTERVAL_FILE:\033[0m Path to a BED file containing intervals to WPS was calculated over.
+
+
+        \033[92mCHROM_SIZES:\033[0m A .chrom.sizes file containing chromosome sizes.
+
+    \033[91mOUTPUT:\033[0m A bigWig file containing the adjusted WPS results over the intervals specified in INTERVAL_FILE.
+    """
+    from finaletools.frag.adjust_wps import adjust_wps
+    adjust_wps(input_file=input_file, interval_file=interval_file, output_file=output_file, chrom_sizes=chrom_sizes, median_window_size=median_window_size, savgol_window_size=savgol_window_size, savgol_poly_deg=savgol_poly_deg, mean=mean, subtract_edges=subtract_edges, edge_size=edge_size, workers=workers, verbose=verbose)
+
+
+@main_cli.command(name='agg-signal', short_help="Aggregates a bigWig signal over constant-length intervals defined in a BED file.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('interval_file', type=click.Path(exists=True))
+@click.argument('output_file', type=str)
+@click.option('-m', '--median_window_size', default=0, show_default=True, type=int, help='Size of the median filter window used to adjust WPS scores. Only modify if aggregating WPS signals.')
+@click.option('-M', '--mean', is_flag=True, help='A mean aggregation is returned rather than sum.')
+@click.option('-s', '--strand_location', default=5, show_default=True, help='Index of column in --interval_file that contains the strand (+/-) information.')
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def agg_signal(input_file, interval_file, output_file, median_window_size, mean, strand_location, verbose):
+    """
+    Aggregates a bigWig signal over constant-length intervals defined in a BED file.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m A bigWig file containing signals over the intervals specified in INTERVAL_FILE.
+
+
+        \033[92mINTERVAL_FILE:\033[0m Path to a BED file containing intervals to which signals were calculated over.
+
+    \033[91mOUTPUT:\033[0m A wiggle file containing the aggregate signal over the intervals specified in INTERVAL_FILE.
+    """
+    from finaletools.frag.agg_bw_signal import agg_bw_signal
+    agg_bw_signal(input_file=input_file, interval_file=interval_file, output_file=output_file, median_window_size=median_window_size, mean=mean, strand_location=strand_location, verbose=verbose)
+
+@main_cli.command(name='filter-bam', short_help="Filters a BAM file for mapped read pairs meeting specified criteria.", no_args_is_help=True)
+@click.argument('input_file', type=click.Path(exists=True))
+@click.option('-r', '--region_file', default=None, type=click.Path(exists=True), help='Only output alignments overlapping the intervals in this BED file will be included.')
+@click.option('-o', '--output_file', default="-", type=str, help='Output BAM file path.')
+@click.option('-min', '--min_length', default=None, type=int, help='Minimum length for a fragment to be included in fragment length.')
+@click.option('-max', '--max_length', default=None, type=int, help='Maximum length for a fragment to be included in fragment length.')
+@click.option('-q', '--quality', show_default=True, default=30, type=int, help="Minimum mapping quality threshold.")
+@click.option('-v', '--verbose', is_flag=True, help='Enable verbose mode to display detailed processing information.')
+def filter_bam(input_file, interval_file, output_file, median_window_size, mean, strand_location, verbose):
+    """
+    Filters a BAM file for mapped read pairs meeting specified criteria.
+
+    Arguments:
+
+        \033[92mINPUT_FILE:\033[0m Path to BAM file.
+
+
+    \033[91mOUTPUT:\033[0m A BAM file containing filtered read pairs.
+    """
+    from finaletools.utils.filter_bam import filter_bam
+    filter_bam(input_file=input_file, region_file=region_file, output_file=output_file, min_length=min_length, max_length=max_length, quality=quality, verbose=verbose)
+
 if __name__ == '__main__':
     main_cli()
