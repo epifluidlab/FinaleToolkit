@@ -13,7 +13,7 @@ import numpy as np
 from numba import jit
 from tqdm import tqdm
 
-from finaletools.utils import frag_array
+from finaletoolkit.utils import frag_array
 
 @jit(nopython=True)
 def _single_wps(contig: str,
@@ -86,7 +86,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     if (verbose):
         start_time = time.time()
-        stderr.write("[finaletools-wps] Reading fragments\n")
+        stderr.write("[finaletoolkit-wps] Reading fragments\n")
         stderr.write(f'Region: {contig}:{start}-{stop}\n')
 
     # set start and stop to ints
