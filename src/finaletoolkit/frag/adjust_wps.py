@@ -63,6 +63,7 @@ def _single_adjust_wps(
         savgol_poly_deg: int=2,
         mean: bool=False,
         subtract_edges: bool=False,
+        edge_size: int=500,
 ):
     """
     Takes a wps WIG file and applies a median filter and a Savitsky-
@@ -104,7 +105,6 @@ def _single_adjust_wps(
         # adjusting/filtering
         if subtract_edges:
             # TODO: add option for edge size
-            edge_size = 500
             start_mean = np.mean(intervals['scores'][:edge_size])
             stop_mean = np.mean(intervals['scores'][-edge_size:])
             mean = np.mean([start_mean, stop_mean])
@@ -155,6 +155,7 @@ def adjust_wps(
     savgol_poly_deg: int=2,
     mean: bool=False,
     subtract_edges: bool=False,
+    edge_size: int=500,
     workers: int=1,
     verbose: Union(bool, int)=False
 ):
@@ -236,6 +237,7 @@ def adjust_wps(
                     savgol_poly_deg,
                     mean,
                     subtract_edges,
+                    edge_size,
                 ))
     else:
         raise ValueError('Invalid filetype for interval_file.')
