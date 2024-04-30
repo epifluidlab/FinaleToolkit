@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-import finaletools.frag as pkg_data
+import finaletoolkit.frag as pkg_data
 
 # path to csv containing 5mb bins from delfi_scripts
 BINS_PATH: Path = (

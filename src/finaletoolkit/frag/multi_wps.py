@@ -11,7 +11,7 @@ from numpy.typing import NDArray
 from tqdm import tqdm
 import pyBigWig as pbw
 
-from finaletools.frag.wps import wps
+from finaletoolkit.frag.wps import wps
 
 
 def _wps_star(args):

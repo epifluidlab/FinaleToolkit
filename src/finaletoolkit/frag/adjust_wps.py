@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 import pyBigWig as pbw
 from scipy.signal import savgol_filter
 
-from finaletools.utils import genome2list
+from finaletoolkit.utils import genome2list
 
 def _median_filter(positions: NDArray, data: NDArray, window_size: int):
     """locally adjusted running median"""

@@ -17,8 +17,8 @@ import py2bit
 import numpy as np
 from numpy.typing import NDArray
 
-from finaletools.utils.utils import frag_generator, _get_intervals
-import finaletools.frag as pkg_data
+from finaletoolkit.utils.utils import frag_generator, _get_intervals
+import finaletoolkit.frag as pkg_data
 
 # path to tsv containing f-profiles from Zhou et al (2023)
 FPROFILE_PATH: Path = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
