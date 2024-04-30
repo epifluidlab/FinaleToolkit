@@ -1,2 +1,2 @@
-from finaletools.utils.utils import *
-from finaletools.utils.filter_bam import filter_bam
+from finaletoolkit.utils.utils import *
+from finaletoolkit.utils.filter_bam import filter_bam
