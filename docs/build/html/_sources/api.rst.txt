@@ -29,15 +29,27 @@ DELFI
 
 .. autofunction:: finaletools.frag.delfi_gc_correct
 
+.. autofunction:: finaletools.frag.delfi_merge_bins
+
 End-motifs
 ==========
 
 .. autoclass:: finaletools.frag.EndMotifFreqs
    :members:
 
+.. autoclass:: finaletools.frag.EndMotifsIntervals
+   :members:
+
 .. autofunction:: finaletools.frag.region_end_motifs
 
 .. autofunction:: finaletools.frag.end_motifs
+
+.. autofunction:: finaletools.frag.interval_end_motifs
+
+Cleavage Profile
+================
+.. autofunction:: finaletools.frag.cleavage_profile
+
 
 Frag File Utilities
 ===================

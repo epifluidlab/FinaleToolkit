@@ -10,10 +10,10 @@ import numpy as np
 import pandas
 from tqdm import tqdm
 
-from finaletools.frag.delfi_gc_correct import delfi_gc_correct
-from finaletools.frag.delfi_merge_bins import delfi_merge_bins
-from finaletools.utils.utils import frag_generator, overlaps
-from finaletools.genome.gaps import GenomeGaps, ContigGaps
+from finaletoolkit.frag.delfi_gc_correct import delfi_gc_correct
+from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
+from finaletoolkit.utils.utils import frag_generator, overlaps
+from finaletoolkit.genome.gaps import GenomeGaps, ContigGaps
 
 
 def _delfi_single_window(

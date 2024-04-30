@@ -19,7 +19,7 @@ import pyBigWig as pbw
 from pybedtools import BedTool
 import pysam
 
-from finaletools.utils.utils import frag_array, overlaps
+from finaletoolkit.utils.utils import frag_array, overlaps
 
 
 def cleavage_profile(

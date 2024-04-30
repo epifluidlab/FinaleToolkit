@@ -19,7 +19,7 @@ from sys import stdout
 import numpy as np
 from numpy.typing import NDArray
 
-import finaletools.genome as genome
+import finaletoolkit.genome as genome
 
 HG19GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt.gz')
 HG38GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt.gz')
