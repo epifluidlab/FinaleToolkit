@@ -10,6 +10,7 @@ name = "FinaleToolkit"
 version = "0.5.0"
 authors = [
     {name="James Li", email="lijw21@wfu.edu"},
+    {name="Ravi Bandaru", email="ravi.bandaru@northwestern.edu"},
     {name="Yaping Liu", email="yaping@northwestern.edu"},
 ]
 description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
