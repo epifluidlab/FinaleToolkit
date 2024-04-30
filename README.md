@@ -1,20 +1,20 @@
-# FinaleTools
+# FinaleToolkit
 A package and standalone program to extract fragmentation patterns of cell-free
-DNA from paired-end sequencing data. FinaleTools refers to FragmentatIoN
+DNA from paired-end sequencing data. FinaleToolkit refers to FragmentatIoN
 AnaLysis of cEll-free DNA Tools.
 
-FinaleTools is in active development, and all API is subject to change and
+FinaleToolkit is in active development, and all API is subject to change and
 should be considered unstable.
 
 ## Installation
 Instructions:
-- (Optional) create a conda or venv environment to use FinaleTools in.
-- Run `pip install finaletools`
+- (Optional) create a conda or venv environment to use FinaleToolkit in.
+- Run `pip install finaletoolkit`
 
-To verify FinaleTools has been successfully installed, try
+To verify FinaleToolkit has been successfully installed, try
 ```
-$ finaletools -h
-usage: finaletools [-h]
+$ finaletoolkit -h
+usage: finaletoolkit [-h]
                    {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
                    ...
 
@@ -28,9 +28,9 @@ subcommands:
 ```
 
 ## Usage
-Documentation can be found at https://epifluidlab.github.io/finaletools-docs/
+Documentation can be found at https://epifluidlab.github.io/finaletoolkit-docs/
 
-FinaleTools functions generally accept reads in a few file formats:
+FinaleToolkit functions generally accept reads in a few file formats:
 - Binary Alignment Map (BAM) Files
 - Compressed Reference-oriented Alignment Map
 - FinaleDB Frag.gz Files
@@ -55,11 +55,11 @@ tabix -p bed $OUTPUT;
 
 Frag.gz files can be retrieved from http://finaledb.research.cchmc.org/
 
-Because FinaleTools uses pysam, BAM files should be bai-indexed and Frag.gz files should be tabix-indexed.
+Because FinaleToolkit uses pysam, BAM files should be bai-indexed and Frag.gz files should be tabix-indexed.
 
 To view fragment length distribution
 ```
-$ finaletools frag-length-bins --contig 22 --histogram sample.bam
+$ finaletoolkit frag-length-bins --contig 22 --histogram sample.bam
 Fragment Lengths for 22:-
 10.61%                            ▇                              mean      :169.28
 09.85%                           ▆█▁                             median    :169.00
@@ -79,7 +79,7 @@ len (nt)067   091   115   139   163   187   211   235   259   283
 ```
 
 ## FAQ
-Q: When running on an ARM64 Mac, I can install FinaleTools without errors.
+Q: When running on an ARM64 Mac, I can install FinaleToolkit without errors.
 However, I get an `ImportError` when I run it.
 
 A: Try `brew install curl`. Otherwise, email me and I will try to help you.

@@ -3,20 +3,20 @@
 from __future__ import annotations
 import argparse
 
-from finaletools.frag.frag_length import (
+from finaletoolkit.frag.frag_length import (
     _cli_frag_length, frag_length_bins, frag_length_intervals
 )
-from finaletools.utils.filter_bam import filter_bam
-from finaletools.frag.coverage import coverage
-from finaletools.frag.multi_wps import multi_wps
-from finaletools.frag.delfi import delfi
-from finaletools.frag.adjust_wps import adjust_wps
-from finaletools.frag.agg_wps import agg_wps
-from finaletools.frag.delfi_gc_correct import cli_delfi_gc_correct
-from finaletools.frag.end_motifs import (
+from finaletoolkit.utils.filter_bam import filter_bam
+from finaletoolkit.frag.coverage import coverage
+from finaletoolkit.frag.multi_wps import multi_wps
+from finaletoolkit.frag.delfi import delfi
+from finaletoolkit.frag.adjust_wps import adjust_wps
+from finaletoolkit.frag.agg_wps import agg_wps
+from finaletoolkit.frag.delfi_gc_correct import cli_delfi_gc_correct
+from finaletoolkit.frag.end_motifs import (
     end_motifs, _cli_mds, _cli_interval_mds, interval_end_motifs)
-from finaletools.frag.cleavage_profile import _cli_cleavage_profile
-from finaletools.genome.gaps import _cli_gap_bed
+from finaletoolkit.frag.cleavage_profile import _cli_cleavage_profile
+from finaletoolkit.genome.gaps import _cli_gap_bed
 
 # TODO: implement subcommands read from stdin
 # TODO: implement pipelining
@@ -85,7 +85,7 @@ def main_cli_parser():
 
     # Subcommand 2: frag-length
     parser_command2 = subparsers.add_parser(
-        'frag-length', prog='finaletools-frag-length',
+        'frag-length', prog='finaletoolkit-frag-length',
         description='Calculates fragment lengths given a CRAM/BAM/SAM file',
         )
     parser_command2.add_argument(
@@ -151,7 +151,7 @@ def main_cli_parser():
 
     # Subcommand 3: frag_length_bins()
     parser_command3 = subparsers.add_parser(
-        'frag-length-bins', prog='finaletools-frag-length-bins',
+        'frag-length-bins', prog='finaletoolkit-frag-length-bins',
         description='computes frag lengths of fragments and agregates in bins '
         'by length. Either writes bins and counts to tsv or prints a histogram'
         )
@@ -288,7 +288,7 @@ def main_cli_parser():
     # Subcommand 4: wps (on interval bed file)
     parser_command4 = subparsers.add_parser(
         'wps',
-        prog='finaletools-wps',
+        prog='finaletoolkit-wps',
         description='Calculates Windowed Protection Score over a region '
         'around sites specified in a BED file from alignments in a '
         'CRAM/BAM/SAM/Frag.gz file'
@@ -353,7 +353,7 @@ def main_cli_parser():
     # Subcommand 5: delfi
     parser_command5 = subparsers.add_parser(
         'delfi',
-        prog='finaletools-delfi',
+        prog='finaletoolkit-delfi',
         description='Calculates DELFI score over genome.'
         '\nNOTE: due to some '
         'ad hoc implementation details, currently the only accepted reference '
@@ -414,7 +414,7 @@ def main_cli_parser():
     # Subcommand 6: filter_bam
     parser_command6 = subparsers.add_parser(
         'filter-bam',
-        prog='finaletools-filter-bam',
+        prog='finaletoolkit-filter-bam',
         description='Filters a BAM file so that all reads are in mapped pairs'
         ', exceed a certain MAPQ, are not flagged for quality, are read1, are'
         ' not secondary or supplementary alignments, and are on the same '
@@ -478,7 +478,7 @@ def main_cli_parser():
     # Subcommand 7: adjust WPS
     parser_command7 = subparsers.add_parser(
         'adjust-wps',
-        prog='finaletools-adjust-wps',
+        prog='finaletoolkit-adjust-wps',
         description='Reads WPS data from a WIG file and applies a median filter'
         ' and a Savitsky-Golay filter (Savitsky and Golay, 1964).'
     )
@@ -549,7 +549,7 @@ def main_cli_parser():
     # Subcommand 8: aggregate WPS
     parser_command8 = subparsers.add_parser(
         'agg-wps',
-        prog='finaletools-agg-wps',
+        prog='finaletoolkit-agg-wps',
         description='Reads WPS data from a WIG file and aggregates over'
         ' intervals in a BED file.'
     )
@@ -586,7 +586,7 @@ def main_cli_parser():
     # Subcommand 9: delfi gc correct
     parser_command9 = subparsers.add_parser(
         'delfi-gc-correct',
-        prog='finaletools-delfi-gc-correct',
+        prog='finaletoolkit-delfi-gc-correct',
         description='Performs gc-correction on raw delfi data.'
     )
     parser_command9.add_argument(
@@ -618,7 +618,7 @@ def main_cli_parser():
     # Subcommand 10: end motifs
     parser_command10 = subparsers.add_parser(
         'end-motifs',
-        prog='finaletools-end-motifs',
+        prog='finaletoolkit-end-motifs',
         description="Measures frequency of k-mer 5' end motifs and tabulates"
         " data into a tab-delimited file."
     )
@@ -671,7 +671,7 @@ def main_cli_parser():
     # subcommand 10a: interval-end-motifs
     parser_command10a = subparsers.add_parser(
         'interval-end-motifs',
-        prog='finaletools-interval-end-motifs',
+        prog='finaletoolkit-interval-end-motifs',
         description="Measures frequency of k-mer 5' end motifs in each "
         "region specified in a BED file and writes data into a table."
     )
@@ -740,7 +740,7 @@ def main_cli_parser():
     # Subcommand 11: MDS
     parser_command11 = subparsers.add_parser(
         'mds',
-        prog='finaletools-mds',
+        prog='finaletoolkit-mds',
         description='Reads k-mer frequencies from a file and calculates a '
         'motif diversity score (MDS) using normalized Shannon entropy as '
         'described by Jiang et al (2020). This function is generalized for '
@@ -771,7 +771,7 @@ def main_cli_parser():
     # Subcommand 11a: interval-mds
     parser_command11a = subparsers.add_parser(
         'interval-mds',
-        prog='finaletools-interval-mds',
+        prog='finaletoolkit-interval-mds',
         description='Reads k-mer frequencies from a file and calculates a '
         'motif diversity score (MDS) for each interval using normalized '
         'Shannon entropy as '
@@ -801,7 +801,7 @@ def main_cli_parser():
     # Subcommand 12: gap bed
     parser_command12 = subparsers.add_parser(
         'gap-bed',
-        prog='finaletools-gap-bed',
+        prog='finaletoolkit-gap-bed',
         description='Creates a BED4 file containing centromeres, '
         'telomeres, and short-arm intervals, similar to the gaps '
         'annotation track for hg19 found on the UCSC Genome Browser '
@@ -825,7 +825,7 @@ def main_cli_parser():
     # Subcommand 13: cleavage profile
     parser_command13 = subparsers.add_parser(
         'cleavage-profile',
-        prog='finaletools-cleavage-profile',
+        prog='finaletoolkit-cleavage-profile',
         description='wip'
     )
     parser_command13.add_argument(

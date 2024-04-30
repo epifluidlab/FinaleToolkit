@@ -10,10 +10,10 @@ import numpy as np
 import pysam
 import tqdm
 
-from finaletools.utils.utils import (
+from finaletoolkit.utils.utils import (
     _not_read1_or_low_quality, _get_intervals, frag_generator
 )
-from finaletools.utils.cli_hist import _cli_hist
+from finaletoolkit.utils.cli_hist import _cli_hist
 
 
 def frag_length(
