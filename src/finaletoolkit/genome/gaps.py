@@ -22,8 +22,7 @@ from numpy.typing import NDArray
 import finaletoolkit.genome as genome
 
 HG19GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt.gz')
-HG38GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt.gz')
-HG38CENTROMERES: Path = (files(genome) / 'data' / 'hg38.centromeres.txt.gz')
+HG38GAPS: Path = (files(genome) / 'data' / 'hg38.gap.txt.gz')
 
 
 class GenomeGaps:
@@ -121,8 +120,33 @@ class GenomeGaps:
         return genome_gaps
 
     @classmethod
-    def ucsc_hg38(cls):
-        return NotImplemented
+    def hg38(cls):
+        """
+        Creates a GenomeGaps for the hg38 reference genome. This
+        sequences uses chromosome names that start with 'chr' and is
+        synonymous with the GRCh38 reference genome.
+        Returns
+        -------
+        gaps : GenomeGaps
+            GenomeGaps for the hg38 reference genome.
+        """
+        genome_gaps = cls()
+        gaps = np.genfromtxt(
+            HG38GAPS,
+            usecols=[1, 2, 3, 7],
+            dtype=[
+                ('contig', '<U32'),
+                ('start', '<i8'),
+                ('stop', '<i8'),
+                ('type', '<U32'),
+            ]
+        )
+        genome_gaps.centromeres = gaps[gaps['type'] == 'centromere']
+        genome_gaps.telomeres = gaps[gaps['type'] == 'telomere']
+        genome_gaps.short_arms = gaps[gaps['type'] == 'short_arm']
+        genome_gaps.gaps = gaps
+
+        return genome_gaps
 
     def in_tcmere(self, contig: str, start: int, stop: int) -> bool:
         """
