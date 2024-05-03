@@ -788,7 +788,7 @@ def main_cli_parser():
     parser_command11a.add_argument(
         '-s',
         '--sep',
-        default=',',
+        default='\t',
         help='Separator used in tabular file. Default is tab.'
     )
     parser_command11a.add_argument(
