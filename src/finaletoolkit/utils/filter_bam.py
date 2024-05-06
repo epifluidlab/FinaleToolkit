@@ -8,14 +8,12 @@ from shutil import rmtree
 
 import pysam
 
-
-
 def filter_bam(
         input_file: str,
         region_file: str=None,
         output_file: str=None,
-        fraction_high: int=None,
-        fraction_low: int=None,
+        max_length: int=None,
+        min_length: int=None,
         quality_threshold: int=30,
         workers: int=1,
         verbose: bool=False):
@@ -32,6 +30,8 @@ def filter_bam(
         filtered.
     region_file : str, option
     output_file : str, optional
+    min_length : int, optional
+    max_length : int, optional
     quality_threshold : int, optional
     workers : int, optional
     verbose : bool, optional
@@ -44,77 +44,56 @@ def filter_bam(
     # create tempfile to contain filtered bam
     if output_file is None:
         _, output_file = tf.mkstemp(suffix='.bam')
-    elif output_file.endswith('bam') or output_file == '-':
-        pass
-    else:
-        raise ValueError('output_file should have suffix .bam')
+    elif not output_file.endswith('bam') and output_file != '-':
+        raise ValueError('Output file should have suffix .bam')
 
 
         # create temp dir to store intermediate sorted file
     try:
-        temp_dir = tf.TemporaryDirectory()
+        with tf.TemporaryDirectory() as temp_dir:
+            flag_filtered_bam = f'{temp_dir}/flag_filtered.bam'
+            samtools_command = (
+                f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
+                f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
+            )
 
-        flag_filtered_bam = temp_dir.name + '/flag_filtered.bam'
+            if region_file is not None:
+                samtools_command += f' -M -L {region_file}'
 
-        samtools_command = (
-            f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
-            f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
-        )
+            try:
+                subprocess.run(samtools_command, shell=True, check=True)
+            except Exception:
+                traceback.print_exc()
+                exit(1)
 
-        if region_file is not None:
-            samtools_command += f' -M -L {region_file}'
+            # suppress index file warning
+            save = pysam.set_verbosity(0)
 
-        try:
-            process1 = subprocess.run(samtools_command, shell=True, check=True)
-        except Exception as e:
-            traceback.print_exc()
-            exit(1)
-
-        # supress index file warning
-        save = pysam.set_verbosity(0)
-
-        # filter for reads on different reference
-        with pysam.AlignmentFile(flag_filtered_bam, 'rb') as in_file:
-            with pysam.AlignmentFile(
-                output_file,
-                'wb',
-                template=in_file
-            ) as out_file:
-                if fraction_high is None and fraction_low is None:
+            # filter for reads on different reference
+            with pysam.AlignmentFile(flag_filtered_bam, 'rb') as in_file:
+                with pysam.AlignmentFile(
+                    output_file, 'wb', template=in_file) as out_file:
                     for read in in_file:
-                        if read.reference_name == read.next_reference_name:
-                            out_file.write(read)
-                elif fraction_high is None:
-                    for read in in_file:
-                        if (read.reference_name == read.next_reference_name
-                            and read.template_length >= fraction_low
+                        if (
+                            read.reference_name == read.next_reference_name
+                            and (max_length is None
+                                 or read.template_length <= max_length)
+                            and (min_length is None
+                                 or read.template_length >= min_length)
                         ):
                             out_file.write(read)
-                elif fraction_low is None:
-                    for read in in_file:
-                        if (read.reference_name == read.next_reference_name
-                            and read.template_length <= fraction_high
-                        ):
-                            out_file.write(read)
-                else:
-                    for read in in_file:
-                        if (read.reference_name == read.next_reference_name
-                            and read.template_length >= fraction_low
-                            and read.template_length <= fraction_high
-                        ):
-                            out_file.write(read)
+
     finally:
-        temp_dir.cleanup()
         pysam.set_verbosity(save)
 
     if output_file != '-':
         # generate index for output_file
         try:
-            process3 = subprocess.run(
+            subprocess.run(
                 f'samtools index {output_file} {output_file}.bai',
                 shell=True,
                 check=True
             )
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
             exit(1)

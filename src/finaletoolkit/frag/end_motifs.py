@@ -107,7 +107,8 @@ class EndMotifFreqs():
         """
         num_kmers = 4**self.k
         freq = np.array(self.frequencies())
-        mds = np.sum(-freq*np.log(freq)/np.log(num_kmers))
+        # if freq is 0, ignore
+        mds = np.sum(-freq*np.nan_to_num(np.log(freq), neginf=0)/np.log(num_kmers))
 
         return mds
 
@@ -287,7 +288,9 @@ class EndMotifsIntervals():
         for interval, kmers in self.intervals:
             freq = np.array(list(kmers.values()))
             try:
-                interval_mds = np.sum(-freq*np.log(freq))/np.log(num_kmers)
+                interval_mds = np.sum(
+                    -freq*np.nan_to_num(np.log(freq), neginf=0)
+                    )/np.log(num_kmers)
             except RuntimeWarning:
                 interval_mds = np.NaN
             mds.append((interval, interval_mds))

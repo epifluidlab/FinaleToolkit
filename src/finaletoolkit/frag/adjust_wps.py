@@ -4,6 +4,7 @@ from typing import TextIO, Union
 from multiprocessing import Pool
 from time import time
 import traceback
+import gzip
 
 import numpy as np
 from numpy.typing import NDArray
@@ -62,6 +63,7 @@ def _single_adjust_wps(
         savgol_poly_deg: int=2,
         mean: bool=False,
         subtract_edges: bool=False,
+        edge_size: int=500,
 ):
     """
     Takes a wps WIG file and applies a median filter and a Savitsky-
@@ -103,7 +105,6 @@ def _single_adjust_wps(
         # adjusting/filtering
         if subtract_edges:
             # TODO: add option for edge size
-            edge_size = 500
             start_mean = np.mean(intervals['scores'][:edge_size])
             stop_mean = np.mean(intervals['scores'][-edge_size:])
             mean = np.mean([start_mean, stop_mean])
@@ -154,6 +155,7 @@ def adjust_wps(
     savgol_poly_deg: int=2,
     mean: bool=False,
     subtract_edges: bool=False,
+    edge_size: int=500,
     workers: int=1,
     verbose: Union(bool, int)=False
 ):
@@ -197,14 +199,13 @@ def adjust_wps(
         stderr.write('Reading intervals from bed...\n')
 
     # read intervals
-    # TODO: add support for bedgz
     if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
         # amount taken by median filter
         end_decrease = median_window_size//2
-        if interval_file.endswith('.gz'):
-            raise NotImplementedError('bed.gz not supported yet')
         intervals = []
-        with open(interval_file, 'r') as file:
+        with (gzip.open(interval_file, 'rt')
+              if interval_file.endswith('.gz')
+              else open(interval_file, 'rt')) as file:
             for line in file:
                 # read segment from BED
                 contents = line.split('\t')
@@ -236,12 +237,14 @@ def adjust_wps(
                     savgol_poly_deg,
                     mean,
                     subtract_edges,
+                    edge_size,
                 ))
     else:
         raise ValueError('Invalid filetype for interval_file.')
 
     if verbose:
-        stderr.write('Opening pool\n')
+        stderr.write('Opening pool...\n')
+        
     try:
         # use pool of processes to process wps scores into an iterator
         pool = Pool(workers)
