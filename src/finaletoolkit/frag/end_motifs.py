@@ -202,7 +202,7 @@ class EndMotifsIntervals():
         k: int,
         quality_threshold: int = MIN_QUALITY,
     ):
-        self.intervals = intervals
+        self.intervals = intervals # (chrom, start, stop)
         self.k = k
         self.quality_threshold = quality_threshold
         if not all(len(freqs) == 4**k for _, freqs in intervals):
@@ -784,7 +784,7 @@ def end_motifs(
 def interval_end_motifs(
     input_file: str,
     refseq_file: Union[str, Path],
-    intervals: Union[str, list[Tuple[str,int,int]]],
+    intervals: Union[str, Iterable[Tuple[str,int,int]]],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
@@ -837,13 +837,13 @@ def interval_end_motifs(
                 for chrom, start, stop, *name
                 in (line.split() for line in interval_file.readlines())
             ]
-    elif type(intervals) is tuple:
+    elif isinstance(intervals, Iterable):
         intervals_tuples = intervals
     else:
-        raise TypeError("Intervals should be string or tuple.")
+        raise TypeError("Intervals should be string or list.")
     
     mp_intervals = []   # args to be fed into pool processes
-    for chrom, start, stop, _ in intervals_tuples:
+    for chrom, start, stop, *_ in intervals_tuples:
         mp_intervals.append((
             input_file,
             chrom,
