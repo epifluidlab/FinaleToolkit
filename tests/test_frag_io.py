@@ -5,9 +5,6 @@ several genomic file formats. This function is the backbone of almost
 all finaletoolkit features.
 """
 
-import os
-import pytest
-
 import numpy as np
 
 from finaletoolkit.utils.utils import frag_generator, frag_array, overlaps
