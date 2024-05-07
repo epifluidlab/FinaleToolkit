@@ -4,6 +4,7 @@ import gzip
 import tempfile as tf
 from typing import Union, TextIO, Tuple, List, Generator
 from sys import stderr, stdout
+from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
@@ -136,7 +137,7 @@ def frags_in_region(frag_array: NDArray[np.int64],
 
 
 def frag_generator(
-    input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
+    input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile, Path],
     contig: str,
     quality_threshold: int=30,
     start: int=None,
@@ -180,32 +181,40 @@ def frag_generator(
     """
     try:
         # check type of input and open if needed
-        input_file_is_str = False   # file was opened in this context
-        is_sam = False  # file is SAM/BAM, not tabix indexed
-        if type(input_file) == str:   # path string
-            input_file_is_str == True
+        input_file_is_path = False
+        if isinstance(input_file, str) or isinstance(input_file, Path):
+            input_file_is_path == True
             # check file type
             if (
-                input_file.endswith('.sam')
-                or input_file.endswith('.bam')
-                or input_file.endswith('.cram')
+                str(input_file).endswith('.sam')
+                or str(input_file).endswith('.bam')
+                or str(input_file).endswith('.cram')
             ):
                 is_sam = True
                 sam_file = pysam.AlignmentFile(input_file, 'r')
             elif (
-                input_file.endswith('frag.gz')
-                or input_file.endswith('bed.gz')
+                str(input_file).endswith('frag.gz')
+                or str(input_file).endswith('bed.gz')
             ):
                 tbx = pysam.TabixFile(input_file, 'r')
+                is_sam = False
+            else:
+                raise ValueError(
+                    "Unaccepted interval file type. Only SAM, CRAM, BAM"
+                    ", and Frag.gz files are accepted.")
         elif type(input_file) == pysam.AlignmentFile:
+            input_file_is_path = False
             is_sam = True
             sam_file = input_file
         elif type(input_file) == pysam.TabixFile:
+            input_file_is_path = False
+            is_sam = False
             tbx = input_file
         else:
             raise TypeError(
                 f'{type(input_file)} is invalid type for input_file.'
             )
+            exit(1)
         
         # setting filter based on intersect policy
         if intersect_policy == 'midpoint':
@@ -287,9 +296,9 @@ def frag_generator(
                     continue
 
     finally:
-        if input_file_is_str and is_sam:
+        if input_file_is_path and is_sam:
             sam_file.close()
-        elif input_file_is_str:
+        elif input_file_is_path:
             tbx.close()
 
 
