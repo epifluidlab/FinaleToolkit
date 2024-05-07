@@ -196,7 +196,7 @@ def frag_generator(
                 str(input_file).endswith('frag.gz')
                 or str(input_file).endswith('bed.gz')
             ):
-                tbx = pysam.TabixFile(input_file, 'r')
+                tbx = pysam.TabixFile(str(input_file), 'r')
                 is_sam = False
             else:
                 raise ValueError(
@@ -302,16 +302,17 @@ def frag_generator(
             tbx.close()
 
 
-def frag_array(input_file: Union[str, pysam.AlignmentFile],
-               contig: str,
-               quality_threshold: int=30,
-               start: int=None,
-               stop: int=None,
-               fraction_low: int=120,
-               fraction_high: int=180,
-               intersect_policy: str="midpoint",
-               verbose: bool=False
-               ) -> NDArray:
+def frag_array(
+    input_file: Union[str,pysam.AlignmentFile, pysam.TabixFile, Path],
+    contig: str,
+    quality_threshold: int=30,
+    start: int=None,
+    stop: int=None,
+    fraction_low: int=120,
+    fraction_high: int=180,
+    intersect_policy: str="midpoint",
+    verbose: bool=False
+    ) -> NDArray:
     """
     Reads from BAM, SAM, or BED file and returns a two column matrix
     with fragment start and stop positions.
