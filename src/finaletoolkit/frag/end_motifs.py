@@ -500,7 +500,7 @@ def region_end_motifs(
     contig: str,
     start: int,
     stop: int,
-    refseq_file: str,
+    refseq_file: Union[str, Path],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
@@ -525,7 +525,7 @@ def region_end_motifs(
         0-based start coordinate.
     stop : int
         1-based end coordinate.
-    refseq_file : str
+    refseq_file : str or Path
         2bit file with reference sequence `input_file` was aligned to.
     k : int, optional
         Length of end motif kmer. Default is 4.
@@ -567,7 +567,7 @@ def region_end_motifs(
     # TODO: accept other reference file types e.g. FASTA
     # count end motifs
     try:
-        refseq = py2bit.open(refseq_file, 'r')
+        refseq = py2bit.open(str(refseq_file), 'r')
         if both_strands:   # both strands of fragment
             for frag in frag_ends:
                 # py2bit uses 0-based for start, 1-based for end
@@ -652,7 +652,7 @@ def _region_end_motifs_dict_star(args) -> dict:
 
 def end_motifs(
     input_file: str,
-    refseq_file: str,
+    refseq_file: Union[str, Path],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
@@ -672,7 +672,7 @@ def end_motifs(
     ----------
     input_file : str
         SAM, BAM, CRAM, or Frag.gz file with paired-end reads.
-    refseq_file : str
+    refseq_file : str or Path
         2bit file with sequence of reference genome input_file is
         aligned to.
     k : int, optional
@@ -697,7 +697,7 @@ def end_motifs(
 
     # read chromosomes from py2bit
     try:
-        refseq = py2bit.open(refseq_file, 'r')
+        refseq = py2bit.open(str(refseq_file), 'r')
         chroms: dict = refseq.chroms()
     finally:
         refseq.close()
@@ -780,7 +780,7 @@ def end_motifs(
 
 def interval_end_motifs(
     input_file: str,
-    refseq_file: str,
+    refseq_file: Union[str, Path],
     intervals: Union[str, list[Tuple[str,int,int]]],
     k: int = 4,
     fraction_low: int = 10,
@@ -800,7 +800,7 @@ def interval_end_motifs(
     ----------
     input_file : str
         Path of SAM, BAM, CRAM, or Frag.gz containing pair-end reads.
-    refseq_file : str
+    refseq_file : str or Path
         Path of 2bit file for reference genome that reads are aligned to.
     intervals : str or tuple
         Path of BED file containing intervals or list of tuples
