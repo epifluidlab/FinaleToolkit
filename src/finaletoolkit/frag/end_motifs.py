@@ -108,8 +108,10 @@ class EndMotifFreqs():
         num_kmers = 4**self.k
         freq = np.array(self.frequencies())
         # if freq is 0, ignore
-        mds = np.sum(-freq*np.nan_to_num(np.log(freq), neginf=0)/np.log(num_kmers))
-
+        mds = -np.sum(
+            freq * np.log(
+                freq, out=np.zeros_like(freq), where=(freq!=0)
+                ) / np.log(num_kmers))
         return mds
 
     @classmethod
@@ -288,9 +290,10 @@ class EndMotifsIntervals():
         for interval, kmers in self.intervals:
             freq = np.array(list(kmers.values()))
             try:
-                interval_mds = np.sum(
-                    -freq*np.nan_to_num(np.log(freq), neginf=0)
-                    )/np.log(num_kmers)
+                interval_mds = -np.sum(
+                    freq * np.log(
+                        freq, out=np.zeros_like(freq), where=(freq!=0)
+                        ) / np.log(num_kmers))
             except RuntimeWarning:
                 interval_mds = np.NaN
             mds.append((interval, interval_mds))
@@ -790,7 +793,7 @@ def interval_end_motifs(
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union[bool, int] = False,
-) -> EndMotifFreqs:
+) -> EndMotifsIntervals:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
     file and user-specified intervals and returns the 5' k-mer
