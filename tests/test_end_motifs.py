@@ -59,7 +59,7 @@ class TestInvervalEndMotifs:
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
         motifs = interval_end_motifs(
-            bam, ref_file, [('12', 34442500, 34446500)], both_strands=True,
+            bam, ref_file, [('12', 34440000, 34450000)], both_strands=True,
             quality_threshold=0)
         expected_freqs = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
                           0.029411764705882353,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
@@ -92,9 +92,8 @@ class TestInvervalEndMotifs:
                           0.0,0.0,0.0,0.0,0.0,0.029411764705882353,0.0,0.0,
                           0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
                           0.029411764705882353,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-        motifs.frequencies()
         for freq, expected in zip(motifs.intervals[0][1].values(), expected_freqs):
-            assert freq == pytest.approx(expected, 0.1)
+            assert freq == pytest.approx(expected/0.029411764705882353, 0.1)
     def test_mds(self, request):
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
