@@ -5,6 +5,7 @@ end-motifs and motif diversity scores genomewide and over intervals.
 
 import os
 import filecmp
+import difflib
 
 import pytest
 
@@ -71,6 +72,7 @@ class TestGenomewideEndMotifs:
         dest = tmp_path / "results.tsv"
         dif_file = request.path.parent / 'data' / 'end_motifs_dif.tsv'
         motifs.to_tsv(dest)
+        filecmp.clear_cache()
         assert filecmp.cmp(dest, dif_file)
 
     def test_from_file(self, request, tmp_path):
@@ -94,7 +96,7 @@ class TestInvervalEndMotifs:
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
         motifs = interval_end_motifs(
-            bam, ref_file, [('12', 34440000, 34450000)], both_strands=True,
+            bam, ref_file, [('12', 34440000, 34450000, '.')], both_strands=True,
             quality_threshold=0)
         expected_freqs = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
                           0.029411764705882353,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
@@ -129,16 +131,38 @@ class TestInvervalEndMotifs:
                           0.029411764705882353,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
         for freq, expected in zip(motifs.intervals[0][1].values(), expected_freqs):
             assert freq == pytest.approx(expected/0.029411764705882353, 0.1)
+
     def test_mds(self, request):
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
         motifs = interval_end_motifs(
-            bam, ref_file, [('12', 34442500, 34446500)], both_strands=True,
+            bam, ref_file, [('12', 34442500, 34446500, '.')], both_strands=True,
             quality_threshold=0)
         
         assert motifs.motif_diversity_score()[0][1] == pytest.approx(
             0.5844622669209985, 0.1)
+        
+    def test_to_tsv(self, request, tmp_path):
+        bam = request.path.parent / 'data' / '12.3444.b37.bam'
+        ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
+        motifs = interval_end_motifs(
+            bam, ref_file, [('12', 34440000, 34450000, '.')], both_strands=True,
+            quality_threshold=0)
+        
+        dest = tmp_path / "interval_results.tsv"
+        dif_file = request.path.parent / 'data' / 'end_motifs_intervals_dif.tsv'
 
+        motifs.to_tsv(dest, False)
+        differ = difflib.Differ()
+        with open(dest) as actual, open(dif_file) as expected:
+            difs = differ.compare(actual.readlines(), expected.readlines())
+            dif_text = '\n'.join(difs)
+        filecmp.clear_cache()
+        assert filecmp.cmp(dest, dif_file), (
+            f"Generated file is different from expected: \n{dif_text}")
+
+    def test_from_file(self, request, tmp_path):
+        pass
 
 class TestCLIEntryPoint:
     """
