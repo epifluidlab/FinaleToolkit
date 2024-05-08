@@ -77,9 +77,9 @@ class EndMotifFreqs():
     def freq(self, kmer: str) -> float:
         return self._dict[kmer]
 
-    def to_tsv(self, output_file: str, sep: str='\t'):
+    def to_tsv(self, output_file: Union[str,Path], sep: str='\t'):
         """Prints k-mer frequencies to a tsv"""
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
@@ -97,7 +97,7 @@ class EndMotifFreqs():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string.')
+            raise TypeError(f'output_file must be a string or path.')
 
     def motif_diversity_score(self) -> float:
         """
