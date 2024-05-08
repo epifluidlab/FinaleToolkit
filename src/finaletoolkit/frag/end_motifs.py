@@ -227,7 +227,8 @@ class EndMotifsIntervals():
             quality_threshold: int,
             sep: str=',') -> EndMotifFreqs:
         """
-        Reads kmer frequency from a tab-delimited file
+        Reads kmer frequency from a tab-delimited file. Expected columns
+        are contig, start, stop, name, count, *kmers.
 
         Parameters
         ---------
@@ -315,7 +316,8 @@ class EndMotifsIntervals():
     
     def to_tsv(self, output_file: str, calc_freq: bool=True, sep: str='\t'):
         """
-        Writes all intervals and associated frquencies to file.
+        Writes all intervals and associated frquencies to file. Columns
+        are contig, start, stop, name, count, *kmers.
         
         Parameters
         ----------
