@@ -256,7 +256,7 @@ class EndMotifsIntervals():
             lines = file.readlines()
             _,_,_,_,_,*kmers = lines[0].split(sep)
             k = round(np.log(len(kmers))/np.log(4))
-            assert 4**k == len(kmers), f"We got k={k} but there are {len(kmers)} kmers."
+            assert 4**k == len(kmers), f"k={k} but should be {len(kmers)}."
 
             for line in lines[1:]:
                 contig, start, stop, name, *freqs = line.split(sep)
