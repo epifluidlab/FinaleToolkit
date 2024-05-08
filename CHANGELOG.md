@@ -4,26 +4,40 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [UNRELEASED] - 2024-05-08
+
+### Fixed
+- `interval-mds` CLI subcommand calculates correctly without large negative values.
+- `interval-mds` CLI subcommand now correctly parses tsv files.
+
+### Added
+- Most end-motif related Python functions accept Path instances as inputs for files.
+- Unit and function tests, especially for end-motif related functions.
+
+
 ## [0.5.1] - 2024-05-03
 
 ### Changed
-- all instances of finaletools have been renamed to finaletoolkit
+- All instances of finaletools have been renamed to finaletoolkit
+- All default tabular files are now TSV
+- Update contacts in TOML
 
 ### Fixed
-- interval mds and mds both calculate correctly when one motif has a frequency of 0
+- `interval-mds` and `mds` both calculate correctly when one motif has a frequency of 0
 
 ## [0.5.0] - 2024-04-24
 
 ### Added
-- Added finaletools.interval_end_motifs function to calculate end-motifs
+- Added `finaletools.interval_end_motifs` function to calculate end-motifs
 over genomic intervals. Stores results in an IntervalEndMotifs object.
-- Added CLI subcommand interval-end-motifs to calculate end-motifs over
+- Added CLI subcommand `interval-end-motifs` to calculate end-motifs over
 genomic intervals.
-- Added CLI subcommand interval-mds to calculate MDS over intervals from
+- Added CLI subcommand `interval-mds` to calculate MDS over intervals from
 interval end-motifs table.
 
 ### Changed
-- Added gc_correct option to delfi_merge_bins so that merging is possible
+- Added `gc_correct` option to `delfi_merge_bins` so that merging is possible
 without GC correction
 
 ### Fixed
