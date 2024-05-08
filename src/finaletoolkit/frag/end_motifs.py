@@ -122,7 +122,7 @@ class EndMotifFreqs():
             sep: str='\t',
             header: int=0,) -> EndMotifFreqs:
         """
-        Reads kmer frequency from a two-column tab-delimited file
+        Reads kmer frequency from a two-column tab-delimited file.
 
         Parameters
         ---------
@@ -202,7 +202,7 @@ class EndMotifsIntervals():
         k: int,
         quality_threshold: int = MIN_QUALITY,
     ):
-        self.intervals = intervals # (chrom, start, stop)
+        self.intervals = intervals
         self.k = k
         self.quality_threshold = quality_threshold
         if not all(len(freqs) == 4**k for _, freqs in intervals):
@@ -225,15 +225,19 @@ class EndMotifsIntervals():
             cls,
             file_path: str,
             quality_threshold: int,
-            sep: str=',') -> EndMotifFreqs:
+            sep: str = ',',) -> EndMotifFreqs:
         """
         Reads kmer frequency from a tab-delimited file. Expected columns
-        are contig, start, stop, name, count, *kmers.
+        are contig, start, stop, name, count, *kmers. Because
+        exporting to file includes an option to turn counts to a fraction,
+        this doesn't perfectly correspond to replicating the other file.
 
         Parameters
         ---------
         file_path : str
             Path string containing path to file.
+        quality_threshold : int
+            MAPQ filter used. Only used for some calculations.
         sep : str, optional
             Delimiter used in file.
 
@@ -260,7 +264,7 @@ class EndMotifsIntervals():
             assert 4**k == len(kmers), f"k={k} but should be {len(kmers)}."
 
             for line in lines[1:]:
-                contig, start, stop, name, score, *freqs = line.split(sep)
+                contig, start, stop, name, count, *freqs = line.split(sep)
                 start, stop = int(start), int(stop)
                 float_freqs = [float(freq) for freq in freqs]
                 dict_freqs = dict(zip(kmers, float_freqs))
@@ -790,7 +794,7 @@ def end_motifs(
 def interval_end_motifs(
     input_file: str,
     refseq_file: Union[str, Path],
-    intervals: Union[str, Iterable[Tuple[str,int,int]]],
+    intervals: Union[str, Iterable[Tuple[str,int,int,str]]],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
@@ -813,7 +817,7 @@ def interval_end_motifs(
         Path of 2bit file for reference genome that reads are aligned to.
     intervals : str or tuple
         Path of BED file containing intervals or list of tuples
-        (chrom, start, stop).
+        (chrom, start, stop, name).
     k : int, optional
         Length of end motif kmer. Default is 4.
     output_file : None or str, optional
