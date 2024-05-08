@@ -4,6 +4,7 @@ end-motifs and motif diversity scores genomewide and over intervals.
 """
 import pytest
 import os
+import filecmp
 
 from finaletoolkit.frag.end_motifs import *
 
@@ -46,6 +47,7 @@ class TestGenomewideEndMotifs:
                           0.029411764705882353,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
         for freq, expected in zip(motifs.frequencies(), expected_freqs):
             assert freq == pytest.approx(expected, 0.1)
+
     def test_mds(self, request):
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
@@ -54,6 +56,17 @@ class TestGenomewideEndMotifs:
         
         assert motifs.motif_diversity_score() == pytest.approx(
             0.5844622669209985, 0.1)
+    
+    def test_tsv(self, request, tmp_path):
+        bam = request.path.parent / 'data' / '12.3444.b37.bam'
+        ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
+        motifs = end_motifs(
+            bam, ref_file, both_strands=True, quality_threshold=0)
+        
+        dest = tmp_path / "results.tsv"
+        dif_file = request.path.parent / 'data' / 'end_motifs_dif.tsv'
+        motifs.to_tsv(dest)
+        assert filecmp.cmp(dest, dif_file)
 
         
 class TestInvervalEndMotifs:
