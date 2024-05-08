@@ -259,7 +259,7 @@ class EndMotifsIntervals():
             assert 4**k == len(kmers), f"k={k} but should be {len(kmers)}."
 
             for line in lines[1:]:
-                contig, start, stop, name, *freqs = line.split(sep)
+                contig, start, stop, name, score, *freqs = line.split(sep)
                 start, stop = int(start), int(stop)
                 float_freqs = [float(freq) for freq in freqs]
                 dict_freqs = dict(zip(kmers, float_freqs))
