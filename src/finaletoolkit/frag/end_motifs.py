@@ -48,7 +48,7 @@ class EndMotifFreqs():
         k: int,
         quality_threshold: int = MIN_QUALITY,
     ):
-        self._dict = dict(kmer_frequencies)
+        self.freq_dict = dict(kmer_frequencies)
         self.k = k
         self.quality_threshold = quality_threshold
         if not all(len(kmer) == k for kmer, _ in kmer_frequencies):
@@ -63,19 +63,19 @@ class EndMotifFreqs():
                 in zip(self.kmers(), self.frequencies()))
 
     def __len__(self) -> int:
-        return self._dict.__len__()
+        return self.freq_dict.__len__()
 
     def __str__(self) -> str:
         return ''.join(f'{kmer}: {freq}\n' for kmer, freq in self)
 
     def kmers(self) -> list:
-        return list(self._dict.keys())
+        return list(self.freq_dict.keys())
 
     def frequencies(self) -> list:
-        return list(self._dict.values())
+        return list(self.freq_dict.values())
 
     def freq(self, kmer: str) -> float:
-        return self._dict[kmer]
+        return self.freq_dict[kmer]
 
     def to_tsv(self, output_file: Union[str,Path], sep: str='\t'):
         """Prints k-mer frequencies to a tsv"""
