@@ -301,7 +301,7 @@ class EndMotifsIntervals():
             mds.append((interval, interval_mds))
         return mds
 
-    def mds_bed(self, output_file: str, sep: str='\t'):
+    def mds_bed(self, output_file: Union[str, Path], sep: str='\t'):
         """Writes MDS for each interval to a bed/bedgraph file."""
         mds = self.motif_diversity_score()
         with open(output_file, 'w') as out:
@@ -314,7 +314,10 @@ class EndMotifsIntervals():
                     f"{temp_str}\n"
                 )
     
-    def to_tsv(self, output_file: str, calc_freq: bool=True, sep: str='\t'):
+    def to_tsv(
+            self,
+            output_file: Union[str, Path],
+            calc_freq: bool=True, sep: str='\t'):
         """
         Writes all intervals and associated frquencies to file. Columns
         are contig, start, stop, name, count, *kmers.
@@ -329,11 +332,11 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
-                if output_file == '-':
+                if str(output_file) == '-':
                     output = stdout
                 else:
                     output_is_file = True
@@ -369,12 +372,12 @@ class EndMotifsIntervals():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string.')
+            raise TypeError(f'output_file must be a string or path.')
     
     def to_bedgraph(
             self,
             kmer: str,
-            output_file: str,
+            output_file: Union[str, Path],
             calc_freq: bool=True,
             sep: str='\t'
         ):
@@ -391,11 +394,11 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
-                if output_file == '-':
+                if str(output_file) == '-':
                     output = stdout
                 else:
                     output_is_file = True
@@ -427,7 +430,7 @@ class EndMotifsIntervals():
     def to_bed(
             self,
             kmer: str,
-            output_file: str,
+            output_file: Union[str, Path],
             calc_freq: bool=True,
             sep: str='\t'
         ):
@@ -444,11 +447,11 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
-                if output_file == '-':
+                if str(output_file) == '-':
                     output = stdout
                 else:
                     output_is_file = True
