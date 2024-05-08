@@ -185,3 +185,12 @@ class TestCLIEntryPoint:
         exit_status = os.system('finaletoolkit interval-mds --help')
         assert exit_status == 0
     
+class TestCLIIntervalMDS:
+    def test_interval_mds(self, request, tmp_path):
+        src_tsv = request.path.parent / 'data' / 'end_motifs_intervals_dif.tsv'
+        dest = tmp_path / "interval_mds.tsv"
+        os.system(f'finaletoolkit interval-mds {src_tsv} {dest}')
+        with open(dest) as file:
+            line = file.readline()
+            chrom, start, stop, name, mds = line.split() 
+        assert float(mds) == pytest.approx(0.5844622669209985, 0.01)
