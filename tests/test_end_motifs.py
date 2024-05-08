@@ -3,6 +3,7 @@ Tests for finaletoolkit.frag.end_motifs module, which calculates
 end-motifs and motif diversity scores genomewide and over intervals.
 """
 import pytest
+import os
 
 from finaletoolkit.frag.end_motifs import *
 
@@ -53,6 +54,7 @@ class TestGenomewideEndMotifs:
         
         assert motifs.motif_diversity_score() == pytest.approx(
             0.5844622669209985, 0.1)
+
         
 class TestInvervalEndMotifs:
     def test_end_motifs(self, request):
@@ -103,3 +105,26 @@ class TestInvervalEndMotifs:
         
         assert motifs.motif_diversity_score()[0][1] == pytest.approx(
             0.5844622669209985, 0.1)
+
+
+class TestCLIEntryPoint:
+    """
+    Test all CLI subcommands related to end_motifs and MDS, genomewide
+    and intervals.
+    """
+    def test_end_motif(self, request):
+        exit_status = os.system('finaletoolkit end-motifs --help')
+        assert exit_status == 0
+
+    def test_mds(self, request):
+        exit_status = os.system('finaletoolkit mds --help')
+        assert exit_status == 0
+
+    def test_interval_end_motif(self, request):
+        exit_status = os.system('finaletoolkit interval-end-motifs --help')
+        assert exit_status == 0
+
+    def test_interval_mds(self, request):
+        exit_status = os.system('finaletoolkit interval-mds --help')
+        assert exit_status == 0
+    
