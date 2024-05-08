@@ -2,9 +2,11 @@
 Tests for finaletoolkit.frag.end_motifs module, which calculates
 end-motifs and motif diversity scores genomewide and over intervals.
 """
-import pytest
+
 import os
 import filecmp
+
+import pytest
 
 from finaletoolkit.frag.end_motifs import *
 
@@ -57,7 +59,10 @@ class TestGenomewideEndMotifs:
         assert motifs.motif_diversity_score() == pytest.approx(
             0.5844622669209985, 0.1)
     
-    def test_tsv(self, request, tmp_path):
+    def test_to_tsv(self, request, tmp_path):
+        """
+        Dif output with expected output file.
+        """
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
         motifs = end_motifs(
@@ -68,7 +73,22 @@ class TestGenomewideEndMotifs:
         motifs.to_tsv(dest)
         assert filecmp.cmp(dest, dif_file)
 
+    def test_from_file(self, request, tmp_path):
+        """
+        Compare EndMotifFreq with EndMotifFreq created from 
+        """
+        bam = request.path.parent / 'data' / '12.3444.b37.bam'
+        ref_file = request.path.parent / 'data' / 'b37.chr12.2bit'
+        motifs = end_motifs(
+            bam, ref_file, both_strands=True, quality_threshold=0)
         
+        dest = tmp_path / "results.tsv"
+        motifs.to_tsv(dest)
+        tsv_motifs = EndMotifFreqs.from_file(dest, 0)
+
+        assert motifs.freq_dict == pytest.approx(tsv_motifs.freq_dict) 
+
+
 class TestInvervalEndMotifs:
     def test_end_motifs(self, request):
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
