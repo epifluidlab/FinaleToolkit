@@ -117,7 +117,7 @@ class EndMotifFreqs():
     @classmethod
     def from_file(
             cls,
-            file_path: str,
+            file_path: Union[str, Path],
             quality_threshold: int,
             sep: str='\t',
             header: int=0,) -> EndMotifFreqs:
@@ -140,10 +140,10 @@ class EndMotifFreqs():
         try:
             # open file
             is_file = False
-            if file_path.endswith('gz'):
+            if str(file_path).endswith('gz'):
                 is_file = True
                 file = gzip.open(file_path)
-            elif file_path == '-':
+            elif str(file_path) == '-':
                 file = stdin
             else:
                 is_file = True
