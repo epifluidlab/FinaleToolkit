@@ -7,7 +7,7 @@ include-package-data = true
 
 [project]
 name = "FinaleToolkit"
-version = "0.5.1"
+version = "0.5.2"
 authors = [
     {name="James Li", email="lijw21@wfu.edu"},
     {name="Ravi Bandaru", email="ravi.bandaru@northwestern.edu"},
