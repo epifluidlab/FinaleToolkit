@@ -335,7 +335,7 @@ def frag_array(
         given interval. Default is "midpoint". Policies include:
         - midpoint: the average of end coordinates of a fragment lies
         in the interval.
-        - any: any part of the fragment is in the interval.v
+        - any: any part of the fragment is in the interval.
     verbose : bool, optional
 
     Returns
