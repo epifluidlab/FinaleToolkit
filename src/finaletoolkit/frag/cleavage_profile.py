@@ -55,7 +55,8 @@ def cleavage_profile(
         start=start,
         stop=stop,
         fraction_low=fraction_low,
-        fraction_high=fraction_high
+        fraction_high=fraction_high,
+        intersect_policy="any"
     )
 
     positions = np.arange(start, stop)
