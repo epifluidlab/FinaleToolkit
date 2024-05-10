@@ -48,7 +48,7 @@ class EndMotifFreqs():
         k: int,
         quality_threshold: int = MIN_QUALITY,
     ):
-        self._dict = dict(kmer_frequencies)
+        self.freq_dict = dict(kmer_frequencies)
         self.k = k
         self.quality_threshold = quality_threshold
         if not all(len(kmer) == k for kmer, _ in kmer_frequencies):
@@ -63,23 +63,23 @@ class EndMotifFreqs():
                 in zip(self.kmers(), self.frequencies()))
 
     def __len__(self) -> int:
-        return self._dict.__len__()
+        return self.freq_dict.__len__()
 
     def __str__(self) -> str:
         return ''.join(f'{kmer}: {freq}\n' for kmer, freq in self)
 
     def kmers(self) -> list:
-        return list(self._dict.keys())
+        return list(self.freq_dict.keys())
 
     def frequencies(self) -> list:
-        return list(self._dict.values())
+        return list(self.freq_dict.values())
 
     def freq(self, kmer: str) -> float:
-        return self._dict[kmer]
+        return self.freq_dict[kmer]
 
-    def to_tsv(self, output_file: str, sep: str='\t'):
+    def to_tsv(self, output_file: Union[str,Path], sep: str='\t'):
         """Prints k-mer frequencies to a tsv"""
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
@@ -97,7 +97,7 @@ class EndMotifFreqs():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string.')
+            raise TypeError(f'output_file must be a string or path.')
 
     def motif_diversity_score(self) -> float:
         """
@@ -107,19 +107,22 @@ class EndMotifFreqs():
         """
         num_kmers = 4**self.k
         freq = np.array(self.frequencies())
-        mds = np.sum(-freq*np.log(freq)/np.log(num_kmers))
-
+        # if freq is 0, ignore
+        mds = -np.sum(
+            freq * np.log(
+                freq, out=np.zeros_like(freq, dtype=np.float64), where=(freq!=0)
+                ) / np.log(num_kmers))
         return mds
 
     @classmethod
     def from_file(
             cls,
-            file_path: str,
+            file_path: Union[str, Path],
             quality_threshold: int,
             sep: str='\t',
             header: int=0,) -> EndMotifFreqs:
         """
-        Reads kmer frequency from a two-column tab-delimited file
+        Reads kmer frequency from a two-column tab-delimited file.
 
         Parameters
         ---------
@@ -137,10 +140,10 @@ class EndMotifFreqs():
         try:
             # open file
             is_file = False
-            if file_path.endswith('gz'):
+            if str(file_path).endswith('gz'):
                 is_file = True
                 file = gzip.open(file_path)
-            elif file_path == '-':
+            elif str(file_path) == '-':
                 file = stdin
             else:
                 is_file = True
@@ -222,14 +225,19 @@ class EndMotifsIntervals():
             cls,
             file_path: str,
             quality_threshold: int,
-            sep: str=',') -> EndMotifFreqs:
+            sep: str = ',',) -> EndMotifFreqs:
         """
-        Reads kmer frequency from a tab-delimited file
+        Reads kmer frequency from a tab-delimited file. Expected columns
+        are contig, start, stop, name, count, *kmers. Because
+        exporting to file includes an option to turn counts to a fraction,
+        this doesn't perfectly correspond to replicating the other file.
 
         Parameters
         ---------
         file_path : str
             Path string containing path to file.
+        quality_threshold : int
+            MAPQ filter used. Only used for some calculations.
         sep : str, optional
             Delimiter used in file.
 
@@ -253,10 +261,10 @@ class EndMotifsIntervals():
             lines = file.readlines()
             _,_,_,_,_,*kmers = lines[0].split(sep)
             k = round(np.log(len(kmers))/np.log(4))
-            assert 4**k == len(kmers), f"We got k={k} but there are {len(kmers)} kmers."
+            assert 4**k == len(kmers), f"k={k} but should be {len(kmers)}."
 
             for line in lines[1:]:
-                contig, start, stop, name, *freqs = line.split(sep)
+                contig, start, stop, name, count, *freqs = line.split(sep)
                 start, stop = int(start), int(stop)
                 float_freqs = [float(freq) for freq in freqs]
                 dict_freqs = dict(zip(kmers, float_freqs))
@@ -285,15 +293,19 @@ class EndMotifsIntervals():
         num_kmers = 4**self.k
         mds = []
         for interval, kmers in self.intervals:
-            freq = np.array(list(kmers.values()))
+            counts = np.array(list(kmers.values()))
+            freq = counts / np.sum(counts)
             try:
-                interval_mds = np.sum(-freq*np.log(freq))/np.log(num_kmers)
+                interval_mds = -np.sum(
+                    freq * np.log(
+                        freq, out=np.zeros_like(freq, dtype=np.float64), where=(freq!=0)
+                        ) / np.log(num_kmers))
             except RuntimeWarning:
                 interval_mds = np.NaN
             mds.append((interval, interval_mds))
         return mds
 
-    def mds_bed(self, output_file: str, sep: str='\t'):
+    def mds_bed(self, output_file: Union[str, Path], sep: str='\t'):
         """Writes MDS for each interval to a bed/bedgraph file."""
         mds = self.motif_diversity_score()
         with open(output_file, 'w') as out:
@@ -306,9 +318,13 @@ class EndMotifsIntervals():
                     f"{temp_str}\n"
                 )
     
-    def to_tsv(self, output_file: str, calc_freq: bool=True, sep: str='\t'):
+    def to_tsv(
+            self,
+            output_file: Union[str, Path],
+            calc_freq: bool=True, sep: str='\t'):
         """
-        Writes all intervals and associated frquencies to file.
+        Writes all intervals and associated frquencies to file. Columns
+        are contig, start, stop, name, count, *kmers.
         
         Parameters
         ----------
@@ -320,11 +336,11 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
-                if output_file == '-':
+                if str(output_file) == '-':
                     output = stdout
                 else:
                     output_is_file = True
@@ -360,12 +376,12 @@ class EndMotifsIntervals():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string.')
+            raise TypeError(f'output_file must be a string or path.')
     
     def to_bedgraph(
             self,
             kmer: str,
-            output_file: str,
+            output_file: Union[str, Path],
             calc_freq: bool=True,
             sep: str='\t'
         ):
@@ -382,11 +398,11 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
-                if output_file == '-':
+                if str(output_file) == '-':
                     output = stdout
                 else:
                     output_is_file = True
@@ -418,7 +434,7 @@ class EndMotifsIntervals():
     def to_bed(
             self,
             kmer: str,
-            output_file: str,
+            output_file: Union[str, Path],
             calc_freq: bool=True,
             sep: str='\t'
         ):
@@ -435,11 +451,11 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if type(output_file) == str:
+        if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
                 # open file based on name
                 output_is_file = False
-                if output_file == '-':
+                if str(output_file) == '-':
                     output = stdout
                 else:
                     output_is_file = True
@@ -497,7 +513,7 @@ def region_end_motifs(
     contig: str,
     start: int,
     stop: int,
-    refseq_file: str,
+    refseq_file: Union[str, Path],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
@@ -522,7 +538,7 @@ def region_end_motifs(
         0-based start coordinate.
     stop : int
         1-based end coordinate.
-    refseq_file : str
+    refseq_file : str or Path
         2bit file with reference sequence `input_file` was aligned to.
     k : int, optional
         Length of end motif kmer. Default is 4.
@@ -564,7 +580,7 @@ def region_end_motifs(
     # TODO: accept other reference file types e.g. FASTA
     # count end motifs
     try:
-        refseq = py2bit.open(refseq_file, 'r')
+        refseq = py2bit.open(str(refseq_file), 'r')
         if both_strands:   # both strands of fragment
             for frag in frag_ends:
                 # py2bit uses 0-based for start, 1-based for end
@@ -649,7 +665,7 @@ def _region_end_motifs_dict_star(args) -> dict:
 
 def end_motifs(
     input_file: str,
-    refseq_file: str,
+    refseq_file: Union[str, Path],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
@@ -669,7 +685,7 @@ def end_motifs(
     ----------
     input_file : str
         SAM, BAM, CRAM, or Frag.gz file with paired-end reads.
-    refseq_file : str
+    refseq_file : str or Path
         2bit file with sequence of reference genome input_file is
         aligned to.
     k : int, optional
@@ -694,7 +710,7 @@ def end_motifs(
 
     # read chromosomes from py2bit
     try:
-        refseq = py2bit.open(refseq_file, 'r')
+        refseq = py2bit.open(str(refseq_file), 'r')
         chroms: dict = refseq.chroms()
     finally:
         refseq.close()
@@ -777,8 +793,8 @@ def end_motifs(
 
 def interval_end_motifs(
     input_file: str,
-    refseq_file: str,
-    intervals: Union[str, list[Tuple[str,int,int]]],
+    refseq_file: Union[str, Path],
+    intervals: Union[str, Iterable[Tuple[str,int,int,str]]],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
@@ -787,7 +803,7 @@ def interval_end_motifs(
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union[bool, int] = False,
-) -> EndMotifFreqs:
+) -> EndMotifsIntervals:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
     file and user-specified intervals and returns the 5' k-mer
@@ -797,11 +813,11 @@ def interval_end_motifs(
     ----------
     input_file : str
         Path of SAM, BAM, CRAM, or Frag.gz containing pair-end reads.
-    refseq_file : str
+    refseq_file : str or Path
         Path of 2bit file for reference genome that reads are aligned to.
     intervals : str or tuple
         Path of BED file containing intervals or list of tuples
-        (chrom, start, stop).
+        (chrom, start, stop, name).
     k : int, optional
         Length of end motif kmer. Default is 4.
     output_file : None or str, optional
@@ -831,13 +847,13 @@ def interval_end_motifs(
                 for chrom, start, stop, *name
                 in (line.split() for line in interval_file.readlines())
             ]
-    elif type(intervals) is tuple:
+    elif isinstance(intervals, Iterable):
         intervals_tuples = intervals
     else:
-        raise TypeError("Intervals should be string or tuple.")
+        raise TypeError("Intervals should be string or list.")
     
     mp_intervals = []   # args to be fed into pool processes
-    for chrom, start, stop, _ in intervals_tuples:
+    for chrom, start, stop, *_ in intervals_tuples:
         mp_intervals.append((
             input_file,
             chrom,
