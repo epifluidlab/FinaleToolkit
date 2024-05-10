@@ -6,12 +6,12 @@ import argparse
 from finaletoolkit.frag.frag_length import (
     _cli_frag_length, frag_length_bins, frag_length_intervals
 )
+from finaletoolkit.utils.agg_bw import agg_bw
 from finaletoolkit.utils.filter_bam import filter_bam
 from finaletoolkit.frag.coverage import coverage
 from finaletoolkit.frag.multi_wps import multi_wps
 from finaletoolkit.frag.delfi import delfi
 from finaletoolkit.frag.adjust_wps import adjust_wps
-from finaletoolkit.frag.agg_wps import agg_wps
 from finaletoolkit.frag.delfi_gc_correct import cli_delfi_gc_correct
 from finaletoolkit.frag.end_motifs import (
     end_motifs, _cli_mds, _cli_interval_mds, interval_end_motifs)
@@ -546,16 +546,16 @@ def main_cli_parser():
     )
     parser_command7.set_defaults(func=adjust_wps)
 
-    # Subcommand 8: aggregate WPS
+    # Subcommand 8: aggregate BigWig/WPS
     parser_command8 = subparsers.add_parser(
-        'agg-wps',
+        'agg-bw',
         prog='finaletoolkit-agg-wps',
-        description='Reads WPS data from a WIG file and aggregates over'
+        description='Reads data from a BigWig file and aggregates over'
         ' intervals in a BED file.'
     )
     parser_command8.add_argument(
         'input_file',
-        help='BigWig file with WPS data.'
+        help='BigWig file with data.'
     )
     parser_command8.add_argument(
         'interval_file',
@@ -581,7 +581,7 @@ def main_cli_parser():
         action='count',
         help='Specify verbosity. Number of printed statements is proportional to number of vs.'
     )
-    parser_command8.set_defaults(func=agg_wps)
+    parser_command8.set_defaults(func=agg_bw)
 
     # Subcommand 9: delfi gc correct
     parser_command9 = subparsers.add_parser(
@@ -788,7 +788,7 @@ def main_cli_parser():
     parser_command11a.add_argument(
         '-s',
         '--sep',
-        default=',',
+        default='\t',
         help='Separator used in tabular file. Default is tab.'
     )
     parser_command11a.add_argument(

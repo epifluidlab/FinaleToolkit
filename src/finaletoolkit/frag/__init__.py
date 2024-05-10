@@ -7,5 +7,4 @@ from finaletoolkit.frag.delfi import delfi
 from finaletoolkit.frag.delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
 from finaletoolkit.frag.adjust_wps import adjust_wps
-from finaletoolkit.frag.agg_wps import agg_wps
 from finaletoolkit.frag.end_motifs import *

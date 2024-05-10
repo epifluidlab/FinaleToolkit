@@ -78,6 +78,11 @@ Fragment Lengths for 22:-
 len (nt)067   091   115   139   163   187   211   235   259   283
 ```
 
+## Testing
+
+To run unit tests, navigate to the root directory of your local copy of this
+repo and run `pytest`. You may have to download pytest first.
+
 ## FAQ
 Q: When running on an ARM64 Mac, I can install FinaleToolkit without errors.
 However, I get an `ImportError` when I run it.
