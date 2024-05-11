@@ -1,34 +1,51 @@
-# FinaleToolkit
-A package and standalone program to extract fragmentation patterns of cell-free
-DNA from paired-end sequencing data. FinaleToolkit refers to FragmentatIoN
-AnaLysis of cEll-free DNA Tools.
+# <img alt="dna with letters FT" src="https://bananasrlowkeygood.github.io/images/finaletools_logo_rounded.png" height="60"> ‎ ‎ ‎FinaleToolkit
+<summary><h3>Table of Contents</h2></summary>
+<ol>
+  <li><a href="#about-the-project">About The Project</a></li>
+  <li><a href="#installation">Installation</a></li>
+  <li>
+    <a href="#usage">Usage</a>
+    <ul>
+      <li><a href="#documentation">Documentation</a></li>
+      <li><a href="#compatible-file-formats">Compatible File Formats</a></li>
+      <li><a href="#retrieving-fragment-files">Generating Fragment Data</a></li>
+    </ul>
+  </li>
+  <li><a href="#testing">Testing</a></li>
+  <li><a href="#license">License</a></li>
+  <li><a href="#contact">Contact</a></li>
+</ol>
 
-FinaleToolkit is in active development, and all API is subject to change and
-should be considered unstable.
+
+
+
+## About The Project
+FinaleToolkit (**F**ragmentat**I**o**N** **A**na**L**ysis of c**E**ll-free DNA **Toolkit**) is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.
 
 ## Installation
-Instructions:
-- (Optional) create a conda or venv environment to use FinaleToolkit in.
-- Run `pip install finaletoolkit`
-
-To verify FinaleToolkit has been successfully installed, try
+You can install the package using `pip`.
 ```
-$ finaletoolkit -h
-usage: finaletoolkit [-h]
-                   {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
-                   ...
-
-Calculates fragmentation features given a CRAM/BAM/SAM file
-
-options:
-  -h, --help            show this help message and exit
-
-subcommands:
-  {coverage,frag-length,frag-length-bins,frag-length-intervals,wps,delfi,filter-bam,adjust-wps,agg-wps,delfi-gc-correct,end-motifs,mds}
+$ pip install finaletoolkit
 ```
 
 ## Usage
-Documentation can be found at https://epifluidlab.github.io/finaletoolkit-docs/
+
+### Documentation
+Documentation for FinaleToolkit can be found [here](https://epifluidlab.github.io/finaletoolkit-docs/).
+
+### Compatible File Formats
+
+
+### Retrieving Fragment Files
+
+## Testing
+## Contact
+- Ravi Bandaru: ravi.bandaru@northwestern.edu
+- Jiayan Ma: jiayan.ma@northwestern.edu
+- Yaping Liu: yaping@northwestern.edu
+
+
+
 
 FinaleToolkit functions generally accept reads in a few file formats:
 - Binary Alignment Map (BAM) Files
@@ -78,7 +95,7 @@ Fragment Lengths for 22:-
 len (nt)067   091   115   139   163   187   211   235   259   283
 ```
 
-## Testing
+
 
 To run unit tests, navigate to the root directory of your local copy of this
 repo and run `pytest`. You may have to download pytest first.
