@@ -9,11 +9,11 @@
       <li><a href="#functionality">Functionality</a></li>
       <li><a href="#documentation">Documentation</a></li>
       <li><a href="#compatible-file-formats">Compatible File Formats</a></li>
-      <li><a href="#retrieving-fragment-files">Generating Fragment Data</a></li>
+      <li><a href="#using-fragment-files">Using Fragment Files</a></li>
     </ul>
   </li>
-  <li><a href="#license">License</a></li>
   <li><a href="#contact">Contact</a></li>
+  <li><a href="#license">License</a></li>
 </ol>
 
 
