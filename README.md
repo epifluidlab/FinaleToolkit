@@ -52,7 +52,7 @@ FinaleToolkit is compatible with almost any paired-end sequence data:
 - Binary Alignment Map (`.bam`) files with an associated index file (`.bam.bai`).
 - Sequence Alignment Map (`.sam`) files.
 - Compressed Reference-oriented Alignment Map (`.cram`) files.
-- Fragment (`.frag.gz`) files with an associated tabix index file (`.frag.gz.tbi`). Learn more about FinaleDB [here](http://finaledb.research.cchmc.org).
+- Fragment (`.frag.gz`) files with an associated tabix index file (`.frag.gz.tbi`).
 
 ### Retrieving Fragment Files
 
