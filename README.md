@@ -54,7 +54,7 @@ FinaleToolkit is compatible with almost any paired-end sequence data:
 - Compressed Reference-oriented Alignment Map (`.cram`) files.
 - Fragment (`.frag.gz`) files with an associated tabix index file (`.frag.gz.tbi`).
 
-### Retrieving Fragment Files
+### Using Fragment Files
 
 Fragment (`.frag.gz`) files are block-gzipped BED3+2 files with the following columns: `chrom` , `start` , `stop` , `mapq` , `strand`.
 
