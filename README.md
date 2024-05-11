@@ -58,7 +58,7 @@ FinaleToolkit is compatible with almost any paired-end sequence data:
 
 Fragment (`.frag.gz`) files are block-gzipped BED3+2 files with the following columns: `chrom` , `start` , `stop` , `mapq` , `strand`.
 
-We encourage you to use our comprehensive database, `FinaleDB`, to access relevant fragment files. Learn more about FinaleDB [here](http://finaledb.research.cchmc.org).
+We encourage you to use our comprehensive database, FinaleDB, to access relevant fragment files. Learn more about FinaleDB [here](http://finaledb.research.cchmc.org).
 
 ## Contact
 - James Li: lijw21@wfu.edu
