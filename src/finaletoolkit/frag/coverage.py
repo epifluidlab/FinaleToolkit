@@ -10,7 +10,7 @@ import gzip
 from tqdm import tqdm
 
 from finaletoolkit.utils.utils import (
-    _not_read1_or_low_quality, _get_contigs, _get_intervals, frag_generator
+    _get_intervals, frag_generator
 )
 
 

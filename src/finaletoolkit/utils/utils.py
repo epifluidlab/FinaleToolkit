@@ -2,7 +2,7 @@ from __future__ import annotations
 import time
 import gzip
 import tempfile as tf
-from typing import Union, TextIO, Tuple, List, Generator
+from typing import Union, TextIO, Tuple, List, Generator, Iterable
 from sys import stderr, stdout
 from pathlib import Path
 
@@ -13,36 +13,17 @@ import pysam
 from tqdm import tqdm
 
 
-def _get_contigs(
-        input_file: Union[str, pysam.AlignmentFile],
-        verbose: bool=False
-    ) -> list:
+def _parse_chrom_sizes(
+    chrom_sizes_file: Union[str, Path]) -> List[Tuple[str][int]]:
     """
-    Retrieves contigs from input_file and returns lists of contig names
-    and lengths
+    Reads from a chrom.size
     """
-
-    input_is_file = False
-    try:
-        # handling input types
-        if (type(input_file) == pysam.AlignmentFile):
-            sam_file = input_file
-        elif input_file.endswith('bam'):
-            input_is_file = True
-            if (verbose):
-                stderr.write(f'Opening {input_file}\n')
-            sam_file = pysam.AlignmentFile(input_file)
-        else:
-            raise ValueError(
-                'Invalid input_file type. Only BAM or SAM files are allowed.'
-            )
-        contigs = sam_file.references
-        lengths = sam_file.lengths
-    finally:
-        if input_is_file:
-            sam_file.close()
-
-    return zip(contigs, lengths)
+    chrom_sizes = []
+    with open(chrom_sizes_file, 'r') as file:
+        for line in file:
+            chrom, size = line.strip().split('\t')
+            chrom_sizes.append((chrom, int(size)))
+    return chrom_sizes
 
 
 def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
