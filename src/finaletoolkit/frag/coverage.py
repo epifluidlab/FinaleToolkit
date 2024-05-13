@@ -54,15 +54,15 @@ def single_coverage(
         start_time = time.time()
         tqdm.write(
             f"""
-input_file: 
-contig: {contig}
-start: {start}
-stop: {stop}
-name: {name}
-intersect_policy: {intersect_policy}
-quality_threshold: {quality_threshold}
-verbose: {verbose}
-"""
+            input_file: {input_file}
+            contig: {contig}
+            start: {start}
+            stop: {stop}
+            name: {name}
+            intersect_policy: {intersect_policy}
+            quality_threshold: {quality_threshold}
+            verbose: {verbose}
+            """
         )
 
     # initializing variable for coverage tuple outside of with statement
