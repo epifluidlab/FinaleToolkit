@@ -9,6 +9,7 @@ CpG site.
 
 from __future__ import annotations
 from typing import Union
+from pathlib import Path
 from sys import stderr, stdout, stdin
 from multiprocessing import Pool
 import gzip
@@ -19,7 +20,10 @@ import pyBigWig as pbw
 from pybedtools import BedTool
 import pysam
 
-from finaletoolkit.utils.utils import frag_array, overlaps
+from finaletoolkit.utils.utils import (
+    frag_array, overlaps, chrom_sizes_to_list, _reduce_overlaps_in_file,
+    _convert_to_list, _merge_all_intervals
+    )
 
 
 def cleavage_profile(
@@ -110,6 +114,7 @@ def _cli_cleavage_profile(
     fraction_high: int=10000000,
     quality_threshold: int=30,
     output_file: str='-',
+    chrom_sizes: Union[str, Path]=None,
     workers: int=1,
     verbose: Union[bool, int]=0
 ):
@@ -151,8 +156,11 @@ def _cli_cleavage_profile(
           or input_file.endswith('.frag')
           or input_file.endswith('.frag.gz')
     ):
-        with pysam.TabixFile(input_file, 'r') as tbx:
-            raise NotImplementedError('tabix files not yet supported!')
+        if chrom_sizes is None:
+            raise ValueError(
+                '--chrom_sizes must be specified for BED/Fragment files'
+            )
+        header = chrom_sizes_to_list(chrom_sizes)
     else:
         raise ValueError("Not a supported file type.")
 
@@ -161,44 +169,10 @@ def _cli_cleavage_profile(
     
     # reading intervals from bed and removing overlaps
     # NOTE: assumes that bed file is sorted.
-    contigs = []
-    starts = []
-    stops = []
-    try:
-        if interval_file == '-':
-            bed = stdin
-        else:
-            bed = open(interval_file)
-
-        # for overlap checking
-        prev_contig = None
-        prev_start = 0
-        prev_stop = 0
-        for line in bed:
-            contents = line.split()
-            contig = contents[0].strip()
-            start = int(contents[1])
-            stop = int(contents[2])
-
-            # cut off part of previous interval if overlap
-            if contig == prev_contig and start < prev_stop:
-                prev_stop = start
-
-            if prev_contig is not None:
-                contigs.append(prev_contig)
-                starts.append(prev_start)
-                stops.append(prev_stop)
-
-            prev_contig = contig
-            prev_start = start
-            prev_stop = stop
-        # appending last interval
-        contigs.append(prev_contig)
-        starts.append(prev_start)
-        stops.append(prev_stop)
-    finally:
-        if interval_file != '-':
-            bed.close()
+    reduced_intervals = _reduce_overlaps_in_file(interval_file)
+    converted_intervals = _convert_to_list(reduced_intervals)
+    all_intervals = _merge_all_intervals(converted_intervals)
+    contigs, starts, stops = zip(*all_intervals)
     
     count = len(contigs)
 

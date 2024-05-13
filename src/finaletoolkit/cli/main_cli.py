@@ -847,6 +847,14 @@ def main_cli_parser():
         'suffixes used. Default is "-".',
     )
     parser_command13.add_argument(
+        '-c',
+        '--chrom-sizes',
+        default=None,
+        help='Tab-delimited file with two columns, one with names of '
+        'chromosomes or contigs, and the other with the size of '
+        'chromosomes.'
+    )
+    parser_command13.add_argument(
         '-lo',
         '--fraction_low',
         default=120,
