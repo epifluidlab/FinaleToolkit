@@ -80,7 +80,11 @@ def cleavage_profile(
         ), np.logical_not(frags['strand'][:, np.newaxis])
     )
     ends = np.sum(np.logical_or(forward_ends, reverse_ends), axis=0)
-    proportions = ends/depth*100
+
+    proportions = np.zeros_like(depth, dtype=np.float64)
+    non_zero_mask = depth != 0
+    proportions[non_zero_mask] = ends[non_zero_mask] / depth[non_zero_mask] * 100
+
 
     results = np.zeros_like(proportions, dtype=[
         ('contig', 'U16'),
