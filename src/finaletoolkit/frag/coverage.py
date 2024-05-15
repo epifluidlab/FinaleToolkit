@@ -2,6 +2,7 @@ from __future__ import annotations
 import sys
 import time
 from typing import Union, Tuple
+from pathlib import Path
 
 from multiprocessing import Pool
 
@@ -15,7 +16,7 @@ from finaletoolkit.utils.utils import (
 
 
 def single_coverage(
-        input_file: Union[str, pysam.AlignmentFile],
+        input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         contig: str=None,
         start: int=0,
         stop: int=None,
@@ -66,8 +67,6 @@ def single_coverage(
     # initializing variable for coverage tuple outside of with statement
     coverage = 0
 
-    input_type = type(input_file)
-
     frags = frag_generator(
         input_file=input_file,
         contig=contig,
@@ -101,7 +100,7 @@ def _single_coverage_star(args):
 
 
 def coverage(
-        input_file: Union[str, pysam.AlignmentFile],
+        input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
         output_file: str,
         scale_factor: float=1e6,
