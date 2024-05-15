@@ -18,8 +18,6 @@ from finaletoolkit.frag.end_motifs import (
 from finaletoolkit.frag.cleavage_profile import _cli_cleavage_profile
 from finaletoolkit.genome.gaps import _cli_gap_bed
 
-# TODO: implement subcommands read from stdin
-# TODO: implement pipelining
 
 def main_cli_parser():
     parser = argparse.ArgumentParser(
