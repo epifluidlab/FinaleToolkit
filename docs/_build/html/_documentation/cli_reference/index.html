@@ -346,24 +346,16 @@ document.write(`
                   
   <section id="cli">
 <h1>CLI<a class="headerlink" href="#cli" title="Permalink to this heading">#</a></h1>
-<p><p>Calculates fragmentation features given a CRAM, BAM, SAM, or Frag.gz file.</p>
+<p><p>FinaleToolkit is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.</p>
 </p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">finaletoolkit</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">{</span><span class="n">coverage</span><span class="p">,</span><span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="p">,</span><span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span><span class="p">,</span><span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span><span class="p">,</span><span class="n">wps</span><span class="p">,</span><span class="n">delfi</span><span class="p">,</span><span class="nb">filter</span><span class="o">-</span><span class="n">bam</span><span class="p">,</span><span class="n">adjust</span><span class="o">-</span><span class="n">wps</span><span class="p">,</span><span class="n">agg</span><span class="o">-</span><span class="n">bw</span><span class="p">,</span><span class="n">delfi</span><span class="o">-</span><span class="n">gc</span><span class="o">-</span><span class="n">correct</span><span class="p">,</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span><span class="p">,</span><span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span><span class="p">,</span><span class="n">mds</span><span class="p">,</span><span class="n">interval</span><span class="o">-</span><span class="n">mds</span><span class="p">,</span><span class="n">gap</span><span class="o">-</span><span class="n">bed</span><span class="p">,</span><span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span><span class="p">}</span> <span class="o">...</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">finaletoolkit</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">{</span><span class="n">coverage</span><span class="p">,</span><span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span><span class="p">,</span><span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span><span class="p">,</span><span class="n">wps</span><span class="p">,</span><span class="n">delfi</span><span class="p">,</span><span class="nb">filter</span><span class="o">-</span><span class="n">bam</span><span class="p">,</span><span class="n">adjust</span><span class="o">-</span><span class="n">wps</span><span class="p">,</span><span class="n">agg</span><span class="o">-</span><span class="n">bw</span><span class="p">,</span><span class="n">delfi</span><span class="o">-</span><span class="n">gc</span><span class="o">-</span><span class="n">correct</span><span class="p">,</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span><span class="p">,</span><span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span><span class="p">,</span><span class="n">mds</span><span class="p">,</span><span class="n">interval</span><span class="o">-</span><span class="n">mds</span><span class="p">,</span><span class="n">gap</span><span class="o">-</span><span class="n">bed</span><span class="p">,</span><span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span><span class="p">}</span> <span class="o">...</span>
 </pre></div>
 </div>
-<section id="subcommands">
-<h2>subcommands<a class="headerlink" href="#subcommands" title="Permalink to this heading">#</a></h2>
-<dl class="option-list">
-<dt><kbd>subcommand</kbd></dt>
-<dd><p>Possible choices: coverage, frag-length, frag-length-bins, frag-length-intervals, wps, delfi, filter-bam, adjust-wps, agg-bw, delfi-gc-correct, end-motifs, interval-end-motifs, mds, interval-mds, gap-bed, cleavage-profile</p>
-</dd>
-</dl>
-</section>
 <section id="Sub-commands">
 <h2>Sub-commands<a class="headerlink" href="#Sub-commands" title="Permalink to this heading">#</a></h2>
 <section id="coverage">
 <h3>coverage<a class="headerlink" href="#coverage" title="Permalink to this heading">#</a></h3>
-<p>Calculates fragmentation coverage over intervals in a BED file given a SAM, BAM, CRAM, or Frag.gz file</p>
+<p>Calculates fragmentation coverage over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">coverage</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SCALE_FACTOR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
@@ -371,10 +363,10 @@ document.write(`
 <h4>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd><p>SAM, BAM, CRAM, or Frag.gz file containing fragment data</p>
+<dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
 </dd>
 <dt><kbd>interval_file</kbd></dt>
-<dd><p>BED file containing intervals over which coverage is calculated</p>
+<dd><p>Path to a BED file containing intervals to calculate coverage over.</p>
 </dd>
 </dl>
 </section>
@@ -382,37 +374,39 @@ document.write(`
 <h4>Named Arguments<a class="headerlink" href="#named-arguments" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output_file</kbd></dt>
-<dd><p>BED file where coverage is printed</p>
+<dd><p>A BED file containing coverage values over the intervals specified in interval file.</p>
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>-s, --scale-factor</kbd></dt>
-<dd><p>Amount coverage will be multiplied by</p>
+<dd><p>Scale factor for coverage values.</p>
 <p>Default: 1000000.0</p>
 </dd>
 <dt><kbd>-q, --quality_threshold</kbd></dt>
-<dd><p>Default: 30</p>
+<dd><p>Minimum mapping quality threshold.</p>
+<p>Default: 30</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
-<dd><p>Number of worker processes to use. Default is 1.</p>
+<dd><p>Number of worker processes.</p>
 <p>Default: 1</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Default: 0</p>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
+<p>Default: False</p>
 </dd>
 </dl>
 </section>
 </section>
-<section id="frag-length">
-<h3>frag-length<a class="headerlink" href="#frag-length" title="Permalink to this heading">#</a></h3>
-<p>Calculates fragment lengths given a CRAM/BAM/SAM file</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">INTERSECT_POLICY</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
+<section id="frag-length-bins">
+<h3>frag-length-bins<a class="headerlink" href="#frag-length-bins" title="Permalink to this heading">#</a></h3>
+<p>Retrieves fragment lengths grouped in bins given a BAM/SAM/CRAM/Fragment file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">INTERSECT_POLICY</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">contig</span><span class="o">-</span><span class="n">by</span><span class="o">-</span><span class="n">contig</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat1">
 <h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat1" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd><p>bam or frag.gz file containing fragment data.</p>
+<dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
 </dd>
 </dl>
 </section>
@@ -420,72 +414,23 @@ document.write(`
 <h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat1" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-c, --contig</kbd></dt>
-<dd><p>contig or chromosome to select fragments from. Required if using –start or –stop.</p>
+<dd><p>Specify the contig or chromosome to select fragments from. (Required if using –start or –stop.)</p>
 </dd>
 <dt><kbd>-S, --start</kbd></dt>
-<dd><p>0-based left-most coordinate of interval to select fragmentsfrom. Must also use –contig.</p>
-</dd>
-<dt><kbd>-E, --stop</kbd></dt>
-<dd><p>1-based right-most coordinate of interval to select fragmentsfrom. Must also use –contig.</p>
+<dd><p>Specify the 0-based left-most coordinate of the interval to select fragments from. (Must also specify –contig.)</p>
 </dd>
 <dt><kbd>-p, --intersect_policy</kbd></dt>
-<dd><p>Specifies what policy is used to include fragments in the given interval. Default is “midpoint”. Policies include:
-- midpoint: the average of end coordinates of a fragment liesin the interval.
-- any: any part of the fragment is in the interval.</p>
-<p>Default: “midpoint”</p>
-</dd>
-<dt><kbd>-o, --output_file</kbd></dt>
-<dd><p>File to write results to. “-” may be used to write to stdout. Default is “-“.</p>
-<p>Default: “-”</p>
-</dd>
-<dt><kbd>-q, --quality_threshold</kbd></dt>
-<dd><p>Minimum MAPQ. Default is 30.</p>
-<p>Default: 30</p>
-</dd>
-<dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Verbose logging.</p>
-<p>Default: 0</p>
-</dd>
-</dl>
-</section>
-</section>
-<section id="frag-length-bins">
-<h3>frag-length-bins<a class="headerlink" href="#frag-length-bins" title="Permalink to this heading">#</a></h3>
-<p>computes frag lengths of fragments and agregates in bins by length. Either writes bins and counts to tsv or prints a histogram</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">INTERSECT_POLICY</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">contig</span><span class="o">-</span><span class="n">by</span><span class="o">-</span><span class="n">contig</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
-</pre></div>
-</div>
-<section id="positional-arguments_repeat2">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat2" title="Permalink to this heading">#</a></h4>
-<dl class="option-list">
-<dt><kbd>input_file</kbd></dt>
-<dd><p>BAM or SAM file containing fragment data</p>
-</dd>
-</dl>
-</section>
-<section id="named-arguments_repeat2">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat2" title="Permalink to this heading">#</a></h4>
-<dl class="option-list">
-<dt><kbd>-c, --contig</kbd></dt>
-<dd><p>contig or chromosome to select fragments from. Required if using –start or –stop.</p>
-</dd>
-<dt><kbd>-S, --start</kbd></dt>
-<dd><p>0-based left-most coordinate of interval to select fragmentsfrom. Must also use –contig.</p>
-</dd>
-<dt><kbd>-p, --intersect_policy</kbd></dt>
-<dd><p>Specifies what policy is used to include fragments in the given interval. Default is “midpoint”. Policies include:
-- midpoint: the average of end coordinates of a fragment liesin the interval.
-- any: any part of the fragment is in the interval.</p>
+<dd><p>Specifies what policy is used to include fragments in the given interval. See User Guide for more information.</p>
 <p>Default: “midpoint”</p>
 </dd>
 <dt><kbd>-E, --stop</kbd></dt>
-<dd><p>1-based right-most coordinate of interval to select fragmentsfrom. Must also use –contig.</p>
+<dd><p>Specify the 1-based right-most coordinate of the interval to select fragments from. (Must also specify –contig.)</p>
 </dd>
 <dt><kbd>--bin-size</kbd></dt>
-<dd><p>Used to specify a custom bin size instead of automatically calculating one.</p>
+<dd><p>Specify the size of the bins to group fragment lengths into.</p>
 </dd>
 <dt><kbd>-o, --output_file</kbd></dt>
-<dd><p>File to write results to. “-” may be used to write to stdout. Default is “-“.</p>
+<dd><p>A .TSV file containing containing fragment lengths binned according to the specified bin size.</p>
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>--contig-by-contig</kbd></dt>
@@ -493,15 +438,15 @@ document.write(`
 <p>Default: False</p>
 </dd>
 <dt><kbd>--histogram</kbd></dt>
-<dd><p>Draws a histogram in the terminal.</p>
+<dd><p>Enable histogram mode to display histogram in terminal.</p>
 <p>Default: False</p>
 </dd>
 <dt><kbd>-q, --quality_threshold</kbd></dt>
-<dd><p>Minimum MAPQ. Default is 30.</p>
+<dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 30</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Verbose logging.</p>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
 <p>Default: 0</p>
 </dd>
 </dl>
@@ -509,44 +454,42 @@ document.write(`
 </section>
 <section id="frag-length-intervals">
 <h3>frag-length-intervals<a class="headerlink" href="#frag-length-intervals" title="Permalink to this heading">#</a></h3>
-<p>Calculates frag lengths statistics over user-specified genomic intervals.</p>
+<p>Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">INTERSECT_POLICY</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat3">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat3" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat2">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat2" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd><p>BAM or SAM file containing PE WGS of cfDNA</p>
+<dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
 </dd>
 <dt><kbd>interval_file</kbd></dt>
-<dd><p>BED file containing intervals over which to produce statistics</p>
+<dd><p>Path to a BED file containing intervals to retrieve fragment length summary statistics over.</p>
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat3">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat3" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat2">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat2" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-p, --intersect_policy</kbd></dt>
-<dd><p>Specifies what policy is used to include fragments in the given interval. Default is “midpoint”. Policies include:
-- midpoint: the average of end coordinates of a fragment liesin the interval.
-- any: any part of the fragment is in the interval.</p>
+<dd><p>Specifies what policy is used to include fragments in the given interval. See User Guide for more information.</p>
 <p>Default: “midpoint”</p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
-<dd><p>File to print results to. if “-”, will print to stdout. Defaultis “-“.</p>
+<dd><p>A BED file containing fragment length summary statistics (mean, median, st. dev, min, max) over the intervals specified in the interval file.</p>
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
-<dd><p>minimum MAPQ to filter for</p>
+<dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 30</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
-<dd><p>Number of subprocesses to use</p>
+<dd><p>Number of worker processes.</p>
 <p>Default: 1</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Determines how much is written to stderr</p>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
 <p>Default: 0</p>
 </dd>
 </dl>
@@ -554,87 +497,93 @@ document.write(`
 </section>
 <section id="wps">
 <h3>wps<a class="headerlink" href="#wps" title="Permalink to this heading">#</a></h3>
-<p>Calculates Windowed Protection Score over a region around sites specified in a BED file from alignments in a CRAM/BAM/SAM/Frag.gz file</p>
+<p>Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">site_bed</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat4">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat4" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat3">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat3" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd><p>bam or sam file containing paired-end reads of cfDNA WGS</p>
+<dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
 </dd>
 <dt><kbd>site_bed</kbd></dt>
-<dd><p>bed file containing sites over which to calculate wps</p>
+<dd><p>Path to a BED file containing intervals to calculate WPS over.</p>
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat4">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat4" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat3">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat3" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output_file</kbd></dt>
-<dd><p>BigWig file to write results to. Default is stdout</p>
+<dd><p>A bigWig file containing the WPS results over the intervals specified in interval file.</p>
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>-i, --interval_size</kbd></dt>
-<dd><p>Default: 5000</p>
+<dd><p>Size in bp of each interval in the interval file.</p>
+<p>Default: 5000</p>
 </dd>
 <dt><kbd>-W, --window_size</kbd></dt>
-<dd><p>Default: 120</p>
+<dd><p>Size of the sliding window used to calculate WPS scores.</p>
+<p>Default: 120</p>
 </dd>
 <dt><kbd>-lo, --fraction_low</kbd></dt>
-<dd><p>Default: 120</p>
+<dd><p>Minimum length for a fragment to be included in WPS calculation.</p>
+<p>Default: 120</p>
 </dd>
 <dt><kbd>-hi, --fraction_high</kbd></dt>
-<dd><p>Default: 180</p>
+<dd><p>Maximum length for a fragment to be included in WPS calculation.</p>
+<p>Default: 180</p>
 </dd>
 <dt><kbd>-q, --quality_threshold</kbd></dt>
-<dd><p>Default: 30</p>
+<dd><p>Minimum mapping quality threshold.</p>
+<p>Default: 30</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
-<dd><p>Default: 1</p>
+<dd><p>Number of worker processes.</p>
+<p>Default: 1</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Default: 0</p>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
+<p>Default: 0</p>
 </dd>
 </dl>
 </section>
 </section>
 <section id="delfi">
 <h3>delfi<a class="headerlink" href="#delfi" title="Permalink to this heading">#</a></h3>
-<p>Calculates DELFI score over genome.
-NOTE: due to some ad hoc implementation details, currently the only accepted reference genome is hg19.</p>
+<p>Calculates DELFI score over genome. NOTE: Due to some ad hoc implementation details, currently the only accepted reference genome is hg19.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">GAP_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gc</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">autosomes</span> <span class="n">reference_file</span> <span class="n">bins_file</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat5">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat5" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat4">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat4" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd><p>SAM, BAM, CRAM, or Frag.gz file containing fragment reads.</p>
+<dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
 </dd>
 <dt><kbd>autosomes</kbd></dt>
-<dd><p>Tab-delimited file where column one is chromosomes and column two is the length of said chromosome.</p>
+<dd><p>Tab-delimited file containing (1) autosome name and (2) integer length of chromosome in base pairs.</p>
 </dd>
 <dt><kbd>reference_file</kbd></dt>
-<dd><p>2bit file for reference sequence used during alignment.</p>
+<dd><p>The .2bit file for the associate reference genome sequence used during alignment.</p>
 </dd>
 <dt><kbd>bins_file</kbd></dt>
-<dd><p>BED format file containing bins over which to calculate delfi. To replicate Cristiano and colleage’s methodology, use 100kb bins over human autosomes.</p>
+<dd><p>A BED file containing bins over which to calculate DELFI. To replicate Cristiano et al.’s methodology, use 100kb bins over human autosomes.</p>
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat5">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat4">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat4" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-b, --blacklist_file</kbd></dt>
-<dd><p>BED file containing darkregions to ignore when calculating DELFI.</p>
+<dd><p>BED file containing regions to ignore when calculating DELFI.</p>
 </dd>
 <dt><kbd>-g, --gap_file</kbd></dt>
-<dd><p>BED4 format file with columns “chrom”,”start”,”stop”,”type”. “type” should be “centromere”, “telomere”, or “short arm”; all others are ignored. This information corresponds to “gap” track for hg19 in UCSC Genome Browser.</p>
+<dd><p>BED4 format file containing columns for “chrom”, “start”, “stop”, and “type”. The “type” column should denote whether the entry corresponds to a “centromere”, “telomere”, or “short arm”, and entries not falling into these categories are ignored. This information corresponds to the “gap” track for hg19 in the UCSC Genome Browser.</p>
 </dd>
 <dt><kbd>-o, --output_file</kbd></dt>
-<dd><p>BED, bed.gz, tsv, or csv file to write results to. If “-”, writes tab-deliniated data to stdout. Default is “-“.</p>
+<dd><p>BED, bed.gz, TSV, or CSV file to write results to. If “-”, writes to stdout.</p>
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>-W, --window_size</kbd></dt>
@@ -642,23 +591,24 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <p>Default: 5000000</p>
 </dd>
 <dt><kbd>-gc, --gc_correct</kbd></dt>
-<dd><p>Indicate whther or not gc correction is applied.</p>
+<dd><p>Indicates whether to apply GC correction.</p>
 <p>Default: False</p>
 </dd>
 <dt><kbd>-m, --merge_bins</kbd></dt>
-<dd><p>Indicate whther or not bins are merged to 5Mb bins.</p>
+<dd><p>Indicates whether to merge bins to 5Mb size.</p>
 <p>Default: False</p>
 </dd>
 <dt><kbd>-q, --quality_threshold</kbd></dt>
-<dd><p>MAPQ to be filtered.</p>
+<dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 30</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
-<dd><p>Maximum number of subprocesses to spawn. Should be close to number of cores.</p>
+<dd><p>Number of worker processes.</p>
 <p>Default: 1</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Default: 0</p>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
+<p>Default: 0</p>
 </dd>
 </dl>
 </section>
@@ -669,61 +619,117 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">bam</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGION_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat6">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat6" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat5">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat5" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd><p>BAM file with PE WGS</p>
+<dd><p>Path to BAM file.</p>
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat6">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat6" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat5">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-r, --region-file</kbd></dt>
-<dd><p>BED file containing regions to read fragments from. Default is None.</p>
+<dd><p>Only output alignments overlapping the intervals in this BED file will be included.</p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
-<dd><p>Path to write filtered BAM. Defualt is “-”. If set to “-”, the BAM file will be written to stdout.</p>
+<dd><p>Output BAM file path.</p>
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>-q, --quality_threshold</kbd></dt>
-<dd><p>Minimum mapping quality to filter for. Defualt is 30.</p>
+<dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 30</p>
 </dd>
 <dt><kbd>-hi, --fraction-high</kbd></dt>
-<dd><p>Maximum fragment size. Default is None</p>
+<dd><p>Maximum length for a fragment to be included in output BAM.</p>
 </dd>
 <dt><kbd>-lo, --fraction-low</kbd></dt>
-<dd><p>Minimum fragment size. Default is None</p>
+<dd><p>Minimum length for a fragment to be included in output BAM.</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
-<dd><p>Number of worker processes to spawn.</p>
+<dd><p>Number of worker processes.</p>
 <p>Default: 1</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Specify verbosity. Number of printed statements is proportional to number of vs.</p>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
 </dd>
 </dl>
 </section>
 </section>
 <section id="adjust-wps">
 <h3>adjust-wps<a class="headerlink" href="#adjust-wps" title="Permalink to this heading">#</a></h3>
-<p>Reads WPS data from a WIG file and applies a median filter and a Savitsky-Golay filter (Savitsky and Golay, 1964).</p>
+<p>Adjusts raw Windowed Protection Score (WPS) by applying a median filter and Savitsky-Golay filter.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">genome_file</span>
+</pre></div>
+</div>
+<section id="positional-arguments_repeat6">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat6" title="Permalink to this heading">#</a></h4>
+<dl class="option-list">
+<dt><kbd>input_file</kbd></dt>
+<dd><p>A bigWig file containing the WPS results over the intervals specified in interval file.</p>
+</dd>
+<dt><kbd>interval_file</kbd></dt>
+<dd><p>Path to a BED file containing intervals to WPS was calculated over.</p>
+</dd>
+<dt><kbd>genome_file</kbd></dt>
+<dd><p>A .chrom.sizes file containing chromosome sizes.</p>
+</dd>
+</dl>
+</section>
+<section id="named-arguments_repeat6">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat6" title="Permalink to this heading">#</a></h4>
+<dl class="option-list">
+<dt><kbd>-o, --output-file</kbd></dt>
+<dd><p>A bigWig file containing the adjusted WPS results over the intervals specified in interval file.</p>
+<p>Default: “-”</p>
+</dd>
+<dt><kbd>-m, --median-window-size</kbd></dt>
+<dd><p>Size of the median filter window used to adjust WPS scores.</p>
+<p>Default: 1000</p>
+</dd>
+<dt><kbd>-s, --savgol-window-size</kbd></dt>
+<dd><p>Size of the Savitsky-Golay filter window used to adjust WPS scores.</p>
+<p>Default: 21</p>
+</dd>
+<dt><kbd>-p, --savgol-poly-deg</kbd></dt>
+<dd><p>Degree polynomial for Savitsky-Golay filter.</p>
+<p>Default: 2</p>
+</dd>
+<dt><kbd>-w, --workers</kbd></dt>
+<dd><p>Number of worker processes.</p>
+<p>Default: 1</p>
+</dd>
+<dt><kbd>--mean</kbd></dt>
+<dd><p>A mean filter is used instead of median.</p>
+<p>Default: False</p>
+</dd>
+<dt><kbd>--subtract-edges</kbd></dt>
+<dd><p>Take the median of the first and last 500 bases in a window and subtract from the whole interval.</p>
+<p>Default: False</p>
+</dd>
+<dt><kbd>-v, --verbose</kbd></dt>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="agg-bw">
+<h3>agg-bw<a class="headerlink" href="#agg-bw" title="Permalink to this heading">#</a></h3>
+<p>Aggregates a bigWig signal over constant-length intervals defined in a BED file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">agg</span><span class="o">-</span><span class="n">bw</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat7">
 <h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat7" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
-<dd><p>BigWig file with WPS data.</p>
+<dd><blockquote>
+<div><p>A bigWig file containing signals over the intervals specified in interval file.</p>
+</div></blockquote>
 </dd>
 <dt><kbd>interval_file</kbd></dt>
-<dd><p>BED file containing intervals over which wps was calculated</p>
-</dd>
-<dt><kbd>genome_file</kbd></dt>
-<dd><p>GENOME file containing chromosome/contig names and lengths. Needed to write head for BigWig.</p>
+<dd><p>Path to a BED file containing intervals over which signals were calculated over.</p>
 </dd>
 </dl>
 </section>
@@ -731,67 +737,15 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat7" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
-<dd><p>WIG file to print filtered WPS data. If “-”, will write to stdout. Default is “-“.</p>
+<dd><p>A wiggle file containing the aggregate signal over the intervals specified in interval file.</p>
 <p>Default: “-”</p>
 </dd>
 <dt><kbd>-m, --median-window-size</kbd></dt>
-<dd><p>Size of window for median filter. Default is 1000.</p>
-<p>Default: 1000</p>
-</dd>
-<dt><kbd>-s, --savgol-window-size</kbd></dt>
-<dd><p>Size of window for Savitsky-Golay filter. Default is 21.</p>
-<p>Default: 21</p>
-</dd>
-<dt><kbd>-p, --savgol-poly-deg</kbd></dt>
-<dd><p>Degree polynomial for Savitsky-Golay filter. Default is 2.</p>
-<p>Default: 2</p>
-</dd>
-<dt><kbd>-w, --workers</kbd></dt>
-<dd><p>Number of subprocesses to use. Default is 1.</p>
-<p>Default: 1</p>
-</dd>
-<dt><kbd>--mean</kbd></dt>
-<dd><p>Default: False</p>
-</dd>
-<dt><kbd>--subtract-edges</kbd></dt>
-<dd><p>Default: False</p>
+<dd><p>Size of the median filter window used to adjust WPS scores. Only modify if aggregating WPS signals.</p>
+<p>Default: 0</p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Specify verbosity. Number of printed statements is proportional to number of vs.</p>
-</dd>
-</dl>
-</section>
-</section>
-<section id="agg-bw">
-<h3>agg-bw<a class="headerlink" href="#agg-bw" title="Permalink to this heading">#</a></h3>
-<p>Reads data from a BigWig file and aggregates over intervals in a BED file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">agg</span><span class="o">-</span><span class="n">bw</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
-</pre></div>
-</div>
-<section id="positional-arguments_repeat8">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat8" title="Permalink to this heading">#</a></h4>
-<dl class="option-list">
-<dt><kbd>input_file</kbd></dt>
-<dd><p>BigWig file with data.</p>
-</dd>
-<dt><kbd>interval_file</kbd></dt>
-<dd><p>BED file containing intervals over which wps was calculated</p>
-</dd>
-</dl>
-</section>
-<section id="named-arguments_repeat8">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat8" title="Permalink to this heading">#</a></h4>
-<dl class="option-list">
-<dt><kbd>-o, --output-file</kbd></dt>
-<dd><p>WIG file to print filtered WPS data. If “-”, will write to stdout. Default is “-“.</p>
-<p>Default: “-”</p>
-</dd>
-<dt><kbd>-m, --median-window-size</kbd></dt>
-<dd><p>Size of window for median filter. Default is 1000.</p>
-<p>Default: 1000</p>
-</dd>
-<dt><kbd>-v, --verbose</kbd></dt>
-<dd><p>Specify verbosity. Number of printed statements is proportional to number of vs.</p>
+<dd><p>Enable verbose mode to display detailed processing information.</p>
 </dd>
 </dl>
 </section>
@@ -802,16 +756,16 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span><span class="o">-</span><span class="n">gc</span><span class="o">-</span><span class="n">correct</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span><span class="o">-</span><span class="n">lines</span> <span class="n">HEADER_LINES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat9">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat9" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat8">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat8" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>BED3+3 file containing raw data</p>
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat9">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat9" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat8">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat8" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>BED3+3 to print GC-corrected DELFI fractions. If “-”, will write to stdout. Default is “-“.</p>
@@ -833,8 +787,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">refseq_file</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat10">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat10" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat9">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat9" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>SAM, BAM, or tabix-indexed file with fragment data.</p>
@@ -844,8 +798,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat10">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat10" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat9">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat9" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-k</kbd></dt>
 <dd><p>Length of k-mer. Default is 4.</p>
@@ -876,8 +830,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">refseq_file</span> <span class="n">intervals</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat11">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat11" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat10">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat10" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>SAM, BAM, or tabix-indexed file with fragment data.</p>
@@ -890,8 +844,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat11">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat11" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat10">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat10" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-k</kbd></dt>
 <dd><p>Length of k-mer. Default is 4.</p>
@@ -930,8 +884,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span> <span class="n">HEADER</span><span class="p">]</span> <span class="p">[</span><span class="n">file_path</span><span class="p">]</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat12">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat12" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat11">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat11" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>file_path</kbd></dt>
 <dd><p>Tab-delimited or similar file containing one column for all k-mers a one column for frequency. Reads from stdin by default.</p>
@@ -939,8 +893,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat12">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat12" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat11">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat11" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-s, --sep</kbd></dt>
 <dd><p>Separator used in tabular file. Default is tab.</p>
@@ -959,8 +913,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span> <span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="n">file_out</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat13">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat13" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat12">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat12" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>file_path</kbd></dt>
 <dd><p>Tab-delimited or similar file containing one column for all k-mers a one column for frequency. Reads from stdin by default.</p>
@@ -971,8 +925,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat13">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat13" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat12">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat12" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-s, --sep</kbd></dt>
 <dd><p>Separator used in tabular file. Default is tab.</p>
@@ -987,8 +941,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">gap</span><span class="o">-</span><span class="n">bed</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">{</span><span class="n">hg19</span><span class="p">,</span><span class="n">b37</span><span class="p">,</span><span class="n">human_g1k_v37</span><span class="p">,</span><span class="n">hg38</span><span class="p">,</span><span class="n">GRCh38</span><span class="p">}</span> <span class="n">output_file</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat14">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat14" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat13">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat13" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>reference_genome</kbd></dt>
 <dd><p>Possible choices: hg19, b37, human_g1k_v37, hg38, GRCh38</p>
@@ -1007,8 +961,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
-<section id="positional-arguments_repeat15">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat15" title="Permalink to this heading">#</a></h4>
+<section id="positional-arguments_repeat14">
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat14" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>BAM, CRAM, or frag.gz containing fragment coordinates.</p>
@@ -1018,8 +972,8 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat14">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat14" title="Permalink to this heading">#</a></h4>
+<section id="named-arguments_repeat13">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat13" title="Permalink to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output_file</kbd></dt>
 <dd><p>Path to write output file to. If “-” used, writes bed.gz to stdout. Writes in BigWig format if “.bw” or “.bigwig” used, and writes in gzip compressed bed file if “.bed.gz” or “.bedGraph.gz” suffixes used. Default is “-“.</p>
@@ -1095,85 +1049,79 @@ NOTE: due to some ad hoc implementation details, currently the only accepted ref
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subcommands">subcommands</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Sub-commands">Sub-commands</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#coverage">coverage</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#frag-length">frag-length</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#frag-length-bins">frag-length-bins</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat1">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat1">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#frag-length-bins">frag-length-bins</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#frag-length-intervals">frag-length-intervals</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat2">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat2">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#frag-length-intervals">frag-length-intervals</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wps">wps</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat3">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat3">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wps">wps</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delfi">delfi</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat4">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat4">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delfi">delfi</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-bam">filter-bam</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat5">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat5">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-bam">filter-bam</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adjust-wps">adjust-wps</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat6">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat6">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adjust-wps">adjust-wps</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agg-bw">agg-bw</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat7">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat7">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agg-bw">agg-bw</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delfi-gc-correct">delfi-gc-correct</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat8">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat8">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delfi-gc-correct">delfi-gc-correct</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#end-motifs">end-motifs</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat9">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat9">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#end-motifs">end-motifs</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interval-end-motifs">interval-end-motifs</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat10">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat10">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interval-end-motifs">interval-end-motifs</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mds">mds</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat11">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat11">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mds">mds</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interval-mds">interval-mds</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat12">Positional Arguments</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat12">Named Arguments</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interval-mds">interval-mds</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat13">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat13">Named Arguments</a></li>
-</ul>
-</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gap-bed">gap-bed</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat14">Positional Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat13">Positional Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cleavage-profile">cleavage-profile</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat15">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat14">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat14">Positional Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat13">Named Arguments</a></li>
 </ul>
 </li>
 </ul>

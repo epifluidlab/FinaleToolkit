@@ -1,0 +1,26 @@
+Usage: finaletoolkit [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  adjust-wps             Adjusts raw Windowed Protection Score (WPS) by
+                         applying a median filter and Savitsky-Golay filter.
+  agg-bw                 Aggregates a bigWig signal over constant-length
+                         intervals defined in a BED file.
+  cleavage-profile       Calculates cleavage proportion over intervals defined
+                         in a BED file based on alignment data from a
+                         BAM/SAM/CRAM/Fragment file.
+  coverage               Calculates fragmentation coverage over intervals
+                         defined in a BED file based on alignment data from a
+                         BAM/SAM/CRAM/Fragment file.
+  filter-bam             Filters a BAM file for mapped read pairs meeting
+                         specified criteria.
+  frag-length-bins       Retrieves fragment lengths given a
+                         BAM/SAM/CRAM/Fragment file.
+  frag-length-intervals  Retrieves fragment length summary statistics over
+                         intervals defined in a BED file based on alignment
+                         data from a BAM/SAM/CRAM/Fragment file.
+  wps                    Calculates Windowed Protection Score over intervals
+                         defined in a BED file based on alignment data from a
+                         BAM/SAM/CRAM/Fragment file.

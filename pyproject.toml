@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
+    "click",
     "pysam",
     "pybedtools",
     "pybigwig",
@@ -36,9 +37,6 @@ dependencies = [
     "pandas",
     "cython",
     "statsmodels",
-    "sphinx<7.0.0",
-    "sphinx_rtd_theme",
-    "sphinx-argparse",
     "loess",
 ]
 
