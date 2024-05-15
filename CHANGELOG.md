@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [UNRELEASED VERSION]
+
+### Fixed
+- Fixed intersect policy for cleavage_profile
+- Clean up some comments
+- Fixed logging from coverage function
+
+### Added
+- Added numerous util functions
+- Added `left` and `right` options to `cleavage_profile` and CLI
+`cleavage-profile`.
+- Added tests for cleavage profiling.
+
+
 ## [0.5.2] - 2024-05-08
 
 ### Fixed
