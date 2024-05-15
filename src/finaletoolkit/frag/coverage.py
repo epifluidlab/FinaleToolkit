@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys
 import time
-from typing import Union, Tuple
+from typing import Union, Tuple, Iterable
 from pathlib import Path
 
 from multiprocessing import Pool
@@ -120,7 +120,7 @@ def coverage(
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False
-    ):
+    ) -> Iterable[Tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -138,19 +138,28 @@ def coverage(
         BED4 file containing intervals over which to generate coverage
         statistics.
     output_file : string, optional
-        Path for bed file to print coverages to. If output_file = `_`,
+        Path for bed file to print coverages to. If output_file = `-`,
         results will be printed to stdout.
     scale_factor : int, optional
         Amount to multiply coverages by. Default is 10^6.
+    intersect_policy: str, optional
+        Specifies how to determine whether fragments are in interval.
+        'midpoint' (default) calculates the central coordinate of each fragment
+        and only selects the fragment if the midpoint is in the
+        interval. 'any' includes fragments with any overlap with the
+        interval.
     quality_threshold : int, optional
+        Minimum MAPQ. Default is 30.
+    workers : int, optional
+        Number of subprocesses to spawn. Increases speed at the expense
+        of memory.
     verbose : int or bool, optional
 
     Returns
     -------
-    coverage : int
-        Fragment coverage over contig and region.
+    coverages : Iterable[Tuple[str, int, int, str, float]]
+        Fragment coverages over intervals.
     """
-    #FIXME update docstring
     if (verbose):
         start_time = time.time()
         sys.stderr.write(
