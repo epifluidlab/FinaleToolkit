@@ -294,7 +294,11 @@ def frag_generator(
         else:
             raise ValueError(f'{intersect_policy} is not a valid policy')
 
-        #FIXME: raise exception if start and stop specified but not contig
+        # Raise exception if start and stop specified but not contig
+        if contig is None and not (start is None and stop is None):
+            raise ValueError("contig should be specified if start or "
+                             "stop given.")
+
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
                 # Only select read1 and filter out non-paired-end
