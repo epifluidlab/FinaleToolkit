@@ -22,7 +22,7 @@ import pysam
 
 from finaletoolkit.utils.utils import (
     frag_array, overlaps, chrom_sizes_to_list, _reduce_overlaps_in_file,
-    _convert_to_list, _merge_all_intervals
+    _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
     )
 
 
@@ -211,6 +211,12 @@ def _cli_cleavage_profile(
     converted_intervals = _convert_to_list(reduced_intervals)
     all_intervals = _merge_all_intervals(converted_intervals)
     contigs, starts, stops = zip(*all_intervals)
+
+    # reading chrom.sizes file
+
+    size_dict = chrom_sizes_to_dict(chrom_sizes)
+
+    sizes = [size_dict[contig] for contig in contigs]
     
     count = len(contigs)
 
@@ -219,9 +225,12 @@ def _cli_cleavage_profile(
 
     interval_list = zip(
         count*[input_file],
+        sizes,
         contigs,
         starts,
         stops,
+        count*[left],
+        count*[right],
         count*[fraction_low],
         count*[fraction_high],
         count*[quality_threshold],

@@ -838,6 +838,12 @@ def main_cli_parser():
         'over.'
     )
     parser_command13.add_argument(
+        'chrom-sizes',
+        help='Tab-delimited file with two columns, one with names of '
+        'chromosomes or contigs, and the other with the size of '
+        'chromosomes.'
+    )
+    parser_command13.add_argument(
         '-o',
         '--output_file',
         default='-',
@@ -847,12 +853,20 @@ def main_cli_parser():
         'suffixes used. Default is "-".',
     )
     parser_command13.add_argument(
-        '-c',
-        '--chrom-sizes',
-        default=None,
-        help='Tab-delimited file with two columns, one with names of '
-        'chromosomes or contigs, and the other with the size of '
-        'chromosomes.'
+        '-l',
+        '--left',
+        default=0,
+        type=int,
+        help='Amount to subtract from start coordinate. Useful when '
+        'dealing with BED files with only CpG coordinates.',
+    )
+    parser_command13.add_argument(
+        '-r',
+        '--right',
+        default=0,
+        type=int,
+        help='Amount to add to stop coordinate. Useful when '
+        'dealing with BED files with only CpG coordinates.',
     )
     parser_command13.add_argument(
         '-lo',
