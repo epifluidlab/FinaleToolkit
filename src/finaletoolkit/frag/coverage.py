@@ -110,12 +110,13 @@ def _single_coverage_star(args):
     """
     return single_coverage(*args)
 
-
+# TODO: add normalized coverage
 def coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
         output_file: str,
         scale_factor: float=1e6,
+        intersect_policy: str="midpoint",
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False
@@ -155,8 +156,10 @@ def coverage(
         sys.stderr.write(
             f"""
             input_file: {input_file}
-            interval file: {interval_file}
+            interval_file: {interval_file}
             output_file: {output_file}
+            scale_factor: {scale_factor}
+            intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             workers: {workers}
             verbose: {verbose}\n
@@ -180,7 +183,7 @@ def coverage(
 
         intervals = _get_intervals(
             input_file, interval_file,
-            intersect_policy="midpoint",
+            intersect_policy=intersect_policy,
             quality_threshold=quality_threshold,
             verbose=verbose)
 
