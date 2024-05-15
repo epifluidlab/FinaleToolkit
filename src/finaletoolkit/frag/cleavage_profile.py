@@ -87,19 +87,21 @@ def cleavage_profile(
             verbose: {verbose}
             """
         )
+    adj_start = max(start-left, 0)
+    adj_stop = min(stop+right, chrom_size)
 
     frags = frag_array(
         input_file=input_file,
         contig=contig,
         quality_threshold=quality_threshold,
-        start=max(start-left, 0),
-        stop=min(stop+right, chrom_size),
+        start=adj_start,
+        stop=adj_stop,
         fraction_low=fraction_low,
         fraction_high=fraction_high,
         intersect_policy="any"
     )
 
-    positions = np.arange(start, stop)
+    positions = np.arange(adj_start, adj_stop)
 
     # finding depth at sites
     fragwise_overlaps = np.logical_and(
@@ -132,7 +134,7 @@ def cleavage_profile(
         ('proportion', 'f8'),
     ])
     results['contig'] = contig
-    results['pos'] = np.arange(start, stop)
+    results['pos'] = positions
     results['proportion'] = proportions
 
 
