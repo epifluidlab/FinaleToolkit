@@ -48,8 +48,6 @@ def single_coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
-    # TODO: determine if reference (like as found in pysam) is necessary
-    # TODO: consider including region string (like in pysam)
     if verbose:
         start_time = time.time()
         tqdm.write(
