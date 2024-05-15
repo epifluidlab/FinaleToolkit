@@ -28,9 +28,12 @@ from finaletoolkit.utils.utils import (
 
 def cleavage_profile(
     input_file: str,
+    chrom_size: int,
     contig: str,
     start: int,
     stop: int,
+    left: int=0,
+    right: int=0,
     fraction_low: int=1,
     fraction_high: int=10000000,
     quality_threshold: int=30,
@@ -43,12 +46,19 @@ def cleavage_profile(
     ---------
     input_file: str
         SAM, BAM, CRAM, or FRAG file with fragment information.
+    chrom_size: int
+        length of contig.
     contig: str
         Chromosome or contig
     start: int
         0-based start coordinate
     stop: int
         1-based end coordinate
+    left: int
+        Amount to subtract from start coordinate. Useful if only given
+        coordinates of CpG.
+    right: int
+        Amount to add to stop coordinate.
     fraction_low: int
         Minimum fragment size to include
     fraction_high: int
@@ -82,8 +92,8 @@ def cleavage_profile(
         input_file=input_file,
         contig=contig,
         quality_threshold=quality_threshold,
-        start=start,
-        stop=stop,
+        start=max(start-left, 0),
+        stop=min(stop+right, chrom_size),
         fraction_low=fraction_low,
         fraction_high=fraction_high,
         intersect_policy="any"
@@ -134,13 +144,15 @@ def _cleavage_profile_star(args):
 
 
 def _cli_cleavage_profile(
-    input_file: str,
-    interval_file: str,
+    input_file: Union[str, Path],
+    interval_file: Union[str, Path],
+    chrom_sizes: Union[str, Path],
+    left: int=0,
+    right: int=0,
     fraction_low: int=1,
     fraction_high: int=10000000,
     quality_threshold: int=30,
     output_file: str='-',
-    chrom_sizes: Union[str, Path]=None,
     workers: int=1,
     verbose: Union[bool, int]=0
 ):
@@ -168,6 +180,11 @@ def _cli_cleavage_profile(
     if (input_file == '-' and interval_file == '-'):
         raise ValueError('input_file and site_bed cannot both read from stdin')
     
+    if chrom_sizes is None:
+        raise ValueError(
+            '--chrom_sizes must be specified'
+        )
+    
       # get header from input_file
     if (input_file.endswith('.sam')
         or input_file.endswith('.bam')
@@ -176,16 +193,11 @@ def _cli_cleavage_profile(
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
-    # TODO: get a header when reading tabix
     elif (input_file.endswith('.bed')
           or input_file.endswith('.bed.gz')
           or input_file.endswith('.frag')
           or input_file.endswith('.frag.gz')
     ):
-        if chrom_sizes is None:
-            raise ValueError(
-                '--chrom_sizes must be specified for BED/Fragment files'
-            )
         header = chrom_sizes_to_list(chrom_sizes)
     else:
         raise ValueError("Not a supported file type.")
