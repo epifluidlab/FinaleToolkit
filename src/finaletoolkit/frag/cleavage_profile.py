@@ -9,6 +9,7 @@ CpG site.
 
 from __future__ import annotations
 from typing import Union
+from pathlib import Path
 from sys import stderr, stdout, stdin
 from multiprocessing import Pool
 import gzip
@@ -19,19 +20,58 @@ import pyBigWig as pbw
 from pybedtools import BedTool
 import pysam
 
-from finaletoolkit.utils.utils import frag_array, overlaps
+from finaletoolkit.utils.utils import (
+    frag_array, overlaps, chrom_sizes_to_list, _reduce_overlaps_in_file,
+    _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
+    )
 
 
 def cleavage_profile(
     input_file: str,
+    chrom_size: int,
     contig: str,
     start: int,
     stop: int,
+    left: int=0,
+    right: int=0,
     fraction_low: int=1,
     fraction_high: int=10000000,
     quality_threshold: int=30,
     verbose: Union[bool, int]=0
 ) -> np.ndarray:
+    """
+    Cleavage profile calculated over a single interval.
+
+    Parameters
+    ---------
+    input_file: str
+        SAM, BAM, CRAM, or FRAG file with fragment information.
+    chrom_size: int
+        length of contig.
+    contig: str
+        Chromosome or contig
+    start: int
+        0-based start coordinate
+    stop: int
+        1-based end coordinate
+    left: int
+        Amount to subtract from start coordinate. Useful if only given
+        coordinates of CpG.
+    right: int
+        Amount to add to stop coordinate.
+    fraction_low: int
+        Minimum fragment size to include
+    fraction_high: int
+        Maximum fragment size to include
+    quality_threshold: int
+        Minimum MAPQ
+    verbose: bool or in
+
+    Return
+    ------
+    cleavage_proportions: NDArray
+        Array of cleavage proportions over given interval.
+    """
     if (verbose):
         start_time = time.time()
         stderr.write(
@@ -47,18 +87,21 @@ def cleavage_profile(
             verbose: {verbose}
             """
         )
+    adj_start = max(start-left, 0)
+    adj_stop = min(stop+right, chrom_size)
 
     frags = frag_array(
         input_file=input_file,
         contig=contig,
         quality_threshold=quality_threshold,
-        start=start,
-        stop=stop,
+        start=adj_start,
+        stop=adj_stop,
         fraction_low=fraction_low,
-        fraction_high=fraction_high
+        fraction_high=fraction_high,
+        intersect_policy="any"
     )
 
-    positions = np.arange(start, stop)
+    positions = np.arange(adj_start, adj_stop)
 
     # finding depth at sites
     fragwise_overlaps = np.logical_and(
@@ -79,7 +122,11 @@ def cleavage_profile(
         ), np.logical_not(frags['strand'][:, np.newaxis])
     )
     ends = np.sum(np.logical_or(forward_ends, reverse_ends), axis=0)
-    proportions = ends/depth*100
+
+    proportions = np.zeros_like(depth, dtype=np.float64)
+    non_zero_mask = depth != 0
+    proportions[non_zero_mask] = ends[non_zero_mask] / depth[non_zero_mask] * 100
+
 
     results = np.zeros_like(proportions, dtype=[
         ('contig', 'U16'),
@@ -87,7 +134,7 @@ def cleavage_profile(
         ('proportion', 'f8'),
     ])
     results['contig'] = contig
-    results['pos'] = np.arange(start, stop)
+    results['pos'] = positions
     results['proportion'] = proportions
 
 
@@ -99,8 +146,11 @@ def _cleavage_profile_star(args):
 
 
 def _cli_cleavage_profile(
-    input_file: str,
-    interval_file: str,
+    input_file: Union[str, Path],
+    interval_file: Union[str, Path],
+    chrom_sizes: Union[str, Path],
+    left: int=0,
+    right: int=0,
     fraction_low: int=1,
     fraction_high: int=10000000,
     quality_threshold: int=30,
@@ -132,6 +182,11 @@ def _cli_cleavage_profile(
     if (input_file == '-' and interval_file == '-'):
         raise ValueError('input_file and site_bed cannot both read from stdin')
     
+    if chrom_sizes is None:
+        raise ValueError(
+            '--chrom_sizes must be specified'
+        )
+    
       # get header from input_file
     if (input_file.endswith('.sam')
         or input_file.endswith('.bam')
@@ -140,14 +195,12 @@ def _cli_cleavage_profile(
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
-    # TODO: get a header when reading tabix
     elif (input_file.endswith('.bed')
           or input_file.endswith('.bed.gz')
           or input_file.endswith('.frag')
           or input_file.endswith('.frag.gz')
     ):
-        with pysam.TabixFile(input_file, 'r') as tbx:
-            raise NotImplementedError('tabix files not yet supported!')
+        header = chrom_sizes_to_list(chrom_sizes)
     else:
         raise ValueError("Not a supported file type.")
 
@@ -156,44 +209,16 @@ def _cli_cleavage_profile(
     
     # reading intervals from bed and removing overlaps
     # NOTE: assumes that bed file is sorted.
-    contigs = []
-    starts = []
-    stops = []
-    try:
-        if interval_file == '-':
-            bed = stdin
-        else:
-            bed = open(interval_file)
+    reduced_intervals = _reduce_overlaps_in_file(interval_file)
+    converted_intervals = _convert_to_list(reduced_intervals)
+    all_intervals = _merge_all_intervals(converted_intervals)
+    contigs, starts, stops = zip(*all_intervals)
 
-        # for overlap checking
-        prev_contig = None
-        prev_start = 0
-        prev_stop = 0
-        for line in bed:
-            contents = line.split()
-            contig = contents[0].strip()
-            start = int(contents[1])
-            stop = int(contents[2])
+    # reading chrom.sizes file
 
-            # cut off part of previous interval if overlap
-            if contig == prev_contig and start < prev_stop:
-                prev_stop = start
+    size_dict = chrom_sizes_to_dict(chrom_sizes)
 
-            if prev_contig is not None:
-                contigs.append(prev_contig)
-                starts.append(prev_start)
-                stops.append(prev_stop)
-
-            prev_contig = contig
-            prev_start = start
-            prev_stop = stop
-        # appending last interval
-        contigs.append(prev_contig)
-        starts.append(prev_start)
-        stops.append(prev_stop)
-    finally:
-        if interval_file != '-':
-            bed.close()
+    sizes = [size_dict[contig] for contig in contigs]
     
     count = len(contigs)
 
@@ -202,9 +227,12 @@ def _cli_cleavage_profile(
 
     interval_list = zip(
         count*[input_file],
+        sizes,
         contigs,
         starts,
         stops,
+        count*[left],
+        count*[right],
         count*[fraction_low],
         count*[fraction_high],
         count*[quality_threshold],

@@ -10,7 +10,7 @@ import gzip
 from tqdm import tqdm
 
 from finaletoolkit.utils.utils import (
-    _not_read1_or_low_quality, _get_contigs, _get_intervals, frag_generator
+    _get_intervals, frag_generator
 )
 
 
@@ -48,21 +48,19 @@ def single_coverage(
     coverage : int
         Fragment coverage over contig and region.
     """
-    # TODO: determine if reference (like as found in pysam) is necessary
-    # TODO: consider including region string (like in pysam)
     if verbose:
         start_time = time.time()
         tqdm.write(
             f"""
-input_file: 
-contig: {contig}
-start: {start}
-stop: {stop}
-name: {name}
-intersect_policy: {intersect_policy}
-quality_threshold: {quality_threshold}
-verbose: {verbose}
-"""
+            input_file: {input_file}
+            contig: {contig}
+            start: {start}
+            stop: {stop}
+            name: {name}
+            intersect_policy: {intersect_policy}
+            quality_threshold: {quality_threshold}
+            verbose: {verbose}
+            """
         )
 
     # initializing variable for coverage tuple outside of with statement
