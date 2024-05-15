@@ -37,16 +37,28 @@ def single_coverage(
     input_file : str or pysam.AlignmentFile
         BAM, SAM, CRAM, or Frag.gz file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
-    contig : string
-    start : int
-    stop : int
-    name : str
+    contig : string, optional
+        Default is None.
+    start : int, optional
+        0-based start coordinate to get coverage from. Default is 0.
+    stop : int, optional
+        1-based stop coordinate to get coverage from. Default is None
+        and goes to end of chromosome/contig.
+    name : str, optional
+        Name of interval. Default is '.'.
+    intersect_policy: str, optional
+        Specifies how to determine whether fragments are in interval.
+        'midpoint' (default) calculates the central coordinate of each fragment
+        and only selects the fragment if the midpoint is in the
+        interval. 'any' includes fragments with any overlap with the
+        interval.
     quality_threshold : int, optional
+        Minimum MAPQ to filter for. Default is 30.
     verbose : bool, optional
-
+        Prints messages to stderr. Default is false.
     Returns
     -------
-    coverage : int
+    (contig, start, stop, name, coverage) : tuple[str, int, int, str, float]
         Fragment coverage over contig and region.
     """
     if verbose:
