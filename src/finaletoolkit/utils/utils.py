@@ -27,6 +27,20 @@ def chrom_sizes_to_list(
     return chrom_sizes
 
 
+def chrom_sizes_to_dict(
+    chrom_sizes_file: Union[str, Path]) -> List[Tuple[str][int]]:
+    """
+    Reads chromosome names and sizes from a CHROMSIZE file into a list.
+    """
+    chrom_sizes = {}
+    with open(chrom_sizes_file, 'r') as file:
+        for line in file:
+            if line != '\n':
+                chrom, size = line.strip().split('\t')
+                chrom_sizes[chrom] = size
+    return chrom_sizes
+
+
 def _merge_overlapping_intervals(intervals):
     intervals.sort(key=lambda x: x[0])
     merged = []
