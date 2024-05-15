@@ -36,6 +36,32 @@ def cleavage_profile(
     quality_threshold: int=30,
     verbose: Union[bool, int]=0
 ) -> np.ndarray:
+    """
+    Cleavage profile calculated over a single interval.
+
+    Parameters
+    ---------
+    input_file: str
+        SAM, BAM, CRAM, or FRAG file with fragment information.
+    contig: str
+        Chromosome or contig
+    start: int
+        0-based start coordinate
+    stop: int
+        1-based end coordinate
+    fraction_low: int
+        Minimum fragment size to include
+    fraction_high: int
+        Maximum fragment size to include
+    quality_threshold: int
+        Minimum MAPQ
+    verbose: bool or in
+
+    Return
+    ------
+    cleavage_proportions: NDArray
+        Array of cleavage proportions over given interval.
+    """
     if (verbose):
         start_time = time.time()
         stderr.write(
