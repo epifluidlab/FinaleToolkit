@@ -32,13 +32,9 @@ def main_cli_parser():
     # Subcommand 1: frag-coverage
     parser_command1 = subparsers.add_parser(
         'coverage',
-        description=(
-        'Calculates fragmentation coverage over intervals in a BED file given '
-        'a SAM, BAM, CRAM, or Frag.gz file'
-        )
+        description='Calculates fragmentation coverage over intervals '
+        'in a BED file given a SAM, BAM, CRAM, or Frag.gz file'
     )
-    # TODO: accept tabix
-
     parser_command1.add_argument(
         'input_file',
         help='SAM, BAM, CRAM, or Frag.gz file containing fragment data'
@@ -62,9 +58,16 @@ def main_cli_parser():
     )
     parser_command1.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int
+    )
+    parser_command1.add_argument(
+        '-i',
+        '--intersect-policy',
+        default='midpoint',
+        choices=['midpoint', 'any'],
+        type=str
     )
     parser_command1.add_argument(
         '-w',
