@@ -64,6 +64,8 @@ def main_cli_parser():
     parser_command13.add_argument('-lo', '--fraction_low', default=120, type=int, help="Minimum length for a fragment to be included in cleavage proportion calculation.")
     parser_command13.add_argument('-hi', '--fraction_high', default=180, type=int, help="Maximum length for a fragment to be included in cleavage proportion calculation.")
     parser_command13.add_argument('-q', '--quality-threshold', default=20, type=int, help='Minimum mapping quality threshold.')
+    parser_command13.add_argument('-l', '--left', default=0, type=int, help='Number of base pairs to subtract from start coordinate to create interval. Useful when dealing with BED files with only CpG coordinates.')
+    parser_command13.add_argument('-r','--right', default=0, type=int, help='Number of base pairs to add to stop coordinate to create interval. Useful when dealing with BED files with only CpG coordinates.')
     parser_command13.add_argument('-w', '--workers', default=1, type=int, help='Number of worker processes.')
     parser_command13.add_argument('-v', '--verbose', default=0, action='count', help='Enable verbose mode to display detailed processing information.')
     parser_command13.set_defaults(func=_cli_cleavage_profile)

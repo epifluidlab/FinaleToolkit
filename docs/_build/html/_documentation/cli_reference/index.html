@@ -500,7 +500,7 @@ document.write(`
 <section id="cleavage-profile">
 <h3>cleavage-profile<a class="headerlink" href="#cleavage-profile" title="Permalink to this heading">#</a></h3>
 <p>Calculates cleavage proportion over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat3">
@@ -532,6 +532,14 @@ document.write(`
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 20</p>
+</dd>
+<dt><kbd>-l, --left</kbd></dt>
+<dd><p>Number of base pairs to subtract from start coordinate to create interval. Useful when dealing with BED files with only CpG coordinates.</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>-r, --right</kbd></dt>
+<dd><p>Number of base pairs to add to stop coordinate to create interval. Useful when dealing with BED files with only CpG coordinates.</p>
+<p>Default: 0</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
