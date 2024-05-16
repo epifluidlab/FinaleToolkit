@@ -10,5 +10,6 @@ User Guide
    features
    installation
    structure
+   intersectpolicy
    quickstart
    help
