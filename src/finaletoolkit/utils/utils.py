@@ -335,7 +335,6 @@ def frag_generator(
                                     read.mapping_quality,
                                     read.is_forward 
                                 )
-                # HACK: for some reason read_length is sometimes None
                 except TypeError as e:
                     stderr.writelines(["Type error encountered.\n",
                                        f"Fragment length: {frag_length}\n",
