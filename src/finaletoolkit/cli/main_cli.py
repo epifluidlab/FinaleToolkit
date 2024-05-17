@@ -192,8 +192,8 @@ def main_cli():
     try:
         function = args.func
         funcargs = vars(args)
+        print(funcargs)
         funcargs.pop('func')
-        funcargs.pop('subcommand')
 
         function(**funcargs)
     except AttributeError:
