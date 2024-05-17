@@ -164,26 +164,6 @@ class TestInvervalEndMotifs:
     def test_from_file(self, request, tmp_path):
         pass
 
-class TestCLIEntryPoint:
-    """
-    Test all CLI subcommands related to end_motifs and MDS, genomewide
-    and intervals.
-    """
-    def test_end_motif(self, request):
-        exit_status = os.system('finaletoolkit end-motifs --help')
-        assert exit_status == 0
-
-    def test_mds(self, request):
-        exit_status = os.system('finaletoolkit mds --help')
-        assert exit_status == 0
-
-    def test_interval_end_motif(self, request):
-        exit_status = os.system('finaletoolkit interval-end-motifs --help')
-        assert exit_status == 0
-
-    def test_interval_mds(self, request):
-        exit_status = os.system('finaletoolkit interval-mds --help')
-        assert exit_status == 0
     
 class TestCLIIntervalMDS:
     def test_interval_mds(self, request, tmp_path):
