@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys
 import time
-from typing import Union, Tuple, Iterable
+from typing import Union, Iterable
 from pathlib import Path
 
 from multiprocessing import Pool
@@ -24,7 +24,7 @@ def single_coverage(
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         verbose: Union[bool, int]=False
-    ) -> Tuple[str, int, int, str, float]:
+    ) -> tuple[str, int, int, str, float]:
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -120,7 +120,7 @@ def coverage(
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False
-    ) -> Iterable[Tuple[str, int, int, str, float]]:
+    ) -> Iterable[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -157,7 +157,7 @@ def coverage(
 
     Returns
     -------
-    coverages : Iterable[Tuple[str, int, int, str, float]]
+    coverages : Iterable[tuple[str, int, int, str, float]]
         Fragment coverages over intervals.
     """
     if (verbose):
