@@ -17,7 +17,6 @@ import time
 
 import numpy as np
 import pyBigWig as pbw
-from pybedtools import BedTool
 import pysam
 
 from finaletoolkit.utils.utils import (
