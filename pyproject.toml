@@ -25,9 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
-    "click",
     "pysam",
-    "pybedtools",
     "pybigwig",
     "py2bit",
     "tqdm",
@@ -35,7 +33,6 @@ dependencies = [
     "scipy",
     "matplotlib",
     "pandas",
-    "cython",
     "statsmodels",
     "loess",
 ]
