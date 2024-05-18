@@ -294,7 +294,11 @@ def frag_generator(
         else:
             raise ValueError(f'{intersect_policy} is not a valid policy')
 
-        #FIXME: raise exception if start and stop specified but not contig
+        # Raise exception if start and stop specified but not contig
+        if contig is None and not (start is None and stop is None):
+            raise ValueError("contig should be specified if start or "
+                             "stop given.")
+
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
                 # Only select read1 and filter out non-paired-end
@@ -331,7 +335,6 @@ def frag_generator(
                                     read.mapping_quality,
                                     read.is_forward 
                                 )
-                # HACK: for some reason read_length is sometimes None
                 except TypeError as e:
                     stderr.writelines(["Type error encountered.\n",
                                        f"Fragment length: {frag_length}\n",
@@ -535,31 +538,6 @@ def _get_intervals(
                 else:
                     break
     return intervals
-
-
-def genome2list(genome_file: str) -> list:
-    """
-    Reads a GENOME text file into a list of tuples (chrom, length)
-
-    Parameters
-    ----------
-    genome_file : str
-        String containing path to GENOME format file
-
-    Returns
-    _______
-    chroms : str
-        List of tuples containing chrom/contig names and lengths
-    """
-    chroms = []
-    with open(genome_file) as file:
-        for line in file:
-            if line != '\n':
-                chroms.append((
-                    (contents:=line.split('\t'))[0],
-                    int(contents[1])
-                ))
-    return chroms
 
 
 def overlaps(

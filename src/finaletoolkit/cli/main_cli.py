@@ -20,6 +20,7 @@ from finaletoolkit.genome.gaps import _cli_gap_bed
 
 
 def main_cli_parser():
+
     parser = argparse.ArgumentParser(description='FinaleToolkit is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.', epilog='')
     subparsers = parser.add_subparsers()
 

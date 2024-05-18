@@ -11,7 +11,7 @@ from numpy.typing import NDArray
 import pyBigWig as pbw
 from scipy.signal import savgol_filter
 
-from finaletoolkit.utils import genome2list
+from finaletoolkit.utils import chrom_sizes_to_list
 
 def _median_filter(positions: NDArray, data: NDArray, window_size: int):
     """locally adjusted running median"""
@@ -255,7 +255,7 @@ def adjust_wps(
 
         # write to output
         with pbw.open(output_file, 'w') as output_bw:
-            output_bw.addHeader(genome2list(genome_file))
+            output_bw.addHeader(chrom_sizes_to_list(genome_file))
             for scores in processed_scores:
                 contigs, starts, stops, values = scores
                 if len(contigs) == 0:
