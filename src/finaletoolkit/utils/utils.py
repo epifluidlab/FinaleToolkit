@@ -2,7 +2,7 @@ from __future__ import annotations
 import time
 import gzip
 import tempfile as tf
-from typing import Union, TextIO, Tuple, List, Generator
+from typing import Union, TextIO, Tuple, List, Generator, Iterable
 from sys import stderr, stdout
 from pathlib import Path
 
@@ -13,36 +13,100 @@ import pysam
 from tqdm import tqdm
 
 
-def _get_contigs(
-        input_file: Union[str, pysam.AlignmentFile],
-        verbose: bool=False
-    ) -> list:
+def chrom_sizes_to_list(
+    chrom_sizes_file: Union[str, Path]) -> List[Tuple[str][int]]:
     """
-    Retrieves contigs from input_file and returns lists of contig names
-    and lengths
+    Reads chromosome names and sizes from a CHROMSIZE file into a list.
     """
+    chrom_sizes = []
+    with open(chrom_sizes_file, 'r') as file:
+        for line in file:
+            if line != '\n':
+                chrom, size = line.strip().split('\t')
+                chrom_sizes.append((chrom, int(size)))
+    return chrom_sizes
+
+
+def chrom_sizes_to_dict(
+    chrom_sizes_file: Union[str, Path]) -> List[Tuple[str][int]]:
+    """
+    Reads chromosome names and sizes from a CHROMSIZE file into a list.
+    """
+    chrom_sizes = {}
+    with open(chrom_sizes_file, 'r') as file:
+        for line in file:
+            if line != '\n':
+                chrom, size = line.strip().split('\t')
+                chrom_sizes[chrom] = size
+    return chrom_sizes
+
+
+def _merge_overlapping_intervals(intervals):
+    intervals.sort(key=lambda x: x[0])
+    merged = []
+    for interval in intervals:
+        if not merged or interval[0] > merged[-1][1]:
+            merged.append(interval)
+        else:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], interval[1]))
+    return merged
+
+def _reduce_overlaps_in_file(interval_file):
+    intervals_dict = {}
+    with open(interval_file, 'r') as file:
+        for line in file:
+            chrom, start, end = line.strip().split('\t')[:3]
+            start, end = int(start), int(end)
+            if chrom not in intervals_dict:
+                intervals_dict[chrom] = []
+            intervals_dict[chrom].append((start, end))
+
+    reduced_intervals = {}
+    for chrom, intervals in intervals_dict.items():
+        reduced_intervals[chrom] = _merge_overlapping_intervals(intervals)
+    return reduced_intervals    
+
+def _convert_to_list(reduced_intervals):
+    converted_intervals = {}
+    for chrom, intervals in reduced_intervals.items():
+        converted_intervals[chrom] = [[chrom, start, end] for start, end in intervals]
+    return converted_intervals
+
+def _merge_all_intervals(converted_intervals):
+    all_intervals = []
+    for intervals in converted_intervals.values():
+        all_intervals.extend(intervals)
+    return all_intervals
+
+def get_contig_lengths(
+    input_file: Union[str, pysam.AlignmentFile],
+    verbose: bool
+) -> List[Tuple[str, int]]:
 
     input_is_file = False
+    sam_file = None
+
     try:
-        # handling input types
-        if (type(input_file) == pysam.AlignmentFile):
+        if isinstance(input_file, pysam.AlignmentFile):
             sam_file = input_file
-        elif input_file.endswith('bam'):
+        elif isinstance(input_file, str) and input_file.endswith(('bam', 'sam')):
             input_is_file = True
-            if (verbose):
+            if verbose:
                 stderr.write(f'Opening {input_file}\n')
             sam_file = pysam.AlignmentFile(input_file)
         else:
-            raise ValueError(
-                'Invalid input_file type. Only BAM or SAM files are allowed.'
-            )
+            raise ValueError('Invalid input_file type. Only BAM or SAM files are allowed.')
+
         contigs = sam_file.references
         lengths = sam_file.lengths
+
+        contig_lengths = list(zip(contigs, lengths))
+
     finally:
-        if input_is_file:
+        if input_is_file and sam_file is not None:
             sam_file.close()
 
-    return zip(contigs, lengths)
+    return contig_lengths
 
 
 def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
@@ -335,7 +399,7 @@ def frag_array(
         given interval. Default is "midpoint". Policies include:
         - midpoint: the average of end coordinates of a fragment lies
         in the interval.
-        - any: any part of the fragment is in the interval.v
+        - any: any part of the fragment is in the interval.
     verbose : bool, optional
 
     Returns

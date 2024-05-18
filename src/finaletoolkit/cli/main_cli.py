@@ -180,7 +180,6 @@ def main_cli_parser():
     parser_command12.add_argument('output_file', help='Path to write BED file to. If "-" used, writes to stdout.')
     parser_command12.set_defaults(func=_cli_gap_bed)
 
- 
     return parser
 
 
