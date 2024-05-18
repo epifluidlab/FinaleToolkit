@@ -66,4 +66,4 @@ We encourage you to use our comprehensive database, FinaleDB, to access relevant
 - Yaping Liu: yaping@northwestern.edu
 
 ## License
-For academic research, please refer to MIT license. For commerical usage, please contact the authors.
+For academic research, please refer to MIT license.

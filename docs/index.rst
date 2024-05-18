@@ -52,4 +52,4 @@ Contact
 License
 -----------------
 
-For academic research, please refer to MIT license. For commerical usage, please contact the authors.
+For academic research, please refer to MIT license.
