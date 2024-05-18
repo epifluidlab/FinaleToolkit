@@ -2,7 +2,7 @@ from __future__ import annotations
 import time
 import gzip
 import tempfile as tf
-from typing import Union, TextIO, Tuple, List, Generator, Iterable
+from typing import Union, TextIO, Generator, Iterable
 from sys import stderr, stdout
 from pathlib import Path
 
@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 
 def chrom_sizes_to_list(
-    chrom_sizes_file: Union[str, Path]) -> List[Tuple[str][int]]:
+    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
     """
@@ -28,7 +28,7 @@ def chrom_sizes_to_list(
 
 
 def chrom_sizes_to_dict(
-    chrom_sizes_file: Union[str, Path]) -> List[Tuple[str][int]]:
+    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
     """
@@ -183,7 +183,7 @@ def frag_generator(
     fraction_high: int=180,
     intersect_policy: str="midpoint",
     verbose: bool=False
-) -> Generator[Tuple]:
+) -> Generator[tuple]:
     """
     Reads from BAM, SAM, or BED file and returns tuples containing
     contig (chromosome), start, stop (end), mapq, and strand for each fragment.
@@ -480,7 +480,7 @@ def _get_intervals(
     intersect_policy: str,
     quality_threshold: int,
     verbose: Union[bool, int]
-) -> list[Tuple[str, str, int, int, str, str, int]]:
+) -> list[tuple[str, str, int, int, str, str, int]]:
     """
     Helper function to read intervals from bed file.
     Returns list of tuples:

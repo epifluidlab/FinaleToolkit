@@ -15,7 +15,7 @@ authors = [
 ]
 description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 classifiers = [
     "Programming Language :: Python :: 3",

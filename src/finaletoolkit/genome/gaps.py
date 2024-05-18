@@ -7,7 +7,7 @@ on the UCSC Genome Browser (Kent et al 2002).
 """
 
 from __future__ import annotations
-from typing import Union, Tuple, Iterable
+from typing import Union, Iterable
 import gzip
 try:
     from importlib.resources import files
@@ -328,8 +328,8 @@ class GenomeGaps:
 class ContigGaps():
     def __init__(self,
                  contig: str,
-                 centromere: Tuple[int, int],
-                 telomeres:Iterable[Tuple[int, int]],
+                 centromere: tuple[int, int],
+                 telomeres:Iterable[tuple[int, int]],
                  has_short_arm: bool=False):
         self.contig = contig
         self.centromere = centromere
