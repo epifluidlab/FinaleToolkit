@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Quickstart &#8212; FinaleToolkit  documentation</title>
+    <title>Intersect Policy &#8212; FinaleToolkit  documentation</title>
   
   
   
@@ -39,12 +39,12 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/sphinx_highlight.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_documentation/user_guide/quickstart';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_documentation/user_guide/intersectpolicy';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Help" href="help.html" />
-    <link rel="prev" title="Intersect Policy" href="intersectpolicy.html" />
+    <link rel="next" title="Quickstart" href="quickstart.html" />
+    <link rel="prev" title="Structure" href="structure.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -297,8 +297,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="intersectpolicy.html">Intersect Policy</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Quickstart</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Intersect Policy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="help.html">Help</a></li>
 </ul>
 </div>
@@ -340,7 +340,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Quickstart</li>
+    <li class="breadcrumb-item active" aria-current="page">Intersect Policy</li>
   </ul>
 </nav>
 </div>
@@ -357,28 +357,19 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">#</a></h1>
-<section id="getting-started">
-<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading">#</a></h2>
-<p>If not to be integrated into a workflow, <strong>FinaleToolkit</strong> is intended to be run directly from a terminal interface.</p>
-<p>You can open the terminal and typing the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ finaletoolkit
-</pre></div>
-</div>
+  <section id="intersect-policy">
+<h1>Intersect Policy<a class="headerlink" href="#intersect-policy" title="Permalink to this heading">#</a></h1>
+<p>When you give the <code class="docutils literal notranslate"><span class="pre">Fragment</span> <span class="pre">Generator</span></code> an interval of <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> to pull fragments from, which fragments will it return?</p>
+<p>What if a fragment has 1bp of overlap within the just on the edge of the window? Does it also return that fragment as well?</p>
+<p>These questions are answered by the <code class="docutils literal notranslate"><span class="pre">intersect_policy</span></code> argument, which shows up in many of the CLI and API commands.</p>
+<p><code class="docutils literal notranslate"><span class="pre">intersect_policy</span></code> can either be <code class="docutils literal notranslate"><span class="pre">midpoint</span></code> or <code class="docutils literal notranslate"><span class="pre">any</span></code>.</p>
+<section id="midpoint">
+<h2>Midpoint<a class="headerlink" href="#midpoint" title="Permalink to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">midpoint</span></code>: The midpoint of the fragment determines whether the fragment will be returned or not. If the midpoint falls between <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code>, then it will be returned. Else, it will not.</p>
 </section>
-<section id="importing-modules">
-<h2>Importing Modules<a class="headerlink" href="#importing-modules" title="Permalink to this heading">#</a></h2>
-<p>The <strong>FinaleToolkit</strong> package itself is divided by its API functions.</p>
-<p>You can load <em>all</em> of the functions by using the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">finaletoolkit</span> <span class="k">as</span> <span class="nn">ft</span>
-</pre></div>
-</div>
-<p>If you want to load a <em>specific</em> function, you can do so by using the following:</p>
-<p>Assuming we wanted to load the DELFI function:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">finaletoolkit.frag</span> <span class="kn">import</span> <span class="n">delfi</span>
-</pre></div>
-</div>
+<section id="any">
+<h2>Any<a class="headerlink" href="#any" title="Permalink to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">any</span></code>: As long as the fragment overlaps the interval between <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> in some capacity, then it will be returned. Else, it will not.</p>
 </section>
 </section>
 
@@ -393,20 +384,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="intersectpolicy.html"
+       href="structure.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Intersect Policy</p>
+        <p class="prev-next-title">Structure</p>
       </div>
     </a>
     <a class="right-next"
-       href="help.html"
+       href="quickstart.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Help</p>
+        <p class="prev-next-title">Quickstart</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -428,15 +419,15 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-started">Getting Started</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#importing-modules">Importing Modules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#midpoint">Midpoint</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#any">Any</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../../_sources/_documentation/user_guide/quickstart.rst.txt">
+    <a href="../../_sources/_documentation/user_guide/intersectpolicy.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>
