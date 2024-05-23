@@ -354,8 +354,8 @@ def frag_array(
     verbose: bool=False
     ) -> NDArray:
     """
-    Reads from BAM, SAM, or BED file and returns a two column matrix
-    with fragment start and stop positions.
+    Reads from BAM, SAM, or BED file and returns a three column matrix
+    with fragment start and stop positions and strand.
 
     Parameters
     ----------
