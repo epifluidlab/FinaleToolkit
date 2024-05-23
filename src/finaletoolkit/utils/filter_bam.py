@@ -53,7 +53,7 @@ def filter_bam(
         with tf.TemporaryDirectory() as temp_dir:
             flag_filtered_bam = f'{temp_dir}/flag_filtered.bam'
             samtools_command = (
-                f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
+                f'samtools view {input_file} -F 3852 -f 3 -b -h -o '
                 f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
             )
 

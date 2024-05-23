@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Minimum Python version 3.9
+- Changed `filter_bam` to have same filters as FinaleDB
 
 ### Removed
 - Removed `get_contig_lengths`
