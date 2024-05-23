@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `cleavage-profile`.
 - Added tests for cleavage profiling.
 
+### Changed
+- Minimum Python version 3.9
+
+### Removed
+- Removed `get_contig_lengths`
+- Removed `data`, `conda_envs`, and `figs` directories
+- Removed unused dependencies `click`, `pybedtools`, and `cython`
+
 
 ## [0.5.2] - 2024-05-08
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import time
-from typing import Union, Tuple
+from typing import Union
 from sys import stdout, stderr
 from shutil import get_terminal_size
 from multiprocessing import Pool
@@ -225,7 +225,7 @@ def frag_length_bins(
     intersect_policy: str="midpoint",
     quality_threshold: int=30,
     verbose: Union[bool, int]=False
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
     two arrays containing bins and counts by size. Optionally prints
