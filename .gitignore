@@ -7,3 +7,4 @@ pip-wheel-metadata
 **/.DS_Store
 build/*
 test/tmp/*
+.coverage*
