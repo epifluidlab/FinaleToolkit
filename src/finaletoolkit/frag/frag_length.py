@@ -361,14 +361,14 @@ def frag_length_bins(
 
 
 def _frag_length_stats(
-    input_file: Union(str, pysam.AlignmentFile),
+    input_file: Union[str, pysam.AlignmentFile],
     contig: str,
     start: int,
     stop: int,
     name: str,
     intersect_policy: str,
     quality_threshold: int,
-    verbose: Union(bool, int)
+    verbose: Union[bool, int]
 ):
     # generating fragment lengths
     frag_lengths = frag_length(
