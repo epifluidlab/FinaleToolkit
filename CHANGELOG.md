@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed intersect policy for cleavage_profile
-- Clean up some comments
+- Clean up some comments and docstrings
 - Fixed logging from coverage function
 
 ### Added
 - Added numerous util functions
 - Added `left` and `right` options to `cleavage_profile` and CLI
 `cleavage-profile`.
-- Added tests for cleavage profiling.
+- Added tests for cleavage profile and WPS.
 
 ### Changed
 - Minimum Python version 3.9
