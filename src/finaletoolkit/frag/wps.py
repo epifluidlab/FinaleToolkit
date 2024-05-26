@@ -79,9 +79,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     Returns
     -------
     scores : numpy.ndarray
-        np array of shape (n, 3) where column 1 is the contig, 
-        column 2 is the coordinate, and column 3 is the score and n is
-        the number of coordinates in region [start,stop)
+        np struct array of with columns `contig`, `start`, and `wps`.
     """
 
     if (verbose):
