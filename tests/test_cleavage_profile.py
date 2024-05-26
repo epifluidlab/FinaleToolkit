@@ -20,6 +20,6 @@ class TestIntervalCleavageProfile:
             quality_threshold=0)
 
         assert np.all('12' == results['contig'])
-        assert np.all(np.arange(34443195, 34443206) == results['pos']), str(results)
-        assert np.all(np.zeros(11, np.int64) == results['proportion']), str(results)
+        assert np.all(results['pos'] == np.arange(34443195, 34443206)), str(results)
+        assert np.all(results['proportion'] == np.zeros(11, np.int64)), str(results)
         
