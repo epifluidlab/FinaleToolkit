@@ -1,5 +1,5 @@
 """
-FinaleTools.gaps
+finaletoolkit.gaps
 ================
 
 This module contains classes and functions to use the gap tracks found
@@ -13,7 +13,7 @@ from importlib.resources import files
 from pathlib import Path
 from sys import stdout
 
-import numpy as np
+import numpy as npp
 from numpy.typing import NDArray
 
 import finaletoolkit.genome as genome

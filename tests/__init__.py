@@ -1,3 +1,3 @@
 """
-This is the test suite for FinaleTools.
+This is the test suite for FinaleToolkit.
 """
