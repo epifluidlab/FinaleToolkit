@@ -13,7 +13,7 @@ from importlib.resources import files
 from pathlib import Path
 from sys import stdout
 
-import numpy as npp
+import numpy as np
 from numpy.typing import NDArray
 
 import finaletoolkit.genome as genome
