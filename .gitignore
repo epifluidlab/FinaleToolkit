@@ -6,4 +6,5 @@ pip-wheel-metadata
 .vscode
 **/.DS_Store
 build/*
-test/tmp/*
+tests/tmp/*
+.coverage*

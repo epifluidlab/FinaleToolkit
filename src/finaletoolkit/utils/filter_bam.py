@@ -2,9 +2,6 @@ from __future__ import annotations
 import tempfile as tf
 import subprocess
 import traceback
-from sys import stderr
-from os.path import isdir
-from shutil import rmtree
 
 import pysam
 

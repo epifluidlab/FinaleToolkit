@@ -8,15 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [UNRELEASED VERSION]
 
 ### Fixed
-- Fixed intersect policy for cleavage_profile
-- Clean up some comments
+- Fixed intersect policy for `cleavage_profile`. Now it calls `frag_generator`
+with a policy of `any`.
+- Clean up some comments and docstrings
 - Fixed logging from coverage function
 
 ### Added
 - Added numerous util functions
 - Added `left` and `right` options to `cleavage_profile` and CLI
 `cleavage-profile`.
-- Added tests for cleavage profiling.
+- Added tests for cleavage profile and WPS.
 
 ### Changed
 - Minimum Python version 3.9
@@ -25,7 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Removed `get_contig_lengths`
 - Removed `data`, `conda_envs`, and `figs` directories
-- Removed unused dependencies `click`, `pybedtools`, and `cython`
+- Removed unused dependencies `click`, `pybedtools`, and `cython
+- Remove some unused imports from module files
 
 
 ## [0.5.2] - 2024-05-08

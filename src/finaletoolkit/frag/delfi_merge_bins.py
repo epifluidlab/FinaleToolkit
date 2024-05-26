@@ -1,7 +1,4 @@
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib.resources import files
 from pathlib import Path
 
 import numpy as np

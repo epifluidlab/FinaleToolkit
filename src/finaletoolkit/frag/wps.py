@@ -1,17 +1,12 @@
 from __future__ import annotations
-import argparse
 import gzip
 import time
-import os
-import tempfile as tf
-from multiprocessing.pool import Pool
-from typing import Union, TextIO, BinaryIO
-from sys import stdout, stderr, getsizeof
+from typing import Union
+from sys import stdout, stderr
 
 import pysam
 import numpy as np
 from numba import jit
-from tqdm import tqdm
 
 from finaletoolkit.utils import frag_array
 
@@ -79,9 +74,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     Returns
     -------
     scores : numpy.ndarray
-        np array of shape (n, 2) where column 1 is the coordinate and
-        column 2 is the score and n is the number of coordinates in
-        region [start,stop)
+        np struct array of with columns `contig`, `start`, and `wps`.
     """
 
     if (verbose):
