@@ -1,17 +1,12 @@
 from __future__ import annotations
-import argparse
 import gzip
 import time
-import os
-import tempfile as tf
-from multiprocessing.pool import Pool
-from typing import Union, TextIO, BinaryIO
-from sys import stdout, stderr, getsizeof
+from typing import Union
+from sys import stdout, stderr
 
 import pysam
 import numpy as np
 from numba import jit
-from tqdm import tqdm
 
 from finaletoolkit.utils import frag_array
 
