@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [UNRELEASED VERSION]
+## [0.6.0] - 2024-05-26
 
 ### Fixed
 - Fixed intersect policy for `cleavage_profile`. Now it calls `frag_generator`
@@ -22,9 +22,12 @@ with a policy of `any`.
 ### Changed
 - Minimum Python version 3.9
 - Changed `filter_bam` to have same filters as FinaleDB
+- `utils.frag_generator` raises `ValueError` if `start` or `stop`
+are specified without `contig`
+- Type hints changed to use literals when possible
 
 ### Removed
-- Removed `get_contig_lengths`
+- Removed `utils.get_contig_lengths`
 - Removed `data`, `conda_envs`, and `figs` directories
 - Removed unused dependencies `click`, `pybedtools`, and `cython
 - Remove some unused imports from module files
