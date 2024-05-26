@@ -9,10 +9,7 @@ on the UCSC Genome Browser (Kent et al 2002).
 from __future__ import annotations
 from typing import Union, Iterable
 import gzip
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+from importlib.resources import files
 from pathlib import Path
 from sys import stdout
 

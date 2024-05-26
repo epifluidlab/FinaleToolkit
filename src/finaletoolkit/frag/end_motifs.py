@@ -5,10 +5,8 @@ from multiprocessing import Pool
 from time import time
 from sys import stderr, stdout, stdin
 import gzip
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+
+from importlib.resources import files
 from pathlib import Path
 from collections import UserDict
 
