@@ -7,13 +7,12 @@ include-package-data = true
 
 [project]
 name = "FinaleToolkit"
-version = "0.6.0"
 authors = [
     {name = "James Li", email = "lijw21@wfu.edu"},
     {name = "Ravi Bandaru", email = "ravi.bandaru@northwestern.edu"},
     {name = "Yaping Liu", email = "yaping@northwestern.edu"},
 ]
-description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
+description = "FinaleToolkit is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
@@ -39,6 +38,10 @@ dependencies = [
     "statsmodels",
     "loess",
 ]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "finaletoolkit.version.__version__"}
 
 [project.scripts]
 finaletoolkit = "finaletoolkit.cli:main_cli"
