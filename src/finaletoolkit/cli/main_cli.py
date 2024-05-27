@@ -25,7 +25,7 @@ def main_cli_parser():
     parser = argparse.ArgumentParser(
         description='FinaleToolkit is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.',
         epilog='')
-    parser.add_argument('--version', action='version', version=f'FinaleToolkit {__version__}')
+    parser.add_argument('-v', '--version', action='version', version=f'FinaleToolkit {__version__}')
     subparsers = parser.add_subparsers()
 
     cli_coverage = subparsers.add_parser('coverage', description='Calculates fragmentation coverage over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.')
