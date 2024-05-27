@@ -17,6 +17,17 @@ def chrom_sizes_to_list(
     chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
+
+    Parameters
+    ----------
+    chrom_sizes_file: str or Path
+        Tab-delimited file with column for chrom names and column for
+        chrom sizes.
+    
+    Returns
+    -------
+    list of string, int tuples
+        chrom names and sizes.
     """
     chrom_sizes = []
     with open(chrom_sizes_file, 'r') as file:
@@ -30,7 +41,18 @@ def chrom_sizes_to_list(
 def chrom_sizes_to_dict(
     chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
     """
-    Reads chromosome names and sizes from a CHROMSIZE file into a list.
+    Reads chromosome names and sizes from a CHROMSIZE file into a dict.
+
+    Parameters
+    ----------
+    chrom_sizes_file: str or Path
+        Tab-delimited file with column for chrom names and column for
+        chrom sizes.
+    
+    Returns
+    -------
+    dict
+        Chrom names are keys and values are int chrom sizes.
     """
     chrom_sizes = {}
     with open(chrom_sizes_file, 'r') as file:
