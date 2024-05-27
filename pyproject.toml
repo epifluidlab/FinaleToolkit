@@ -9,19 +9,22 @@ include-package-data = true
 name = "FinaleToolkit"
 version = "0.6.0"
 authors = [
-    {name="James Li", email="lijw21@wfu.edu"},
-    {name="Ravi Bandaru", email="ravi.bandaru@northwestern.edu"},
-    {name="Yaping Liu", email="yaping@northwestern.edu"},
+    {name = "James Li", email = "lijw21@wfu.edu"},
+    {name = "Ravi Bandaru", email = "ravi.bandaru@northwestern.edu"},
+    {name = "Yaping Liu", email = "yaping@northwestern.edu"},
 ]
 description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
+keywords = ["bioinformatics", "cell free DNA", "computational biology",
+"genomics", "epigenomics"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 dependencies = [
     "numpy",
@@ -41,4 +44,8 @@ dependencies = [
 finaletoolkit = "finaletoolkit.cli:main_cli"
 
 [project.urls]
-"Homepage" = "https://epifluidlab.github.io/"
+Homepage = "https://epifluidlab.github.io/FinaleToolkit/"
+Repository = "https://github.com/epifluidlab/finaletoolkit"
+Issues = "https://github.com/epifluidlab/FinaleToolkit/issues"
+Changelog = "https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md"
+"Lab Website" = "https://epifluidlab.github.io/"
