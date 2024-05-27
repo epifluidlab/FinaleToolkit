@@ -2,6 +2,7 @@ from __future__ import annotations
 from sys import stdin, stdout, stderr
 from typing import Union
 import time
+import gzip
 
 import numpy as np
 import pyBigWig as pbw
