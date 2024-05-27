@@ -41,7 +41,7 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-version = {attr = "finaletoolkit.version.__version__"}
+version = {attr = "finaletoolkit.__version__"}
 
 [project.scripts]
 finaletoolkit = "finaletoolkit.cli:main_cli"
