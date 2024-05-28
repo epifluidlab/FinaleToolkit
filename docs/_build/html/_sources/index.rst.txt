@@ -21,9 +21,9 @@ Documentation
 .. toctree::
    :maxdepth: 2
    
-   _documentation/user_guide/index
-   _documentation/cli_reference/index
-   _documentation/api_reference/index
+   documentation/user_guide/index
+   documentation/cli_reference/index
+   documentation/api_reference/index
    
 -----------------
 Citations
@@ -52,4 +52,4 @@ Contact
 License
 -----------------
 
-For academic research, please refer to MIT license. For commerical usage, please contact the authors.
+For academic research, please refer to MIT license.

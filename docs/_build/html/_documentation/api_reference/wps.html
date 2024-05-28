@@ -1,9 +1,8 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../../" >
 
   <head>
     <meta charset="utf-8" />
@@ -29,16 +28,16 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_documentation/api_reference/wps';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -357,134 +356,104 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="window-protection-score-wps">
-<h1>Window Protection Score (WPS)<a class="headerlink" href="#window-protection-score-wps" title="Permalink to this heading">#</a></h1>
+<h1>Window Protection Score (WPS)<a class="headerlink" href="#window-protection-score-wps" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="finaletoolkit.frag.wps">
-<span class="sig-prename descclassname"><span class="pre">finaletoolkit.frag.</span></span><span class="sig-name descname"><span class="pre">wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AlignmentFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#finaletoolkit.frag.wps" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">finaletoolkit.frag.</span></span><span class="sig-name descname"><span class="pre">wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">AlignmentFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#finaletoolkit.frag.wps" title="Link to this definition">#</a></dt>
 <dd><p>Return (raw) Windowed Protection Scores as specified in Snyder et al
 (2016) over a region [start,stop).</p>
-<section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt>input_file<span class="classifier">str or pysam.AlignmentFile</span></dt><dd><p>BAM, SAM or tabix file containing paired-end fragment reads or its
-path. <cite>AlignmentFile</cite> must be opened in read mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>pysam.AlignmentFile</em>) – BAM, SAM or tabix file containing paired-end fragment reads or its
+path. <cite>AlignmentFile</cite> must be opened in read mode.</p></li>
+<li><p><strong>contig</strong> (<em>str</em>)</p></li>
+<li><p><strong>start</strong> (<em>int</em>)</p></li>
+<li><p><strong>stop</strong> (<em>int</em>)</p></li>
+<li><p><strong>output_file</strong> (<em>string</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of window to calculate WPS. Default is k = 120, equivalent
+to L-WPS.</p></li>
+<li><p><strong>fraction_low</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies lowest fragment length included in calculation.
+Default is 120, equivalent to long fraction.</p></li>
+<li><p><strong>fraction_high</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies highest fragment length included in calculation.
+Default is 180, equivalent to long fraction.</p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>scores</strong> – np struct array of with columns <cite>contig</cite>, <cite>start</cite>, and <cite>wps</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
 </dd>
 </dl>
-<p>contig : str
-start : int
-stop : int
-output_file : string, optional
-window_size : int, optional</p>
-<blockquote>
-<div><p>Size of window to calculate WPS. Default is k = 120, equivalent
-to L-WPS.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>fraction_low<span class="classifier">int, optional</span></dt><dd><p>Specifies lowest fragment length included in calculation.
-Default is 120, equivalent to long fraction.</p>
-</dd>
-<dt>fraction_high<span class="classifier">int, optional</span></dt><dd><p>Specifies highest fragment length included in calculation.
-Default is 180, equivalent to long fraction.</p>
-</dd>
-</dl>
-<p>quality_threshold : int, optional
-workers : int, optional
-verbose : bool, optional</p>
-</section>
-<section id="returns">
-<h2>Returns<a class="headerlink" href="#returns" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt>scores<span class="classifier">numpy.ndarray</span></dt><dd><p>np array of shape (n, 2) where column 1 is the coordinate and
-column 2 is the score and n is the number of coordinates in
-region [start,stop)</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="finaletoolkit.frag.multi_wps">
-<span class="sig-prename descclassname"><span class="pre">finaletoolkit.frag.</span></span><span class="sig-name descname"><span class="pre">multi_wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AlignmentFile</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_bed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#finaletoolkit.frag.multi_wps" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">finaletoolkit.frag.</span></span><span class="sig-name descname"><span class="pre">multi_wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AlignmentFile</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_bed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#finaletoolkit.frag.multi_wps" title="Link to this definition">#</a></dt>
 <dd><p>Function that aggregates WPS over sites in BED file according to the
 method described by Snyder et al (2016).</p>
-<section id="id1">
-<h2>Parameters<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt>input_file<span class="classifier">str or pysam.AlignmentFile</span></dt><dd><p>BAM, SAM, or tabix file containing paired-end fragment reads or its
-path. <cite>AlignmentFile</cite> must be opened in read mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>pysam.AlignmentFile</em>) – BAM, SAM, or tabix file containing paired-end fragment reads or its
+path. <cite>AlignmentFile</cite> must be opened in read mode.</p></li>
+<li><p><strong>site_bed</strong> (<em>str</em>) – Bed file containing intervals to perform WPS on.</p></li>
+<li><p><strong>output_file</strong> (<em>string</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of window to calculate WPS. Default is k = 120, equivalent
+to L-WPS.</p></li>
+<li><p><strong>interval_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of each interval specified in the bed file. Should be the
+same for every interbal. Default is 5000.</p></li>
+<li><p><strong>fraction_low</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies lowest fragment length included in calculation.
+Default is 120, equivalent to long fraction.</p></li>
+<li><p><strong>fraction_high</strong> (<em>int</em><em>, </em><em>optional</em>) – Specifies highest fragment length included in calculation.
+Default is 120, equivalent to long fraction.</p></li>
+<li><p><strong>quality_threshold</strong> (<em>int</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>)</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>)</p></li>
+</ul>
 </dd>
-<dt>site_bed: str</dt><dd><p>Bed file containing intervals to perform WPS on.</p>
-</dd>
-</dl>
-<p>output_file : string, optional
-window_size : int, optional</p>
-<blockquote>
-<div><p>Size of window to calculate WPS. Default is k = 120, equivalent
-to L-WPS.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>interval_size<span class="classifier">int, optional</span></dt><dd><p>Size of each interval specified in the bed file. Should be the
-same for every interbal. Default is 5000.</p>
-</dd>
-<dt>fraction_low<span class="classifier">int, optional</span></dt><dd><p>Specifies lowest fragment length included in calculation.
-Default is 120, equivalent to long fraction.</p>
-</dd>
-<dt>fraction_high<span class="classifier">int, optional</span></dt><dd><p>Specifies highest fragment length included in calculation.
-Default is 120, equivalent to long fraction.</p>
-</dd>
-</dl>
-<p>quality_threshold : int, optional
-workers : int, optional
-verbose : bool, optional</p>
-</section>
-<section id="id2">
-<h2>Returns<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt>scores<span class="classifier">numpy.ndarray</span></dt><dd><p>np array of shape (n, 2) where column 1 is the coordinate and
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>scores</strong> – np array of shape (n, 2) where column 1 is the coordinate and
 column 2 is the score and n is the number of coordinates in
 region [start,stop)</p>
 </dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
 </dl>
-</section>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="finaletoolkit.frag.adjust_wps">
-<span class="sig-prename descclassname"><span class="pre">finaletoolkit.frag.</span></span><span class="sig-name descname"><span class="pre">adjust_wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">median_window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savgol_window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">21</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savgol_poly_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtract_edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union(bool,</span> <span class="pre">int)</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletoolkit.frag.adjust_wps" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">finaletoolkit.frag.</span></span><span class="sig-name descname"><span class="pre">adjust_wps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genome_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">median_window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savgol_window_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">21</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savgol_poly_deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtract_edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union(bool,</span> <span class="pre">int)</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#finaletoolkit.frag.adjust_wps" title="Link to this definition">#</a></dt>
 <dd><p>Adjusts raw WPS data in a BigWig by applying a median filter and
 Savitsky-Golay filter (Savitsky and Golay, 1964).</p>
-<section id="id3">
-<h2>Parameters<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h2>
-<dl class="simple">
-<dt>input_file<span class="classifier">str</span></dt><dd><p>Path string to a BigWig containing raw WPS data.</p>
-</dd>
-<dt>interval_file<span class="classifier">str</span></dt><dd><p>BED format file containing intervals over which WPS was
-calculated on.</p>
-</dd>
-<dt>output_file<span class="classifier">str</span></dt><dd><p>BigWig file to write adjusted WPS to.</p>
-</dd>
-<dt>genome_file<span class="classifier">str</span></dt><dd><p>The genome file for the reference genome that WGS was aligned
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Path string to a BigWig containing raw WPS data.</p></li>
+<li><p><strong>interval_file</strong> (<em>str</em>) – BED format file containing intervals over which WPS was
+calculated on.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – BigWig file to write adjusted WPS to.</p></li>
+<li><p><strong>genome_file</strong> (<em>str</em>) – The genome file for the reference genome that WGS was aligned
 to. A tab delimited file where column 1 contains the name of
-chromosomes and column 2 contains chromosome length.</p>
-</dd>
-<dt>median_window_size<span class="classifier">int, optional</span></dt><dd><p>Size of median filter window. Default is 1000.</p>
-</dd>
-<dt>savgol_window_size<span class="classifier">int, optional</span></dt><dd><p>Size of Savitsky Golay filter window. Default is 21.</p>
-</dd>
-<dt>savgol_poly_deg<span class="classifier">int, optional</span></dt><dd><p>Degree polynomial for Savitsky Golay filter. Default is 2.</p>
-</dd>
-<dt>mean<span class="classifier">bool, optional</span></dt><dd><p>If true, a mean filter is used instead of median. Default is
-False.</p>
-</dd>
-<dt>subtract_edges<span class="classifier">bool, optional</span></dt><dd><p>If true, take the median of the first and last 500 bases in a
-window and subtract from the whole interval. Default is False.</p>
-</dd>
-<dt>workers<span class="classifier">int, optional</span></dt><dd><p>Number of processes to use. Default is 1.</p>
-</dd>
-<dt>verbose<span class="classifier">bool or int, optional</span></dt><dd><p>Default is False.</p>
+chromosomes and column 2 contains chromosome length.</p></li>
+<li><p><strong>median_window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of median filter window. Default is 1000.</p></li>
+<li><p><strong>savgol_window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of Savitsky Golay filter window. Default is 21.</p></li>
+<li><p><strong>savgol_poly_deg</strong> (<em>int</em><em>, </em><em>optional</em>) – Degree polynomial for Savitsky Golay filter. Default is 2.</p></li>
+<li><p><strong>mean</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, a mean filter is used instead of median. Default is
+False.</p></li>
+<li><p><strong>subtract_edges</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, take the median of the first and last 500 bases in a
+window and subtract from the whole interval. Default is False.</p></li>
+<li><p><strong>workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of processes to use. Default is 1.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Default is False.</p></li>
+</ul>
 </dd>
 </dl>
-</section>
 </dd></dl>
 
 </section>
@@ -584,7 +553,7 @@ window and subtract from the whole interval. Default is False.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

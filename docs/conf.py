@@ -13,14 +13,13 @@ author = 'EpiFluidLab'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
-
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 extensions = [
     'sphinx.ext.autodoc',
     'sphinxarg.ext',
+    'sphinx.ext.napoleon'
 ]
 
 # -- Options for HTML output -------------------------------------------------

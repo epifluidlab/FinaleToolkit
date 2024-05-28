@@ -1,6 +1,6 @@
 from __future__ import annotations
 import time
-from typing import Union, Tuple
+from typing import Union
 from sys import stdout, stderr
 from shutil import get_terminal_size
 from multiprocessing import Pool
@@ -11,7 +11,7 @@ import pysam
 import tqdm
 
 from finaletoolkit.utils.utils import (
-    _not_read1_or_low_quality, _get_intervals, frag_generator
+    _get_intervals, frag_generator
 )
 from finaletoolkit.utils.cli_hist import _cli_hist
 
@@ -225,7 +225,7 @@ def frag_length_bins(
     intersect_policy: str="midpoint",
     quality_threshold: int=30,
     verbose: Union[bool, int]=False
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
     two arrays containing bins and counts by size. Optionally prints
@@ -361,14 +361,14 @@ def frag_length_bins(
 
 
 def _frag_length_stats(
-    input_file: Union(str, pysam.AlignmentFile),
+    input_file: Union[str, pysam.AlignmentFile],
     contig: str,
     start: int,
     stop: int,
     name: str,
     intersect_policy: str,
     quality_threshold: int,
-    verbose: Union(bool, int)
+    verbose: Union[bool, int]
 ):
     # generating fragment lengths
     frag_lengths = frag_length(

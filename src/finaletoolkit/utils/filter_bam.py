@@ -2,9 +2,6 @@ from __future__ import annotations
 import tempfile as tf
 import subprocess
 import traceback
-from sys import stderr
-from os.path import isdir
-from shutil import rmtree
 
 import pysam
 
@@ -53,7 +50,7 @@ def filter_bam(
         with tf.TemporaryDirectory() as temp_dir:
             flag_filtered_bam = f'{temp_dir}/flag_filtered.bam'
             samtools_command = (
-                f'samtools view {input_file} -F 3852 -f 66 -b -h -o '
+                f'samtools view {input_file} -F 3852 -f 3 -b -h -o '
                 f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
             )
 

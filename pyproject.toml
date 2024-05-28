@@ -7,26 +7,27 @@ include-package-data = true
 
 [project]
 name = "FinaleToolkit"
-version = "0.5.2"
 authors = [
-    {name="James Li", email="lijw21@wfu.edu"},
-    {name="Ravi Bandaru", email="ravi.bandaru@northwestern.edu"},
-    {name="Yaping Liu", email="yaping@northwestern.edu"},
+    {name = "James Li", email = "lijw21@wfu.edu"},
+    {name = "Ravi Bandaru", email = "ravi.bandaru@northwestern.edu"},
+    {name = "Yaping Liu", email = "yaping@northwestern.edu"},
 ]
-description = "A package and standalone program to process paired-end reads of cfDNA fragment WGS."
+description = "FinaleToolkit is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
+keywords = ["bioinformatics", "cell free DNA", "computational biology",
+"genomics", "epigenomics"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 dependencies = [
     "numpy",
     "pysam",
-    "pybedtools",
     "pybigwig",
     "py2bit",
     "tqdm",
@@ -34,16 +35,20 @@ dependencies = [
     "scipy",
     "matplotlib",
     "pandas",
-    "cython",
     "statsmodels",
-    "sphinx<7.0.0",
-    "sphinx_rtd_theme",
-    "sphinx-argparse",
     "loess",
 ]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "finaletoolkit.__version__"}
 
 [project.scripts]
 finaletoolkit = "finaletoolkit.cli:main_cli"
 
 [project.urls]
-"Homepage" = "https://epifluidlab.github.io/"
+Homepage = "https://epifluidlab.github.io/FinaleToolkit/"
+Repository = "https://github.com/epifluidlab/finaletoolkit"
+Issues = "https://github.com/epifluidlab/FinaleToolkit/issues"
+Changelog = "https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md"
+"Lab Website" = "https://epifluidlab.github.io/"

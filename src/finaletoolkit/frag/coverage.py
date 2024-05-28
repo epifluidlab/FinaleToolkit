@@ -1,7 +1,8 @@
 from __future__ import annotations
 import sys
 import time
-from typing import Union, Tuple
+from typing import Union, Iterable
+from pathlib import Path
 
 from multiprocessing import Pool
 
@@ -10,12 +11,12 @@ import gzip
 from tqdm import tqdm
 
 from finaletoolkit.utils.utils import (
-    _not_read1_or_low_quality, _get_contigs, _get_intervals, frag_generator
+    _get_intervals, frag_generator
 )
 
 
 def single_coverage(
-        input_file: Union[str, pysam.AlignmentFile],
+        input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         contig: str=None,
         start: int=0,
         stop: int=None,
@@ -23,7 +24,7 @@ def single_coverage(
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         verbose: Union[bool, int]=False
-    ) -> Tuple[str, int, int, str, float]:
+    ) -> tuple[str, int, int, str, float]:
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -36,39 +37,47 @@ def single_coverage(
     input_file : str or pysam.AlignmentFile
         BAM, SAM, CRAM, or Frag.gz file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
-    contig : string
-    start : int
-    stop : int
-    name : str
+    contig : string, optional
+        Default is None.
+    start : int, optional
+        0-based start coordinate to get coverage from. Default is 0.
+    stop : int, optional
+        1-based stop coordinate to get coverage from. Default is None
+        and goes to end of chromosome/contig.
+    name : str, optional
+        Name of interval. Default is '.'.
+    intersect_policy: str, optional
+        Specifies how to determine whether fragments are in interval.
+        'midpoint' (default) calculates the central coordinate of each fragment
+        and only selects the fragment if the midpoint is in the
+        interval. 'any' includes fragments with any overlap with the
+        interval.
     quality_threshold : int, optional
+        Minimum MAPQ to filter for. Default is 30.
     verbose : bool, optional
-
+        Prints messages to stderr. Default is false.
     Returns
     -------
-    coverage : int
+    (contig, start, stop, name, coverage) : tuple[str, int, int, str, float]
         Fragment coverage over contig and region.
     """
-    # TODO: determine if reference (like as found in pysam) is necessary
-    # TODO: consider including region string (like in pysam)
     if verbose:
         start_time = time.time()
         tqdm.write(
             f"""
-input_file: 
-contig: {contig}
-start: {start}
-stop: {stop}
-name: {name}
-intersect_policy: {intersect_policy}
-quality_threshold: {quality_threshold}
-verbose: {verbose}
-"""
+            input_file: {input_file}
+            contig: {contig}
+            start: {start}
+            stop: {stop}
+            name: {name}
+            intersect_policy: {intersect_policy}
+            quality_threshold: {quality_threshold}
+            verbose: {verbose}
+            """
         )
 
     # initializing variable for coverage tuple outside of with statement
     coverage = 0
-
-    input_type = type(input_file)
 
     frags = frag_generator(
         input_file=input_file,
@@ -101,16 +110,17 @@ def _single_coverage_star(args):
     """
     return single_coverage(*args)
 
-
+# TODO: add normalized coverage
 def coverage(
-        input_file: Union[str, pysam.AlignmentFile],
+        input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
         output_file: str,
         scale_factor: float=1e6,
+        intersect_policy: str="midpoint",
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False
-    ):
+    ) -> Iterable[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -128,26 +138,37 @@ def coverage(
         BED4 file containing intervals over which to generate coverage
         statistics.
     output_file : string, optional
-        Path for bed file to print coverages to. If output_file = `_`,
+        Path for bed file to print coverages to. If output_file = `-`,
         results will be printed to stdout.
     scale_factor : int, optional
         Amount to multiply coverages by. Default is 10^6.
+    intersect_policy: str, optional
+        Specifies how to determine whether fragments are in interval.
+        'midpoint' (default) calculates the central coordinate of each fragment
+        and only selects the fragment if the midpoint is in the
+        interval. 'any' includes fragments with any overlap with the
+        interval.
     quality_threshold : int, optional
+        Minimum MAPQ. Default is 30.
+    workers : int, optional
+        Number of subprocesses to spawn. Increases speed at the expense
+        of memory.
     verbose : int or bool, optional
 
     Returns
     -------
-    coverage : int
-        Fragment coverage over contig and region.
+    coverages : Iterable[tuple[str, int, int, str, float]]
+        Fragment coverages over intervals.
     """
-    #FIXME update docstring
     if (verbose):
         start_time = time.time()
         sys.stderr.write(
             f"""
             input_file: {input_file}
-            interval file: {interval_file}
+            interval_file: {interval_file}
             output_file: {output_file}
+            scale_factor: {scale_factor}
+            intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             workers: {workers}
             verbose: {verbose}\n
@@ -171,7 +192,7 @@ def coverage(
 
         intervals = _get_intervals(
             input_file, interval_file,
-            intersect_policy="midpoint",
+            intersect_policy=intersect_policy,
             quality_threshold=quality_threshold,
             verbose=verbose)
 

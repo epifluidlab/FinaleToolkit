@@ -56,5 +56,44 @@ class TestFragGenerator:
 
 
 class TestFragArray:
-    pass
+    def test_bam(self, request):
+        """
+        See if frag_array runs when opening a BAM file and reads the
+        right number of reads
+        """
+        bam = request.path.parent / 'data' / '12.3444.b37.bam'
+        frags = frag_array(
+            bam, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+        )
+
+        starts = frags['start']
+        stops = frags['stop']
+        strands = frags['strand']
+
+        in_region = np.any(overlaps(np.array(['12']), np.array([34442500]),
+                               np.array([34446500]), np.array(['12']), starts, stops))
+        assert in_region, "Some fragments are outside of region"
+        
+        assert len(frags) == 17, "Incorrect number of frags"
+
+    def test_frag_gz(self, request):
+        """
+        See if frag_array runs when opening a frag.gz file and reads the
+        right number of reads
+        """
+        path = request.path.parent / 'data' / '12.3444.b37.frag.gz'
+        frags = frag_array(
+            path, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+        )
+
+        starts = frags['start']
+        stops = frags['stop']
+        strands = frags['strand']
+
+        in_region = np.any(
+            overlaps(np.array(['12']), np.array([34442500]),
+                     np.array([34446500]), np.array(['12']), starts, stops))
+        assert in_region, "Some fragments are outside of region"
+        
+        assert len(frags) == 17, "Incorrect number of frags"
     

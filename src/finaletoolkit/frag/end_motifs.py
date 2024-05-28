@@ -1,14 +1,12 @@
 from __future__ import annotations
 from collections.abc import Iterator
-from typing import Union, Iterable, Tuple
+from typing import Union, Iterable
 from multiprocessing import Pool
 from time import time
 from sys import stderr, stdout, stdin
 import gzip
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+
+from importlib.resources import files
 from pathlib import Path
 from collections import UserDict
 
@@ -274,7 +272,7 @@ class EndMotifsIntervals():
                 file.close()
         return cls(intervals, k, quality_threshold)
 
-    def freq(self, kmer: str) -> list[Tuple[str, int, int, float]]:
+    def freq(self, kmer: str) -> list[tuple[str, int, int, float]]:
         """
         Returns a list of intervals and associated frquency for given
         kmer. Results are in the form (chrom, 0-based start, 1-based
@@ -794,7 +792,7 @@ def end_motifs(
 def interval_end_motifs(
     input_file: str,
     refseq_file: Union[str, Path],
-    intervals: Union[str, Iterable[Tuple[str,int,int,str]]],
+    intervals: Union[str, Iterable[tuple[str,int,int,str]]],
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
