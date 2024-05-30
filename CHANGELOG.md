@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2024-05-30
+
+### Fixed
+- adjusted handling of contig, start, stop for `frag_generator` so that
+`coverage` does not throw exceptions for genomewide intervals.
+
+### Added
+- test for `single_coverage`
+
 ## [0.6.1] - 2024-05-26
+
 ### Changed
 - add `__version` attribute
 - `finaletoolkit --version` displays package version
