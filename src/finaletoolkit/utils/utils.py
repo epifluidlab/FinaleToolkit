@@ -291,8 +291,10 @@ def frag_generator(
 
         # Raise exception if start and stop specified but not contig
         if contig is None and not (start is None and stop is None):
-            raise ValueError("contig should be specified if start or "
-                             "stop given.")
+            if contig is None and start==0 and stop is None:
+                pass
+            else:
+                raise ValueError("contig should be specified if start or stop given.")
 
         if is_sam:
             for read in sam_file.fetch(contig, start, stop):
