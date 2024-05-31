@@ -150,6 +150,7 @@ def adjust_wps(
     interval_file: str,
     output_file: str,
     genome_file: str,
+    interval_size: int=5000,
     median_window_size: int=1000,
     savgol_window_size: int=21,
     savgol_poly_deg: int=2,
@@ -198,6 +199,11 @@ def adjust_wps(
         start_time = time()
         stderr.write('Reading intervals from bed...\n')
 
+    left_of_site = round(-interval_size / 2)
+    right_of_site = round(interval_size / 2)
+
+    assert right_of_site - left_of_site == interval_size
+
     # read intervals
     if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
         # amount taken by median filter
@@ -210,8 +216,11 @@ def adjust_wps(
                 # read segment from BED
                 contents = line.split('\t')
                 contig = contents[0].strip()
-                start = int(contents[1])
-                stop = int(contents[2])
+                midpoint = (int(contents[1]) + int(contents[2])) // 2
+
+                start = max(0, midpoint + int(left_of_site))
+                stop = midpoint + int(right_of_site)
+
 
                 # Checks for overlap with previous interval, accounting
                 # for change in interval size from median filter.
