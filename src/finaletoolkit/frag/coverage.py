@@ -223,21 +223,17 @@ def coverage(
                 tqdm.write('Writing results to output\n')
             try:
                 # handle output types
-                if (output_file.endswith('.bed')
-                    or output_file.endswith('.bedgraph')
-                ):
+                if output_file.endswith('.bed') or output_file.endswith('.bedgraph'):
                     output_is_file = True
                     output = open(output_file, 'w')
                 elif output_file.endswith('.bed.gz'):
-                    output = gzip.open(output_file, 'w')
+                    output = gzip.open(output_file, 'wt')  # 'wt' mode for text writing
                     output_is_file = True
                 elif output_file == '-':
                     output = sys.stdout
                 else:
-                    raise ValueError(
-                        'output_file should have .bed or .bed.gz as as suffix'
-                    )
-
+                    raise ValueError('output_file should have .bed or .bed.gz as suffix')
+            
                 # print to files
                 if output_file.endswith(".bedgraph"):
                     for contig, start, stop, name, coverage in coverages:
@@ -252,7 +248,6 @@ def coverage(
                             f'{name}\t'
                             f'{coverage/total_coverage[4]*scale_factor}\n'
                         )
-
             finally:
                 if output_is_file:
                     output.close()
