@@ -35,8 +35,8 @@ def single_coverage(
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, CRAM, or Frag.gz file containing paired-end fragment reads or
-        its path. `AlignmentFile` must be opened in read mode.
+        BAM, SAM, CRAM, or Frag.gz file containing paired-end fragment
+        reads or its path. `AlignmentFile` must be opened in read mode.
     contig : string, optional
         Default is None.
     start : int, optional
@@ -48,8 +48,8 @@ def single_coverage(
         Name of interval. Default is '.'.
     intersect_policy: str, optional
         Specifies how to determine whether fragments are in interval.
-        'midpoint' (default) calculates the central coordinate of each fragment
-        and only selects the fragment if the midpoint is in the
+        'midpoint' (default) calculates the central coordinate of each
+        fragment and only selects the fragment if the midpoint is in the
         interval. 'any' includes fragments with any overlap with the
         interval.
     quality_threshold : int, optional
@@ -124,9 +124,9 @@ def coverage(
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
-    a SAM, BAM, CRAM, or Frag.gz file. Uses an algorithm where the midpoints of
-    fragments are calculated and coverage is tabulated from the
-    midpoints that fall into the specified region. Not suitable for
+    a SAM, BAM, CRAM, or Frag.gz file. Uses an algorithm where the
+    midpoints of fragments are calculated and coverage is tabulated from
+    the midpoints that fall into the specified region. Not suitable for
     fragments of size approaching interval size.
 
     Parameters
@@ -144,8 +144,8 @@ def coverage(
         Amount to multiply coverages by. Default is 10^6.
     intersect_policy: str, optional
         Specifies how to determine whether fragments are in interval.
-        'midpoint' (default) calculates the central coordinate of each fragment
-        and only selects the fragment if the midpoint is in the
+        'midpoint' (default) calculates the central coordinate of each
+        fragment and only selects the fragment if the midpoint is in the
         interval. 'any' includes fragments with any overlap with the
         interval.
     quality_threshold : int, optional
@@ -184,7 +184,8 @@ def coverage(
 
         total_coverage_results = pool.apply_async(
             single_coverage,
-            (input_file, None, 0, None, '.', "midpoint", quality_threshold, False)
+            (input_file, None, 0, None, '.', "midpoint", quality_threshold,
+             False)
         )
 
         if verbose:
@@ -224,20 +225,18 @@ def coverage(
             try:
                 # handle output types
                 if (output_file.endswith('.bed')
-                    or output_file.endswith('.bedgraph')
-                ):
+                    or output_file.endswith('.bedgraph')):
                     output_is_file = True
                     output = open(output_file, 'w')
                 elif output_file.endswith('.bed.gz'):
-                    output = gzip.open(output_file, 'w')
+                    output = gzip.open(output_file, 'wt')  # text writing
                     output_is_file = True
                 elif output_file == '-':
                     output = sys.stdout
                 else:
                     raise ValueError(
-                        'output_file should have .bed or .bed.gz as as suffix'
-                    )
-
+                        'output_file should have .bed or .bed.gz as suffix')
+            
                 # print to files
                 if output_file.endswith(".bedgraph"):
                     for contig, start, stop, name, coverage in coverages:
@@ -252,7 +251,6 @@ def coverage(
                             f'{name}\t'
                             f'{coverage/total_coverage[4]*scale_factor}\n'
                         )
-
             finally:
                 if output_is_file:
                     output.close()
