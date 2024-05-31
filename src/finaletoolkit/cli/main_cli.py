@@ -93,6 +93,7 @@ def main_cli_parser():
     cli_adjust_wps.add_argument('interval_file', help='Path to a BED file containing intervals to WPS was calculated over.')
     cli_adjust_wps.add_argument('genome_file', help='A .chrom.sizes file containing chromosome sizes.')
     cli_adjust_wps.add_argument('-o', '--output-file', default='-', help='A bigWig file containing the adjusted WPS results over the intervals specified in interval file.')
+    cli_adjust_wps.add_argument('-i', '--interval_size', default=5000, type=int, help='Size in bp of each interval in the interval file.')
     cli_adjust_wps.add_argument('-m', '--median-window-size', default=1000, type=int, help='Size of the median filter window used to adjust WPS scores.')
     cli_adjust_wps.add_argument('-s', '--savgol-window-size', default=21, type=int, help='Size of the Savitsky-Golay filter window used to adjust WPS scores.')
     cli_adjust_wps.add_argument('-p', '--savgol-poly-deg', default=2, type=int, help='Degree polynomial for Savitsky-Golay filter.')
