@@ -110,14 +110,14 @@ def _single_adjust_wps(
             mean = np.mean([start_mean, stop_mean])
             intervals['scores'] = intervals['scores'] - mean
 
-        
+
         if median_window_size > intervals['scores'].shape[0]:
             raise ValueError(
                 f"median_window_size ({median_window_size}) cannot be "
                 "greater than the length of interval "
                 f"({intervals['scores'].shape[0]}).")
 
-        if not mean:
+        if not mean:    # median filter specified
             adjusted_positions, adjusted_scores = _median_filter(
                 intervals['starts'], intervals['scores'], median_window_size)
         else:
