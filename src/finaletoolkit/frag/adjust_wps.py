@@ -16,6 +16,8 @@ from finaletoolkit.utils import chrom_sizes_to_list
 def _median_filter(positions: NDArray, data: NDArray, window_size: int):
     """locally adjusted running median"""
     # Calculate the running median
+    if window_size > len(data):
+        raise ValueError(f"median_window_size ({window_size}) cannot be greater than the length of interval ({len(data)}).")
     running_median = np.array(
         [np.median(data[i:i+window_size]) for i in range(len(data) - window_size)]
     )
@@ -32,6 +34,8 @@ def _median_filter(positions: NDArray, data: NDArray, window_size: int):
 def _mean_filter(positions: NDArray, data: NDArray, window_size: int):
     """locally adjusted running mean"""
     # Calculate the running mean
+    if window_size > len(data):
+        raise ValueError(f"median_window_size ({window_size}) cannot be greater than the length of interval ({len(data)}).")
     running_mean = np.array(
         [np.mean(data[i:i+window_size]) for i in range(len(data) - window_size)]
     )
