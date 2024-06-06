@@ -33,7 +33,6 @@ dependencies = [
     "tqdm",
     "numba",
     "scipy",
-    "matplotlib",
     "pandas",
     "statsmodels",
     "loess",
