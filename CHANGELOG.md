@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 error catching/predictable behavior.
 
 ### Fixed
-- `wps`
+- `wps`related functions and subcommands
 
 ## [0.6.3] - 2024-05-31
 
