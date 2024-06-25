@@ -58,12 +58,12 @@ def _single_adjust_wps(
         contig: str,
         start: int,
         stop: int,
-        median_window_size: int=1000,
-        savgol_window_size: int=21,
-        savgol_poly_deg: int=2,
-        mean: bool=False,
-        subtract_edges: bool=False,
-        edge_size: int=500,
+        median_window_size: int,
+        savgol_window_size: int,
+        savgol_poly_deg: int,
+        mean: bool,
+        subtract_edges: bool,
+        edge_size: int,
 ):
     """
     Takes a wps WIG file and applies a median filter and a Savitsky-

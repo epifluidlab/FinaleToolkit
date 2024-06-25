@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `interval_size` argument for `adjust_wps`
 
+### Changed
+- `adjust_wps` checks if `median_window` is larger than interval
+- remove default options from some private helper functions for better
+error catching/predictable behavior.
+
 ### Fixed
 - `wps`
 
