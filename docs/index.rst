@@ -43,7 +43,7 @@ If FinaleToolkit is integral to a scientific publication, please cite it. A pape
 	URL = {https://www.biorxiv.org/content/early/2024/06/02/2024.05.29.596414},
 	eprint = {https://www.biorxiv.org/content/early/2024/06/02/2024.05.29.596414.full.pdf},
 	journal = {bioRxiv}
-}
+    }
 
 
 -----------------
