@@ -42,6 +42,8 @@
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API" href="../api_reference/index.html" />
+    <link rel="prev" title="Help" href="../user_guide/help.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -136,6 +138,26 @@
 <nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        CLI
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api_reference/index.html">
+                        API
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
       
@@ -218,6 +240,26 @@ document.write(`
 <nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        CLI
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api_reference/index.html">
+                        API
+                      </a>
+                    </li>
+                
   </ul>
 </nav></div>
         
@@ -366,7 +408,8 @@ document.write(`
 <section id="frag-length-bins">
 <h3>frag-length-bins<a class="headerlink" href="#frag-length-bins" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment lengths grouped in bins given a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">contig</span><span class="o">-</span><span class="n">by</span><span class="o">-</span><span class="n">contig</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">--</span><span class="n">contig</span><span class="o">-</span><span class="n">by</span><span class="o">-</span><span class="n">contig</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                <span class="n">input_file</span>
 </pre></div>
 </div>
@@ -424,7 +467,8 @@ document.write(`
 <section id="frag-length-intervals">
 <h3>frag-length-intervals<a class="headerlink" href="#frag-length-intervals" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                                    <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat2">
@@ -468,7 +512,9 @@ document.write(`
 <section id="cleavage-profile">
 <h3>cleavage-profile<a class="headerlink" href="#cleavage-profile" title="Link to this heading">#</a></h3>
 <p>Calculates cleavage proportion over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                               <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat3">
@@ -523,7 +569,9 @@ document.write(`
 <section id="wps">
 <h3>wps<a class="headerlink" href="#wps" title="Link to this heading">#</a></h3>
 <p>Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">site_bed</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                  <span class="n">input_file</span> <span class="n">site_bed</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat4">
@@ -578,7 +626,9 @@ document.write(`
 <section id="adjust-wps">
 <h3>adjust-wps<a class="headerlink" href="#adjust-wps" title="Link to this heading">#</a></h3>
 <p>Adjusts raw Windowed Protection Score (WPS) by applying a median filter and Savitsky-Golay filter.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">genome_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                         <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">genome_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat5">
@@ -601,6 +651,10 @@ document.write(`
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A bigWig file containing the adjusted WPS results over the intervals specified in interval file.</p>
 <p>Default: “-”</p>
+</dd>
+<dt><kbd>-i, --interval_size</kbd></dt>
+<dd><p>Size in bp of each interval in the interval file.</p>
+<p>Default: 5000</p>
 </dd>
 <dt><kbd>-m, --median-window-size</kbd></dt>
 <dd><p>Size of the median filter window used to adjust WPS scores.</p>
@@ -635,7 +689,9 @@ document.write(`
 <section id="delfi">
 <h3>delfi<a class="headerlink" href="#delfi" title="Link to this heading">#</a></h3>
 <p>Calculates DELFI featrues over genome, returning information about (GC-corrected) short fragments, long fragments, DELFI ratio, and total fragments. NOTE: Due to some ad hoc implementation details, currently the only accepted reference genome is hg19.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">GAP_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gc</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">autosomes</span> <span class="n">reference_file</span> <span class="n">bins_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">GAP_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gc</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                    <span class="n">input_file</span> <span class="n">autosomes</span> <span class="n">reference_file</span> <span class="n">bins_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat6">
@@ -772,7 +828,9 @@ document.write(`
 <section id="interval-end-motifs">
 <h3>interval-end-motifs<a class="headerlink" href="#interval-end-motifs" title="Link to this heading">#</a></h3>
 <p>Measures frequency of k-mer 5’ end motifs in each region specified in a BED file and writes data into a table.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">refseq_file</span> <span class="n">intervals</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                                  <span class="n">input_file</span> <span class="n">refseq_file</span> <span class="n">intervals</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat9">
@@ -884,7 +942,9 @@ document.write(`
 <section id="filter-bam">
 <h3>filter-bam<a class="headerlink" href="#filter-bam" title="Link to this heading">#</a></h3>
 <p>Filters a BAM file so that all reads are in mapped pairs, exceed a certain MAPQ, are not flagged for quality, are read1, are not secondary or supplementary alignments, and are on the same reference sequence as the mate.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">bam</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGION_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">bam</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGION_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                         <span class="n">input_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat12">
@@ -994,6 +1054,24 @@ document.write(`
                 <footer class="prev-next-footer">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="../user_guide/help.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Help</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../api_reference/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               

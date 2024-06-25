@@ -58,12 +58,12 @@ def _single_adjust_wps(
         contig: str,
         start: int,
         stop: int,
-        median_window_size: int=1000,
-        savgol_window_size: int=21,
-        savgol_poly_deg: int=2,
-        mean: bool=False,
-        subtract_edges: bool=False,
-        edge_size: int=500,
+        median_window_size: int,
+        savgol_window_size: int,
+        savgol_poly_deg: int,
+        mean: bool,
+        subtract_edges: bool,
+        edge_size: int,
 ):
     """
     Takes a wps WIG file and applies a median filter and a Savitsky-
@@ -110,7 +110,14 @@ def _single_adjust_wps(
             mean = np.mean([start_mean, stop_mean])
             intervals['scores'] = intervals['scores'] - mean
 
-        if not mean:
+
+        if median_window_size > intervals['scores'].shape[0]:
+            raise ValueError(
+                f"median_window_size ({median_window_size}) cannot be "
+                "greater than the length of interval "
+                f"({intervals['scores'].shape[0]}).")
+
+        if not mean:    # median filter specified
             adjusted_positions, adjusted_scores = _median_filter(
                 intervals['starts'], intervals['scores'], median_window_size)
         else:
@@ -150,6 +157,7 @@ def adjust_wps(
     interval_file: str,
     output_file: str,
     genome_file: str,
+    interval_size: int=5000,
     median_window_size: int=1000,
     savgol_window_size: int=21,
     savgol_poly_deg: int=2,
@@ -198,6 +206,11 @@ def adjust_wps(
         start_time = time()
         stderr.write('Reading intervals from bed...\n')
 
+    left_of_site = round(-interval_size / 2)
+    right_of_site = round(interval_size / 2)
+
+    assert right_of_site - left_of_site == interval_size
+
     # read intervals
     if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
         # amount taken by median filter
@@ -210,8 +223,11 @@ def adjust_wps(
                 # read segment from BED
                 contents = line.split('\t')
                 contig = contents[0].strip()
-                start = int(contents[1])
-                stop = int(contents[2])
+                midpoint = (int(contents[1]) + int(contents[2])) // 2
+
+                start = max(0, midpoint + int(left_of_site))
+                stop = midpoint + int(right_of_site)
+
 
                 # Checks for overlap with previous interval, accounting
                 # for change in interval size from median filter.

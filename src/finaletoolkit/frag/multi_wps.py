@@ -48,7 +48,7 @@ def multi_wps(
         to L-WPS.
     interval_size : int, optional
         Size of each interval specified in the bed file. Should be the
-        same for every interbal. Default is 5000.
+        same for every interval. Default is 5000.
     fraction_low : int, optional
         Specifies lowest fragment length included in calculation.
         Default is 120, equivalent to long fraction.
@@ -121,6 +121,11 @@ def multi_wps(
         else:
             bed = open(site_bed)
 
+        left_of_site = round(-interval_size / 2)
+        right_of_site = round(interval_size / 2)
+
+        assert right_of_site - left_of_site == interval_size
+
         # for overlap checking
         prev_contig = None
         prev_start = 0
@@ -128,8 +133,10 @@ def multi_wps(
         for line in bed:
             contents = line.split()
             contig = contents[0].strip()
-            start = int(contents[1])
-            stop = int(contents[2])
+            midpoint = (int(contents[1]) + int(contents[2])) // 2
+
+            start = max(0, midpoint + int(left_of_site))
+            stop = midpoint + int(right_of_site)
 
             # cut off part of previous interval if overlap
             if contig == prev_contig and start < prev_stop:
@@ -147,15 +154,9 @@ def multi_wps(
         contigs.append(prev_contig)
         starts.append(prev_start)
         stops.append(prev_stop)
-
     finally:
         if site_bed != '-':
-            bed.close()
-
-    left_of_site = round(-interval_size / 2)
-    right_of_site = round(interval_size / 2)
-
-    assert right_of_site - left_of_site == interval_size
+            bed.close()  
 
     count = len(contigs)
 
