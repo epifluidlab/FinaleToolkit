@@ -1,6 +1,8 @@
 FinaleToolkit Documentation
 ===========================
 
+Refer to the following sections:
+
 .. toctree::
    :maxdepth: 1
    

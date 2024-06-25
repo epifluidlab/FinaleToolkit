@@ -21,6 +21,7 @@ Documentation
 .. toctree::
    :maxdepth: 2
    
+   documentation/index
    documentation/user_guide/index
    documentation/cli_reference/index
    documentation/api_reference/index
@@ -32,7 +33,7 @@ Citations
 If FinaleToolkit is integral to a scientific publication, please cite it. A paper describing FinaleToolkit has been written. Here is a ready-made BibTeX entry::
 
     @article{
-    COMING SOON
+    Li JW, Bandaru R, Liu Y. FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit. Preprint. bioRxiv. 2024;2024.05.29.596414. Published 2024 Jun 2. doi:10.1101/2024.05.29.596414
     }
 
 -----------------
