@@ -20,7 +20,15 @@
 
 
 ## About The Project
-FinaleToolkit (**F**ragmentat**I**o**N** **A**na**L**ysis of c**E**ll-free DNA **Toolkit**) is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.
+FinaleToolkit (**F**ragmentat**I**o**N** **A**na**L**ysis of c**E**ll-free DNA 
+**Toolkit**) is a package and standalone program to extract fragmentation
+features of cell-free DNA from paired-end sequencing data.
+
+### Citation
+If you use FinaleToolkit in your research, please consider citing our paper:
+
+[![Static Badge](https://img.shields.io/badge/DOI-10.1101%2F2024.05.29.596414-blue?style=flat-square)](https://doi.org/10.1101/2024.05.29.596414)
+
 
 ## Installation
 You can install the package using `pip`.
@@ -36,7 +44,7 @@ FinaleToolkit has support for the following cell-free DNA fragmentation features
 
 - Fragment Length
 - Coverage
-- End Motifs
+- End Motifs [![DOI](https://img.shields.io/badge/DOI-10.1158%2F2159--8290.CD--19--0622-blue?style=flat-square&label=DOI)](https://doi.org/10.1158/2159-8290.cd-19-0622)
 - Motif Diversity Score [![DOI](https://img.shields.io/badge/DOI-10.1158%2F2159--8290.CD--19--0622-blue?style=flat-square)](https://doi.org/10.1158/2159-8290.CD-19-0622)
 - Windowed Protection Score [![DOI](https://img.shields.io/badge/DOI-110.1016%2Fj.cell.2015.11.050-blue?style=flat-square)](https://doi.org/10.1016/j.cell.2015.11.050)
 - DELFI [![DOI](https://img.shields.io/badge/DOI-10.1038%2Fs41586--019--1272--6-blue?style=flat-square&link=https%3A%2F%2Fdoi.org%2F10.1038%252Fs41586-019-1272-6)](https://doi.org/10.1038%2Fs41586-019-1272-6)
