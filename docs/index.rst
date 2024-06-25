@@ -63,4 +63,4 @@ Contact
 License
 -----------------
 
-For academic research, please refer to MIT license.
+Please refer to the `MIT license <https://github.com/epifluidlab/FinaleToolkit/blob/main/LICENSE>`_.
