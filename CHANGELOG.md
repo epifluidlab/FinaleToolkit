@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `utils.agg_bw` now supports `PathLike` for input
+- docstrings for `frag.end_motifs.EndMotifsIntervals` changed to be compatible
+with Sphinx 
 
 ### Fixed
 - added missing `gzip` import for `utils.agg_bw` 

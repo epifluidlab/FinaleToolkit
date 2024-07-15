@@ -226,7 +226,7 @@ class EndMotifsIntervals():
             sep: str = ',',) -> EndMotifFreqs:
         """
         Reads kmer frequency from a tab-delimited file. Expected columns
-        are contig, start, stop, name, count, *kmers. Because
+        are contig, start, stop, name, count, (kmers). Because
         exporting to file includes an option to turn counts to a fraction,
         this doesn't perfectly correspond to replicating the other file.
 
@@ -322,7 +322,7 @@ class EndMotifsIntervals():
             calc_freq: bool=True, sep: str='\t'):
         """
         Writes all intervals and associated frquencies to file. Columns
-        are contig, start, stop, name, count, *kmers.
+        are contig, start, stop, name, count, (kmers).
         
         Parameters
         ----------
