@@ -2,22 +2,24 @@ from __future__ import annotations
 from sys import stdin, stdout, stderr
 from typing import Union
 import time
+import gzip
+from os import PathLike
 
 import numpy as np
 import pyBigWig as pbw
 
 def agg_bw(
-    input_file: str,
-    interval_file: str,
-    output_file: str,
-    median_window_size: int=0,
+    input_file: Union[str, PathLike],
+    interval_file: Union[str, PathLike],
+    output_file: Union[str, PathLike],
+    median_window_size: int=120,
     mean: bool=False,
     strand_location: int=5,
     verbose: bool=False
 ):
     """
     Takes a BigWig and an interval BED and
-    aggregates signal along the intervals.
+    aggregates signal along the intervals with a median filter.
 
     For aggregating WPS signals, note that the median filter trims the
     ends of each interval by half of the window size of the filter
@@ -60,10 +62,10 @@ def agg_bw(
         stderr.write('Reading intervals from bed...\n')
 
     # reading intervals from interval_file into a list
-    if interval_file.endswith('.bed') or interval_file.endswith('.bed.gz'):
+    if str(interval_file).endswith('.bed') or str(interval_file).endswith('.bed.gz'):
         intervals = []
         with (gzip.open(interval_file, 'rt')
-              if interval_file.endswith('.gz')
+              if str(interval_file).endswith('.gz')
               else open(interval_file, 'rt')) as file:
             for line in file:
                 # read segment from BED
@@ -82,7 +84,7 @@ def agg_bw(
     else:
         raise ValueError('Invalid filetype for interval_file.')
 
-    with pbw.open(input_file, 'r') as raw_wps:
+    with pbw.open(str(input_file), 'r') as raw_wps: # Path not supported by pbw
         # get size of interval based on first entry in interval_file
         interval_size = intervals[0][2] - intervals[0][1] - median_window_size
         agg_scores = np.zeros(interval_size, dtype=np.int64)
@@ -119,7 +121,7 @@ def agg_bw(
     if mean:
         agg_scores = agg_scores/num_intervals_added
 
-    if output_file.endswith('wig'):
+    if str(output_file).endswith('wig'):
         with open(output_file, 'wt') as out:
             if (verbose):
                 stderr.write(f'File opened! Writing...\n')

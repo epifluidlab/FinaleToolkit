@@ -25,7 +25,7 @@ extensions = [
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'pydata_sphinx_theme'
+html_theme = "pydata_sphinx_theme"
 html_static_path = ['_static']
 html_logo = "_static/finaletoolkit_logo_rounded.png"
 html_favicon = "_static/favicon.ico"
