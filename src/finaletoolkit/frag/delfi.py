@@ -416,6 +416,7 @@ def delfi(input_file: str,
     else:
         gc_corrected = trimmed_windows
 
+    # merge bins
     if merge_bins:
         if (verbose):
             stderr.write('Merging bins...\n')
