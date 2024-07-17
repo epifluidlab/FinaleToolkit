@@ -176,6 +176,7 @@ def delfi(input_file: str,
           gap_file: Union(str, GenomeGaps)=None,
           output_file: str=None,
           gc_correct:bool=True,
+          remove_nocov:bool=True,
           merge_bins:bool=True,
           window_size: int=5000000,
           subsample_coverage: float=2,
@@ -209,6 +210,14 @@ def delfi(input_file: str,
         labled "telomere" or "centromere, respectively.
     output_file: str, optional
         Path to output tsv.
+    gc_correct: bool
+        Perform gc-correction
+    remove_nocov: bool
+        Remove two windows described by Cristiano et al as low coverage.
+        These windows might not apply to reference genomes other than 
+        hg19.
+    merge_bins: bool
+        Perform merging from 100kb bins to 5Mb bins.
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
