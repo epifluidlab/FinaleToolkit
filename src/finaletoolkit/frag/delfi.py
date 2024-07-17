@@ -213,9 +213,9 @@ def delfi(input_file: str,
     gc_correct: bool
         Perform gc-correction
     remove_nocov: bool
-        Remove two windows described by Cristiano et al as low coverage.
-        These windows might not apply to reference genomes other than 
-        hg19.
+        Remove two windows described by Cristiano et al (2019) as low
+        coverage. These windows might not apply to reference genomes
+        other than hg19.
     merge_bins: bool
         Perform merging from 100kb bins to 5Mb bins.
     window_size: int
@@ -234,12 +234,6 @@ def delfi(input_file: str,
     """
 
     # TODO: add support to fasta for reference_file
-
-    # TODO: add option to supply a reference genome name instead of
-    # genome file
-
-    # TODO: subsample bam to specified coverage. Jan28.hg19.mdups.bam
-    # already has 1-2x coverage.
 
     if (verbose):
         start_time = time.time()
