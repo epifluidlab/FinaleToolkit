@@ -276,7 +276,7 @@ def delfi(input_file: str,
             raise TypeError(
                 f'{type(gap_file)} is not accepted type for gap_file'
             )
-
+    
     # Read 100kb bins and filter out bins that overlap gaps, darkregions
     
     # opening 100kb bins BED file into a dataframe
@@ -411,13 +411,22 @@ def delfi(input_file: str,
 
     trimmed_windows['ratio'] = trimmed_windows['short']/trimmed_windows['long']
 
+      # remove nocov windows
+    if remove_nocov:
+        no_nocov_slice = np.logical_and(
+            np.logical_not(np.equal(np.arange(26238),8779)),
+            np.logical_not(np.equal(np.arange(26238), 13664)))
+        corrected_delfi_drop_nocov = trimmed_windows.loc[no_nocov_slice].reset_index()
+    else:
+        corrected_delfi_drop_nocov = trimmed_windows
+
     # gc correct
     if gc_correct:
         if (verbose):
             stderr.write('GC bias correction...\n')
-        gc_corrected = delfi_gc_correct(trimmed_windows, 0.75, 8, verbose)
+        gc_corrected = delfi_gc_correct(corrected_delfi_drop_nocov, 0.75, 8, verbose)
     else:
-        gc_corrected = trimmed_windows
+        gc_corrected = corrected_delfi_drop_nocov
 
     # merge bins
     if merge_bins:
