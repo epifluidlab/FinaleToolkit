@@ -179,10 +179,8 @@ def delfi(input_file: str,
           remove_nocov:bool=True,
           merge_bins:bool=True,
           window_size: int=5000000,
-          subsample_coverage: float=2,
           quality_threshold: int=30,
           workers: int=1,
-          preprocessing: bool=True,
           verbose: Union[int, bool]=False) -> pandas.DataFrame:
     """
     A function that replicates the methodology of Christiano et al
@@ -221,12 +219,8 @@ def delfi(input_file: str,
     window_size: int
         Size of non-overlapping windows to cover genome. Default is
         5 megabases.
-    subsample_coverage: int, optional
-        The depth at which to subsample the input_bam. Default is 2.
     workers: int, optional
         Number of worker processes to use. Default is 1.
-    preprocessing: bool, optional
-        Christiano et al (2019)
     verbose: int or bool, optional
         Determines how many print statements and loading bars appear in
         stdout. Default is False.
@@ -244,12 +238,10 @@ def delfi(input_file: str,
         blacklist_file: {blacklist_file}
         output_file: {output_file}
         window_size: {window_size}
-        subsample_coverage: {subsample_coverage}
         gc_correct: {gc_correct}
         merge_bins: {merge_bins}
         quality_threshold: {quality_threshold}
         workers: {workers}
-        preprocessing: {preprocessing}
         verbose: {verbose}
         \n""")
 
