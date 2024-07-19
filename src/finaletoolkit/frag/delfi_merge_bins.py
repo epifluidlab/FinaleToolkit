@@ -89,6 +89,10 @@ def delfi_merge_bins(
                 ))
             for row in five_mb_bins_reversed[:]:
                 five_mb_bins.append(row)
-    five_mb_bins_df = pd.DataFrame(five_mb_bins, columns = hundred_kb_bins.columns[1:])
+        del arm_bins
+    
+    five_mb_bins_df = pd.DataFrame(
+        five_mb_bins,
+        columns = hundred_kb_bins.columns[hundred_kb_bins.columns!='index'])
 
     return five_mb_bins_df
