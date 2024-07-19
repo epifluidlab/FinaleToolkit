@@ -433,7 +433,7 @@ def delfi(input_file: str,
         if (verbose):
             stderr.write('Merging bins...\n')
         final_bins = delfi_merge_bins(
-            gc_corrected, gc_correct, True, verbose=verbose)
+            gc_corrected, gc_correct, verbose=verbose)
     else:
         final_bins = gc_corrected
     
