@@ -1,9 +1,8 @@
 from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
-from typing import Union, TextIO
+from typing import Union
 from sys import stderr, stdout
-import gzip
 
 import py2bit
 import numpy as np
