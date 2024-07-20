@@ -266,7 +266,7 @@ def delfi(input_file: str,
 
     trimmed_windows['ratio'] = trimmed_windows['short']/trimmed_windows['long']
 
-      # remove nocov windows
+    # remove nocov windows
     if remove_nocov:
         no_nocov_slice = np.logical_and(
             np.logical_not(np.equal(np.arange(26238),8779)),
