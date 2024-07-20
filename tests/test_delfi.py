@@ -1,6 +1,7 @@
 """
-Tests for finaletoolkit.frag.delfi_merge_bins module, which collapses
-100kb DELFI bins into 5Mb bins.
+Tests for modules related to calculating DELFI, including 
+finaletoolkit.frag.delfi_merge_bins, finaletoolkit.frag.delfi, and
+finaletoolkit.frag.delfi_gc_correct.
 """
 
 import pytest
@@ -32,7 +33,5 @@ def test_merge_bins(request):
     # similar ratios
     assert (pytest.approx(merged_bins['ratio_corrected'], rel=5e-2)
             == delfi_merged_bins['ratio_corrected'])
-    
-
 
 
