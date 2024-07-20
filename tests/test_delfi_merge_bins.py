@@ -1,3 +1,8 @@
+"""
+Tests for finaletoolkit.frag.delfi_merge_bins module, which collapses
+100kb DELFI bins into 5Mb bins.
+"""
+
 import pytest
 
 import pandas as pd
