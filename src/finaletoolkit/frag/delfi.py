@@ -172,40 +172,6 @@ def delfi(input_file: str,
             stderr.write(f'No gaps specified, skipping.\n')
         gapless_bins = bins
 
-    # filtering for darkregions
-    """
-    if verbose:
-        stderr.write(f'Filtering darkregions...\n')
-    if blacklist_file is not None:
-        # opening blacklist file into a dataframe
-        darkregions = pandas.read_csv(
-            blacklist_file,
-            names=["contig", "start", "stop"],
-            usecols=[0, 1, 2],
-            dtype={"contig":str, "start":np.int32, "stop":np.int32},
-            delimiter='\t'
-        )
-        # finding overlap
-        overlaps_darkregion = overlaps(
-            gapless_bins['contig'].to_numpy(),
-            gapless_bins['start'].to_numpy(),
-            gapless_bins['stop'].to_numpy(),
-            darkregions['contig'].to_numpy(),
-            darkregions['start'].to_numpy(),
-            darkregions['stop'].to_numpy(),
-        )
-        # masking by overlap
-        darkless_bins = gapless_bins.loc[~overlaps_darkregion]
-        if verbose:
-            stderr.write(f'{gapless_bins.shape[0]-darkless_bins.shape[0]} bins'
-                         ' removed\n')
-    else:
-        if verbose:
-            stderr.write(f'No darkregions given, skipping.\n')
-        darkless_bins = gapless_bins
-    """
-    darkless_bins = gapless_bins
-
     # generating args for pooled processes
     if verbose:
         stderr.write(f'Preparing to generate short and long coverages.\n')
@@ -220,7 +186,7 @@ def delfi(input_file: str,
         else:
             contig_gaps = None
         for _, start, stop, *_ in (
-            darkless_bins.loc[darkless_bins.loc[:,'contig']==contig]
+            gapless_bins.loc[gapless_bins.loc[:,'contig']==contig]
             .itertuples(index=False, name=None)
         ):
             window_args.append((
