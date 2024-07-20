@@ -13,142 +13,6 @@ from finaletoolkit.frag.delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
 from finaletoolkit.utils.utils import frag_generator, overlaps
 from finaletoolkit.genome.gaps import GenomeGaps, ContigGaps
-
-
-def _delfi_single_window(
-        input_file: str,
-        reference_file: str,
-        contig_gaps: ContigGaps,
-        window_start: int,
-        window_stop: int,
-        blacklist_file: str=None,
-        quality_threshold: int=30,
-        verbose: Union[int,bool]=False) -> tuple:
-    """
-    Calculates short and long counts for one window.
-    """
-    contig = contig_gaps.contig
-
-    blacklist_regions = []
-
-    if (blacklist_file is not None):
-        # convert blacklist to a list of tuples
-        # TODO: accept other file types
-        with open(blacklist_file) as blacklist:
-            for line in blacklist:
-                region_contig, region_start, region_stop, *_ = line.split()
-                region_start = int(region_start)
-                region_stop = int(region_stop)
-                if (contig == region_contig
-                    and window_start <= region_start
-                    and window_stop >= region_stop ):
-                    blacklist_regions.append((region_start,region_stop))
-
-    short_lengths = []
-    long_lengths = []
-    frag_pos = []
-
-    num_frags = 0
-
-    # check if interval in centromere or telomere
-    in_tcmere = contig_gaps.in_tcmere(window_start, window_stop)
-    if in_tcmere:
-        return (contig,
-            window_start,
-            window_stop,
-            'NOARM',
-            np.NaN,
-            np.NaN,
-            np.NaN,
-            0)
-
-    arm = contig_gaps.get_arm(window_start, window_stop)
-    # if in short arm
-    if arm == 'NOARM':
-        return (contig,
-            window_start,
-            window_stop,
-            'NOARM',
-            np.NaN,
-            np.NaN,
-            np.NaN,
-            0)
-    
-    # Iterating on each read in file in specified contig/chromosome
-    for _, frag_start, frag_stop, _, _ in frag_generator(
-        input_file,
-        contig,
-        quality_threshold,
-        window_start,
-        window_stop,
-        fraction_low=100,
-        fraction_high=220):
-
-        frag_length = frag_stop - frag_start
-
-        assert frag_length > 0, (f"Frag length of {frag_length} found at"
-            f"{contig}:{frag_start}-{frag_stop}.")
-
-        # check if in blacklist
-        blacklisted = False
-        for region in blacklist_regions:
-            if (
-                (frag_start >= region[0] and frag_start < region[1])
-                and (frag_stop >= region[0] and frag_stop < region[1])
-            ):
-                blacklisted = True
-                break
-
-        # check if in centromere or telomere
-        in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
-        if in_tcmere:
-            continue
-
-        if (not blacklisted
-            and not in_tcmere
-        ):
-            # append length of fragment to list
-            if (frag_length >= 151):
-                long_lengths.append(abs(frag_length))
-            else:
-                short_lengths.append(abs(frag_length))
-
-            frag_pos.append((frag_start, frag_stop))
-
-            num_frags += 1
-
-    num_gc = 0  # cumulative sum of gc bases
-
-    with py2bit.open(reference_file) as ref_seq:
-        ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
-
-    num_gc = sum((base == 'G' or base == 'C') for base in ref_bases)
-
-    # window_length
-    window_coverage = window_stop - window_start
-
-    # NaN if no fragments in window.
-    gc_content = num_gc / window_coverage if num_frags > 0 else np.NaN
-
-    coverage_short = len(short_lengths)
-    coverage_long = len(long_lengths)
-
-    # if (len(short_lengths) != 0 or len(long_lengths) != 0):
-    if verbose:
-        stderr.write(
-            f'{contig}:{window_start}-{window_stop} short: '
-            f'{coverage_short} long: {coverage_long}, gc_content: '
-            f'{gc_content*100}%\n'
-        )
-
-    return (contig,
-            window_start,
-            window_stop,
-            arm,
-            coverage_short,
-            coverage_long,
-            gc_content,
-            num_frags)
     
 
 def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
@@ -462,3 +326,139 @@ def delfi(input_file: str,
         stderr.write(f'{num_frags} fragments included.\n')
         stderr.write(f'delfi took {end_time - start_time} s to complete\n')
     return gc_corrected
+
+
+def _delfi_single_window(
+        input_file: str,
+        reference_file: str,
+        contig_gaps: ContigGaps,
+        window_start: int,
+        window_stop: int,
+        blacklist_file: str=None,
+        quality_threshold: int=30,
+        verbose: Union[int,bool]=False) -> tuple:
+    """
+    Calculates short and long counts for one window.
+    """
+    contig = contig_gaps.contig
+
+    blacklist_regions = []
+
+    if (blacklist_file is not None):
+        # convert blacklist to a list of tuples
+        # TODO: accept other file types
+        with open(blacklist_file) as blacklist:
+            for line in blacklist:
+                region_contig, region_start, region_stop, *_ = line.split()
+                region_start = int(region_start)
+                region_stop = int(region_stop)
+                if (contig == region_contig
+                    and window_start <= region_start
+                    and window_stop >= region_stop ):
+                    blacklist_regions.append((region_start,region_stop))
+
+    short_lengths = []
+    long_lengths = []
+    frag_pos = []
+
+    num_frags = 0
+
+    # check if interval in centromere or telomere
+    in_tcmere = contig_gaps.in_tcmere(window_start, window_stop)
+    if in_tcmere:
+        return (contig,
+            window_start,
+            window_stop,
+            'NOARM',
+            np.NaN,
+            np.NaN,
+            np.NaN,
+            0)
+
+    arm = contig_gaps.get_arm(window_start, window_stop)
+    # if in short arm
+    if arm == 'NOARM':
+        return (contig,
+            window_start,
+            window_stop,
+            'NOARM',
+            np.NaN,
+            np.NaN,
+            np.NaN,
+            0)
+    
+    # Iterating on each read in file in specified contig/chromosome
+    for _, frag_start, frag_stop, _, _ in frag_generator(
+        input_file,
+        contig,
+        quality_threshold,
+        window_start,
+        window_stop,
+        fraction_low=100,
+        fraction_high=220):
+
+        frag_length = frag_stop - frag_start
+
+        assert frag_length > 0, (f"Frag length of {frag_length} found at"
+            f"{contig}:{frag_start}-{frag_stop}.")
+
+        # check if in blacklist
+        blacklisted = False
+        for region in blacklist_regions:
+            if (
+                (frag_start >= region[0] and frag_start < region[1])
+                and (frag_stop >= region[0] and frag_stop < region[1])
+            ):
+                blacklisted = True
+                break
+
+        # check if in centromere or telomere
+        in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
+        if in_tcmere:
+            continue
+
+        if (not blacklisted
+            and not in_tcmere
+        ):
+            # append length of fragment to list
+            if (frag_length >= 151):
+                long_lengths.append(abs(frag_length))
+            else:
+                short_lengths.append(abs(frag_length))
+
+            frag_pos.append((frag_start, frag_stop))
+
+            num_frags += 1
+
+    num_gc = 0  # cumulative sum of gc bases
+
+    with py2bit.open(reference_file) as ref_seq:
+        ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
+
+    num_gc = sum((base == 'G' or base == 'C') for base in ref_bases)
+
+    # window_length
+    window_coverage = window_stop - window_start
+
+    # NaN if no fragments in window.
+    gc_content = num_gc / window_coverage if num_frags > 0 else np.NaN
+
+    coverage_short = len(short_lengths)
+    coverage_long = len(long_lengths)
+
+    # if (len(short_lengths) != 0 or len(long_lengths) != 0):
+    if verbose:
+        stderr.write(
+            f'{contig}:{window_start}-{window_stop} short: '
+            f'{coverage_short} long: {coverage_long}, gc_content: '
+            f'{gc_content*100}%\n'
+        )
+
+    return (contig,
+            window_start,
+            window_stop,
+            arm,
+            coverage_short,
+            coverage_long,
+            gc_content,
+            num_frags)
