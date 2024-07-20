@@ -7,11 +7,13 @@ from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
 
 def test_merge_bins(request):
     # getting files for comparison
-    delfi_bins_csv = request.path.parent / 'data' / 'test_delfi_100kb.csv'
-    delfi_merged_bins_csv = request.path.parent / 'data' / 'test_delfi_5mb.csv'
+    delfi_bins_csv = request.path.parent / 'data' / 'delfi' / 'test_delfi_100kb.csv'
+    delfi_merged_bins_csv = request.path.parent / 'data' / 'delfi' / 'test_delfi_5mb.csv'
 
-    delfi_bins = pd.read_csv(delfi_bins_csv, dtype={'contig':str, 'start':int, 'stop':int})
-    delfi_merged_bins = pd.read_csv(delfi_merged_bins_csv, dtype={'contig':str, 'start':int, 'stop':int})
+    delfi_bins = pd.read_csv(
+        delfi_bins_csv, dtype={'contig':str, 'start':int, 'stop':int})
+    delfi_merged_bins = pd.read_csv(
+        delfi_merged_bins_csv, dtype={'contig':str, 'start':int, 'stop':int})
 
     merged_bins = delfi_merge_bins(delfi_bins)
 
