@@ -16,9 +16,6 @@ and this project adheres to
 variable
 - `remove_nocov` option in `finaletoolkit.frag.delfi` to toggle dropping two bins with low coverage. These bins are dropped in delfi_scripts but
 may not apply to fragment files not aligned to hg19.
-- `-r`, `--remove-nocov` option for `finaletoolkit delfi` to toggle
-droptting two bins with low coverage. Analogous to `remove_nocov` option in `finaletoolkit.frag.delfi`.
-
 - tests for `finaletoolkit.frag.delfi_merge_bins`
 
 ### Changed
@@ -26,9 +23,13 @@ droptting two bins with low coverage. Analogous to `remove_nocov` option in `fin
 any reference genome.
 - `finaletoolkit.frag.delfi_merge_bins` algorithm changed to be
 reference genome-agnostic and consistent with delfi_scripts
+- `finaletoolkit delfi` options `-G`, `-M`, and `-R` to drop
+gc-correction, merging, and remove nocov bins, respectively.
 
 ### Removed
 - unused flags for `finaletools delfi`: `-W`, `--window-size`
+- redundant flags for `finaletools delfi`: `-gc`, `--gc-correct`,
+`-m`, `--merge-bins`
 
 ## [0.6.5] - 2024-07-15
 
