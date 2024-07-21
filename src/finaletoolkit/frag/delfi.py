@@ -55,33 +55,35 @@ def delfi(input_file: str,
         Path string pointing to a bam file containing PE
         fragment reads.
     autosomes: str
-        Path string to a .genome file containing only autosomal
+        Path string to a chrom.sizes file containing only autosomal
         chromosomes
     bins_file: str
         Path string to a BED file containing 100kb bins for reference
-        genome of choice. Cristiano et al uses 
+        genome of choice.
     reference_file: str
-        Path string to .2bit file.
+        Path string to .2bit file for reference genoe.
     blacklist_file: str
-        Path string to BED file containing genome blacklist.
-    gap_file: str
+        Path string to BED file containing genome blacklist regions.
+    gap_file: str or GenomeGaps
         Path string to a BED4+ file where each interval is a centromere
         or telomere. A bed file can be used **only if** the fourth field
         for each entry corresponding to a telomere or centromere is
-        labled "telomere" or "centromere, respectively.
+        labled "telomere" or "centromere, respectively. Alternatively, a
+        finaletoolkit.genome.GenomeGaps with gap info associated with
+        the reference genome of choice may be used.
     output_file: str, optional
         Path to output tsv.
     gc_correct: bool
-        Perform gc-correction
+        Perform gc-correction. Default is True.
     remove_nocov: bool
         Remove two windows described by Cristiano et al (2019) as low
         coverage. These windows might not apply to reference genomes
-        other than hg19.
+        other than hg19. Default is True.
     merge_bins: bool
-        Perform merging from 100kb bins to 5Mb bins.
+        Perform merging from 100kb bins to 5Mb bins. Default is True.
     window_size: int
-        Size of non-overlapping windows to cover genome. Default is
-        5 megabases.
+        Size (in bases) of non-overlapping windows to cover genome. Default is
+        5000000.
     workers: int, optional
         Number of worker processes to use. Default is 1.
     verbose: int or bool, optional
@@ -102,6 +104,7 @@ def delfi(input_file: str,
         output_file: {output_file}
         window_size: {window_size}
         gc_correct: {gc_correct}
+        remove_nocov: {remove_nocov}
         merge_bins: {merge_bins}
         quality_threshold: {quality_threshold}
         workers: {workers}
@@ -235,8 +238,8 @@ def delfi(input_file: str,
     # remove nocov windows
     if remove_nocov:
         no_nocov_slice = np.logical_and(
-            np.logical_not(np.equal(np.arange(26238),8779)),
-            np.logical_not(np.equal(np.arange(26238), 13664)))
+            np.logical_not(np.equal(np.arange(trimmed_windows.shape[0]),8779)),
+            np.logical_not(np.equal(np.arange(trimmed_windows.shape[0]), 13664)))
         corrected_delfi_drop_nocov = trimmed_windows.loc[no_nocov_slice].reset_index()
     else:
         corrected_delfi_drop_nocov = trimmed_windows
