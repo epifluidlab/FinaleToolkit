@@ -18,6 +18,13 @@ Importing Modules
 
 The **FinaleToolkit** package itself is divided by its API functions.
 
+FinaleToolkit has the following modules:
+
+* `frag` - fragmentomic feature genereation
+* `genome` - utilities for genome tracks
+* `cli` - command line interface
+* `utils` - utilities that simplify feature generation
+
 You can load *all* of the functions by using the following command::
 
     >>> import finaletoolkit as ft

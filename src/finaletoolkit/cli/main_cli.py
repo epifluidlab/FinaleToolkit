@@ -108,13 +108,13 @@ def main_cli_parser():
     cli_delfi.add_argument('autosomes', help="Tab-delimited file containing (1) autosome name and (2) integer length of chromosome in base pairs.")
     cli_delfi.add_argument('reference_file', help="The .2bit file for the associate reference genome sequence used during alignment.")
     cli_delfi.add_argument('bins_file', help="A BED file containing bins over which to calculate DELFI. To replicate Cristiano et al.'s methodology, use 100kb bins over human autosomes.")
-    cli_delfi.add_argument('-b', '--blacklist_file', help="BED file containing regions to ignore when calculating DELFI.")
-    cli_delfi.add_argument('-g', '--gap_file', help='BED4 format file containing columns for "chrom", "start", "stop", and "type". The "type" column should denote whether the entry corresponds to a "centromere", "telomere", or "short arm", and entries not falling into these categories are ignored. This information corresponds to the "gap" track for hg19 in the UCSC Genome Browser.')
-    cli_delfi.add_argument('-o', '--output_file', default='-', help='BED, bed.gz, TSV, or CSV file to write DELFI data to. If "-", writes to stdout.')
-    cli_delfi.add_argument('-W', '--window_size', default=5000000, type=int, help="Currently unused.")
-    cli_delfi.add_argument('-gc', '--gc_correct', action='store_true', help="Indicates whether to apply GC correction.")
-    cli_delfi.add_argument('-m', '--merge_bins', action='store_true', help="Indicates whether to merge bins to 5Mb size.")
-    cli_delfi.add_argument('-q', '--quality_threshold', default=30, type=int, help="Minimum mapping quality threshold.")
+    cli_delfi.add_argument('-b', '--blacklist-file', help="BED file containing regions to ignore when calculating DELFI.")
+    cli_delfi.add_argument('-g', '--gap-file', help='BED4 format file containing columns for "chrom", "start", "stop", and "type". The "type" column should denote whether the entry corresponds to a "centromere", "telomere", or "short arm", and entries not falling into these categories are ignored. This information corresponds to the "gap" track for hg19 in the UCSC Genome Browser.')
+    cli_delfi.add_argument('-o', '--output-file', default='-', help='BED, bed.gz, TSV, or CSV file to write DELFI data to. If "-", writes to stdout.')
+    cli_delfi.add_argument('-G', '--no-gc-correct', action='store_false', dest="gc_correct", help="Skip GC correction.")
+    cli_delfi.add_argument('-R', '--keep-nocov', action='store_false', dest="remove_nocov", help="Skip removal two regions in hg19 with no coverage. Use this flag when not using hg19 human reference genome.")
+    cli_delfi.add_argument('-M', '--no-merge-bins', action='store_false', dest="merge_bins", help="Keep 100kb bins and do not merge to 5Mb size.")
+    cli_delfi.add_argument('-q', '--quality-threshold', default=30, type=int, help="Minimum mapping quality threshold.")
     cli_delfi.add_argument('-w', '--workers', default=1, type=int, help="Number of worker processes.")
     cli_delfi.add_argument('-v', '--verbose', action='count', default=0, help='Enable verbose mode to display detailed processing information.')
     cli_delfi.set_defaults(func=delfi)
@@ -196,7 +196,6 @@ def main_cli():
     try:
         function = args.func
         funcargs = vars(args)
-        print(funcargs)
         funcargs.pop('func')
 
         function(**funcargs)

@@ -70,7 +70,7 @@ class TestGenomewideEndMotifs:
             bam, ref_file, both_strands=True, quality_threshold=0)
         
         dest = tmp_path / "results.tsv"
-        dif_file = request.path.parent / 'data' / 'end_motifs_dif.tsv'
+        dif_file = request.path.parent / 'data' / 'end_motifs' / 'end_motifs_dif.tsv'
         motifs.to_tsv(dest)
         filecmp.clear_cache()
         assert filecmp.cmp(dest, dif_file)
@@ -150,7 +150,7 @@ class TestInvervalEndMotifs:
             quality_threshold=0)
         
         dest = tmp_path / "interval_results.tsv"
-        dif_file = request.path.parent / 'data' / 'end_motifs_intervals_dif.tsv'
+        dif_file = request.path.parent / 'data' / 'end_motifs' / 'end_motifs_intervals_dif.tsv'
 
         motifs.to_tsv(dest, False)
         differ = difflib.Differ()
@@ -167,7 +167,7 @@ class TestInvervalEndMotifs:
     
 class TestCLIIntervalMDS:
     def test_interval_mds(self, request, tmp_path):
-        src_tsv = request.path.parent / 'data' / 'end_motifs_intervals_dif.tsv'
+        src_tsv = request.path.parent / 'data' / 'end_motifs' / 'end_motifs_intervals_dif.tsv'
         dest = tmp_path / "interval_mds.tsv"
         os.system(f'finaletoolkit interval-mds {src_tsv} {dest}')
         with open(dest) as file:

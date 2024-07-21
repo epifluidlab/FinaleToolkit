@@ -14,57 +14,85 @@ BINS_PATH: Path = (
 def delfi_merge_bins(
         hundred_kb_bins: pd.DataFrame,
         gc_corrected: bool=True,
-        add_chr: bool=False,
         verbose: bool=False
-):
-    #FIXME: find a way to calculate this that is not dependent on b37 format
-    delfi_scripts_5mb_bins = pd.read_csv(BINS_PATH)
+) -> pd.DataFrame:
 
-    if add_chr:
-        chr_bins = hundred_kb_bins.copy()
-        chr_bins['contig'] = hundred_kb_bins['contig'].apply(
-            lambda x: f"chr{x}")
-    else:
-        chr_bins = hundred_kb_bins.copy()
+    # TODO: allow for no gc-correction
+    five_mb_bins = []
 
+    for arm in hundred_kb_bins["arm"].unique():
+        arm_bins = hundred_kb_bins[hundred_kb_bins["arm"] == arm].reset_index()
+        if "p" in arm:
+            for i in range(0,arm_bins.shape[0],50):
+                chunk = arm_bins.loc[i:i+49,:]
+                if chunk.shape[0] < 50:
+                    continue
+                contig = arm[:-1]
+                start = chunk['start'].min()
+                stop = chunk['stop'].max()
+                short = chunk['short'].sum()
+                long = chunk['long'].sum()
+                gc = chunk['gc'].mean()
+                num_frags = chunk['num_frags'].sum()
+                ratio = chunk['ratio'].mean()
+                short_corrected = chunk['short_corrected'].sum()
+                long_corrected = chunk['long_corrected'].sum()
+                num_frags_corrected = chunk['num_frags_corrected'].sum()
+                ratio_corrected = chunk['ratio_corrected'].mean()
+                five_mb_bins.append((
+                    contig,
+                    start,
+                    stop,
+                    arm,
+                    short,
+                    long,
+                    gc,
+                    num_frags,
+                    ratio,
+                    short_corrected,
+                    long_corrected,
+                    num_frags_corrected,
+                    ratio_corrected
+                ))
+        elif "q" in arm:
+            five_mb_bins_reversed = []
+            for i in range(arm_bins.shape[0]-1,0,-50):
+                chunk = arm_bins.loc[i-49:i,:]
+                if chunk.shape[0] < 50:
+                    continue
+                contig = arm[:-1]
+                start = chunk['start'].min()
+                stop = chunk['stop'].max()
+                short = chunk['short'].sum()
+                long = chunk['long'].sum()
+                gc = chunk['gc'].mean()
+                num_frags = chunk['num_frags'].sum()
+                ratio = chunk['ratio'].mean()
+                short_corrected = chunk['short_corrected'].sum()
+                long_corrected = chunk['long_corrected'].sum()
+                num_frags_corrected = chunk['num_frags_corrected'].sum()
+                ratio_corrected = chunk['ratio_corrected'].mean()
+                five_mb_bins_reversed.append((
+                    contig,
+                    start,
+                    stop,
+                    arm,
+                    short,
+                    long,
+                    gc,
+                    num_frags,
+                    ratio,
+                    short_corrected,
+                    long_corrected,
+                    num_frags_corrected,
+                    ratio_corrected
+                ))
+            for row in five_mb_bins_reversed[-1::-1]:
+                five_mb_bins.append(row)
+        del arm_bins
     
-    five_mb_bins = delfi_scripts_5mb_bins.copy()
+    five_mb_bins_df = pd.DataFrame(
+        five_mb_bins,
+        columns = hundred_kb_bins.columns[hundred_kb_bins.columns!='index'])
 
-    #finding overlaps
-    contigs_1 = chr_bins['contig'].to_numpy()[:, np.newaxis]
-    starts_1 = chr_bins['start'].to_numpy()[:, np.newaxis]
-    stops_1 = chr_bins['stop'].to_numpy()[:, np.newaxis]
-
-    contigs_2 = delfi_scripts_5mb_bins['seqnames'].to_numpy()[np.newaxis]
-    starts_2 = delfi_scripts_5mb_bins['start'].to_numpy()[np.newaxis]
-    stops_2 = delfi_scripts_5mb_bins['end'].to_numpy()[np.newaxis]
-
-    contig_blind_overlaps = np.logical_and(
-        (starts_1 < stops_2),
-        (stops_1 > starts_2)
-    )
-    in_same_contig = contigs_1 == contigs_2
-    overlaps = np.logical_and(contig_blind_overlaps, in_same_contig)
-
-    # merging bins
-    ft_5mb_indices = np.arange(five_mb_bins.shape[0])
-    if gc_corrected:
-        for i in ft_5mb_indices:
-            subset = (chr_bins.loc[overlaps[:,i],:])
-            assert subset.shape[0] == 50, "5mb bin does not have 50 100bins."
-            five_mb_bins.iloc[[i],[4]] = subset['short_corrected'].sum()
-            five_mb_bins.iloc[[i],[5]] = subset['long_corrected'].sum()
-            five_mb_bins.iloc[[i],[6]] = subset['ratio_corrected'].mean()
-            five_mb_bins.iloc[[i],[7]] = subset['num_frags_corrected'].sum()
-    else:
-        for i in ft_5mb_indices:
-            subset = (chr_bins.loc[overlaps[:,i],:])
-            assert subset.shape[0] == 50, "5mb bin does not have 50 100bins."
-            five_mb_bins.iloc[[i],[4]] = subset['short'].sum()
-            five_mb_bins.iloc[[i],[5]] = subset['long'].sum()
-            five_mb_bins.iloc[[i],[6]] = subset['ratio'].mean()
-            five_mb_bins.iloc[[i],[7]] = subset['num_frags'].sum()
-    
-    return five_mb_bins
-
-# TODO: make binning customizable
+    return five_mb_bins_df
