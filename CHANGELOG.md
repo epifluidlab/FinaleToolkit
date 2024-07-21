@@ -2,8 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.7.0] - 2024-07-21
+
+### Added
+- Brief description of modules in documentation under structure page
+- Docstring
+- `finaletoolkit.version` module containing single-source `__version__`
+variable
+- `remove_nocov` option in `finaletoolkit.frag.delfi` to toggle dropping two bins with low coverage. These bins are dropped in delfi_scripts but
+may not apply to fragment files not aligned to hg19.
+- `-r`, `--remove-nocov` option for `finaletoolkit delfi` to toggle
+droptting two bins with low coverage. Analogous to `remove_nocov` option in `finaletoolkit.frag.delfi`.
+
+- tests for `finaletoolkit.frag.delfi_merge_bins`
+
+### Changed
+- `finaletoolkit.frag.delfi` changed to accept files aligned to almost
+any reference genome.
+- `finaletoolkit.frag.delfi_merge_bins` algorithm changed to be
+reference genome-agnostic and consistent with delfi_scripts
+
+### Removed
+- unused flags for `finaletools delfi`: `-W`, `--window-size`
 
 ## [0.6.5] - 2024-07-15
 
