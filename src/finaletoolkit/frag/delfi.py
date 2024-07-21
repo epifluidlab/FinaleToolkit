@@ -253,10 +253,15 @@ def delfi(input_file: str,
     if merge_bins:
         if (verbose):
             stderr.write('Merging bins...\n')
-        final_bins = delfi_merge_bins(
+        merged = delfi_merge_bins(
             gc_corrected, gc_correct, verbose=verbose)
     else:
-        final_bins = gc_corrected
+        merged = gc_corrected
+
+    # sort
+    if (verbose):
+        stderr.write('Sorting bins...\n')
+    final_bins = merged.sort_values(['contig', 'start'])
     
     # output
     if (verbose):
@@ -267,7 +272,7 @@ def delfi(input_file: str,
     if output_file.endswith('.bed') or output_file.endswith('.tsv'):
         output_delfi.to_csv(output_file, sep='\t', index=False)
     elif output_file.endswith('.csv'):
-        output_delfi.to_csv(output_file, sep=',', index=False)
+        final_bins.to_csv(output_file, sep=',', index=False)
     elif output_file.endswith('.bed.gz'):
         output_delfi.to_csv(
             output_file,
@@ -276,7 +281,7 @@ def delfi(input_file: str,
             encoding='gzip')
     elif output_file == '-':
         with stdout as out:
-            for window in gc_corrected.itertuples():
+            for window in final_bins.itertuples():
                 tab_separated = "\t".join(window)
                 out.write(
                     f'{tab_separated}\n')
@@ -291,7 +296,7 @@ def delfi(input_file: str,
         end_time = time.time()
         stderr.write(f'{num_frags} fragments included.\n')
         stderr.write(f'delfi took {end_time - start_time} s to complete\n')
-    return gc_corrected
+    return output_delfi
 
 
 def _delfi_single_window(
