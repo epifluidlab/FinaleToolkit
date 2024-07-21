@@ -1,0 +1,10 @@
+numpy
+pysam
+pybigwig
+py2bit
+tqdm
+numba
+scipy
+pandas
+statsmodels
+loess
