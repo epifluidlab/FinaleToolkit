@@ -382,9 +382,16 @@ document.write(`
                   
   <section id="structure">
 <h1>Structure<a class="headerlink" href="#structure" title="Permalink to this heading">#</a></h1>
-<p>While not particularly pertinent to your usage, we include this page to give you a sense of what is going on under the hood of <strong>FinaleToolkit</strong>:</p>
-<p>At the heart of <strong>FinaleToolkit</strong> is the <code class="docutils literal notranslate"><span class="pre">Fragment</span> <span class="pre">Generator</span></code>. This generator is designed to be as flexible as possible. It takes BAM, CRAM, SAM, and Fragment Files (among other arguments) and filters out the reads that are not of interest (e.x. unmapped reads, reads with low mapping quality, etc.). The fragments that make it through this filter are then passed to the relevant function to be processed.</p>
-<p>A rough outline of the structure of <strong>FinaleToolkit</strong> is therefore as follows:</p>
+<p>While not particularly pertinent to your usage, we include this page to
+give you a sense of what is going on under the hood of <strong>FinaleToolkit</strong>:</p>
+<p>At the heart of <strong>FinaleToolkit</strong> is the <code class="docutils literal notranslate"><span class="pre">Fragment</span> <span class="pre">Generator</span></code>. This
+generator is designed to be as flexible as possible. It takes BAM, CRAM,
+SAM, and Fragment Files (among other arguments) and filters out the
+reads that are not of interest (e.x. unmapped reads, reads with low
+mapping quality, etc.). The fragments that make it through this filter
+are then passed to the relevant function to be processed.</p>
+<p>A rough outline of the structure of <strong>FinaleToolkit</strong> is therefore as
+follows:</p>
 <figure class="align-center">
 <img alt="../../_images/finaletoolkit_structure.png" src="../../_images/finaletoolkit_structure.png" />
 </figure>
