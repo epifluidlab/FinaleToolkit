@@ -3,4 +3,4 @@ A package and standalone program to extract fragmentation features of
 cell-free DNA from paired-end sequencing data.
 """
 
-from version import __version__
+from finaletoolkit.version import __version__
