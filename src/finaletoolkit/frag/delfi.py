@@ -2,6 +2,7 @@ from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
 from typing import Union
+from os import PathLike
 from sys import stderr, stdout
 
 import py2bit
@@ -36,7 +37,7 @@ def delfi(input_file: str,
           bins_file: str,
           reference_file: str,
           blacklist_file: str=None,
-          gap_file: Union(str, GenomeGaps)=None,
+          gap_file: Union[str, GenomeGaps]=None,
           output_file: str=None,
           gc_correct:bool=True,
           remove_nocov:bool=True,
