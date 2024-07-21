@@ -87,7 +87,7 @@ def delfi_merge_bins(
                     num_frags_corrected,
                     ratio_corrected
                 ))
-            for row in five_mb_bins_reversed[:]:
+            for row in five_mb_bins_reversed[-1::-1]:
                 five_mb_bins.append(row)
         del arm_bins
     

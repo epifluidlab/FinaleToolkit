@@ -253,15 +253,10 @@ def delfi(input_file: str,
     if merge_bins:
         if (verbose):
             stderr.write('Merging bins...\n')
-        merged = delfi_merge_bins(
+        final_bins = delfi_merge_bins(
             gc_corrected, gc_correct, verbose=verbose)
     else:
-        merged = gc_corrected
-
-    # sort
-    if (verbose):
-        stderr.write('Sorting bins...\n')
-    final_bins = merged.sort_values(['contig', 'start'])
+        final_bins = gc_corrected
     
     # output
     if (verbose):
