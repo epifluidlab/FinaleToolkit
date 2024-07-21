@@ -25,12 +25,22 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-
-dynamic = ["version", "dependencies"]
+dependencies = [
+    "numpy",
+    "pysam",
+    "pybigwig",
+    "py2bit",
+    "tqdm",
+    "numba",
+    "scipy",
+    "pandas",
+    "statsmodels",
+    "loess",
+]
+dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-version = {attr = "finaletoolkit.version.__version__"}
-dependencies = {file = ["requirements.txt"]}
+version = {attr = "finaletoolkit.__version__"}
 
 [project.scripts]
 finaletoolkit = "finaletoolkit.cli:main_cli"
