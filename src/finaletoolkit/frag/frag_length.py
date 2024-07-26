@@ -348,7 +348,7 @@ def frag_length_bins(
                 stop = ""
             title = f'Fragment Lengths for {contig}:{start}-{stop}'
         else:
-            title = f'Fragment Lengths'
+            title = 'Fragment Lengths'
         _cli_hist(bins, counts, n_bins, stats, stdout, title)
 
     if verbose:
