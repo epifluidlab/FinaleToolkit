@@ -51,3 +51,7 @@ Repository = "https://github.com/epifluidlab/finaletoolkit"
 Issues = "https://github.com/epifluidlab/FinaleToolkit/issues"
 Changelog = "https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md"
 "Lab Website" = "https://epifluidlab.github.io/"
+
+[dependency-groups]
+test = ["pytest", "coverage"]
+docs = ["sphinx", "sphinx-argparse"]
