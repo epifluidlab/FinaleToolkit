@@ -25,9 +25,9 @@ def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     ten_percentile = np.percentile(window_data['num_frags'], trim_percentile)
     trimmed = window_data.copy()
     in_percentile = window_data['num_frags']<ten_percentile
-    trimmed['short'][in_percentile] = np.NaN
-    trimmed['long'][in_percentile] = np.NaN
-    trimmed['gc'][in_percentile] = np.NaN
+    trimmed['short'][in_percentile] = np.nan
+    trimmed['long'][in_percentile] = np.nan
+    trimmed['gc'][in_percentile] = np.nan
     trimmed['num_frags'][in_percentile] = 0
     return trimmed
 
@@ -340,9 +340,9 @@ def _delfi_single_window(
             window_start,
             window_stop,
             'NOARM',
-            np.NaN,
-            np.NaN,
-            np.NaN,
+            np.nan,
+            np.nan,
+            np.nan,
             0)
 
     arm = contig_gaps.get_arm(window_start, window_stop)
@@ -352,9 +352,9 @@ def _delfi_single_window(
             window_start,
             window_stop,
             'NOARM',
-            np.NaN,
-            np.NaN,
-            np.NaN,
+            np.nan,
+            np.nan,
+            np.nan,
             0)
     
     # Iterating on each read in file in specified contig/chromosome
@@ -411,7 +411,7 @@ def _delfi_single_window(
     window_coverage = window_stop - window_start
 
     # NaN if no fragments in window.
-    gc_content = num_gc / window_coverage if num_frags > 0 else np.NaN
+    gc_content = num_gc / window_coverage if num_frags > 0 else np.nan
 
     coverage_short = len(short_lengths)
     coverage_long = len(long_lengths)

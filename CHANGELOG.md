@@ -7,6 +7,12 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unrelease version]
+
+### Changed
+- Numpy dependency version set to <2 to avoid breaking changes from numpy 2.0
+- Replaced all instances of `np.NaN` with `np.nan`.
+
 ## [0.7.0] - 2024-07-21
 
 ### Added
