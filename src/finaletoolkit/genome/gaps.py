@@ -460,7 +460,7 @@ def ucsc_hg38_gap_bed(output_file: str):
     output_file : str
         Output path
     """
-    raise NotImplementedError()
+    return GenomeGaps.hg38().to_bed(output_file)
 
 
 def _cli_gap_bed(reference_genome, output_file):
