@@ -65,7 +65,7 @@ def main_cli_parser():
     cli_cleavage_profile = subparsers.add_parser('cleavage-profile', prog='finaletoolkit-cleavage-profile', description='Calculates cleavage proportion over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.')
     cli_cleavage_profile.add_argument('input_file', help='Path to a BAM/SAM/CRAM/Fragment file containing fragment data.')
     cli_cleavage_profile.add_argument('interval_file', help='Path to a BED file containing intervals to calculates cleavage proportion over.')
-    cli_adjust_wps.add_argument('genome_file', help='A .chrom.sizes file containing chromosome sizes.')
+    cli_cleavage_profile.add_argument('chrom_sizes', help='A .chrom.sizes file containing chromosome sizes.')
     cli_cleavage_profile.add_argument('-o', '--output_file', default='-', help='A bigWig file containing the cleavage proportion results over the intervals specified in interval file.',)
     cli_cleavage_profile.add_argument('-lo', '--fraction_low', default=120, type=int, help="Minimum length for a fragment to be included in cleavage proportion calculation.")
     cli_cleavage_profile.add_argument('-hi', '--fraction_high', default=180, type=int, help="Maximum length for a fragment to be included in cleavage proportion calculation.")
