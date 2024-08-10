@@ -59,7 +59,29 @@ class TestGapBedCLI:
         assert file_exists
 
 class TestGapBed:
-    pass
+    def test_hg19(self, tmp_path):
+        dest = tmp_path / 'hg19.gaps.bed'
+
+        ucsc_hg19_gap_bed(dest)
+
+        file_exists = os.path.isfile(dest)
+        assert file_exists
+
+    def test_b37(self, tmp_path):
+        dest = tmp_path / 'b37.gaps.bed'
+
+        b37_gap_bed(dest)
+
+        file_exists = os.path.isfile(dest)
+        assert file_exists
+
+    def test_hg38(self, tmp_path):
+        dest = tmp_path / 'hg19.gaps.bed'
+
+        ucsc_hg38_gap_bed(dest)
+
+        file_exists = os.path.isfile(dest)
+        assert file_exists
 
 class TestGenomeGaps:
     pass
