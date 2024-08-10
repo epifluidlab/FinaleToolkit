@@ -1,6 +1,6 @@
 """
 finaletoolkit.gaps
-================
+==================
 
 This module contains classes and functions to use the gap tracks found
 on the UCSC Genome Browser (Kent et al 2002).
