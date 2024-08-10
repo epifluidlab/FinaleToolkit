@@ -424,20 +424,20 @@ class ContigGaps():
             return 'NOARM'
 
 
-def ucsc_hg19_gap_bed(output_file: str):
+def ucsc_hg19_gap_bed(output_file: Union[str, PathLike]):
     """
     Creates BED4 of centromeres, telomeres, and short arms for the UCSC
     hg19 reference sequence.
 
     Parameters
     ----------
-    output_file : str
+    output_file : str or path
         Output path
     """
     return GenomeGaps.ucsc_hg19().to_bed(output_file)
 
 
-def b37_gap_bed(output_file: str):
+def b37_gap_bed(output_file: Union[str, PathLike]):
     """
     Creates BED4 of centromeres, telomeres, and short arms for the Broad
     Institute GRCh37 (b37) reference sequence. Also useful for
@@ -445,20 +445,20 @@ def b37_gap_bed(output_file: str):
 
     Parameters
     ----------
-    output_file : str
+    output_file : str or path
         Output path
     """
     return GenomeGaps.b37().to_bed(output_file)
 
 
-def ucsc_hg38_gap_bed(output_file: str):
+def ucsc_hg38_gap_bed(output_file: Union[str, PathLike]):
     """
     Creates BED4 of centromeres, telomeres, and short arms for the UCSC
     hg38 reference sequence.
 
     Parameters
     ----------
-    output_file : str
+    output_file : str or path
         Output path
     """
     return GenomeGaps.hg38().to_bed(output_file)
