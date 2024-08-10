@@ -12,6 +12,7 @@ import gzip
 from importlib.resources import files
 from pathlib import Path
 from sys import stdout
+from os import PathLike
 
 import numpy as np
 from numpy.typing import NDArray
@@ -288,26 +289,26 @@ class GenomeGaps:
         )
         return contig_gaps
 
-    def to_bed(self, output_file: str):
+    def to_bed(self, output_file: Union[str, PathLike]):
         """
         Prints gap intervals in GenomeGaps to a BED4 file where the name
         is the type of gap interval.
 
         Parameters
         ----------
-        output_file : str
+        output_file : str or path
             File to write to. Optionally gzipped. If output_file == '-',
             results will be writted to stdout.
         """
         gaps = np.sort(self.gaps)
-        if output_file.endswith('.gz'):
+        if str(output_file).endswith('.gz'):
             with gzip.open(output_file, 'w') as output:
                 for interval in gaps:
                     output.write(
                         f"{interval['contig']}\t{interval['start']}\t"
                         f"{interval['stop']}\t{interval['type']}\n"
                     )
-        elif output_file == '-':
+        elif str(output_file) == '-':
             for interval in gaps:
                     stdout.write(
                         f"{interval['contig']}\t{interval['start']}\t"
