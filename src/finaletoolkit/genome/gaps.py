@@ -1,6 +1,6 @@
 """
 finaletoolkit.gaps
-================
+==================
 
 This module contains classes and functions to use the gap tracks found
 on the UCSC Genome Browser (Kent et al 2002).
@@ -9,17 +9,17 @@ on the UCSC Genome Browser (Kent et al 2002).
 from __future__ import annotations
 from typing import Union, Iterable
 import gzip
-from importlib.resources import files
-from pathlib import Path
+import importlib.resources
 from sys import stdout
+from os import PathLike
 
 import numpy as np
 from numpy.typing import NDArray
 
 import finaletoolkit.genome as genome
 
-HG19GAPS: Path = (files(genome) / 'data' / 'hg19.gap.txt.gz')
-HG38GAPS: Path = (files(genome) / 'data' / 'hg38.gap.txt.gz')
+HG19GAPS = importlib.resources.files(genome) / 'data' / 'hg19.gap.txt.gz'
+HG38GAPS = importlib.resources.files(genome) / 'data' / 'hg38.gap.txt.gz'
 
 
 class GenomeGaps:
@@ -28,7 +28,7 @@ class GenomeGaps:
     or generates these intervals from UCSC gap and centromere tracks for
     hg19 and hg38.
     """
-    def __init__(self, gaps_bed: Union[Path, str]=None):
+    def __init__(self, gaps_bed: Union[PathLike, str, None]=None):
         self.centromeres: NDArray
         self.telomeres: NDArray
         self.short_arms: NDArray
@@ -62,17 +62,19 @@ class GenomeGaps:
         gaps : GenomeGaps
             GenomeGaps for the UCSC hg19 reference genome.
         """
+        
         genome_gaps = cls()
-        gaps = np.genfromtxt(
-            HG19GAPS,
-            usecols=[1, 2, 3, 7],
-            dtype=[
-                ('contig', '<U32'),
-                ('start', '<i8'),
-                ('stop', '<i8'),
-                ('type', '<U32'),
-            ]
-        )
+        with importlib.resources.as_file(HG19GAPS) as gap_file:
+            gaps = np.genfromtxt(
+                gap_file,
+                usecols=[1, 2, 3, 7],
+                dtype=[
+                    ('contig', '<U32'),
+                    ('start', '<i8'),
+                    ('stop', '<i8'),
+                    ('type', '<U32'),
+                ]
+            )
         genome_gaps.centromeres = gaps[gaps['type'] == 'centromere']
         genome_gaps.telomeres = gaps[gaps['type'] == 'telomere']
         genome_gaps.short_arms = gaps[gaps['type'] == 'short_arm']
@@ -98,16 +100,17 @@ class GenomeGaps:
             GenomeGaps for the b37 reference genome.
         """
         genome_gaps = cls()
-        gaps = np.genfromtxt(
-            HG19GAPS,
-            usecols=[1, 2, 3, 7],
-            dtype=[
-                ('contig', '<U32'),
-                ('start', '<i8'),
-                ('stop', '<i8'),
-                ('type', '<U32'),
-            ]
-        )
+        with importlib.resources.as_file(HG19GAPS) as gap_file:
+            gaps = np.genfromtxt(
+                gap_file,
+                usecols=[1, 2, 3, 7],
+                dtype=[
+                    ('contig', '<U32'),
+                    ('start', '<i8'),
+                    ('stop', '<i8'),
+                    ('type', '<U32'),
+                ]
+            )
         gaps['contig'] = np.char.replace(gaps['contig'], 'chr', '')
         genome_gaps.centromeres = gaps[gaps['type'] == 'centromere']
         genome_gaps.telomeres = gaps[gaps['type'] == 'telomere']
@@ -128,16 +131,17 @@ class GenomeGaps:
             GenomeGaps for the hg38 reference genome.
         """
         genome_gaps = cls()
-        gaps = np.genfromtxt(
-            HG38GAPS,
-            usecols=[1, 2, 3, 7],
-            dtype=[
-                ('contig', '<U32'),
-                ('start', '<i8'),
-                ('stop', '<i8'),
-                ('type', '<U32'),
-            ]
-        )
+        with importlib.resources.as_file(HG38GAPS) as gap_file:
+            gaps = np.genfromtxt(
+                gap_file,
+                usecols=[1, 2, 3, 7],
+                dtype=[
+                    ('contig', '<U32'),
+                    ('start', '<i8'),
+                    ('stop', '<i8'),
+                    ('type', '<U32'),
+                ]
+            )
         genome_gaps.centromeres = gaps[gaps['type'] == 'centromere']
         genome_gaps.telomeres = gaps[gaps['type'] == 'telomere']
         genome_gaps.short_arms = gaps[gaps['type'] == 'short_arm']
@@ -167,15 +171,16 @@ class GenomeGaps:
         centromere = self.centromeres[self.centromeres['contig'] == contig]
         telomeres = self.telomeres[self.telomeres['contig'] == contig]
         if not centromere.shape[0]:
+            # XXX: why None?
             return None
         else:
-            in_centromere = np.logical_and(
+            in_centromere: bool = np.sum(np.logical_and(
                 stop > centromere['start'],
                 start < centromere['stop'],
-            )
+            ))
             # chr17 has no telomere in the gap track for some reason
             if not telomeres.shape[0]:
-                in_telomeres = np.sum(np.logical_and(
+                in_telomeres: bool = np.sum(np.logical_and(
                     stop > telomeres['start'],
                     start < telomeres['stop'],
                 )) > 0
@@ -288,26 +293,26 @@ class GenomeGaps:
         )
         return contig_gaps
 
-    def to_bed(self, output_file: str):
+    def to_bed(self, output_file: Union[str, PathLike]):
         """
         Prints gap intervals in GenomeGaps to a BED4 file where the name
         is the type of gap interval.
 
         Parameters
         ----------
-        output_file : str
+        output_file : str or path
             File to write to. Optionally gzipped. If output_file == '-',
             results will be writted to stdout.
         """
         gaps = np.sort(self.gaps)
-        if output_file.endswith('.gz'):
-            with gzip.open(output_file, 'w') as output:
+        if str(output_file).endswith('.gz'):
+            with gzip.open(output_file, 'wt') as output:
                 for interval in gaps:
                     output.write(
                         f"{interval['contig']}\t{interval['start']}\t"
                         f"{interval['stop']}\t{interval['type']}\n"
                     )
-        elif output_file == '-':
+        elif str(output_file) == '-':
             for interval in gaps:
                     stdout.write(
                         f"{interval['contig']}\t{interval['start']}\t"
@@ -330,7 +335,7 @@ class ContigGaps():
                  has_short_arm: bool=False):
         self.contig = contig
         self.centromere = centromere
-        self.telomeres = telomeres
+        self.telomeres = [telomere for telomere in telomeres]
         self.has_short_arm = has_short_arm
 
     def in_tcmere(self, start: int, stop: int) -> bool:
@@ -423,20 +428,20 @@ class ContigGaps():
             return 'NOARM'
 
 
-def ucsc_hg19_gap_bed(output_file: str):
+def ucsc_hg19_gap_bed(output_file: Union[str, PathLike]):
     """
     Creates BED4 of centromeres, telomeres, and short arms for the UCSC
     hg19 reference sequence.
 
     Parameters
     ----------
-    output_file : str
+    output_file : str or path
         Output path
     """
     return GenomeGaps.ucsc_hg19().to_bed(output_file)
 
 
-def b37_gap_bed(output_file: str):
+def b37_gap_bed(output_file: Union[str, PathLike]):
     """
     Creates BED4 of centromeres, telomeres, and short arms for the Broad
     Institute GRCh37 (b37) reference sequence. Also useful for
@@ -444,23 +449,23 @@ def b37_gap_bed(output_file: str):
 
     Parameters
     ----------
-    output_file : str
+    output_file : str or path
         Output path
     """
     return GenomeGaps.b37().to_bed(output_file)
 
 
-def ucsc_hg38_gap_bed(output_file: str):
+def ucsc_hg38_gap_bed(output_file: Union[str, PathLike]):
     """
     Creates BED4 of centromeres, telomeres, and short arms for the UCSC
     hg38 reference sequence.
 
     Parameters
     ----------
-    output_file : str
+    output_file : str or path
         Output path
     """
-    raise NotImplementedError()
+    return GenomeGaps.hg38().to_bed(output_file)
 
 
 def _cli_gap_bed(reference_genome, output_file):

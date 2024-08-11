@@ -219,6 +219,7 @@ def main_cli_parser():
         'interval_file',
         help='Path to a BED file containing intervals to calculates cleavage '
         'proportion over.')
+    cli_cleavage_profile.add_argument('chrom_sizes', help='A .chrom.sizes file containing chromosome sizes.')
     cli_cleavage_profile.add_argument(
         '-o',
         '--output_file',

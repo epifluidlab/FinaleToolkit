@@ -12,6 +12,7 @@ FinaleToolkit (FragmentatIoN AnaLysis of cEll-free DNA Toolkit) is a package and
 - **PyPI:** https://pypi.org/project/finaletoolkit/
 - **Documentation:** https://epifluidlab.github.io/finaletoolkit-docs/documentation
 - **Source code:** https://github.com/epifluidlab/finaletoolkit
+- **Changelog:** https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md
 - **Bug reports:** https://github.com/epifluidlab/finaletoolkit/issues
 
 

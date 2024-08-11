@@ -297,7 +297,7 @@ class EndMotifsIntervals():
                         freq, out=np.zeros_like(freq, dtype=np.float64), where=(freq!=0)
                         ) / np.log(num_kmers))
             except RuntimeWarning:
-                interval_mds = np.NaN
+                interval_mds = np.nan
             mds.append((interval, interval_mds))
         return mds
 

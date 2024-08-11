@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Intersect Policy &#8212; FinaleToolkit  documentation</title>
   
@@ -29,16 +28,16 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/user_guide/intersectpolicy';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -381,17 +380,17 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="intersect-policy">
-<h1>Intersect Policy<a class="headerlink" href="#intersect-policy" title="Permalink to this heading">#</a></h1>
+<h1>Intersect Policy<a class="headerlink" href="#intersect-policy" title="Link to this heading">#</a></h1>
 <p>When you give the <code class="docutils literal notranslate"><span class="pre">Fragment</span> <span class="pre">Generator</span></code> an interval of <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> to pull fragments from, which fragments will it return?</p>
 <p>What if a fragment has 1bp of overlap within the just on the edge of the window? Does it also return that fragment as well?</p>
 <p>These questions are answered by the <code class="docutils literal notranslate"><span class="pre">intersect_policy</span></code> argument, which shows up in many of the CLI and API commands.</p>
 <p><code class="docutils literal notranslate"><span class="pre">intersect_policy</span></code> can either be <code class="docutils literal notranslate"><span class="pre">midpoint</span></code> or <code class="docutils literal notranslate"><span class="pre">any</span></code>.</p>
 <section id="midpoint">
-<h2>Midpoint<a class="headerlink" href="#midpoint" title="Permalink to this heading">#</a></h2>
+<h2>Midpoint<a class="headerlink" href="#midpoint" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">midpoint</span></code>: The midpoint of the fragment determines whether the fragment will be returned or not. If the midpoint falls between <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code>, then it will be returned. Else, it will not.</p>
 </section>
 <section id="any">
-<h2>Any<a class="headerlink" href="#any" title="Permalink to this heading">#</a></h2>
+<h2>Any<a class="headerlink" href="#any" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">any</span></code>: As long as the fragment overlaps the interval between <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> in some capacity, then it will be returned. Else, it will not.</p>
 </section>
 </section>
@@ -490,7 +489,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
