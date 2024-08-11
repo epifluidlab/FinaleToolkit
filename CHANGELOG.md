@@ -12,8 +12,13 @@ and this project adheres to
 ### Changed
 - include `chrom_sizes` file as required argument for
 `finaletoolkit cleavage-profile`
-- Numpy dependency version set to <2 to avoid breaking changes from numpy 2.0
+- Numpy dependency version set to <2 to avoid breaking changes from numpy 2.
+This will change in the future as we migrate to use numpy 2.
 - Replaced all instances of `np.NaN` with `np.nan`.
+
+### Fixed
+- Fixed minor issues with typing in `finaletoolkit.genome.gaps`
+- Fixed issue where data files are not packaged with FinaleToolkit
 
 ## [0.7.0] - 2024-07-21
 
