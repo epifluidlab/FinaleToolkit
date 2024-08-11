@@ -174,13 +174,13 @@ class GenomeGaps:
             # XXX: why None?
             return None
         else:
-            in_centromere = np.logical_and(
+            in_centromere: bool = np.sum(np.logical_and(
                 stop > centromere['start'],
                 start < centromere['stop'],
-            )
+            ))
             # chr17 has no telomere in the gap track for some reason
             if not telomeres.shape[0]:
-                in_telomeres = np.sum(np.logical_and(
+                in_telomeres: bool = np.sum(np.logical_and(
                     stop > telomeres['start'],
                     start < telomeres['stop'],
                 )) > 0
