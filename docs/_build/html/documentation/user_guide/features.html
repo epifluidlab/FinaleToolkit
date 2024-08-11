@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Features &#8212; FinaleToolkit  documentation</title>
   
@@ -29,16 +28,16 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/user_guide/features';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -381,37 +380,37 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="features">
-<h1>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h1>
-<p><strong>FinaleToolkit</strong> has support for the following cell-free DNA features:</p>
+<h1>Features<a class="headerlink" href="#features" title="Link to this heading">#</a></h1>
+<p><strong>FinaleToolkit</strong> has support for the following cell-free DNA fragmentomic features:</p>
 <section id="fragment-length">
-<h2>Fragment Length<a class="headerlink" href="#fragment-length" title="Permalink to this heading">#</a></h2>
+<h2>Fragment Length<a class="headerlink" href="#fragment-length" title="Link to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the fragment length distribution and summary statistics of cell-free DNA fragments.</p>
 </section>
 <section id="fragment-coverage">
-<h2>Fragment Coverage<a class="headerlink" href="#fragment-coverage" title="Permalink to this heading">#</a></h2>
+<h2>Fragment Coverage<a class="headerlink" href="#fragment-coverage" title="Link to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate fragment coverage (the number of reads mapped to a specific region of the genome). This coverage can be normalized by the total number of reads in the sample, or simply the raw value.</p>
 </section>
 <section id="windowed-protection-score-wps">
-<h2>Windowed Protection Score (WPS)<a class="headerlink" href="#windowed-protection-score-wps" title="Permalink to this heading">#</a></h2>
+<h2>Windowed Protection Score (WPS)<a class="headerlink" href="#windowed-protection-score-wps" title="Link to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the Windowed Protection Score (WPS), which is a metric designed by <em>Snyder et al. 2016</em>.</p>
 <p>It is used to quantify the level of protection or coverage of DNA fragments across a specific genomic region. It’s calculated by assessing the number of DNA fragments that fully span a defined window (typically 120 base pairs) centered around a particular genomic coordinate, and then subtracting the number of fragments with an endpoint falling within the same window. This score is correlated with the location of nucleosomes and other genomic features, including transcriptional start sites (TSS) and DNase I hypersensitive sites (DHSs).</p>
 </section>
 <section id="delfi">
-<h2>DELFI<a class="headerlink" href="#delfi" title="Permalink to this heading">#</a></h2>
+<h2>DELFI<a class="headerlink" href="#delfi" title="Link to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate DELFI, which is a metric designed by <em>Cristiano et al. 2019</em>.</p>
 <p>DELFI is a metric that was introduced to identify abnormalities in cfDNA from their fragmentation patterns. In the original paper, DELFI was used to categorize patients with cancer and the associated tumor tissues of origin. The associated DELFI score is the ratio between the GC%-corrected short fragment count and the GC%-corrected long fragment count.</p>
 </section>
 <section id="end-motifs">
-<h2>End Motifs<a class="headerlink" href="#end-motifs" title="Permalink to this heading">#</a></h2>
+<h2>End Motifs<a class="headerlink" href="#end-motifs" title="Link to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the frequency of end-motif k-mers of cell-free DNA fragments. Since end motifs are specific sequences found at the ends of cfDNA fragments resulting from cleavage, they can be used to potentially detect patterns associated with certain conditions or diseases.</p>
 </section>
 <section id="motif-diversity-score-mds">
-<h2>Motif Diversity Score (MDS)<a class="headerlink" href="#motif-diversity-score-mds" title="Permalink to this heading">#</a></h2>
+<h2>Motif Diversity Score (MDS)<a class="headerlink" href="#motif-diversity-score-mds" title="Link to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the Motif Diversity Score (MDS), which is a metric designed by <em>Jiang et al. 2020</em>.</p>
 <p>The MDS is a metric that quantifies the diversity of cfDNA end motifs. It is the normalized Shannon entropy of the categorical distribution of all possible end-motif k-mers.</p>
 </section>
 <section id="cleavage-profile">
-<h2>Cleavage Profile<a class="headerlink" href="#cleavage-profile" title="Permalink to this heading">#</a></h2>
+<h2>Cleavage Profile<a class="headerlink" href="#cleavage-profile" title="Link to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the Cleavage Proportion, which is a metric designed by <em>Zhou et al. 2022</em>.</p>
 <p>The cleavage proportion is, by definition, the number of fragment ends that fall within a nucleotide location over the total number of fragment ends that overlap that nucleotide location. According to the authors, this metric shows a relationship to DNA methylation, specifically methylation at CpG sites.</p>
 </section>
@@ -516,7 +515,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>

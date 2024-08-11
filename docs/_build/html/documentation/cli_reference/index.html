@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>CLI &#8212; FinaleToolkit  documentation</title>
   
@@ -29,16 +28,16 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/cli_reference/index';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -368,7 +367,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="cli">
-<h1>CLI<a class="headerlink" href="#cli" title="Permalink to this heading">#</a></h1>
+<h1>CLI<a class="headerlink" href="#cli" title="Link to this heading">#</a></h1>
 <p><p>FinaleToolkit is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.</p>
 </p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">finaletoolkit</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
@@ -377,7 +376,7 @@ document.write(`
 </pre></div>
 </div>
 <section id="named-arguments">
-<h2>Named Arguments<a class="headerlink" href="#named-arguments" title="Permalink to this heading">#</a></h2>
+<h2>Named Arguments<a class="headerlink" href="#named-arguments" title="Link to this heading">#</a></h2>
 <dl class="option-list">
 <dt><kbd>-v, --version</kbd></dt>
 <dd><p>show program’s version number and exit</p>
@@ -385,17 +384,16 @@ document.write(`
 </dl>
 </section>
 <section id="Sub-commands">
-<h2>Sub-commands<a class="headerlink" href="#Sub-commands" title="Permalink to this heading">#</a></h2>
+<h2>Sub-commands<a class="headerlink" href="#Sub-commands" title="Link to this heading">#</a></h2>
 <section id="coverage">
-<h3>coverage<a class="headerlink" href="#coverage" title="Permalink to this heading">#</a></h3>
+<h3>coverage<a class="headerlink" href="#coverage" title="Link to this heading">#</a></h3>
 <p>Calculates fragmentation coverage over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">coverage</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SCALE_FACTOR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
-                       <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">coverage</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SCALE_FACTOR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                        <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -406,7 +404,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat1">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat1" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat1" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output_file</kbd></dt>
 <dd><p>A BED file containing coverage values over the intervals specified in interval file.</p>
@@ -432,16 +430,15 @@ document.write(`
 </section>
 </section>
 <section id="frag-length-bins">
-<h3>frag-length-bins<a class="headerlink" href="#frag-length-bins" title="Permalink to this heading">#</a></h3>
+<h3>frag-length-bins<a class="headerlink" href="#frag-length-bins" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment lengths grouped in bins given a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span>
-                               <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">contig</span><span class="o">-</span><span class="n">by</span><span class="o">-</span><span class="n">contig</span><span class="p">]</span>
-                               <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">contig</span><span class="o">-</span><span class="n">by</span><span class="o">-</span><span class="n">contig</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                <span class="n">input_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat1">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat1" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat1" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -449,7 +446,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat2">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat2" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat2" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-c, --contig</kbd></dt>
 <dd><p>Specify the contig or chromosome to select fragments from. (Required if using –start or –stop.)</p>
@@ -492,15 +489,15 @@ document.write(`
 </section>
 </section>
 <section id="frag-length-intervals">
-<h3>frag-length-intervals<a class="headerlink" href="#frag-length-intervals" title="Permalink to this heading">#</a></h3>
+<h3>frag-length-intervals<a class="headerlink" href="#frag-length-intervals" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
-                                    <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                     <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat2">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat2" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat2" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -511,7 +508,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat3">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat3" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat3" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-p, --intersect_policy</kbd></dt>
 <dd><p>Possible choices: midpoint, any</p>
@@ -538,15 +535,15 @@ document.write(`
 </section>
 </section>
 <section id="cleavage-profile">
-<h3>cleavage-profile<a class="headerlink" href="#cleavage-profile" title="Permalink to this heading">#</a></h3>
+<h3>cleavage-profile<a class="headerlink" href="#cleavage-profile" title="Link to this heading">#</a></h3>
 <p>Calculates cleavage proportion over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span>
                                <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                               <span class="n">input_file</span> <span class="n">interval_file</span>
+                               <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">chrom_sizes</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat3">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat3" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat3" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -554,10 +551,13 @@ document.write(`
 <dt><kbd>interval_file</kbd></dt>
 <dd><p>Path to a BED file containing intervals to calculates cleavage proportion over.</p>
 </dd>
+<dt><kbd>chrom_sizes</kbd></dt>
+<dd><p>A .chrom.sizes file containing chromosome sizes.</p>
+</dd>
 </dl>
 </section>
 <section id="named-arguments_repeat4">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat4" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat4" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output_file</kbd></dt>
 <dd><p>A bigWig file containing the cleavage proportion results over the intervals specified in interval file.</p>
@@ -595,16 +595,15 @@ document.write(`
 </section>
 </section>
 <section id="wps">
-<h3>wps<a class="headerlink" href="#wps" title="Permalink to this heading">#</a></h3>
+<h3>wps<a class="headerlink" href="#wps" title="Link to this heading">#</a></h3>
 <p>Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span>
-                  <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
-                  <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                   <span class="n">input_file</span> <span class="n">site_bed</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat4">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat4" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat4" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -615,7 +614,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat5">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output_file</kbd></dt>
 <dd><p>A bigWig file containing the WPS results over the intervals specified in interval file.</p>
@@ -653,16 +652,16 @@ document.write(`
 </section>
 </section>
 <section id="adjust-wps">
-<h3>adjust-wps<a class="headerlink" href="#adjust-wps" title="Permalink to this heading">#</a></h3>
+<h3>adjust-wps<a class="headerlink" href="#adjust-wps" title="Link to this heading">#</a></h3>
 <p>Adjusts raw Windowed Protection Score (WPS) by applying a median filter and Savitsky-Golay filter.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                          <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">genome_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat5">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat5" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat5" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>A bigWig file containing the WPS results over the intervals specified in interval file.</p>
@@ -676,7 +675,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat6">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat6" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat6" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A bigWig file containing the adjusted WPS results over the intervals specified in interval file.</p>
@@ -717,7 +716,7 @@ document.write(`
 </section>
 </section>
 <section id="delfi">
-<h3>delfi<a class="headerlink" href="#delfi" title="Permalink to this heading">#</a></h3>
+<h3>delfi<a class="headerlink" href="#delfi" title="Link to this heading">#</a></h3>
 <p>Calculates DELFI featrues over genome, returning information about (GC-corrected) short fragments, long fragments, DELFI ratio, and total fragments. NOTE: Due to some ad hoc implementation details, currently the only accepted reference genome is hg19.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">GAP_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">G</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">R</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">M</span><span class="p">]</span>
                     <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
@@ -725,7 +724,7 @@ document.write(`
 </pre></div>
 </div>
 <section id="positional-arguments_repeat6">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat6" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat6" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -742,7 +741,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat7">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat7" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat7" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-b, --blacklist-file</kbd></dt>
 <dd><p>BED file containing regions to ignore when calculating DELFI.</p>
@@ -782,14 +781,13 @@ document.write(`
 </section>
 </section>
 <section id="delfi-gc-correct">
-<h3>delfi-gc-correct<a class="headerlink" href="#delfi-gc-correct" title="Permalink to this heading">#</a></h3>
+<h3>delfi-gc-correct<a class="headerlink" href="#delfi-gc-correct" title="Link to this heading">#</a></h3>
 <p>Performs gc-correction on raw delfi data.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span><span class="o">-</span><span class="n">gc</span><span class="o">-</span><span class="n">correct</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span><span class="o">-</span><span class="n">lines</span> <span class="n">HEADER_LINES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                               <span class="n">input_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span><span class="o">-</span><span class="n">gc</span><span class="o">-</span><span class="n">correct</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span><span class="o">-</span><span class="n">lines</span> <span class="n">HEADER_LINES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat7">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat7" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat7" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>BED file containing raw DELFI data. Raw DELFI data should only have columns for “contig”, “start”, “stop”, “arm”, “short”, “long”, “gc”, “num_frags”, “ratio”.</p>
@@ -797,7 +795,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat8">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat8" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat8" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>BED to print GC-corrected DELFI fractions. If “-”, will write to stdout.</p>
@@ -814,15 +812,14 @@ document.write(`
 </section>
 </section>
 <section id="end-motifs">
-<h3>end-motifs<a class="headerlink" href="#end-motifs" title="Permalink to this heading">#</a></h3>
+<h3>end-motifs<a class="headerlink" href="#end-motifs" title="Link to this heading">#</a></h3>
 <p>Measures frequency of k-mer 5’ end motifs.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                          <span class="n">input_file</span> <span class="n">refseq_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat8">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat8" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat8" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -833,7 +830,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat9">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat9" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat9" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-k</kbd></dt>
 <dd><p>Length of k-mer.</p>
@@ -859,15 +856,15 @@ document.write(`
 </section>
 </section>
 <section id="interval-end-motifs">
-<h3>interval-end-motifs<a class="headerlink" href="#interval-end-motifs" title="Permalink to this heading">#</a></h3>
+<h3>interval-end-motifs<a class="headerlink" href="#interval-end-motifs" title="Link to this heading">#</a></h3>
 <p>Measures frequency of k-mer 5’ end motifs in each region specified in a BED file and writes data into a table.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span>
-                                  <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                   <span class="n">input_file</span> <span class="n">refseq_file</span> <span class="n">intervals</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat9">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat9" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat9" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
@@ -881,7 +878,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat10">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat10" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat10" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-k</kbd></dt>
 <dd><p>Length of k-mer.</p>
@@ -915,13 +912,13 @@ document.write(`
 </section>
 </section>
 <section id="mds">
-<h3>mds<a class="headerlink" href="#mds" title="Permalink to this heading">#</a></h3>
+<h3>mds<a class="headerlink" href="#mds" title="Link to this heading">#</a></h3>
 <p>Reads k-mer frequencies from a file and calculates a motif diversity score (MDS) using normalized Shannon entropy as described by Jiang et al (2020).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span> <span class="n">HEADER</span><span class="p">]</span> <span class="p">[</span><span class="n">file_path</span><span class="p">]</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat10">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat10" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat10" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>file_path</kbd></dt>
 <dd><p>Tab-delimited or similar file containing one column for all k-mers a one column for frequency. Reads from stdin by default.</p>
@@ -930,11 +927,11 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat11">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat11" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat11" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-s, --sep</kbd></dt>
 <dd><p>Separator used in tabular file.</p>
-<p>Default: ”      “</p>
+<p>Default: “      “</p>
 </dd>
 <dt><kbd>--header</kbd></dt>
 <dd><p>Number of header rows to ignore. Default is 0</p>
@@ -944,13 +941,13 @@ document.write(`
 </section>
 </section>
 <section id="interval-mds">
-<h3>interval-mds<a class="headerlink" href="#interval-mds" title="Permalink to this heading">#</a></h3>
+<h3>interval-mds<a class="headerlink" href="#interval-mds" title="Link to this heading">#</a></h3>
 <p>Reads k-mer frequencies from a file and calculates a motif diversity score (MDS) for each interval using normalized Shannon entropy as described by Jiang et al (2020).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span> <span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="n">file_out</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat11">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat11" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat11" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>file_path</kbd></dt>
 <dd><p>Tab-delimited or similar file containing one column for all k-mers a one column for frequency. Reads from stdin by default.</p>
@@ -963,25 +960,25 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat12">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat12" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat12" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-s, --sep</kbd></dt>
 <dd><p>Separator used in tabular file.</p>
-<p>Default: ”      “</p>
+<p>Default: “      “</p>
 </dd>
 </dl>
 </section>
 </section>
 <section id="filter-bam">
-<h3>filter-bam<a class="headerlink" href="#filter-bam" title="Permalink to this heading">#</a></h3>
+<h3>filter-bam<a class="headerlink" href="#filter-bam" title="Link to this heading">#</a></h3>
 <p>Filters a BAM file so that all reads are in mapped pairs, exceed a certain MAPQ, are not flagged for quality, are read1, are not secondary or supplementary alignments, and are on the same reference sequence as the mate.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">bam</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGION_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">bam</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGION_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                          <span class="n">input_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat12">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat12" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat12" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to BAM file.</p>
@@ -989,7 +986,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat13">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat13" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat13" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-r, --region-file</kbd></dt>
 <dd><p>Only output alignments overlapping the intervals in this BED file will be included.</p>
@@ -1019,14 +1016,13 @@ document.write(`
 </section>
 </section>
 <section id="agg-bw">
-<h3>agg-bw<a class="headerlink" href="#agg-bw" title="Permalink to this heading">#</a></h3>
+<h3>agg-bw<a class="headerlink" href="#agg-bw" title="Link to this heading">#</a></h3>
 <p>Aggregates a bigWig signal over constant-length intervals defined in a BED file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">agg</span><span class="o">-</span><span class="n">bw</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                     <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">agg</span><span class="o">-</span><span class="n">bw</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat13">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat13" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat13" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>input_file</kbd></dt>
 <dd><blockquote>
@@ -1039,7 +1035,7 @@ document.write(`
 </dl>
 </section>
 <section id="named-arguments_repeat14">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat14" title="Permalink to this heading">#</a></h4>
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat14" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A wiggle file containing the aggregate signal over the intervals specified in interval file.</p>
@@ -1056,13 +1052,13 @@ document.write(`
 </section>
 </section>
 <section id="gap-bed">
-<h3>gap-bed<a class="headerlink" href="#gap-bed" title="Permalink to this heading">#</a></h3>
+<h3>gap-bed<a class="headerlink" href="#gap-bed" title="Link to this heading">#</a></h3>
 <p>Creates a BED4 file containing centromeres, telomeres, and short-arm intervals, similar to the gaps annotation track for hg19 found on the UCSC Genome Browser (Kent et al 2002). Currently only supports hg19, b37, human_g1k_v37, hg38, and GRCh38</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">gap</span><span class="o">-</span><span class="n">bed</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">{</span><span class="n">hg19</span><span class="p">,</span><span class="n">b37</span><span class="p">,</span><span class="n">human_g1k_v37</span><span class="p">,</span><span class="n">hg38</span><span class="p">,</span><span class="n">GRCh38</span><span class="p">}</span> <span class="n">output_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat14">
-<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat14" title="Permalink to this heading">#</a></h4>
+<h4>Positional Arguments<a class="headerlink" href="#positional-arguments_repeat14" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>reference_genome</kbd></dt>
 <dd><p>Possible choices: hg19, b37, human_g1k_v37, hg38, GRCh38</p>
@@ -1248,7 +1244,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
