@@ -7,7 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased version]
+## [0.7.1] - 2024-08-11
 
 ### Changed
 - include `chrom_sizes` file as required argument for
