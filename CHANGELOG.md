@@ -7,6 +7,19 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2024-08-11
+
+### Changed
+- include `chrom_sizes` file as required argument for
+`finaletoolkit cleavage-profile`
+- Numpy dependency version set to <2 to avoid breaking changes from numpy 2.
+This will change in the future as we migrate to use numpy 2.
+- Replaced all instances of `np.NaN` with `np.nan`.
+
+### Fixed
+- Fixed minor issues with typing in `finaletoolkit.genome.gaps`
+- Fixed issue where data files are not packaged with FinaleToolkit
+
 ## [0.7.0] - 2024-07-21
 
 ### Added
@@ -14,7 +27,8 @@ and this project adheres to
 - Docstring
 - `finaletoolkit.version` module containing single-source `__version__`
 variable
-- `remove_nocov` option in `finaletoolkit.frag.delfi` to toggle dropping two bins with low coverage. These bins are dropped in delfi_scripts but
+- `remove_nocov` option in `finaletoolkit.frag.delfi` to toggle dropping two
+bins with low coverage. These bins are dropped in delfi_scripts but
 may not apply to fragment files not aligned to hg19.
 - tests for `finaletoolkit.frag.delfi_merge_bins`
 

@@ -2,7 +2,7 @@
 Features
 =========================================
 
-**FinaleToolkit** has support for the following cell-free DNA features:
+**FinaleToolkit** has support for the following cell-free DNA fragmentomic features:
 
 
 -----------------------

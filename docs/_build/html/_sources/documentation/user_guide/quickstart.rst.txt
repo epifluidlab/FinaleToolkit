@@ -25,9 +25,9 @@ FinaleToolkit has the following modules:
 * `cli` - command line interface
 * `utils` - utilities that simplify feature generation
 
-You can load *all* of the functions by using the following command::
+You can load *all* fragmentomics functions by using the following command::
 
-    >>> import finaletoolkit as ft
+    >>> import finaletoolkit.frag as ft
     
 If you want to load a *specific* function, you can do so by using the following:
 
