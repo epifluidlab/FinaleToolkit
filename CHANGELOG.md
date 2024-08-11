@@ -7,9 +7,11 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrelease version]
+## [Unreleased version]
 
 ### Changed
+- include `chrom_sizes` file as required argument for
+`finaletoolkit cleavage-profile`
 - Numpy dependency version set to <2 to avoid breaking changes from numpy 2.0
 - Replaced all instances of `np.NaN` with `np.nan`.
 
@@ -20,7 +22,8 @@ and this project adheres to
 - Docstring
 - `finaletoolkit.version` module containing single-source `__version__`
 variable
-- `remove_nocov` option in `finaletoolkit.frag.delfi` to toggle dropping two bins with low coverage. These bins are dropped in delfi_scripts but
+- `remove_nocov` option in `finaletoolkit.frag.delfi` to toggle dropping two
+bins with low coverage. These bins are dropped in delfi_scripts but
 may not apply to fragment files not aligned to hg19.
 - tests for `finaletoolkit.frag.delfi_merge_bins`
 
