@@ -10,7 +10,7 @@ CpG site.
 from __future__ import annotations
 from typing import Union
 from pathlib import Path
-from sys import stderr, stdout, stdin
+from sys import stderr
 from multiprocessing import Pool
 import gzip
 import time
@@ -20,7 +20,7 @@ import pyBigWig as pbw
 import pysam
 
 from finaletoolkit.utils.utils import (
-    frag_array, overlaps, chrom_sizes_to_list, _reduce_overlaps_in_file,
+    frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
     _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
     )
 
@@ -277,7 +277,7 @@ def _cli_cleavage_profile(
                                 ends=stops,
                                 values=scores.astype(np.float64),
                             )
-                        except RuntimeError as e:
+                        except RuntimeError:
                             stderr.write(
                                 f'{contigs[0]}:{starts[0]}-{stops[-1]}\n'
                             )

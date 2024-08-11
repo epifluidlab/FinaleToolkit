@@ -1,7 +1,6 @@
 from __future__ import annotations
 from shutil import get_terminal_size
 from typing import TextIO
-from sys import stdout
 
 import numpy as np
 
