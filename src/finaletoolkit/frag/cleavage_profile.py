@@ -45,6 +45,11 @@ def cleavage_profile(
     ---------
     input_file: str
         SAM, BAM, CRAM, or FRAG file with fragment information.
+    interval_file : str
+        BED4 file containing intervals over which to generate coverage
+        statistics.
+    output_file : str   
+        Path for bed file to print coverages to.
     chrom_size: int
         length of contig.
     contig: str
@@ -217,7 +222,7 @@ def _cli_cleavage_profile(
 
     size_dict = chrom_sizes_to_dict(chrom_sizes)
 
-    sizes = [size_dict[contig] for contig in contigs]
+    sizes = [int(size_dict[contig]) for contig in contigs]
     
     count = len(contigs)
 
