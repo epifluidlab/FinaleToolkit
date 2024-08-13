@@ -59,7 +59,7 @@ def chrom_sizes_to_dict(
         for line in file:
             if line != '\n':
                 chrom, size = line.strip().split('\t')
-                chrom_sizes[chrom] = size
+                chrom_sizes[chrom] = int(size)
     return chrom_sizes
 
 
