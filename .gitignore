@@ -8,3 +8,5 @@ pip-wheel-metadata
 build/*
 tests/tmp/*
 .coverage*
+test.py 
+test2.py

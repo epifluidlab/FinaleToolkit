@@ -515,7 +515,7 @@ def _get_intervals(
 
     with open(interval_file) as bed:
         for line in bed:
-            if ~line.startswith('#'):
+            if not line.startswith('#'):
                 if line != '':
                     contig, start, stop, *name = line.split()
                     start = int(start)
