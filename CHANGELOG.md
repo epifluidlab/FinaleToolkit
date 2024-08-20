@@ -13,7 +13,7 @@ and this project adheres to
  - Added a test for the coverage function
 
 ### Fixed
- - Ensured that the coverage value returns the expected value (previously returned an empty array)
+ - Ensured that the coverage value returns the expected value (previously returned an empty generator)
 
 ## [0.7.2] - 2024-08-17
 
