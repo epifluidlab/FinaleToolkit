@@ -160,6 +160,7 @@ def coverage(
     coverages : Iterable[tuple[str, int, int, str, float]]
         Fragment coverages over intervals.
     """
+    returnVal = []
     if (verbose):
         start_time = time.time()
         sys.stderr.write(
@@ -209,7 +210,6 @@ def coverage(
             ) if verbose else intervals,
             min(len(intervals) // 2 // workers + 1, 40)
         )
-
         if verbose:
             tqdm.write('Retrieving total coverage for file\n')
         total_coverage = total_coverage_results.get()
@@ -244,6 +244,7 @@ def coverage(
                             f'{contig}\t{start}\t{stop}\t'
                             f'{coverage/total_coverage[4]*scale_factor}\n'
                         )
+                        returnVal.append((contig,start,stop,name,coverage/total_coverage[4]*scale_factor))
                 else:
                     for contig, start, stop, name, coverage in coverages:
                         output.write(
@@ -251,6 +252,7 @@ def coverage(
                             f'{name}\t'
                             f'{coverage/total_coverage[4]*scale_factor}\n'
                         )
+                        returnVal.append((contig,start,stop,name,coverage/total_coverage[4]*scale_factor))
             finally:
                 if output_is_file:
                     output.close()
@@ -262,6 +264,5 @@ def coverage(
         sys.stderr.write(
             f'coverage took {end_time - start_time} s to complete\n'
         )
-
-    return coverages
+    return returnVal
 

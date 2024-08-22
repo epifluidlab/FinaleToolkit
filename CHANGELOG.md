@@ -6,6 +6,15 @@ The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.7.3] - 2024-08-20
+
+### Changed
+ - Used "not" instead of "~" in an if statement
+ - Added a test for the coverage function
+
+### Fixed
+ - Ensured that the coverage value returns the expected value (previously returned an empty generator)
+
 ## [0.7.2] - 2024-08-17
 
 ### Changed

@@ -41,5 +41,21 @@ class TestSingleCoverage:
         assert cov == pytest.approx(2)
 
 class TestCoverage:
-    def coverage(self, request):
-        pass
+    def test_coverage(self, request):
+        input_file = request.path.parent / 'data' / '12.3444.b37.frag.gz'
+        intervals = request.path.parent / 'data' / 'intervals.bed'
+        results = coverage(input_file,intervals,"-")
+        for i in range(2):
+            chrom, start, stop, name, cov = results[i]
+            if i == 0:  
+                assert chrom == '12'
+                assert start == 34443118
+                assert stop == 34443538
+                assert name == '.'
+                assert cov == pytest.approx(312500.0)
+            elif i == 1:
+                assert chrom == '12'
+                assert start == 34444968
+                assert stop == 34446115
+                assert name == '.'
+                assert cov == pytest.approx(437500.0)	
