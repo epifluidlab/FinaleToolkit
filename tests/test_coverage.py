@@ -52,10 +52,10 @@ class TestCoverage:
                 assert start == 34443118
                 assert stop == 34443538
                 assert name == '.'
-                assert cov == 312500.0
+                assert cov == pytest.approx(312500.0)
             elif i == 1:
                 assert chrom == '12'
                 assert start == 34444968
                 assert stop == 34446115
                 assert name == '.'
-                assert cov == 437500.0	
+                assert cov == pytest.approx(437500.0)	
