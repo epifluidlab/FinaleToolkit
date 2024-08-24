@@ -187,10 +187,10 @@ def frags_in_region(frag_array: NDArray[np.int64],
     -------
     filtered_frags : ndarray
     """
-    # Changed the code a bit to make it compatible with numba and not raise an error          
+    # Changed the code a bit to make it compatible with numba and not raise an error 
     starts = frag_array['start']
     stops = frag_array['stop']
-    in_region = np.logical_and(starts < maximum, stops >= minimum)
+    in_region = np.logical_and(np.less(starts,maximum), np.greater_equal(stops,minimum))
     filtered_frags = frag_array[in_region]
     return filtered_frags
 def frag_generator(
