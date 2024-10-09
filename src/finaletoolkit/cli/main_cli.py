@@ -414,9 +414,8 @@ def main_cli_parser():
         prog='finaletoolkit-delfi',
         description='Calculates DELFI featrues over genome, returning '
         'information about (GC-corrected) short fragments, long '
-        'fragments, DELFI ratio, and total fragments. NOTE: Due to some'
-        ' ad hoc implementation details, currently the only accepted '
-        'reference genome is hg19.')
+        'fragments, DELFI ratio, and total fragments.'
+        )
     cli_delfi.add_argument(
         'input_file',
         help="Path to a BAM/SAM/CRAM/Fragment file containing fragment data.")

@@ -65,12 +65,17 @@ def delfi(input_file: str,
     blacklist_file: str
         Path string to BED file containing genome blacklist regions.
     gap_file: str or GenomeGaps
-        Path string to a BED4+ file where each interval is a centromere
-        or telomere. A bed file can be used **only if** the fourth field
-        for each entry corresponding to a telomere or centromere is
-        labled "telomere" or "centromere, respectively. Alternatively, a
-        finaletoolkit.genome.GenomeGaps with gap info associated with
-        the reference genome of choice may be used.
+        Specifies locations of telomeres and centromeres for reference 
+        genome. There are three options:
+        - Path string to a BED4+ file where each interval is a
+        centromere or telomere. A bed file can be used **only if** the 
+        fourth field for each entry corresponding to a telomere or
+        centromere is labled "telomere" or "centromere, respectively. 
+        - String naming reference genome used. Options are "b37",
+        "hg19", "hg38", and "GRCh38".
+        - Alternatively, a finaletoolkit.genome.GenomeGaps with gap 
+        info associated with the reference genome of choice may be
+        used.
     output_file: str, optional
         Path to output tsv.
     gc_correct: bool
@@ -184,8 +189,20 @@ def delfi(input_file: str,
 
     for contig, size in contigs:
         if gaps is not None:
-            # print(contig)
-            contig_gaps = gaps.get_contig_gaps(contig)
+            if gap_file == "hg38" or gap_file == "GRCh38": 
+                gaps = GenomeGaps.hg38()
+            elif gap_file == "hg19":
+                gaps = GenomeGaps.ucsc_hg19()
+            elif gap_file == "b37":
+                gaps = GenomeGaps.b37()
+            elif type(gap_file) == str:
+                gaps = GenomeGaps(gap_file)
+            elif type(gap_file) == GenomeGaps:
+                gaps = gap_file
+            else:
+                raise TypeError(
+                    f'{type(gap_file)} is not accepted type for gap_file'
+                )
         else:
             contig_gaps = None
         for _, start, stop, *_ in (
