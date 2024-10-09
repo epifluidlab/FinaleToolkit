@@ -2,7 +2,6 @@ from __future__ import annotations
 import time
 from multiprocessing.pool import Pool
 from typing import Union
-from os import PathLike
 from sys import stderr, stdout
 
 import py2bit
@@ -113,7 +112,7 @@ def delfi(input_file: str,
         \n""")
 
     if verbose:
-        stderr.write(f'Reading genome file...\n')
+        stderr.write('Reading genome file...\n')
 
     # Read chromosome names and lengths from .genome file
     contigs = []
@@ -140,7 +139,7 @@ def delfi(input_file: str,
     
     # opening 100kb bins BED file into a dataframe
     if verbose:
-        stderr.write(f'Opening bins file...\n')
+        stderr.write('Opening bins file...\n')
 
     bins = pandas.read_csv(
         bins_file,
@@ -153,7 +152,7 @@ def delfi(input_file: str,
 
     if verbose:
         stderr.write(f'{bins.shape[0]} bins read from file.\n')
-        stderr.write(f'Filtering gaps...\n')
+        stderr.write('Filtering gaps...\n')
         
     # filtering for gaps
     if gaps is not None:
@@ -173,12 +172,12 @@ def delfi(input_file: str,
                          '\n')
     else:
         if verbose:
-            stderr.write(f'No gaps specified, skipping.\n')
+            stderr.write('No gaps specified, skipping.\n')
         gapless_bins = bins
 
     # generating args for pooled processes
     if verbose:
-        stderr.write(f'Preparing to generate short and long coverages.\n')
+        stderr.write('Preparing to generate short and long coverages.\n')
 
     window_args = []
     contig_gaps = None

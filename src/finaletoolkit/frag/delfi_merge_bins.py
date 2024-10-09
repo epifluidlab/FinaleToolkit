@@ -1,7 +1,6 @@
 from importlib.resources import files
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 import finaletoolkit.frag as pkg_data
