@@ -62,8 +62,6 @@ def delfi(input_file: str,
         genome of choice.
     reference_file: str
         Path string to .2bit file for reference genoe.
-    blacklist_file: str
-        Path string to BED file containing genome blacklist regions.
     gap_file: str or GenomeGaps
         Specifies locations of telomeres and centromeres for reference 
         genome. There are three options:
@@ -76,6 +74,8 @@ def delfi(input_file: str,
         - Alternatively, a finaletoolkit.genome.GenomeGaps with gap 
         info associated with the reference genome of choice may be
         used.
+    blacklist_file: str
+        Path string to BED file containing genome blacklist regions.
     output_file: str, optional
         Path to output tsv.
     gc_correct: bool
@@ -130,15 +130,14 @@ def delfi(input_file: str,
 
     # Prepare genome gaps using GenomeGaps class
     gaps = None
-    if (gap_file is not None):
-        if type(gap_file) == str:
-            gaps = GenomeGaps(gap_file)
-        elif type(gap_file) == GenomeGaps:
-            gaps = gap_file
-        else:
-            raise TypeError(
-                f'{type(gap_file)} is not accepted type for gap_file'
-            )
+    if (type(gap_file) == str):
+        gaps = GenomeGaps(gap_file)
+    elif (type(gap_file) == GenomeGaps):
+        gaps = gap_file
+    else:
+        raise TypeError(
+            f'{type(gap_file)} is not accepted type for gap_file'
+        )
     
     # Read 100kb bins and filter out bins that overlap gaps, darkregions
     
@@ -173,8 +172,8 @@ def delfi(input_file: str,
         # masking by overlap
         gapless_bins = bins.loc[~overlaps_gap]
         if verbose:
-            stderr.write(f'{bins.shape[0]-gapless_bins.shape[0]} bins removed'
-                         '\n')
+            stderr.write(f'{bins.shape[0]-gapless_bins.shape[0]} bins '
+            'removed\n')
     else:
         if verbose:
             stderr.write('No gaps specified, skipping.\n')
@@ -189,22 +188,11 @@ def delfi(input_file: str,
 
     for contig, size in contigs:
         if gaps is not None:
-            if gap_file == "hg38" or gap_file == "GRCh38": 
-                gaps = GenomeGaps.hg38()
-            elif gap_file == "hg19":
-                gaps = GenomeGaps.ucsc_hg19()
-            elif gap_file == "b37":
-                gaps = GenomeGaps.b37()
-            elif type(gap_file) == str:
-                gaps = GenomeGaps(gap_file)
-            elif type(gap_file) == GenomeGaps:
-                gaps = gap_file
-            else:
-                raise TypeError(
-                    f'{type(gap_file)} is not accepted type for gap_file'
-                )
+            # print(contig)
+            contig_gaps = gaps.get_contig_gaps(contig)
         else:
             contig_gaps = None
+
         for _, start, stop, *_ in (
             gapless_bins.loc[gapless_bins.loc[:,'contig']==contig]
             .itertuples(index=False, name=None)
@@ -213,6 +201,7 @@ def delfi(input_file: str,
                 input_file,
                 reference_file,
                 contig_gaps,
+                contig,
                 start,
                 stop,
                 blacklist_file,
@@ -318,6 +307,7 @@ def _delfi_single_window(
         input_file: str,
         reference_file: str,
         contig_gaps: ContigGaps,
+        contig: str,
         window_start: int,
         window_stop: int,
         blacklist_file: str=None,
@@ -326,7 +316,6 @@ def _delfi_single_window(
     """
     Calculates short and long counts for one window.
     """
-    contig = contig_gaps.contig
 
     blacklist_regions = []
 
@@ -349,29 +338,33 @@ def _delfi_single_window(
 
     num_frags = 0
 
-    # check if interval in centromere or telomere
-    in_tcmere = contig_gaps.in_tcmere(window_start, window_stop)
-    if in_tcmere:
-        return (contig,
-            window_start,
-            window_stop,
-            'NOARM',
-            np.nan,
-            np.nan,
-            np.nan,
-            0)
+    if contig_gaps is not None:
+        # check if interval in centromere or telomere
+        in_tcmere = contig_gaps.in_tcmere(window_start, window_stop)
+        if in_tcmere:
+            return (contig,
+                window_start,
+                window_stop,
+                'NOARM',
+                np.nan,
+                np.nan,
+                np.nan,
+                0)
 
-    arm = contig_gaps.get_arm(window_start, window_stop)
-    # if in short arm
-    if arm == 'NOARM':
-        return (contig,
-            window_start,
-            window_stop,
-            'NOARM',
-            np.nan,
-            np.nan,
-            np.nan,
-            0)
+        arm = contig_gaps.get_arm(window_start, window_stop)
+        # if in short arm
+        if arm == 'NOARM':
+            return (contig,
+                window_start,
+                window_stop,
+                'NOARM',
+                np.nan,
+                np.nan,
+                np.nan,
+                0)
+    else:
+        in_tcmere = False
+        arm = contig
     
     # Iterating on each read in file in specified contig/chromosome
     for _, frag_start, frag_stop, _, _ in frag_generator(
@@ -399,12 +392,15 @@ def _delfi_single_window(
                 break
 
         # check if in centromere or telomere
-        in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
-        if in_tcmere:
-            continue
+        if contig_gaps is not None:
+            read_in_tcmere = contig_gaps.in_tcmere(frag_start, frag_stop)
+            if read_in_tcmere:
+                continue
+        else:
+            read_in_tcmere = False
 
         if (not blacklisted
-            and not in_tcmere
+            and not read_in_tcmere
         ):
             # append length of fragment to list
             if (frag_length >= 151):
