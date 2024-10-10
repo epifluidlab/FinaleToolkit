@@ -412,7 +412,7 @@ def main_cli_parser():
     cli_delfi = subparsers.add_parser(
         'delfi',
         prog='finaletoolkit-delfi',
-        description='Calculates DELFI featrues over genome, returning '
+        description='Calculates DELFI features over genome, returning '
         'information about (GC-corrected) short fragments, long '
         'fragments, DELFI ratio, and total fragments.'
         )
