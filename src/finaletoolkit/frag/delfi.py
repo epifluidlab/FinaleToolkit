@@ -134,6 +134,8 @@ def delfi(input_file: str,
         gaps = GenomeGaps(gap_file)
     elif (type(gap_file) == GenomeGaps):
         gaps = gap_file
+    elif gaps is None:
+        pass
     else:
         raise TypeError(
             f'{type(gap_file)} is not accepted type for gap_file'
