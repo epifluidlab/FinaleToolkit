@@ -43,7 +43,7 @@ dynamic = ["version"]
 version = {attr = "finaletoolkit.__version__"}
 
 [project.scripts]
-finaletoolkit = "finaletoolkit.cli:main_cli"
+finaletoolkit = "finaletoolkit.cli.main_cli:main_cli"
 
 [project.urls]
 Homepage = "https://epifluidlab.github.io/FinaleToolkit/"

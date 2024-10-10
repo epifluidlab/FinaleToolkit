@@ -1,16 +1,14 @@
 from __future__ import annotations
 import time
 import gzip
-import tempfile as tf
-from typing import Union, TextIO, Generator, Iterable
-from sys import stderr, stdout
+from typing import Union, Generator
+from sys import stderr
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 from numba import jit
 import pysam
-from tqdm import tqdm
 
 
 def chrom_sizes_to_list(

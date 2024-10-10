@@ -8,14 +8,12 @@ import gzip
 
 from importlib.resources import files
 from pathlib import Path
-from collections import UserDict
 
 import tqdm
 import py2bit
 import numpy as np
-from numpy.typing import NDArray
 
-from finaletoolkit.utils.utils import frag_generator, _get_intervals
+from finaletoolkit.utils.utils import frag_generator
 import finaletoolkit.frag as pkg_data
 
 # path to tsv containing f-profiles from Zhou et al (2023)
@@ -95,7 +93,7 @@ class EndMotifFreqs():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string or path.')
+            raise TypeError('output_file must be a string or path.')
 
     def motif_diversity_score(self) -> float:
         """
@@ -374,7 +372,7 @@ class EndMotifsIntervals():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string or path.')
+            raise TypeError('output_file must be a string or path.')
     
     def to_bedgraph(
             self,
@@ -427,7 +425,7 @@ class EndMotifsIntervals():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string.')
+            raise TypeError('output_file must be a string.')
         
     def to_bed(
             self,
@@ -481,7 +479,7 @@ class EndMotifsIntervals():
                 if output_is_file:
                     output.close()
         else:
-            raise TypeError(f'output_file must be a string.')
+            raise TypeError('output_file must be a string.')
 
 
 def _gen_kmers(k: int, bases: str) -> list:

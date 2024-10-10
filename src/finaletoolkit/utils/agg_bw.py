@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sys import stdin, stdout, stderr
+from sys import stderr
 from typing import Union
 import time
 import gzip
@@ -62,7 +62,8 @@ def agg_bw(
         stderr.write('Reading intervals from bed...\n')
 
     # reading intervals from interval_file into a list
-    if str(interval_file).endswith('.bed') or str(interval_file).endswith('.bed.gz'):
+    if (str(interval_file).endswith('.bed')
+        or str(interval_file).endswith('.bed.gz')):
         intervals = []
         with (gzip.open(interval_file, 'rt')
               if str(interval_file).endswith('.gz')
@@ -93,7 +94,9 @@ def agg_bw(
             try:
                 signal = raw_wps.values(contig, start, stop)
                 if signal==None:
-                    print("There was no information found in the interval: ", contig, start, stop)
+                    print(
+                        "There was no information found in the interval: ",
+                        contig, start, stop)
                     continue
                 values = np.nan_to_num(np.array(signal), nan=0)
             except RuntimeError as e:
@@ -103,7 +106,9 @@ def agg_bw(
             # trimmed from median filter
             trimmed = values[median_window_size//2:-median_window_size//2]
             if trimmed.shape[0] != interval_size:
-                print(f"Trimmed size {trimmed.shape[0]} is not equal to interval size {interval_size}. Skipping.")
+                print(
+                    f"Trimmed size {trimmed.shape[0]} is not equal to "
+                    f"interval size {interval_size}. Skipping.")
                 continue
 
             # flip scores if on reverse strand
@@ -124,11 +129,11 @@ def agg_bw(
     if str(output_file).endswith('wig'):
         with open(output_file, 'wt') as out:
             if (verbose):
-                stderr.write(f'File opened! Writing...\n')
+                stderr.write('File opened! Writing...\n')
             # declaration line
             out.write(
-                f'fixedStep\tchrom=.\tstart={-interval_size//2}\tstep={1}\tspan'
-                f'={interval_size}\n'
+                f'fixedStep\tchrom=.\tstart={-interval_size//2}\tstep={1}\t'
+                f'span={interval_size}\n'
             )
             for score in agg_scores:
                 out.write(f'{score}\n')

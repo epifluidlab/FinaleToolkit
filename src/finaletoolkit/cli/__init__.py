@@ -1,1 +1,1 @@
-from finaletoolkit.cli.main_cli import *
+"Module containing main method for finaletoolkit CLI."

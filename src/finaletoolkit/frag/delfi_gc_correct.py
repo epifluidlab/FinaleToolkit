@@ -1,13 +1,11 @@
 from __future__ import annotations
-from typing import TextIO, Union
+from typing import Union
 from sys import stdout, stdin
-import gzip
 import time
 from sys import stderr
 
 import pandas
 import numpy as np
-from statsmodels.nonparametric.smoothers_lowess import lowess
 from loess.loess_1d import loess_1d
 
 

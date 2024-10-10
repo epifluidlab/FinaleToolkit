@@ -2,13 +2,11 @@ from __future__ import annotations
 import gzip
 import time
 from multiprocessing.pool import Pool
-from typing import Union, Iterator, Generator
-from sys import stderr, stdout, stdin
+from typing import Union
+from sys import stderr, stdin
 
 import pysam
 import numpy as np
-from numpy.typing import NDArray
-from tqdm import tqdm
 import pyBigWig as pbw
 
 from finaletoolkit.frag.wps import wps
@@ -215,7 +213,7 @@ def multi_wps(
                                 ends=stops,
                                 values=scores.astype(np.float64),
                             )
-                        except RuntimeError as e:
+                        except RuntimeError:
                             stderr.write(
                                 f'{contigs[0]}:{starts[0]}-{stops[-1]}\n'
                             )
