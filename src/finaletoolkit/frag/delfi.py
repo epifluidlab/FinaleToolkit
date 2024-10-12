@@ -241,7 +241,7 @@ def delfi(input_file: str,
     if (verbose):
         stderr.write('Calculating ratio...\n')
 
-    trimmed_windows['ratio'] = trimmed_windows['short']/trimmed_windows['long']
+    trimmed_windows['ratio'] = np.where(trimmed_windows['long'] == 0, np.nan, trimmed_windows['short'] / trimmed_windows['long']) #handle the case where the 'long' is 0.
 
     # remove nocov windows
     if remove_nocov:
