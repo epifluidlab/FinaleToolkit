@@ -209,7 +209,9 @@ def frag_generator(
 
     Parameters
     ----------
-    input_file : str or AlignmentFile
+    input_file : str, pathlike, or AlignmentFile
+        Fragment coordinates stored as a SAM, BAM, CRAM, tabix-indexed
+        bed.gz, or tabix-indexed FinaleDB fragment file.
     contig : str
     quality_threshold : int, optional
     start : int, optional
@@ -231,8 +233,9 @@ def frag_generator(
     Returns
     -------
     frag_ends : Generator
-        Generator that yields tuples containing the region covered by
-        each fragment in input_file.
+        Generator that yields tuples:
+        (contig: str, read_start: int, read_stop: int, mapq: int,
+        read_on_plus: boolean)
     """
     try:
         # check type of input and open if needed
