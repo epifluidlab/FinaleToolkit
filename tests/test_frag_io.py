@@ -52,6 +52,27 @@ class TestFragGenerator:
         
         assert len(frags) == 17, "Incorrect number of frags"
 
+    def test_bed_gz(self, request):
+        """
+        See if frag_generator runs when opening a bed.gz file and reads the
+        right number of reads
+        """
+        path = request.path.parent / 'data' / '12.3444.b37.frag.bed.gz'
+        frag_gen = frag_generator(
+            path, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+        )
+        frags = [frag for frag in frag_gen]
+
+        chroms = np.array([chrom for chrom, *_ in frags])
+        starts = np.array([start for _, start, *_ in frags])
+        stops = np.array([stop for _, _, stop, *_ in frags])
+
+        in_region = np.any(overlaps(np.array(['12']), np.array([34442500]),
+                               np.array([34446500]), chroms, starts, stops))
+        assert in_region, "Some fragments are outside of region"
+        
+        assert len(frags) == 17, "Incorrect number of frags"
+
         
 
 
