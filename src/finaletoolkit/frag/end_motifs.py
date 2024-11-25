@@ -607,7 +607,7 @@ def region_end_motifs(
                     continue
         else:
             for frag in frag_ends:
-                if frag[3]: # is on forward strand or not
+                if frag[4]: # is on forward strand or not
                     # py2bit uses 0-based for start, 1-based for end
                     # forward end-motif
                     forward_kmer = refseq.sequence(

@@ -7,7 +7,17 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.4] - 2024-08-24
+## [0.7.6] - 2024-11-18
+
+### Fixed
+- indexing issue in region_end_motifs that would misread strand
+information when calculating end motifs on forward-strand only.
+
+### Changed
+- frag_generator now accepts fragment coordinates in bed.gz files
+
+
+## [0.7.5] - 2024-10-10
 
 ### Fixed
  - `delfi` accepts `gap_file=None`

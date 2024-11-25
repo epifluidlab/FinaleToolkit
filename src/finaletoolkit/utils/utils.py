@@ -209,7 +209,9 @@ def frag_generator(
 
     Parameters
     ----------
-    input_file : str or AlignmentFile
+    input_file : str, pathlike, or AlignmentFile
+        Fragment coordinates stored as a SAM, BAM, CRAM, tabix-indexed
+        bed.gz, or tabix-indexed FinaleDB fragment file.
     contig : str
     quality_threshold : int, optional
     start : int, optional
@@ -231,8 +233,9 @@ def frag_generator(
     Returns
     -------
     frag_ends : Generator
-        Generator that yields tuples containing the region covered by
-        each fragment in input_file.
+        Generator that yields tuples:
+        (contig: str, read_start: int, read_stop: int, mapq: int,
+        read_on_plus: boolean)
     """
     try:
         # check type of input and open if needed
@@ -240,19 +243,21 @@ def frag_generator(
         if isinstance(input_file, str) or isinstance(input_file, Path):
             input_file_is_path == True
             # check file type
-            if (
+            if ( # AlignmentFile
                 str(input_file).endswith('.sam')
                 or str(input_file).endswith('.bam')
                 or str(input_file).endswith('.cram')
             ):
                 is_sam = True
                 sam_file = pysam.AlignmentFile(input_file, 'r')
-            elif (
+            elif ( # Tabix indexed file
                 str(input_file).endswith('frag.gz')
                 or str(input_file).endswith('bed.gz')
             ):
                 tbx = pysam.TabixFile(str(input_file), 'r')
                 is_sam = False
+                # check if input is FinaleDB Fragment file
+                is_frag = str(input_file).endswith('frag.gz') 
             else:
                 raise ValueError(
                     "Unaccepted interval file type. Only SAM, CRAM, BAM"
@@ -265,6 +270,7 @@ def frag_generator(
             input_file_is_path = False
             is_sam = False
             tbx = input_file
+            is_frag = tbx.filename.endswith('frag.gz')
         else:
             raise TypeError(
                 f'{type(input_file)} is invalid type for input_file.'
@@ -292,7 +298,7 @@ def frag_generator(
             else:
                 raise ValueError("contig should be specified if start or stop given.")
 
-        if is_sam:
+        if is_sam: # AlignmentFile
             for read in sam_file.fetch(contig, start, stop):
                 # Only select read1 and filter out non-paired-end
                 # reads and low-quality reads
@@ -336,22 +342,27 @@ def frag_generator(
                                        "Skipping interval.\n",
                                        f"Error: {e}\n"])
 
-        else:
+        else: # Tabix Indexed
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
-                mapq = int(line[3])
                 frag_length = read_stop - read_start
-                read_on_plus = '+' in line[4]
+                if is_frag:
+                    mapq = int(line[3])
+                    read_on_plus = '+' in line[4]
+                else:
+                    mapq = int(line[4])
+                    read_on_plus = '+' in line[5]
+                    
                 try:
                     if (frag_length >= fraction_low
                         and frag_length <= fraction_high
                         and mapq >= quality_threshold
                         ):
                         yield contig, read_start, read_stop, mapq, read_on_plus
-                # HACK: for some reason read_length is sometimes None
+                # HACK: read_length is sometimes None
                 except TypeError:
                     continue
 
