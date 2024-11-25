@@ -10,3 +10,6 @@ tests/tmp/*
 .coverage*
 test.py 
 test2.py
+/shelf/
+/workspace.xml
+.idea*
