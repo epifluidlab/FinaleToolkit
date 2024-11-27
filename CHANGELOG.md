@@ -15,11 +15,8 @@ the following code resulted in an error:
 ```python
 >>> import finaletoolkit as ftk
 >>> help(ftk.frag)
----------------------------------------------------------------------------
-AttributeError                            Traceback (most recent call last)
-Cell In[3], line 1
-----> 1 ftk.frag
-
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
 AttributeError: module 'finaletoolkit' has no attribute 'frag'
 ```
 Now this is a valid way to access subpackages `cli`, `frag`, `genome`, and
