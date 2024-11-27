@@ -7,6 +7,24 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.7] - 2024-11-27
+
+### Fixed
+- subpackages can now be accessed when importing `finaletoolkit`. Previously,
+the following code resulted in an error:
+```python
+>>> import finaletoolkit as ftk
+>>> help(ftk.frag)
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+Cell In[3], line 1
+----> 1 ftk.frag
+
+AttributeError: module 'finaletoolkit' has no attribute 'frag'
+```
+Now this is a valid way to access subpackages `cli`, `frag`, `genome`, and
+`utils`.
+
 ## [0.7.6] - 2024-11-18
 
 ### Fixed
