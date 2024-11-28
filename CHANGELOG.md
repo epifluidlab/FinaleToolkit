@@ -7,6 +7,12 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.8] - 2024-11-28
+
+### Fixed
+- update docs, docstring, and help message for wps to mention that
+`interval_bed` must be sorted.
+
 ## [0.7.7] - 2024-11-27
 
 ### Fixed
