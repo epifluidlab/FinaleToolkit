@@ -11,7 +11,7 @@ and this project adheres to
 
 ### Fixed
 - update docs, docstring, and help message for wps to mention that
-`interval_bed` must be sorted.
+`site_bed` must be sorted.
 
 ## [0.7.7] - 2024-11-27
 
