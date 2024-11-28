@@ -110,12 +110,13 @@ def _single_coverage_star(args):
     """
     return single_coverage(*args)
 
-# TODO: add normalized coverage
+
 def coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
         output_file: str,
         scale_factor: float=1e6,
+        normalize: bool=False,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         workers: int=1,
@@ -142,6 +143,9 @@ def coverage(
         results will be printed to stdout.
     scale_factor : int, optional
         Amount to multiply coverages by. Default is 10^6.
+    normalize : bool
+        When set to true, ignore `scale_factor` and divide by total
+        coverage.
     intersect_policy: str, optional
         Specifies how to determine whether fragments are in interval.
         'midpoint' (default) calculates the central coordinate of each
@@ -169,6 +173,7 @@ def coverage(
             interval_file: {interval_file}
             output_file: {output_file}
             scale_factor: {scale_factor}
+            normalize: {normalize}
             intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             workers: {workers}
@@ -216,6 +221,10 @@ def coverage(
         if verbose:
                 tqdm.write(f'Total coverage is {total_coverage}\n')
 
+        # normalize
+        if normalize:
+            scale_factor = 1/total_coverage
+
         # Output
         output_is_file = False
 
@@ -244,7 +253,9 @@ def coverage(
                             f'{contig}\t{start}\t{stop}\t'
                             f'{coverage/total_coverage[4]*scale_factor}\n'
                         )
-                        returnVal.append((contig,start,stop,name,coverage/total_coverage[4]*scale_factor))
+                        returnVal.append(
+                            (contig, start, stop, name,
+                             coverage/total_coverage[4]*scale_factor))
                 else:
                     for contig, start, stop, name, coverage in coverages:
                         output.write(
@@ -252,7 +263,9 @@ def coverage(
                             f'{name}\t'
                             f'{coverage/total_coverage[4]*scale_factor}\n'
                         )
-                        returnVal.append((contig,start,stop,name,coverage/total_coverage[4]*scale_factor))
+                        returnVal.append(
+                            (contig, start, stop, name,
+                             coverage/total_coverage[4]*scale_factor))
             finally:
                 if output_is_file:
                     output.close()

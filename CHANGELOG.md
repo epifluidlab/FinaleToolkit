@@ -7,6 +7,32 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.8] - 2024-11-28
+
+### Fixed
+- update docs, docstring, and help message for wps to mention that
+`site_bed` must be sorted.
+
+### Added
+- `normalize` keyword argument and `--normalize` flag to `finaletoolkit.frag.coverage` function and `finaletoolkit coverage` subcommand, respectively. Setting this argument/flag to true results in the output
+being normalized by the total coverage, ignoring `scale_factor` if specified.
+- `--intersect-policy` or `-p` flag added to `finaletoolkit coverage` subcommand.
+
+## [0.7.7] - 2024-11-27
+
+### Fixed
+- subpackages can now be accessed when importing `finaletoolkit`. Previously,
+the following code resulted in an error:
+```python
+>>> import finaletoolkit as ftk
+>>> help(ftk.frag)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: module 'finaletoolkit' has no attribute 'frag'
+```
+Now this is a valid way to access subpackages `cli`, `frag`, `genome`, and
+`utils`.
+
 ## [0.7.6] - 2024-11-18
 
 ### Fixed

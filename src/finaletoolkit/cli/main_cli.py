@@ -61,11 +61,27 @@ def main_cli_parser():
         help='A BED file containing coverage values over the intervals '
         'specified in interval file.')
     cli_coverage.add_argument(
+        '-n',
+        '--normalize',
+        action='store_true',
+        help="If flag set, ignores any user inputed scale factor and "
+        "normalizes output by total coverage."
+    )
+    cli_coverage.add_argument(
         '-s',
         '--scale-factor',
         default=1e6,
         type=float,
         help='Scale factor for coverage values.')
+    cli_coverage.add_argument(
+        '-p',
+        '--intersect_policy',
+        choices=['midpoint',
+        'any'],
+        default='midpoint',
+        type=str,
+        help='Specifies what policy is used to include fragments in the'
+        ' given interval. See User Guide for more information.')
     cli_coverage.add_argument(
         '-q',
         '--quality_threshold',
@@ -287,7 +303,8 @@ def main_cli_parser():
     cli_wps.add_argument(
         'site_bed',
         help='Path to a BED file containing intervals to calculate WPS '
-        'over.')
+        'over. The intervals in this BED file should be sorted, first '
+        'by `contig` then `start`.')
     cli_wps.add_argument(
         '-o',
         '--output_file',

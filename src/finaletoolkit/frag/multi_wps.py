@@ -39,7 +39,9 @@ def multi_wps(
         BAM, SAM, or tabix file containing paired-end fragment reads or its
         path. `AlignmentFile` must be opened in read mode.
     site_bed: str
-        Bed file containing intervals to perform WPS on.
+        BED file containing intervals to perform WPS on. The intervals
+        in this BED file should be sorted, first by `contig` then
+        `start`.
     output_file : string, optional
     window_size : int, optional
         Size of window to calculate WPS. Default is k = 120, equivalent
