@@ -61,6 +61,13 @@ def main_cli_parser():
         help='A BED file containing coverage values over the intervals '
         'specified in interval file.')
     cli_coverage.add_argument(
+        '-n',
+        '--normalize',
+        action='store_true',
+        help="If flag set, ignores any user inputed scale factor and "
+        "normalizes output by total coverage."
+    )
+    cli_coverage.add_argument(
         '-s',
         '--scale-factor',
         default=1e6,
