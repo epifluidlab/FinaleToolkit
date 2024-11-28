@@ -74,6 +74,15 @@ def main_cli_parser():
         type=float,
         help='Scale factor for coverage values.')
     cli_coverage.add_argument(
+        '-p',
+        '--intersect_policy',
+        choices=['midpoint',
+        'any'],
+        default='midpoint',
+        type=str,
+        help='Specifies what policy is used to include fragments in the'
+        ' given interval. See User Guide for more information.')
+    cli_coverage.add_argument(
         '-q',
         '--quality_threshold',
         default=30,
