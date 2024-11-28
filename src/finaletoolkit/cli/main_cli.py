@@ -287,7 +287,8 @@ def main_cli_parser():
     cli_wps.add_argument(
         'site_bed',
         help='Path to a BED file containing intervals to calculate WPS '
-        'over.')
+        'over. The intervals in this BED file should be sorted, first '
+        'by `contig` then `start`.')
     cli_wps.add_argument(
         '-o',
         '--output_file',
