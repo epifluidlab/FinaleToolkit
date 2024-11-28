@@ -13,6 +13,10 @@ and this project adheres to
 - update docs, docstring, and help message for wps to mention that
 `site_bed` must be sorted.
 
+### Added
+- `normalize` keyword argument and `--normalize` flag to `finaletoolkit.frag.coverage` function and `finaletoolkit coverage` subcommands, respectively. Setting this argument/flag to true results in the output
+being normalized by the total coverage, ignoring `scale_factor` if specified.
+
 ## [0.7.7] - 2024-11-27
 
 ### Fixed

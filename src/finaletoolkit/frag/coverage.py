@@ -110,7 +110,7 @@ def _single_coverage_star(args):
     """
     return single_coverage(*args)
 
-# TODO: add normalized coverage
+
 def coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
