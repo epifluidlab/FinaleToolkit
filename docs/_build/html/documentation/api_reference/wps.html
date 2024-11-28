@@ -425,7 +425,9 @@ method described by Snyder et al (2016).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_file</strong> (<em>str</em><em> or </em><em>pysam.AlignmentFile</em>) – BAM, SAM, or tabix file containing paired-end fragment reads or its
 path. <cite>AlignmentFile</cite> must be opened in read mode.</p></li>
-<li><p><strong>site_bed</strong> (<em>str</em>) – Bed file containing intervals to perform WPS on.</p></li>
+<li><p><strong>site_bed</strong> (<em>str</em>) – BED file containing intervals to perform WPS on. The intervals
+in this BED file should be sorted, first by <cite>contig</cite> then
+<cite>start</cite>.</p></li>
 <li><p><strong>output_file</strong> (<em>string</em><em>, </em><em>optional</em>) – </p></li>
 <li><p><strong>window_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of window to calculate WPS. Default is k = 120, equivalent
 to L-WPS.</p></li>
