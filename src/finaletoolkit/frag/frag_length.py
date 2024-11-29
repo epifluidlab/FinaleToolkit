@@ -488,6 +488,8 @@ def frag_length_intervals(
     input_file: Union[str, pysam.AlignmentFile],
     interval_file: str,
     output_file: str=None,
+    min_length: int=0,
+    max_length: int=None,
     quality_threshold: int=30,
     intersect_policy: str="midpoint",
     workers: int=1,
@@ -516,6 +518,8 @@ def frag_length_intervals(
             input_file: {input_file}
             interval_file: {interval_file}
             output_file: {output_file}
+            min_length: {min_length}
+            max_length: {max_length}
             quality_threshold: {quality_threshold}
             workers: {workers}
             verbose: {verbose}
@@ -523,64 +527,53 @@ def frag_length_intervals(
         )
         start_time = time.time()
 
-    # read interval_file into list of tuples
-    intervals = _get_intervals(
-        input_file,
-        interval_file,
-        intersect_policy=intersect_policy,
-        quality_threshold=quality_threshold,
-        verbose=verbose
-    )
-
-    interval_len = len(intervals)
     if verbose:
-        stderr.write(f'{interval_len} intervals read!\n')
-
+        stderr.write('Creating process pool.\n')
     try:
-        # create pool and submit intervals into processess
-        pool = Pool(workers)
-        iter_results = pool.imap(
-            _frag_length_stats_star,
-            tqdm.tqdm(
-                intervals,
-                desc='Filling process pool',
-                position=0
-            ) if verbose else intervals,
-            round(interval_len/workers/2+1)
-        )
-        # write to output
-        try:
-            output_is_file = False
-            if output_file == '-':
-                out = stdout
-            else:
-                output_is_file = True
-                out = open(output_file, 'w')
-            # header
-            out.write(
-                'name\tcontig\tstart\tstop\tmean\tmedian\tstdev\tmin\tmax\n'
-            )
-            for result in tqdm.tqdm(
-                iter_results,
-                total=interval_len,
-                desc='Writing to out',
-                position=2
-            ) if verbose else iter_results:
-                out.write('\t'.join([str(item) for item in result]))
-                out.write('\n')
-        finally:
-            if output_is_file:
-                out.close()
+        pool = Pool(processes=workers)
+        if verbose:
+            stderr.write('Reading intervals.\n')
+        intervals = _get_intervals(interval_file)
+        
+        partial_frag_stat = partial(_frag_length_stats, input_file=input_file, min_length=min_length, max_length=max_length, intersect_policy=intersect_policy, quality_threshold=quality_threshold, verbose=verbose)
+        iter_results = pool.imap(partial(_frag_length_stats_star, partial_frag_stat), intervals, chunksize=max(len(intervals)//workers, 1))
+        if verbose:
+            tqdm.write('Retrieving fragment statistics for file\n')
+        output_is_file = False
+        if output_file != None:
+            if verbose:
+                tqdm.write('Writing results to output. \n')
+            try:
+                if (output_file.endswith('.bed')
+                    or output_file.endswith('.bedgraph')
+                ):
+                    output_is_file = True
+                    output = open(output_file, 'w')
+                elif output_file.endswith('.bed.gz'):
+                    output = gzip.open(output_file, 'w')
+                    output_is_file = True
+                elif output_file == '-':
+                    output = stdout
+                else:
+                    raise ValueError(
+                        'The output file should have .bed or .bed.gz as as suffix.'
+                    )
+                output.write('contig\tstart\tstop\tname\tmean\tmedian\tstdev\tmin\tmax\n')
+                output.write('\n'.join('\t'.join(str(element) for element in item) for item in iter_results))
+                output.write('\n')
+            finally:
+                if output_is_file:
+                    output.close()
 
         results = [result for result in iter_results]
 
     finally:
         pool.close()
-
+        
     if verbose:
         stop_time = time.time()
         stderr.write(
-            f'frag_length_intervals took {stop_time-start_time} s\n'
+            f'Calculating fragment length statistics for intervals took {stop_time-start_time} s\n'
         )
 
     return results
