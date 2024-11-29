@@ -53,6 +53,70 @@ def plot_histogram(data_dict, num_bins, histogram_path="./frag_length_bins_histo
     plt.savefig(histogram_path)
 
 
+def _distribution_from_gen(generator):
+    value_counts = {}
+    for fragment in generator:
+        length_of_fragment = fragment[2] - fragment[1]
+        if length_of_fragment in value_counts:
+            value_counts[length_of_fragment] += 1
+        else:
+            value_counts[length_of_fragment] = 1
+    return value_counts
+
+
+def _find_median(val_freq_dict):
+    val = np.array(list(val_freq_dict.keys()))
+    freq = np.array(list(val_freq_dict.values()))
+    ord = np.argsort(val)
+    val = val[ord]
+    freq = freq[ord]
+    cdf = np.cumsum(freq)
+    
+    total_count = cdf[-1]
+    if total_count % 2 == 1:
+        median_index = np.searchsorted(cdf, total_count // 2)
+        median_val = val[median_index]
+        return float(median_val)
+    else:
+        median_indices = np.searchsorted(cdf, [total_count // 2, total_count // 2 + 1])
+        median_vals = val[median_indices]
+        median_val = np.mean(median_vals)
+        return float(median_val)
+
+
+def _frag_length_stats(
+    input_file: Union[str, pysam.AlignmentFile],
+    contig: str,
+    start: int,
+    stop: int,
+    name: str,
+    min_length: int,
+    max_length: int,
+    intersect_policy: str,
+    quality_threshold: int,
+    verbose: Union[bool, int]
+):
+    frag_gen = frag_generator(input_file, contig, quality_threshold, start, stop, min_length, max_length, intersect_policy, verbose)
+    frag_len_dict=_distribution_from_gen(frag_gen)
+
+    if sum(frag_len_dict.values())==0:
+        mean, median, stdev, minimum, maximum = 5*[-1]
+    else:
+        mean = sum(value * count for value, count in frag_len_dict.items()) / sum(frag_len_dict.values())
+        median = _find_median(frag_len_dict)
+        variance = sum(count * ((value - mean) ** 2) for value, count in frag_len_dict.items()) / sum(frag_len_dict.values())
+        stdev = variance ** 0.5
+        minimum = min(frag_len_dict.keys())
+        maximum = max(frag_len_dict.keys())
+
+    return contig, start, stop, name, mean, median, stdev, minimum, maximum
+
+
+def _frag_length_stats_star(partial_frag_stat, interval):
+    contig, start, stop, name = interval
+    return partial_frag_stat(contig=contig, start=start, stop=stop, name=name)
+
+
 def frag_length(
         input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
         contig: str=None,

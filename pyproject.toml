@@ -36,6 +36,7 @@ dependencies = [
     "pandas",
     "statsmodels",
     "loess",
+    "matplotlib",
 ]
 dynamic = ["version"]
 
