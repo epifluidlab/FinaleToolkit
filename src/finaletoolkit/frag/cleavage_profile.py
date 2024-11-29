@@ -158,8 +158,30 @@ def _cli_cleavage_profile(
     verbose: Union[bool, int]=0
 ):
     """
-    Function called when running cleavage profile subcommand in cli.
-    Multithreaded implementation over intervals in bed.
+    Multithreaded cleavage profile implementation over intervals in a
+    BED file.
+    Parameters
+    ---------
+    input_file: str or pathlike
+        SAM, BAM, CRAM, or FRAG file with fragment information.
+    interval_file: str or pathlike
+        BED file containing intervals
+    chrom_sizes: str or pathlike
+        Tab-delimited file with name and lengths of each contig.
+    left: int
+        Amount to subtract from start coordinate. Useful if only given
+        coordinates of CpG.
+    right: int
+        Amount to add to stop coordinate.
+    fraction_low: int
+        Minimum fragment size to include
+    fraction_high: int
+        Maximum fragment size to include
+    quality_threshold: int
+        Minimum MAPQ
+    workers: int, default = 1
+        Number of processes to spawn
+    verbose: bool or int
     """
 
     if (verbose):
@@ -289,7 +311,6 @@ def _cli_cleavage_profile(
             elif (output_file.endswith('.bed.gz')
                   or output_file.endswith('bedgraph.gz')
                   or output_file == "-"):
-                  # XXX: writing to stdout is untested and may not work.
                 with gzip.open(output_file, 'wt') as bedgraph:
                     for interval_score in interval_scores:
                         contigs = interval_score['contig']
