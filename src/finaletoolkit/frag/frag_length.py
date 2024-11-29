@@ -9,11 +9,48 @@ import gzip
 import numpy as np
 import pysam
 import tqdm
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 
 from finaletoolkit.utils.utils import (
     _get_intervals, frag_generator
 )
 from finaletoolkit.utils.cli_hist import _cli_hist
+
+
+def plot_histogram(data_dict, num_bins, histogram_path="./frag_length_bins_histogram.png", stats=None):
+    keys = list(data_dict.keys())
+    values = list(data_dict.values())
+
+    fig_size = (6, 4)
+    font_size = 12
+    plt.figure(figsize=fig_size, dpi=1000)
+    plt.hist(keys, bins=num_bins, weights=values, color='salmon', edgecolor='white', linewidth=0.1)
+    plt.xlabel("Fragment Size (bp)", fontsize=font_size*0.8)
+    plt.ylabel("Number of Fragments", fontsize=font_size*0.8)
+    plt.xticks(fontsize=font_size * 0.7)
+    plt.yticks(fontsize=font_size * 0.7)
+
+    def format_ticks(value, pos):
+        if value >= 1e6:
+            return '{:1.0f}M'.format(value * 1e-6)
+        elif value >= 1e3:
+            return '{:1.0f}K'.format(value * 1e-3)
+        else:
+            return '{:1.0f}'.format(value)
+
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(format_ticks))
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+
+    if stats:
+        stats_str = "\n".join([f"{stat[0]}: {stat[1]}" for stat in stats])
+        plt.text(0.95, 0.95, stats_str, transform=plt.gca().transAxes,
+                 fontsize=font_size * 0.6, verticalalignment='top', horizontalalignment='right',
+                 bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
+
+    plt.tight_layout()
+    plt.savefig(histogram_path)
 
 
 def frag_length(
