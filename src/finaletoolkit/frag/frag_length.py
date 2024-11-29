@@ -19,7 +19,14 @@ from finaletoolkit.utils.utils import (
 from finaletoolkit.utils.cli_hist import _cli_hist
 
 
-def plot_histogram(data_dict, num_bins, histogram_path="./frag_length_bins_histogram.png", stats=None):
+def plot_histogram(
+        data_dict,
+        num_bins,
+        histogram_path="./frag_length_bins_histogram.png",
+        stats=None):
+    """
+    Generates a histogram from `frag_length_bins` results.
+    """
     keys = list(data_dict.keys())
     values = list(data_dict.values())
 
@@ -320,7 +327,7 @@ def frag_length_bins(
     stop: int=None,
     min_length: int=0,
     max_length: int=None,
-    bin_size: int=None,
+    bin_size: int=1,
     output_file: str=None,
     histogram: bool=False,
     intersect_policy: str="midpoint",
@@ -378,7 +385,9 @@ def frag_length_bins(
     frag_gen = frag_generator(
         input_file, contig, quality_threshold, start, stop, min_length,
         max_length, intersect_policy, verbose)
+    
     frag_len_dict = _distribution_from_gen(frag_gen)
+
     mean = (sum(value * count for value, count in frag_len_dict.items())
             / sum(frag_len_dict.values()))
     variance = (sum(count * ((value - mean) ** 2)
@@ -411,6 +420,7 @@ def frag_length_bins(
                         if bin_lower <= length < bin_upper)
         counts.append(bin_count)
 
+    # write results to output
     if output_file is not None:
         try:
             out_is_file = False
@@ -435,6 +445,7 @@ def frag_length_bins(
             if out_is_file:
                 out.close()
 
+    # generate histogram figure
     elif histogram_path!=None:
         plot_histogram(frag_len_dict, num_bins=n_bins,
                        histogram_path=histogram_path, stats=stats)
@@ -556,10 +567,14 @@ def frag_length_intervals(
                     output = stdout
                 else:
                     raise ValueError(
-                        'The output file should have .bed or .bed.gz as as suffix.'
+                        'The output file should have .bed or .bed.gz as as '
+                        'suffix.'
                     )
-                output.write('contig\tstart\tstop\tname\tmean\tmedian\tstdev\tmin\tmax\n')
-                output.write('\n'.join('\t'.join(str(element) for element in item) for item in iter_results))
+                output.write('contig\tstart\tstop\tname\tmean\tmedian\t'
+                             'stdev\tmin\tmax\n')
+                output.write(
+                    '\n'.join('\t'.join(str(element) for element in 
+                                        item) for item in iter_results))
                 output.write('\n')
             finally:
                 if output_is_file:
