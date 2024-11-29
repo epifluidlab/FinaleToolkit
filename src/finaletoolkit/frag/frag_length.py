@@ -5,6 +5,7 @@ from sys import stdout, stderr
 from shutil import get_terminal_size
 from multiprocessing import Pool
 import gzip
+from functools import partial
 
 import numpy as np
 import pysam
@@ -317,11 +318,14 @@ def frag_length_bins(
     contig: str=None,
     start: int=None,
     stop: int=None,
+    min_length: int=0,
+    max_length: int=None,
     bin_size: int=None,
     output_file: str=None,
     histogram: bool=False,
     intersect_policy: str="midpoint",
     quality_threshold: int=30,
+    histogram_path: str=None,
     verbose: Union[bool, int]=False
 ) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -367,52 +371,45 @@ def frag_length_bins(
         )
         start_time = time.time()
 
-    # generating fragment lengths
-    frag_lengths = frag_length(
-        input_file=input_file,
-        contig=contig,
-        start=start,
-        stop=stop,
-        intersect_policy=intersect_policy,
-        quality_threshold=quality_threshold,
-        verbose=verbose-1 if verbose>1 else 0
+    if verbose:
+        stderr.write("Generating fragment dictionary. \n")
+
+    
+    frag_gen = frag_generator(
+        input_file, contig, quality_threshold, start, stop, min_length,
+        max_length, intersect_policy, verbose)
+    frag_len_dict = _distribution_from_gen(frag_gen)
+    mean = (sum(value * count for value, count in frag_len_dict.items())
+            / sum(frag_len_dict.values()))
+    variance = (sum(count * ((value - mean) ** 2)
+                    for value, count in frag_len_dict.items())
+                / sum(frag_len_dict.values())
     )
     # get statistics
     stats = []
-    stats.append(('mean', np.mean(frag_lengths)))
-    stats.append(('median', np.median(frag_lengths)))
-    stats.append(('stdev', np.std(frag_lengths)))
-    stats.append(('min', np.min(frag_lengths)))
-    stats.append(('max', np.max(frag_lengths)))
+    stats.append(('mean', mean))
+    stats.append(('median', _find_median(frag_len_dict)))
+    stats.append(('stdev', variance ** 0.5))
+    stats.append(('min', min(frag_len_dict.keys())))
+    stats.append(('max', max(frag_len_dict.keys())))
 
-    # generating bins and counts
-    if bin_size is None:
-        if histogram:
-            term_width, term_height = get_terminal_size((80, 24))
-            n_bins = (term_width - 24)
-
-            bin_start = np.min(frag_lengths)
-            bin_stop = np.max(frag_lengths)
-
-            bin_size = round((bin_stop - bin_start) / n_bins)
-        else:
-            bin_size = 5
-
-    bin_start = np.min(frag_lengths)
-    bin_stop = np.max(frag_lengths)
+    bin_start = min(frag_len_dict.keys())
+    bin_stop = max(frag_len_dict.keys())
     n_bins = (bin_stop - bin_start) // bin_size
+    bins = np.arange(bin_start, bin_stop+bin_size, bin_size)
+
 
     bins = np.arange(bin_start, bin_stop, bin_size)
     counts = []
 
     # generate histogram
-    for bin in bins:
-        count = np.sum(
-            (frag_lengths >= bin)
-            * (frag_lengths < (bin + bin_size))
-        )
-        counts.append(count)
-    bins = np.append(bins, stop)
+    for i in tqdm(range(n_bins+1),
+                   disable=not verbose, desc="Binning fragments..."):
+        bin_lower = bin_start + i * bin_size
+        bin_upper = bin_start + (i + 1) * bin_size
+        bin_count = sum(count for length, count in frag_len_dict.items()
+                        if bin_lower <= length < bin_upper)
+        counts.append(bin_count)
 
     if output_file is not None:
         try:
@@ -426,26 +423,21 @@ def frag_length_bins(
                 out_is_file = True
                 out = open(output_file, 'w')
 
-            if histogram:
-                _cli_hist(bins, counts, n_bins, stats, out)
+            out.write('min\tmax\tcount\n')
+            for bin, count in zip(bins, counts):
+                out.write(f'{bin}\t{bin+bin_size}\t{count}\n')
+                
+            if histogram_path!=None:
+                plot_histogram(frag_len_dict, num_bins=n_bins,
+                               histogram_path=histogram_path, stats=stats)
 
-            else:
-                out.write('min\tmax\tcount\n')
-                for bin, count in zip(bins, counts):
-                    out.write(f'{bin}\t{bin+bin_size}\t{count}\n')
         finally:
             if out_is_file:
                 out.close()
-    elif histogram:
-        if contig is not None:
-            if start is None:
-                start = ""
-            if stop is None:
-                stop = ""
-            title = f'Fragment Lengths for {contig}:{start}-{stop}'
-        else:
-            title = 'Fragment Lengths'
-        _cli_hist(bins, counts, n_bins, stats, stdout, title)
+
+    elif histogram_path!=None:
+        plot_histogram(frag_len_dict, num_bins=n_bins,
+                       histogram_path=histogram_path, stats=stats)
 
     if verbose:
         stop_time = time.time()
@@ -461,35 +453,35 @@ def _frag_length_stats(
     contig: str,
     start: int,
     stop: int,
+    min_length: int,
+    max_length: int,
     name: str,
     intersect_policy: str,
     quality_threshold: int,
     verbose: Union[bool, int]
 ):
-    # generating fragment lengths
-    frag_lengths = frag_length(
-        input_file=input_file,
-        contig=contig,
-        start=start,
-        stop=stop,
-        intersect_policy=intersect_policy,
-        quality_threshold=quality_threshold,
-        verbose=verbose
-    )
-    if frag_lengths.shape[0] == 0:
-        mean, median, stdev, min, max = 5*[-1]
+    frag_gen = frag_generator(input_file, contig, quality_threshold, start,
+                              stop, min_length, max_length, intersect_policy,
+                              verbose)
+    frag_len_dict=_distribution_from_gen(frag_gen)
+    if sum(frag_len_dict.values())==0:
+        mean, median, stdev, minimum, maximum = 5*[-1]
     else:
-        mean = np.mean(frag_lengths)
-        median = np.median(frag_lengths)
-        stdev = np.std(frag_lengths)
-        min = np.min(frag_lengths)
-        max = np.max(frag_lengths)
+        mean = (sum(value * count for value, count in frag_len_dict.items())
+                / sum(frag_len_dict.values()))
+        median = _find_median(frag_len_dict)
+        variance = sum(count * ((value - mean) ** 2) for value, count
+                       in frag_len_dict.items()) / sum(frag_len_dict.values())
+        stdev = variance ** 0.5
+        minimum = min(frag_len_dict.keys())
+        maximum = max(frag_len_dict.keys())
 
-    return name, contig, start, stop, mean, median, stdev, min, max
+    return contig, start, stop, name, mean, median, stdev, minimum, maximum
 
 
-def _frag_length_stats_star(args):
-    return _frag_length_stats(*args)
+def _frag_length_stats_star(partial_frag_stat, interval):
+    contig, start, stop, name = interval
+    return partial_frag_stat(contig=contig, start=start, stop=stop, name=name)
 
 
 def frag_length_intervals(
