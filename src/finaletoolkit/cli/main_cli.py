@@ -265,8 +265,7 @@ def main_cli_parser():
         'chrom_sizes',
         help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_cleavage_profile.add_argument(
-        '-o',
-        '--output_file',
+        'output_file',
         default='-',
         help='A bigWig file containing the cleavage proportion results over '
         'the intervals specified in interval file.',)
