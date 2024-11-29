@@ -200,6 +200,18 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to retrieve '
         'fragment length summary statistics over.')
     cli_frag_length_intervals.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in fragment length.')
+    cli_frag_length_intervals.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in fragment length.')
+    cli_frag_length_intervals.add_argument(
         '-p',
         '--intersect_policy',
         choices=['midpoint',
