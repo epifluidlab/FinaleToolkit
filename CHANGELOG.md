@@ -7,6 +7,11 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [UNRELEASED]
+
+### Removed
+- `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig` option. This never had any functionality.
+
 ## [0.7.8] - 2024-11-28
 
 ### Fixed
