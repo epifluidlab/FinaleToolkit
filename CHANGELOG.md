@@ -10,7 +10,24 @@ and this project adheres to
 ## [UNRELEASED]
 
 ### Removed
-- `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig` option. This never had any functionality.
+- `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig`
+option. This never had any functionality.
+- `finaletoolkit.frag.frag_length_bins` no longer generates a text-based
+histogram.
+### Fixed
+- `contig_sizes` option included for `cleavage-profile` CLI command.
+
+### Changed
+- `finaletoolkit.frag.frag_length_bins` uses a dict based implementation
+that is more memory efficient.
+- `finaletoolkit.frag.frag_length_bins` and
+`finaletoolkit.frag.frag_length_intervals` now take `min_length` and 
+`max_length` keyword args to only consider fragments of certain lengths.
+- args for `frag-length-bins` and `frag-length-intervals` updated to
+match API
+
+### Added
+- `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
 
 ## [0.7.8] - 2024-11-28
 
