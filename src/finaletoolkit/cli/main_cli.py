@@ -123,6 +123,24 @@ def main_cli_parser():
         help='Specify the 0-based left-most coordinate of the interval '
         'to select fragments from. (Must also specify --contig.)')
     cli_frag_length_bins.add_argument(
+        '-E',
+        '--stop',
+        help='Specify the 1-based right-most coordinate of the interval'
+        ' to select fragments from. (Must also specify --contig.)',
+        type=int)
+    cli_frag_length_bins.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in fragment length.')
+    cli_frag_length_bins.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in fragment length.')
+    cli_frag_length_bins.add_argument(
         '-p',
         '--intersect_policy',
         choices=['midpoint',
@@ -132,14 +150,9 @@ def main_cli_parser():
         help='Specifies what policy is used to include fragments in the'
         ' given interval. See User Guide for more information.')
     cli_frag_length_bins.add_argument(
-        '-E',
-        '--stop',
-        help='Specify the 1-based right-most coordinate of the interval'
-        ' to select fragments from. (Must also specify --contig.)',
-        type=int)
-    cli_frag_length_bins.add_argument(
         '--bin-size',
         type=int,
+        default=1,
         help='Specify the size of the bins to group fragment lengths '
         'into.')
     cli_frag_length_bins.add_argument(
@@ -150,13 +163,14 @@ def main_cli_parser():
         help='A .TSV file containing containing fragment lengths binned'
         ' according to the specified bin size.')
     cli_frag_length_bins.add_argument(
-        '--contig-by-contig',
-        action='store_true',
-        help='Placeholder, not implemented.')
-    cli_frag_length_bins.add_argument(
         '--histogram',
         action='store_true',
-        help='Enable histogram mode to display histogram in terminal.')
+        help='Enable histogram mode to display histogram.')
+    cli_frag_length_bins.add_argument(
+        '--histogram-path',
+        default=None,
+        help='Path to store histogram.',
+    )
     cli_frag_length_bins.add_argument(
         '-q',
         '--quality_threshold',
