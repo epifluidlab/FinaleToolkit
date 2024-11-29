@@ -211,8 +211,6 @@ def _cli_frag_length(
     return None
 
 
-# NOTE: I'm not sure what contig by contig was supposed to be.
-# It doesn't do anything.
 def frag_length_bins(
     input_file: Union[str, pysam.AlignmentFile],
     contig: str=None,
@@ -220,7 +218,6 @@ def frag_length_bins(
     stop: int=None,
     bin_size: int=None,
     output_file: str=None,
-    contig_by_contig: bool=False,
     histogram: bool=False,
     intersect_policy: str="midpoint",
     quality_threshold: int=30,
@@ -239,7 +236,6 @@ def frag_length_bins(
     stop : int, optional
     bin_size : int, optional
     output_file : str, optional
-    contig_by_contig: bool, optional
     histogram: bool, optional
     intersect_policy : str, optional
         Specifies what policy is used to include fragments in the
@@ -263,7 +259,6 @@ def frag_length_bins(
             stop: {stop}
             bin_size: {bin_size}
             output_file: {output_file}
-            contig_by_contig: {contig_by_contig}
             histogram: {histogram}
             quality_threshold: {quality_threshold}
             verbose: {verbose}
