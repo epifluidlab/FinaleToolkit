@@ -8,15 +8,22 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [UNRELEASED]
+This update includes significant refactoring to make this package more
+user-friendly, including:
+- renaming functions to be more consistent across
+different fragmentomic features,
+- deprecating API functions and modules that are not necessary for user code,
+instead labeling these as internal e.g. `_utils.py`
 
 ### Removed
 - `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig`
 option. This never had any functionality.
 - `finaletoolkit.frag.frag_length_bins` no longer generates a text-based
 histogram.
+
 ### Fixed
 - `contig_sizes` option included for `cleavage-profile` CLI command.
-- Some miscellaneous typehints
+- Some miscellaneous typehints thorughout all modules
 
 ### Changed
 - `finaletoolkit.frag.frag_length_bins` uses a dict based implementation
@@ -26,6 +33,8 @@ that is more memory efficient.
 `max_length` keyword args to only consider fragments of certain lengths.
 - args for `frag-length-bins` and `frag-length-intervals` updated to
 match API
+- make `contig` arg for `finaletoolkit.utils.utils.frag_generator`
+optional
 
 ### Added
 - `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
