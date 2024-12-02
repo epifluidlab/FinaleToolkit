@@ -1,7 +1,7 @@
 from __future__ import annotations
 import time
 import gzip
-from typing import Union, Generator
+from typing import Generator
 from sys import stderr
 from pathlib import Path
 
@@ -12,7 +12,7 @@ import pysam
 
 
 def chrom_sizes_to_list(
-    chrom_sizes_file: Union[str, Path]) -> list[tuple[str, int]]:
+    chrom_sizes_file: str | Path) -> list[tuple[str, int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
 
@@ -37,7 +37,7 @@ def chrom_sizes_to_list(
 
 
 def chrom_sizes_to_dict(
-    chrom_sizes_file: Union[str, Path]) -> dict[str, int]:
+    chrom_sizes_file: str | Path) -> dict[str, int]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a dict.
 
@@ -103,7 +103,7 @@ def _merge_all_intervals(converted_intervals):
     return all_intervals
 
 
-def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
+def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
                     output_file: str,
                     contig: str | None=None,
                     quality_threshold: int=30,
@@ -195,7 +195,7 @@ def frags_in_region(frag_array: NDArray[np.int64],
     return filtered_frags
 
 def frag_generator(
-    input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile, Path],
+    input_file: str | pysam.AlignmentFile | pysam.TabixFile | Path,
     contig: str,
     quality_threshold: int=30,
     start: int|None=None,
@@ -379,7 +379,7 @@ def frag_generator(
 
 
 def frag_array(
-    input_file: Union[str,pysam.AlignmentFile, pysam.TabixFile, Path],
+    input_file: str | pysam.AlignmentFile | pysam.TabixFile | Path,
     contig: str,
     quality_threshold: int=30,
     start: int | None=None,
@@ -511,11 +511,11 @@ def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
 
 
 def _get_intervals(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: str | pysam.AlignmentFile,
     interval_file: str,
     intersect_policy: str,
     quality_threshold: int,
-    verbose: Union[bool, int]
+    verbose: bool | int
 ) -> list[tuple[str, str, int, int, str, str, int]]:
     """
     Helper function to read intervals from bed file.
