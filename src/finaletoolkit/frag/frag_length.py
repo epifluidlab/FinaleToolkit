@@ -1,6 +1,5 @@
 from __future__ import annotations
 import time
-from typing import Union
 from sys import stdout, stderr
 from shutil import get_terminal_size
 from multiprocessing import Pool
@@ -8,6 +7,7 @@ import gzip
 from functools import partial
 
 import numpy as np
+from numpy.typing import NDArray
 import pysam
 import tqdm
 import matplotlib.pyplot as plt
@@ -93,7 +93,7 @@ def _find_median(val_freq_dict):
 
 
 def _frag_length_stats(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: str | pysam.AlignmentFile,
     contig: str,
     start: int,
     stop: int,
@@ -102,9 +102,11 @@ def _frag_length_stats(
     max_length: int,
     intersect_policy: str,
     quality_threshold: int,
-    verbose: Union[bool, int]
+    verbose: bool | int
 ):
-    frag_gen = frag_generator(input_file, contig, quality_threshold, start, stop, min_length, max_length, intersect_policy, verbose)
+    frag_gen = frag_generator(input_file, contig, quality_threshold,
+                              start, stop, min_length, max_length,
+                              intersect_policy, verbose)
     frag_len_dict=_distribution_from_gen(frag_gen)
 
     if sum(frag_len_dict.values())==0:
@@ -126,12 +128,12 @@ def _frag_length_stats_star(partial_frag_stat, interval):
 
 
 def frag_length(
-        input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
-        contig: str=None,
-        start: int=None,
-        stop: int=None,
+        input_file: str | pysam.AlignmentFile | pysam.TabixFile,
+        contig: str | None=None,
+        start: int | None=None,
+        stop: int | None=None,
         intersect_policy: str="midpoint",
-        output_file: str=None,
+        output_file: str | None=None,
         quality_threshold: int=30,
         verbose: bool=False
     ) -> np.ndarray:
@@ -224,19 +226,19 @@ def frag_length(
 
 
 def frag_length_bins(
-    input_file: Union[str, pysam.AlignmentFile],
-    contig: str=None,
-    start: int=None,
-    stop: int=None,
-    min_length: int=0,
-    max_length: int=None,
+    input_file: str | pysam.AlignmentFile,
+    contig: str | None=None,
+    start: int | None=None,
+    stop: int | None=None,
+    min_length: int | None=None,
+    max_length: int | None=None,
     bin_size: int=1,
-    output_file: str=None,
+    output_file: str | None=None,
     histogram: bool=False,
     intersect_policy: str="midpoint",
     quality_threshold: int=30,
-    histogram_path: str=None,
-    verbose: Union[bool, int]=False
+    histogram_path: str | None=None,
+    verbose: bool | int=False
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
@@ -249,6 +251,8 @@ def frag_length_bins(
     contig : str, optional
     start : int, optional
     stop : int, optional
+    min_length: int | None,
+    max_length: int | None,
     bin_size : int, optional
     output_file : str, optional
     histogram: bool, optional
@@ -286,8 +290,10 @@ def frag_length_bins(
 
     
     frag_gen = frag_generator(
-        input_file, contig, quality_threshold, start, stop, min_length,
-        max_length, intersect_policy, verbose)
+        input_file=input_file, contig=contig,
+        quality_threshold=quality_threshold, start=start, stop=stop,
+        fraction_low=min_length, fraction_high=max_length,
+        intersect_policy=intersect_policy, verbose=verbose)
     
     frag_len_dict = _distribution_from_gen(frag_gen)
 
@@ -308,21 +314,22 @@ def frag_length_bins(
     bin_start = min(frag_len_dict.keys())
     bin_stop = max(frag_len_dict.keys())
     n_bins = (bin_stop - bin_start) // bin_size
-    bins = np.arange(bin_start, bin_stop+bin_size, bin_size)
-
-
-    bins = np.arange(bin_start, bin_stop, bin_size)
-    counts = []
+    bins: NDArray = np.arange(bin_start, bin_stop+bin_size, bin_size)
+    counts_list = []
 
     # generate histogram
-    for i in tqdm(range(n_bins+1),
-                   disable=not verbose, desc="Binning fragments..."):
+    for i in tqdm.tqdm(
+        range(n_bins+1),
+        disable=not verbose,
+        desc="Binning fragments..."
+        ):
         bin_lower = bin_start + i * bin_size
         bin_upper = bin_start + (i + 1) * bin_size
         bin_count = sum(count for length, count in frag_len_dict.items()
                         if bin_lower <= length < bin_upper)
-        counts.append(bin_count)
+        counts_list.append(bin_count)
 
+    counts: NDArray = np.array(counts_list)
     # write results to output
     if output_file is not None:
         try:
@@ -362,52 +369,16 @@ def frag_length_bins(
     return bins, counts
 
 
-def _frag_length_stats(
-    input_file: Union[str, pysam.AlignmentFile],
-    contig: str,
-    start: int,
-    stop: int,
-    min_length: int,
-    max_length: int,
-    name: str,
-    intersect_policy: str,
-    quality_threshold: int,
-    verbose: Union[bool, int]
-):
-    frag_gen = frag_generator(input_file, contig, quality_threshold, start,
-                              stop, min_length, max_length, intersect_policy,
-                              verbose)
-    frag_len_dict=_distribution_from_gen(frag_gen)
-    if sum(frag_len_dict.values())==0:
-        mean, median, stdev, minimum, maximum = 5*[-1]
-    else:
-        mean = (sum(value * count for value, count in frag_len_dict.items())
-                / sum(frag_len_dict.values()))
-        median = _find_median(frag_len_dict)
-        variance = sum(count * ((value - mean) ** 2) for value, count
-                       in frag_len_dict.items()) / sum(frag_len_dict.values())
-        stdev = variance ** 0.5
-        minimum = min(frag_len_dict.keys())
-        maximum = max(frag_len_dict.keys())
-
-    return contig, start, stop, name, mean, median, stdev, minimum, maximum
-
-
-def _frag_length_stats_star(partial_frag_stat, interval):
-    contig, start, stop, name = interval
-    return partial_frag_stat(contig=contig, start=start, stop=stop, name=name)
-
-
 def frag_length_intervals(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: str | pysam.AlignmentFile,
     interval_file: str,
-    output_file: str=None,
+    output_file: str | None=None,
     min_length: int=0,
-    max_length: int=None,
+    max_length: int | None=None,
     quality_threshold: int=30,
     intersect_policy: str="midpoint",
     workers: int=1,
-    verbose: Union[bool, int]=False
+    verbose: bool | int=False
 ):
     """
     Takes fragments from BAM file and calculates fragment length
