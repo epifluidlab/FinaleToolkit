@@ -194,14 +194,15 @@ def frags_in_region(frag_array: NDArray[np.int64],
     filtered_frags = frag_array[in_region]
     return filtered_frags
 
+
 def frag_generator(
     input_file: str | pysam.AlignmentFile | pysam.TabixFile | Path,
     contig: str|None=None,
     quality_threshold: int=30,
     start: int|None=None,
     stop: int|None=None,
-    fraction_low: int=120,
-    fraction_high: int=180,
+    fraction_low: int|None=None,
+    fraction_high: int|None=None,
     intersect_policy: str="midpoint",
     verbose: bool|int=False
 ) -> Generator[tuple]:
@@ -221,10 +222,10 @@ def frag_generator(
     stop : int, optional
     fraction_low : int, optional
         Specifies lowest fragment length included in array. Default is
-        120, equivalent to long fraction.
+        None.
     fraction_high : int, optional
         Specifies highest fragment length included in array. Default is
-        120, equivalent to long fraction.
+        None.
     intersect_policy : str, optional
         Specifies what policy is used to include fragments in the
         given interval. Default is "midpoint". Policies include:
@@ -312,8 +313,8 @@ def frag_generator(
                         or read.is_read2):
                         pass
                     elif (
-                        abs(frag_length := read.template_length) >= fraction_low
-                        and abs(frag_length) <= fraction_high
+                        _none_geq(abs(frag_length := read.template_length), fraction_low)
+                        and _none_leq(abs(frag_length), fraction_high)
                     ):
                         if read.template_length > 0:
                             f_start = read.reference_start
@@ -362,8 +363,8 @@ def frag_generator(
                     read_on_plus = '+' in line[5]
                     
                 try:
-                    if (frag_length >= fraction_low
-                        and frag_length <= fraction_high
+                    if (_none_geq(frag_length, fraction_low)
+                        and _none_leq(frag_length, fraction_high)
                         and mapq >= quality_threshold
                         ):
                         yield contig, read_start, read_stop, mapq, read_on_plus
@@ -579,3 +580,31 @@ def overlaps(
     raw_overlaps = np.logical_and(contig_blind_overlaps, in_same_contig)
     any_overlaps = np.any(raw_overlaps, axis=1)
     return any_overlaps
+
+# None compatible comparison operators
+def _none_leq(a: int|float|None, b: int|float|None)->bool:
+    """
+    Less than or equals that evaluates True if any argument is None
+    """
+    if a is None or b is None:
+        return True
+    else:
+        return a <= b
+    
+def _none_geq(a: int|float|None, b: int|float|None)->bool:
+    """
+    Greater than or equals that evaluates True if any argument is None
+    """
+    if a is None or b is None:
+        return True
+    else:
+        return a >= b
+    
+def _none_eq(a: int|float|None, b: int|float|None)->bool:
+    """
+    Equals that evaluates True if any argument is None
+    """
+    if a is None or b is None:
+        return True
+    else:
+        return a == b
