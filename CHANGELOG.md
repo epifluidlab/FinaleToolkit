@@ -16,6 +16,7 @@ option. This never had any functionality.
 histogram.
 ### Fixed
 - `contig_sizes` option included for `cleavage-profile` CLI command.
+- Some miscellaneous typehints
 
 ### Changed
 - `finaletoolkit.frag.frag_length_bins` uses a dict based implementation
