@@ -196,7 +196,7 @@ def frags_in_region(frag_array: NDArray[np.int64],
 
 def frag_generator(
     input_file: str | pysam.AlignmentFile | pysam.TabixFile | Path,
-    contig: str,
+    contig: str|None=None,
     quality_threshold: int=30,
     start: int|None=None,
     stop: int|None=None,
