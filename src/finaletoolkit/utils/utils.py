@@ -512,41 +512,29 @@ def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
 
 
 def _get_intervals(
-    input_file: str | pysam.AlignmentFile,
     interval_file: str,
-    intersect_policy: str,
-    quality_threshold: int,
-    verbose: bool | int
-) -> list[tuple[str, str, int, int, str, str, int]]:
-    """
-    Helper function to read intervals from bed file.
-    Returns list of tuples:
-    (input_file, chrom, start, stop, name, intersect_policy,
-    quality_threshold, verbosity)
-    """
-    intervals = []  # list of inputs for single_coverage
+) -> list[tuple[str, int, int, str]]:
+    
+    intervals = []  # List of inputs for single_coverage
 
     with open(interval_file) as bed:
         for line in bed:
             if not line.startswith('#'):
-                if line != '':
+                if line.strip():  # Check if line is not empty
                     contig, start, stop, *name = line.split()
                     start = int(start)
                     stop = int(stop)
-                    name = name[0] if len(name) > 1 else '.'
+                    name = name[0] if name else '.'
                     interval = (
-                        input_file,
                         contig,
                         start,
                         stop,
-                        name,
-                        intersect_policy,
-                        quality_threshold,
-                        verbose - 1 if verbose > 1 else 0
+                        name
                     )
                     intervals.append(interval)
                 else:
                     break
+
     return intervals
 
 
