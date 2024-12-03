@@ -10,7 +10,7 @@ and this project adheres to
 ## [UNRELEASED]
 This update includes significant refactoring to make this package more
 user-friendly, including:
-- renaming functions to be more consistent across
+- TODO: renaming functions to be more consistent across
 different fragmentomic features,
 - deprecating API functions and modules that are not necessary for user code,
 instead labeling these as internal e.g. `_utils.py`
@@ -35,9 +35,31 @@ that is more memory efficient.
 match API
 - make `contig` arg for `finaletoolkit.utils.utils.frag_generator`
 optional
+- TODO: all functions over a single interval e.g. `single_coverage` are renamed
+to `_single_[feature]`. The current functions are labeled as deprecated and
+will be removed in the future. This change affects:
+  - `single_coverage`
+- TODO: all functions over a several intervals e.g. `coverage` are renamed
+to the name of the feature.
+- TODO: all functions over intervals now use a unified `_get_intervals` function
+that allows them to accept intervals from:
+  - A string or pathlike pointing to a BED file
+  - a iterable of tuples where the first three elements are the contig,
+  start, and stop coordinates
+  - a single tuple with the contig, start, and stop of the interval of
+  interest
+- TODO: Unified terminology for certain concepts (old keywords/flags are
+still available but deprecated):
+  - `contig`, `chrom` -> `chrom`
+  - `fraction_high`, `max_length`, `-hi`, `-max` -> `max_length`, `-max`
+  - `fraction_low`, `min_length`, `-lo`, `-min` -> `min_length`, `-min`
+  - `interval_file`, `site_bed`, `intervals` -> `intervals`
+  - `genome_file`, `chrom_sizes` -> `chrom_sizes`
+
 
 ### Added
 - `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
+- internal module for deprecation warnings
 
 ## [0.7.8] - 2024-11-28
 
