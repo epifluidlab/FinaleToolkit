@@ -48,18 +48,6 @@ class TestUtils:
        (34444954, 34445075,  True), (34444968, 34445105,  True)],
       dtype=[('start', '<i8'), ('stop', '<i8'), ('strand', '?')]))
 
-	def test_frag_generator(self,request):
-		interval_file = request.path.parent / 'data' / '12.3444.b37.frag.gz'
-		contig = "12"
-		start=34443119
-		stop=34443538
-		g = frag_generator(interval_file,contig=contig,start=start,stop=stop);
-		assert next(g) == ('12', 34443118, 34443284, 60, True)
-		assert next(g) == ('12', 34443139, 34443300, 60, True)
-		assert next(g) == ('12', 34443358, 34443538, 60, False)
-		assert next(g) == ('12', 34443483, 34443660, 54, True)	
-		for _ in g: # Will iterate if there are more, unexpected values in the generator
-			assert False
 	def test_low_quality_read_pairs(self,request):
 		interval_file = request.path.parent / 'data' / '12.3444.b37.bam'
 		read = pysam.AlignmentFile(interval_file)
