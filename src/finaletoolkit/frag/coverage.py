@@ -121,7 +121,7 @@ def coverage(
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False
-    ) -> Iterable[tuple[str, int, int, str, float]]:
+    ) -> list[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -144,8 +144,7 @@ def coverage(
     scale_factor : int, optional
         Amount to multiply coverages by. Default is 10^6.
     normalize : bool
-        When set to true, ignore `scale_factor` and divide by total
-        coverage.
+        When set to True, divide by total coverage
     intersect_policy: str, optional
         Specifies how to determine whether fragments are in interval.
         'midpoint' (default) calculates the central coordinate of each
@@ -188,14 +187,16 @@ def coverage(
         if verbose:
             sys.stderr.write('Calculating total coverage for file,\n')
 
-        total_coverage_results = pool.apply_async(
-            single_coverage,
-            (input_file, None, 0, None, '.', "midpoint", quality_threshold,
-             False)
-        )
-
         if verbose:
             tqdm.write('reading intervals\n')
+
+        if normalize:
+            # queue in pool
+            total_coverage_results = pool.apply_async(
+                single_coverage,
+                (input_file, None, 0, None, '.', "midpoint", quality_threshold,
+                False)
+            )
 
         intervals = _get_intervals(
             input_file, interval_file,
@@ -217,13 +218,13 @@ def coverage(
         )
         if verbose:
             tqdm.write('Retrieving total coverage for file\n')
-        total_coverage = total_coverage_results.get()
-        if verbose:
-                tqdm.write(f'Total coverage is {total_coverage}\n')
 
         # normalize
         if normalize:
-            scale_factor = 1/total_coverage
+            total_coverage = total_coverage_results.get()
+            if verbose:
+                    tqdm.write(f'Total coverage is {total_coverage}\n')
+            scale_factor /= total_coverage[4]
 
         # Output
         output_is_file = False
@@ -251,24 +252,28 @@ def coverage(
                     for contig, start, stop, name, coverage in coverages:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
-                            f'{coverage/total_coverage[4]*scale_factor}\n'
+                            f'{coverage * scale_factor}\n'
                         )
                         returnVal.append(
                             (contig, start, stop, name,
-                             coverage/total_coverage[4]*scale_factor))
+                             coverage * scale_factor))
                 else:
                     for contig, start, stop, name, coverage in coverages:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
                             f'{name}\t'
-                            f'{coverage/total_coverage[4]*scale_factor}\n'
+                            f'{coverage * scale_factor}\n'
                         )
                         returnVal.append(
                             (contig, start, stop, name,
-                             coverage/total_coverage[4]*scale_factor))
+                             coverage * scale_factor))
             finally:
                 if output_is_file:
                     output.close()
+        else:
+            returnVal = [(contig, start, stop, name, coverage * scale_factor)
+                         for (contig, start, stop, name, coverage)
+                         in coverages]
     finally:
         pool.close()
 

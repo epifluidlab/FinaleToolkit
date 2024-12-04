@@ -16,6 +16,9 @@ option. This never had any functionality.
 histogram.
 ### Fixed
 - `contig_sizes` option included for `cleavage-profile` CLI command.
+- `normalize` option for `coverage` fixed so it no longer normalizes twice
+- `normalize=False` for `coverage` runs much faster
+- misc typehints and docstrings
 
 ### Changed
 - `finaletoolkit.frag.frag_length_bins` uses a dict based implementation
@@ -25,6 +28,7 @@ that is more memory efficient.
 `max_length` keyword args to only consider fragments of certain lengths.
 - args for `frag-length-bins` and `frag-length-intervals` updated to
 match API
+- 
 
 ### Added
 - `finaletoolkit.frag.frag_length_bins` can generate a histogram figure

@@ -41,10 +41,10 @@ class TestSingleCoverage:
         assert cov == pytest.approx(2)
 
 class TestCoverage:
-    def test_coverage(self, request):
+    def test_coverage_normalize(self, request):
         input_file = request.path.parent / 'data' / '12.3444.b37.frag.gz'
         intervals = request.path.parent / 'data' / 'intervals.bed'
-        results = coverage(input_file,intervals,"-")
+        results = coverage(input_file,intervals,"-",scale_factor=1.,normalize=True)
         for i in range(2):
             chrom, start, stop, name, cov = results[i]
             if i == 0:  
@@ -52,10 +52,31 @@ class TestCoverage:
                 assert start == 34443118
                 assert stop == 34443538
                 assert name == '.'
-                assert cov == pytest.approx(312500.0)
+                assert cov == pytest.approx(4/16)
             elif i == 1:
                 assert chrom == '12'
                 assert start == 34444968
                 assert stop == 34446115
                 assert name == '.'
-                assert cov == pytest.approx(437500.0)	
+                assert cov == pytest.approx(7/16)	
+
+    def test_coverage_no_normalize(self, request):
+        input_file = request.path.parent / 'data' / '12.3444.b37.frag.gz'
+        intervals = request.path.parent / 'data' / 'intervals.bed'
+        results = coverage(input_file,intervals,"-", normalize=False,
+                           intersect_policy='midpoint',
+                           scale_factor=1., verbose=True)
+        for i in range(2):
+            chrom, start, stop, name, cov = results[i]
+            if i == 0:  
+                assert chrom == '12'
+                assert start == 34443118
+                assert stop == 34443538
+                assert name == '.'
+                assert cov == pytest.approx(4)
+            elif i == 1:
+                assert chrom == '12'
+                assert start == 34444968
+                assert stop == 34446115
+                assert name == '.'
+                assert cov == pytest.approx(7)	
