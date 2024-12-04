@@ -19,7 +19,7 @@ from finaletoolkit.utils._deprecation import deprecated
 def _single_coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         contig: str | None=None,
-        start: int=0,
+        start: int | None=None,
         stop: int | None=None,
         name: str='.',
         min_length: int | None=None,
@@ -27,7 +27,7 @@ def _single_coverage(
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         verbose: Union[bool, int]=False
-    ) -> tuple[str, int, int, str, int]:
+    ) -> tuple[str | None, int | None, int | None, str, int]:
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -110,12 +110,9 @@ def _single_coverage(
     return contig, start, stop, name, coverage
 
 
-def _single_coverage_star(args):
-    """
-    Helper function that takes a tuple of args and applies to
-    single_coverage. To be used in imap.
-    """
-    return _single_coverage(*args)
+def _single_coverage_star(partial_coverage, interval):
+    contig, start, stop, name = interval
+    return partial_coverage(contig=contig, start=start, stop=stop, name=name)
 
 
 def coverage(
