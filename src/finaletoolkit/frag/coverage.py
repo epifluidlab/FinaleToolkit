@@ -93,8 +93,8 @@ def _single_coverage(
         quality_threshold=quality_threshold,
         start=start,
         stop=stop,
-        fraction_low=10,
-        fraction_high=10000000,
+        fraction_low=min_length,
+        fraction_high=max_length,
         intersect_policy=intersect_policy)
 
     # Iterating on each frag in file in
@@ -209,7 +209,7 @@ def coverage(
             total_coverage_results = pool.apply_async(
                 _single_coverage,
                 (input_file, None, 0, None, '.', min_length, max_length,
-                 intersect_policy, quality_threshold, False))
+                 1., intersect_policy, quality_threshold, False))
 
         if verbose:
             tqdm.write('Calculating coverage...\n')
@@ -301,8 +301,8 @@ def single_coverage(
     name: str='.',
     min_length: int | None=None,
     max_length: int | None=None,
-    intersect_policy: str="midpoint",
     scale_factor=1.,
+    intersect_policy: str="midpoint",
     quality_threshold: int=30,
     verbose: Union[bool, int]=False
 ):
