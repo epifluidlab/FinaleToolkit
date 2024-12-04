@@ -199,10 +199,7 @@ def coverage(
             )
 
         intervals = _get_intervals(
-            input_file, interval_file,
-            intersect_policy=intersect_policy,
-            quality_threshold=quality_threshold,
-            verbose=verbose)
+            interval_file)
 
         if verbose:
             tqdm.write('calculating coverage\n')

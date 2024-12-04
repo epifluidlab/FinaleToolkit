@@ -26,9 +26,9 @@ that is more memory efficient.
 - `finaletoolkit.frag.frag_length_bins` and
 `finaletoolkit.frag.frag_length_intervals` now take `min_length` and 
 `max_length` keyword args to only consider fragments of certain lengths.
-- args for `frag-length-bins` and `frag-length-intervals` updated to
-match API
-- 
+- flags for `frag-length-bins` and `frag-length-intervals` CLI commands updated to match Python API
+- `coverage` default argument for `normalize` changed to `False` 
+- `coverage` default argument for `scale_factor` changed to 1. 
 
 ### Added
 - `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
