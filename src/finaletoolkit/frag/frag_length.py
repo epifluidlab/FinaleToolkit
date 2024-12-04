@@ -314,13 +314,15 @@ def frag_length_bins(
     bins = np.arange(bin_start, bin_stop, bin_size)
     counts = []
 
-    # generate histogram
-    for i in tqdm(range(n_bins+1),
+    # generate histogram data
+    for i in tqdm.tqdm(range(n_bins+1),
                    disable=not verbose, desc="Binning fragments..."):
         bin_lower = bin_start + i * bin_size
         bin_upper = bin_start + (i + 1) * bin_size
         bin_count = sum(count for length, count in frag_len_dict.items()
                         if bin_lower <= length < bin_upper)
+        if bin_count == None:
+            bin_count = 0 
         counts.append(bin_count)
 
     # write results to output
