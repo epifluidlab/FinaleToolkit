@@ -33,3 +33,12 @@ class TestFragLengthBins:
             assert np.isin(bin, bins)
         for count in counts:
             assert count == 1 or count == 0
+
+class TestFragLengthIntervals:
+    def test_default(self, request):
+        """
+        Placeholder test to see if procedure executes
+        """
+        frag_file = request.path.parent / 'data' / '12.3444.b37.frag.gz'
+        intervals = request.path.parent / 'data' / 'intervals.bed'
+        results = frag_length_intervals(frag_file, intervals)
