@@ -410,7 +410,7 @@ def frag_length_intervals(
     intersect_policy: str="midpoint",
     workers: int=1,
     verbose: Union[bool, int]=False
-)->list[]:
+)->list[tuple[str, int, int, str, float, float, int, int]]:
     """
     Takes fragments from BAM file and calculates fragment length
     statistics for each interval in a BED file. If output specified,
@@ -427,6 +427,7 @@ def frag_length_intervals(
 
     Returns
     -------
+    results: list of (contig, start, stop, name, mean, median, stdev, min, max)'
     """
     if verbose:
         stderr.write(
