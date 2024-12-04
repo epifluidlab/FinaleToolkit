@@ -18,16 +18,17 @@ from finaletoolkit.utils._deprecation import deprecated
 
 def _single_coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
-        contig: str | None=None,
-        start: int | None=None,
-        stop: int | None=None,
-        name: str='.',
-        min_length: int | None=None,
-        max_length: int | None=None,
-        intersect_policy: str="midpoint",
-        quality_threshold: int=30,
-        verbose: Union[bool, int]=False
-    ) -> tuple[str | None, int | None, int | None, str, int]:
+        contig: str | None,
+        start: int | None,
+        stop: int | None,
+        name: str,
+        min_length: int | None,
+        max_length: int | None,
+        scale_factor: float,
+        intersect_policy: str,
+        quality_threshold: int,
+        verbose: Union[bool, int]
+    ) -> tuple[str | None, int | None, int | None, str, float]:
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -107,7 +108,7 @@ def _single_coverage(
             f'frag_coverage took {end_time - start_time} s to complete\n'
         )
 
-    return contig, start, stop, name, coverage
+    return contig, start, stop, name, coverage*scale_factor
 
 
 def _single_coverage_star(partial_coverage, interval):
@@ -118,16 +119,18 @@ def _single_coverage_star(partial_coverage, interval):
 def coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
-        output_file: str,
+        output_file: str=None,
         scale_factor: float=1e6,
         min_length: int | None=None,
         max_length: int | None=None,
         normalize: bool=False,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
+        lazy: bool=True,
         workers: int=1,
         verbose: Union[bool, int]=False
-    ) -> Iterable[tuple[str, int, int, str, float]]:
+    ) -> (Iterable[tuple[str, int, int, str, float]]
+          | list[tuple[str, int, int, str, float]]):
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -164,6 +167,9 @@ def coverage(
         interval.
     quality_threshold : int, optional
         Minimum MAPQ. Default is 30.
+    lazy : bool, optional (default is True)
+        Specifies whether result is a Generator or list. Ignored and
+        treated as false if output_file is specified
     workers : int, optional
         Number of subprocesses to spawn. Increases speed at the expense
         of memory.
@@ -171,7 +177,7 @@ def coverage(
 
     Returns
     -------
-    coverages : Iterable[tuple[str, int, int, str, float]]
+    coverages : Iterable or list of (str, int, int, str, float)
         Fragment coverages over intervals.
     """
     if (verbose):
@@ -212,7 +218,8 @@ def coverage(
 
         partial_single_coverage = partial(
             _single_coverage, input_file=input_file, min_length=min_length,
-            max_length=max_length, intersect_policy=intersect_policy,
+            scale_factor=scale_factor, max_length=max_length,
+            intersect_policy=intersect_policy,
             quality_threshold=quality_threshold, verbose=verbose)
         coverages = pool.imap(
             partial(_single_coverage_star, partial_single_coverage),
@@ -232,7 +239,8 @@ def coverage(
 
         output_is_file = False
 
-        if output_file != None:
+        if output_file is not None:
+            coverages_list = [i for i in coverages]
             if verbose:
                 tqdm.write('Writing results to output. \n')
             try:
@@ -252,17 +260,17 @@ def coverage(
                     )
 
                 if output_file.endswith(".bedgraph"):
-                    for contig, start, stop, name, coverage in coverages:
+                    for contig, start, stop, name, coverage in coverages_list:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
-                            f'{coverage/total_coverage*scale_factor}\n'
+                            f'{coverage/total_coverage}\n'
                         )
                 else:
-                    for contig, start, stop, name, coverage in coverages:
+                    for contig, start, stop, name, coverage in coverages_list:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
                             f'{name}\t'
-                            f'{coverage/total_coverage*scale_factor}\n'
+                            f'{coverage/total_coverage}\n'
                         )
 
             finally:
@@ -276,10 +284,38 @@ def coverage(
         sys.stderr.write(
             f'Coverage over intervals took {end_time - start_time} s to complete\n'
         )
-
-    return coverages
+    if output_file is not None:
+        return coverages_list
+    elif lazy:
+        return coverages
+    else:
+        return [i for i in coverages]
 
 # deprecated functions
 @deprecated
-def single_coverage(*args, **kwargs):
-    return _single_coverage(*args, **kwargs)
+def single_coverage(
+    input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
+    contig: str | None=None,
+    start: int | None=None,
+    stop: int | None=None,
+    name: str='.',
+    min_length: int | None=None,
+    max_length: int | None=None,
+    intersect_policy: str="midpoint",
+    scale_factor=1.,
+    quality_threshold: int=30,
+    verbose: Union[bool, int]=False
+):
+    return _single_coverage(
+        input_file=input_file,
+        contig=contig,
+        start=start,
+        stop=stop,
+        name=name,
+        min_length=min_length,
+        max_length=max_length,
+        intersect_policy=intersect_policy,
+        scale_factor=scale_factor,
+        quality_threshold=quality_threshold,
+        verbose=verbose,
+    )
