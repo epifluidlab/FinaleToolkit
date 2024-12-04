@@ -284,5 +284,5 @@ def coverage(
 
 # deprecated functions
 @deprecated
-def single_coverage(args):
-    return _single_coverage(*args)
+def single_coverage(*args, **kwargs):
+    return _single_coverage(*args, **kwargs)
