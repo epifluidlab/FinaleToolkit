@@ -403,14 +403,14 @@ def _frag_length_stats_star(partial_frag_stat, interval):
 def frag_length_intervals(
     input_file: Union[str, pysam.AlignmentFile],
     interval_file: str,
-    output_file: str=None,
-    min_length: int=0,
-    max_length: int=None,
+    output_file: str|None=None,
+    min_length: int|None=0,
+    max_length: int|None=None,
     quality_threshold: int=30,
     intersect_policy: str="midpoint",
     workers: int=1,
     verbose: Union[bool, int]=False
-):
+)->list[]:
     """
     Takes fragments from BAM file and calculates fragment length
     statistics for each interval in a BED file. If output specified,
@@ -452,7 +452,7 @@ def frag_length_intervals(
         intervals = _get_intervals(interval_file)
         
         partial_frag_stat = partial(_frag_length_stats, input_file=input_file, min_length=min_length, max_length=max_length, intersect_policy=intersect_policy, quality_threshold=quality_threshold, verbose=verbose)
-        iter_results = pool.imap(partial(_frag_length_stats_star, partial_frag_stat), intervals, chunksize=max(len(intervals)//workers, 1))
+        results = pool.map(partial(_frag_length_stats_star, partial_frag_stat), intervals, chunksize=max(len(intervals)//workers, 1))
         if verbose:
             tqdm.write('Retrieving fragment statistics for file\n')
         output_is_file = False
@@ -476,16 +476,14 @@ def frag_length_intervals(
                         'suffix.'
                     )
                 output.write('contig\tstart\tstop\tname\tmean\tmedian\t'
-                             'stdev\tmin\tmax\n')
+                             'stdev\tmin\tmax\n') # type: ignore
                 output.write(
                     '\n'.join('\t'.join(str(element) for element in 
-                                        item) for item in iter_results))
-                output.write('\n')
+                                        item) for item in results)) # type: ignore
+                output.write('\n') # type: ignore
             finally:
                 if output_is_file:
                     output.close()
-
-        results = [result for result in iter_results]
 
     finally:
         pool.close()
