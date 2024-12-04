@@ -115,7 +115,7 @@ def coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
         output_file: str,
-        scale_factor: float=1e6,
+        scale_factor: float=1.,
         normalize: bool=False,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,

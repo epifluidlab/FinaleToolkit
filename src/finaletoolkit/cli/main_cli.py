@@ -64,15 +64,16 @@ def main_cli_parser():
         '-n',
         '--normalize',
         action='store_true',
-        help="If flag set, ignores any user inputed scale factor and "
-        "normalizes output by total coverage."
+        help="If flag set, multiplies by user inputed scale factor if"
+        " given and normalizes output by total coverage. May lead to "
+        "longer execution time for high-throughput data."
     )
     cli_coverage.add_argument(
         '-s',
         '--scale-factor',
-        default=1e6,
+        default=1.,
         type=float,
-        help='Scale factor for coverage values.')
+        help='Scale factor for coverage values. Default is 1.')
     cli_coverage.add_argument(
         '-p',
         '--intersect_policy',
