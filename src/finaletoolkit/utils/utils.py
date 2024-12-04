@@ -280,8 +280,8 @@ def frag_generator(
         # setting filter based on intersect policy
         if intersect_policy == 'midpoint':
             check_intersect = lambda r_start, r_stop, f_start, f_stop : (
-                (r_start is None or ((f_start+f_stop)/2) >= r_start)
-                and (r_stop is None or ((f_start+f_stop)/2) < r_stop)
+                (r_start is None or ((f_start+f_stop)//2) >= r_start)
+                and (r_stop is None or ((f_start+f_stop)//2) < r_stop)
             )
         elif intersect_policy == 'any':
             check_intersect = lambda r_start, r_stop, f_start, f_stop : (
@@ -360,11 +360,18 @@ def frag_generator(
                     if (frag_length >= fraction_low
                         and frag_length <= fraction_high
                         and mapq >= quality_threshold
+                        and check_intersect(start, stop, read_start, read_stop)
                         ):
                         yield contig, read_start, read_stop, mapq, read_on_plus
                 # HACK: read_length is sometimes None
-                except TypeError:
-                    continue
+                except TypeError as e:
+                    stderr.writelines(["Type error encountered.\n",
+                                       f"Fragment length: {frag_length}\n",
+                                       f"fraction_low: {fraction_low}\n",
+                                       f"fraction_high: {fraction_high}\n",
+                                       "Skipping interval.\n",
+                                       f"Error: {e}\n"])
+
 
     finally:
         if input_file_is_path and is_sam:
