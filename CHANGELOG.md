@@ -7,13 +7,14 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [UNRELEASED]
+## [0.8.0] - 2024-12-04
 
 ### Removed
 - `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig`
 option. This never had any functionality.
 - `finaletoolkit.frag.frag_length_bins` no longer generates a text-based
 histogram.
+
 ### Fixed
 - `contig_sizes` option included for `cleavage-profile` CLI command.
 - `normalize` option for `coverage` fixed so it no longer normalizes twice
