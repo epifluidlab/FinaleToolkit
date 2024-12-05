@@ -3,8 +3,8 @@ import sys
 import time
 from typing import Union, Iterable
 from pathlib import Path
-
 from multiprocessing import Pool
+from functools import partial
 
 import pysam
 import gzip
@@ -21,6 +21,8 @@ def single_coverage(
         start: int=0,
         stop: int=None,
         name: str='.',
+        min_length: int=None,
+        max_length: int=None,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         verbose: Union[bool, int]=False
@@ -70,6 +72,8 @@ def single_coverage(
             start: {start}
             stop: {stop}
             name: {name}
+            min_length: {min_length}
+            max_length: {max_length}
             intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             verbose: {verbose}
@@ -85,8 +89,8 @@ def single_coverage(
         quality_threshold=quality_threshold,
         start=start,
         stop=stop,
-        fraction_low=10,
-        fraction_high=10000000,
+        fraction_low=min_length,
+        fraction_high=max_length,
         intersect_policy=intersect_policy)
 
     # Iterating on each frag in file in
@@ -103,12 +107,9 @@ def single_coverage(
     return contig, start, stop, name, coverage
 
 
-def _single_coverage_star(args):
-    """
-    Helper function that takes a tuple of args and applies to
-    single_coverage. To be used in imap.
-    """
-    return single_coverage(*args)
+def _single_coverage_star(partial_coverage, interval):
+    contig, start, stop, name = interval
+    return partial_coverage(contig=contig, start=start, stop=stop, name=name)
 
 
 def coverage(
@@ -116,6 +117,8 @@ def coverage(
         interval_file: str,
         output_file: str,
         scale_factor: float=1.,
+        min_length: int=None,
+        max_length: int=None,
         normalize: bool=False,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
@@ -142,7 +145,11 @@ def coverage(
         Path for bed file to print coverages to. If output_file = `-`,
         results will be printed to stdout.
     scale_factor : int, optional
-        Amount to multiply coverages by. Default is 10^6.
+        Amount to multiply coverages by. Default is 1.
+    min_length: int or None, optional
+        Minimum length of fragments to be included.
+    max_length: int or None, optional
+        Maximum length of fragments to be included.
     normalize : bool
         When set to True, divide by total coverage
     intersect_policy: str, optional
@@ -169,14 +176,16 @@ def coverage(
         sys.stderr.write(
             f"""
             input_file: {input_file}
-            interval_file: {interval_file}
+            interval file: {interval_file}
             output_file: {output_file}
             scale_factor: {scale_factor}
-            normalize: {normalize}
+            min_length: {min_length}
+            max_length: {max_length}
             intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             workers: {workers}
-            verbose: {verbose}\n
+            normalize: {normalize}
+            verbose: {verbose} \n
             """
         )
 
@@ -204,15 +213,14 @@ def coverage(
         if verbose:
             tqdm.write('calculating coverage\n')
 
+        partial_single_coverage = partial(
+            single_coverage, input_file=input_file, min_length=min_length,
+            max_length=max_length, intersect_policy=intersect_policy,
+            quality_threshold=quality_threshold, verbose=verbose)
         coverages = pool.imap(
-            _single_coverage_star,
-            tqdm(
-                intervals,
-                desc='Intervals',
-                position=2
-            ) if verbose else intervals,
-            min(len(intervals) // 2 // workers + 1, 40)
-        )
+            partial(_single_coverage_star, partial_single_coverage), intervals,
+            chunksize=max(len(intervals)//workers, 1))
+
         if verbose:
             tqdm.write('Retrieving total coverage for file\n')
 
