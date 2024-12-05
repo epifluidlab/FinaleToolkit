@@ -44,6 +44,7 @@ that is more memory efficient.
 - `normalize` keyword argument and `--normalize` flag to `finaletoolkit.frag.coverage` function and `finaletoolkit coverage` subcommand, respectively. Setting this argument/flag to true results in the output
 being normalized by the total coverage, ignoring `scale_factor` if specified.
 - `--intersect-policy` or `-p` flag added to `finaletoolkit coverage` subcommand.
+- tests for `frag_length` module
 
 ## [0.7.7] - 2024-11-27
 
