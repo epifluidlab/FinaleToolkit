@@ -73,9 +73,24 @@ class TestFragGenerator:
         
         assert len(frags) == 17, "Incorrect number of frags"
 
+    def test_detailed(self,request):
+        """
+        See if exact fragments are included.
+        """
+        interval_file = request.path.parent / 'data' / '12.3444.b37.frag.gz'
+        contig = "12"
+        start=34443119
+        stop=34443538
+        g = frag_generator(interval_file,contig=contig,start=start,stop=stop)
+        expected = [
+            ('12', 34443118, 34443284, 60, True),
+            ('12', 34443139, 34443300, 60, True),
+            ('12', 34443358, 34443538, 60, False),
+            ('12', 34443483, 34443660, 54, True),
+        ]
+        for i, frag in enumerate(g):
+            assert frag == expected[i]
         
-
-
 class TestFragArray:
     def test_bam(self, request):
         """

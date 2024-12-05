@@ -191,12 +191,14 @@ def frags_in_region(frag_array: NDArray[np.int64],
     in_region = np.logical_and(np.less(starts,maximum), np.greater_equal(stops,minimum))
     filtered_frags = frag_array[in_region]
     return filtered_frags
+
+
 def frag_generator(
     input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile, Path],
-    contig: str,
+    contig: str | None,
     quality_threshold: int=30,
-    start: int=None,
-    stop: int=None,
+    start: int | None=None,
+    stop: int | None=None,
     fraction_low: int=120,
     fraction_high: int=180,
     intersect_policy: str="midpoint",
@@ -241,7 +243,7 @@ def frag_generator(
         # check type of input and open if needed
         input_file_is_path = False
         if isinstance(input_file, str) or isinstance(input_file, Path):
-            input_file_is_path == True
+            input_file_is_path = True
             # check file type
             if ( # AlignmentFile
                 str(input_file).endswith('.sam')
@@ -249,7 +251,7 @@ def frag_generator(
                 or str(input_file).endswith('.cram')
             ):
                 is_sam = True
-                sam_file = pysam.AlignmentFile(input_file, 'r')
+                sam_file = pysam.AlignmentFile(str(input_file), 'r')
             elif ( # Tabix indexed file
                 str(input_file).endswith('frag.gz')
                 or str(input_file).endswith('bed.gz')
@@ -260,8 +262,8 @@ def frag_generator(
                 is_frag = str(input_file).endswith('frag.gz') 
             else:
                 raise ValueError(
-                    "Unaccepted interval file type. Only SAM, CRAM, BAM"
-                    ", and Frag.gz files are accepted.")
+                    f"{input_file} is not an accepted file type. Only "
+                    "SAM, CRAM, BAM, and Frag.gz files are accepted.")
         elif type(input_file) == pysam.AlignmentFile:
             input_file_is_path = False
             is_sam = True
@@ -280,8 +282,8 @@ def frag_generator(
         # setting filter based on intersect policy
         if intersect_policy == 'midpoint':
             check_intersect = lambda r_start, r_stop, f_start, f_stop : (
-                (r_start is None or ((f_start+f_stop)/2) >= r_start)
-                and (r_stop is None or ((f_start+f_stop)/2) < r_stop)
+                (r_start is None or _none_geq(((f_start+f_stop)//2), r_start))
+                and (r_stop is None or ((f_start+f_stop)//2) < r_stop)
             )
         elif intersect_policy == 'any':
             check_intersect = lambda r_start, r_stop, f_start, f_stop : (
@@ -307,8 +309,8 @@ def frag_generator(
                         or read.is_read2):
                         pass
                     elif (
-                        abs(frag_length := read.template_length) >= fraction_low
-                        and abs(frag_length) <= fraction_high
+                        _none_geq(abs(frag_length := read.template_length), fraction_low)
+                        and _none_leq(abs(frag_length), fraction_high)
                     ):
                         if read.template_length > 0:
                             f_start = read.reference_start
@@ -357,14 +359,21 @@ def frag_generator(
                     read_on_plus = '+' in line[5]
                     
                 try:
-                    if (frag_length >= fraction_low
-                        and frag_length <= fraction_high
-                        and mapq >= quality_threshold
+                    if (_none_geq(frag_length, fraction_low)
+                        and _none_leq(frag_length, fraction_high)
+                        and _none_geq(mapq, quality_threshold)
+                        and check_intersect(start, stop, read_start, read_stop)
                         ):
                         yield contig, read_start, read_stop, mapq, read_on_plus
                 # HACK: read_length is sometimes None
-                except TypeError:
-                    continue
+                except TypeError as e:
+                    stderr.writelines(["Type error encountered.\n",
+                                       f"Fragment length: {frag_length}\n",
+                                       f"fraction_low: {fraction_low}\n",
+                                       f"fraction_high: {fraction_high}\n",
+                                       "Skipping interval.\n",
+                                       f"Error: {e}\n"])
+
 
     finally:
         if input_file_is_path and is_sam:
@@ -506,11 +515,7 @@ def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
 
 
 def _get_intervals(
-    input_file: Union[str, pysam.AlignmentFile],
-    interval_file: str,
-    intersect_policy: str,
-    quality_threshold: int,
-    verbose: Union[bool, int]
+    interval_file: str
 ) -> list[tuple[str, str, int, int, str, str, int]]:
     """
     Helper function to read intervals from bed file.
@@ -518,29 +523,25 @@ def _get_intervals(
     (input_file, chrom, start, stop, name, intersect_policy,
     quality_threshold, verbosity)
     """
-    intervals = []  # list of inputs for single_coverage
-
+    intervals = []
     with open(interval_file) as bed:
         for line in bed:
             if not line.startswith('#'):
-                if line != '':
+                if line.strip():  # Check if line is not empty
                     contig, start, stop, *name = line.split()
                     start = int(start)
                     stop = int(stop)
-                    name = name[0] if len(name) > 1 else '.'
+                    name = name[0] if name else '.'
                     interval = (
-                        input_file,
                         contig,
                         start,
                         stop,
-                        name,
-                        intersect_policy,
-                        quality_threshold,
-                        verbose - 1 if verbose > 1 else 0
+                        name
                     )
                     intervals.append(interval)
                 else:
                     break
+
     return intervals
 
 
@@ -573,3 +574,31 @@ def overlaps(
     raw_overlaps = np.logical_and(contig_blind_overlaps, in_same_contig)
     any_overlaps = np.any(raw_overlaps, axis=1)
     return any_overlaps
+
+# None compatible comparison operators
+def _none_leq(a: int|float|None, b: int|float|None)->bool:
+    """
+    Less than or equals that evaluates True if any argument is None
+    """
+    if a is None or b is None:
+        return True
+    else:
+        return a <= b
+    
+def _none_geq(a: int|float|None, b: int|float|None)->bool:
+    """
+    Greater than or equals that evaluates True if any argument is None
+    """
+    if a is None or b is None:
+        return True
+    else:
+        return a >= b
+    
+def _none_eq(a: int|float|None, b: int|float|None)->bool:
+    """
+    Equals that evaluates True if any argument is None
+    """
+    if a is None or b is None:
+        return True
+    else:
+        return a == b

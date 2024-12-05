@@ -7,6 +7,33 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2024-12-04
+
+### Removed
+- `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig`
+option. This never had any functionality.
+- `finaletoolkit.frag.frag_length_bins` no longer generates a text-based
+histogram.
+
+### Fixed
+- `contig_sizes` option included for `cleavage-profile` CLI command.
+- `normalize` option for `coverage` fixed so it no longer normalizes twice
+- `normalize=False` for `coverage` runs much faster
+- misc typehints and docstrings
+
+### Changed
+- `finaletoolkit.frag.frag_length_bins` uses a dict based implementation
+that is more memory efficient.
+- `finaletoolkit.frag.frag_length_bins` and
+`finaletoolkit.frag.frag_length_intervals` now take `min_length` and 
+`max_length` keyword args to only consider fragments of certain lengths.
+- flags for `frag-length-bins` and `frag-length-intervals` CLI commands updated to match Python API
+- `coverage` default argument for `normalize` changed to `False` 
+- `coverage` default argument for `scale_factor` changed to 1. 
+
+### Added
+- `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
+
 ## [0.7.8] - 2024-11-28
 
 ### Fixed
@@ -17,6 +44,7 @@ and this project adheres to
 - `normalize` keyword argument and `--normalize` flag to `finaletoolkit.frag.coverage` function and `finaletoolkit coverage` subcommand, respectively. Setting this argument/flag to true results in the output
 being normalized by the total coverage, ignoring `scale_factor` if specified.
 - `--intersect-policy` or `-p` flag added to `finaletoolkit coverage` subcommand.
+- tests for `frag_length` module
 
 ## [0.7.7] - 2024-11-27
 

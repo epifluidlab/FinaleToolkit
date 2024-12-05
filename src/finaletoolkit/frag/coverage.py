@@ -3,8 +3,8 @@ import sys
 import time
 from typing import Union, Iterable
 from pathlib import Path
-
 from multiprocessing import Pool
+from functools import partial
 
 import pysam
 import gzip
@@ -21,6 +21,8 @@ def single_coverage(
         start: int=0,
         stop: int=None,
         name: str='.',
+        min_length: int=None,
+        max_length: int=None,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         verbose: Union[bool, int]=False
@@ -70,6 +72,8 @@ def single_coverage(
             start: {start}
             stop: {stop}
             name: {name}
+            min_length: {min_length}
+            max_length: {max_length}
             intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             verbose: {verbose}
@@ -85,8 +89,8 @@ def single_coverage(
         quality_threshold=quality_threshold,
         start=start,
         stop=stop,
-        fraction_low=10,
-        fraction_high=10000000,
+        fraction_low=min_length,
+        fraction_high=max_length,
         intersect_policy=intersect_policy)
 
     # Iterating on each frag in file in
@@ -97,31 +101,30 @@ def single_coverage(
     if verbose:
         end_time = time.time()
         tqdm.write(
-            f'frag_coverage took {end_time - start_time} s to complete\n'
+            f'single_coverage took {end_time - start_time} s to complete\n'
         )
 
     return contig, start, stop, name, coverage
 
 
-def _single_coverage_star(args):
-    """
-    Helper function that takes a tuple of args and applies to
-    single_coverage. To be used in imap.
-    """
-    return single_coverage(*args)
+def _single_coverage_star(partial_coverage, interval):
+    contig, start, stop, name = interval
+    return partial_coverage(contig=contig, start=start, stop=stop, name=name)
 
 
 def coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
         output_file: str,
-        scale_factor: float=1e6,
+        scale_factor: float=1.,
+        min_length: int=None,
+        max_length: int=None,
         normalize: bool=False,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=False
-    ) -> Iterable[tuple[str, int, int, str, float]]:
+    ) -> list[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -142,10 +145,13 @@ def coverage(
         Path for bed file to print coverages to. If output_file = `-`,
         results will be printed to stdout.
     scale_factor : int, optional
-        Amount to multiply coverages by. Default is 10^6.
+        Amount to multiply coverages by. Default is 1.
+    min_length: int or None, optional
+        Minimum length of fragments to be included.
+    max_length: int or None, optional
+        Maximum length of fragments to be included.
     normalize : bool
-        When set to true, ignore `scale_factor` and divide by total
-        coverage.
+        When set to True, divide by total coverage
     intersect_policy: str, optional
         Specifies how to determine whether fragments are in interval.
         'midpoint' (default) calculates the central coordinate of each
@@ -167,63 +173,65 @@ def coverage(
     returnVal = []
     if (verbose):
         start_time = time.time()
-        sys.stderr.write(
+        tqdm.write(
             f"""
             input_file: {input_file}
-            interval_file: {interval_file}
+            interval file: {interval_file}
             output_file: {output_file}
             scale_factor: {scale_factor}
-            normalize: {normalize}
+            min_length: {min_length}
+            max_length: {max_length}
             intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             workers: {workers}
-            verbose: {verbose}\n
+            normalize: {normalize}
+            verbose: {verbose} \n
             """
         )
 
     if verbose:
-        sys.stderr.write('Creating process pool\n')
+        tqdm.write('Creating process pool\n')
     try:
         pool = Pool(processes=workers, )
         if verbose:
-            sys.stderr.write('Calculating total coverage for file,\n')
-
-        total_coverage_results = pool.apply_async(
-            single_coverage,
-            (input_file, None, 0, None, '.', "midpoint", quality_threshold,
-             False)
-        )
+            tqdm.write('Calculating total coverage for file,\n')
 
         if verbose:
             tqdm.write('reading intervals\n')
 
+        if normalize:
+            # queue in pool
+            total_coverage_results = pool.apply_async(
+                single_coverage,
+                (input_file, None, 0, None, '.'),
+                {"intersect_policy": "midpoint",
+                 "quality_threshold": quality_threshold,
+                 "verbose": False}
+            )
+
         intervals = _get_intervals(
-            input_file, interval_file,
-            intersect_policy=intersect_policy,
-            quality_threshold=quality_threshold,
-            verbose=verbose)
+            interval_file)
 
         if verbose:
             tqdm.write('calculating coverage\n')
 
+        partial_single_coverage = partial(
+            single_coverage, input_file=input_file, min_length=min_length,
+            max_length=max_length, intersect_policy=intersect_policy,
+            quality_threshold=quality_threshold, verbose=verbose)
         coverages = pool.imap(
-            _single_coverage_star,
-            tqdm(
-                intervals,
-                desc='Intervals',
-                position=2
-            ) if verbose else intervals,
-            min(len(intervals) // 2 // workers + 1, 40)
-        )
+            partial(_single_coverage_star, partial_single_coverage), intervals,
+            chunksize=max(len(intervals)//workers, 1))
+
         if verbose:
             tqdm.write('Retrieving total coverage for file\n')
-        total_coverage = total_coverage_results.get()
-        if verbose:
-                tqdm.write(f'Total coverage is {total_coverage}\n')
 
         # normalize
         if normalize:
-            scale_factor = 1/total_coverage
+            total_coverage = total_coverage_results.get()
+            if verbose:
+                    tqdm.write(f'Total coverage is {total_coverage}\n')
+            scale_factor /= total_coverage[4]
 
         # Output
         output_is_file = False
@@ -251,30 +259,34 @@ def coverage(
                     for contig, start, stop, name, coverage in coverages:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
-                            f'{coverage/total_coverage[4]*scale_factor}\n'
+                            f'{coverage * scale_factor}\n'
                         )
                         returnVal.append(
                             (contig, start, stop, name,
-                             coverage/total_coverage[4]*scale_factor))
+                             coverage * scale_factor))
                 else:
                     for contig, start, stop, name, coverage in coverages:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
                             f'{name}\t'
-                            f'{coverage/total_coverage[4]*scale_factor}\n'
+                            f'{coverage * scale_factor}\n'
                         )
                         returnVal.append(
                             (contig, start, stop, name,
-                             coverage/total_coverage[4]*scale_factor))
+                             coverage * scale_factor))
             finally:
                 if output_is_file:
                     output.close()
+        else:
+            returnVal = [(contig, start, stop, name, coverage * scale_factor)
+                         for (contig, start, stop, name, coverage)
+                         in coverages]
     finally:
         pool.close()
 
     if verbose:
         end_time = time.time()
-        sys.stderr.write(
+        tqdm.write(
             f'coverage took {end_time - start_time} s to complete\n'
         )
     return returnVal

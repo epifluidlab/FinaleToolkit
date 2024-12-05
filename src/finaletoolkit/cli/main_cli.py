@@ -64,15 +64,16 @@ def main_cli_parser():
         '-n',
         '--normalize',
         action='store_true',
-        help="If flag set, ignores any user inputed scale factor and "
-        "normalizes output by total coverage."
+        help="If flag set, multiplies by user inputed scale factor if"
+        " given and normalizes output by total coverage. May lead to "
+        "longer execution time for high-throughput data."
     )
     cli_coverage.add_argument(
         '-s',
         '--scale-factor',
-        default=1e6,
+        default=1.,
         type=float,
-        help='Scale factor for coverage values.')
+        help='Scale factor for coverage values. Default is 1.')
     cli_coverage.add_argument(
         '-p',
         '--intersect_policy',
@@ -123,6 +124,24 @@ def main_cli_parser():
         help='Specify the 0-based left-most coordinate of the interval '
         'to select fragments from. (Must also specify --contig.)')
     cli_frag_length_bins.add_argument(
+        '-E',
+        '--stop',
+        help='Specify the 1-based right-most coordinate of the interval'
+        ' to select fragments from. (Must also specify --contig.)',
+        type=int)
+    cli_frag_length_bins.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in fragment length.')
+    cli_frag_length_bins.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in fragment length.')
+    cli_frag_length_bins.add_argument(
         '-p',
         '--intersect_policy',
         choices=['midpoint',
@@ -132,14 +151,9 @@ def main_cli_parser():
         help='Specifies what policy is used to include fragments in the'
         ' given interval. See User Guide for more information.')
     cli_frag_length_bins.add_argument(
-        '-E',
-        '--stop',
-        help='Specify the 1-based right-most coordinate of the interval'
-        ' to select fragments from. (Must also specify --contig.)',
-        type=int)
-    cli_frag_length_bins.add_argument(
         '--bin-size',
         type=int,
+        default=1,
         help='Specify the size of the bins to group fragment lengths '
         'into.')
     cli_frag_length_bins.add_argument(
@@ -150,13 +164,14 @@ def main_cli_parser():
         help='A .TSV file containing containing fragment lengths binned'
         ' according to the specified bin size.')
     cli_frag_length_bins.add_argument(
-        '--contig-by-contig',
-        action='store_true',
-        help='Placeholder, not implemented.')
-    cli_frag_length_bins.add_argument(
         '--histogram',
         action='store_true',
-        help='Enable histogram mode to display histogram in terminal.')
+        help='Enable histogram mode to display histogram.')
+    cli_frag_length_bins.add_argument(
+        '--histogram-path',
+        default=None,
+        help='Path to store histogram.',
+    )
     cli_frag_length_bins.add_argument(
         '-q',
         '--quality_threshold',
@@ -185,6 +200,18 @@ def main_cli_parser():
         'interval_file',
         help='Path to a BED file containing intervals to retrieve '
         'fragment length summary statistics over.')
+    cli_frag_length_intervals.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in fragment length.')
+    cli_frag_length_intervals.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in fragment length.')
     cli_frag_length_intervals.add_argument(
         '-p',
         '--intersect_policy',
@@ -236,8 +263,10 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to calculates cleavage '
         'proportion over.')
     cli_cleavage_profile.add_argument(
-        '-o',
-        '--output_file',
+        'chrom_sizes',
+        help='A .chrom.sizes file containing chromosome names and sizes.')
+    cli_cleavage_profile.add_argument(
+        'output_file',
         default='-',
         help='A bigWig file containing the cleavage proportion results over '
         'the intervals specified in interval file.',)
