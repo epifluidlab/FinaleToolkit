@@ -101,7 +101,7 @@ def single_coverage(
     if verbose:
         end_time = time.time()
         tqdm.write(
-            f'frag_coverage took {end_time - start_time} s to complete\n'
+            f'single_coverage took {end_time - start_time} s to complete\n'
         )
 
     return contig, start, stop, name, coverage
@@ -173,7 +173,7 @@ def coverage(
     returnVal = []
     if (verbose):
         start_time = time.time()
-        sys.stderr.write(
+        tqdm.write(
             f"""
             input_file: {input_file}
             interval file: {interval_file}
@@ -190,11 +190,11 @@ def coverage(
         )
 
     if verbose:
-        sys.stderr.write('Creating process pool\n')
+        tqdm.write('Creating process pool\n')
     try:
         pool = Pool(processes=workers, )
         if verbose:
-            sys.stderr.write('Calculating total coverage for file,\n')
+            tqdm.write('Calculating total coverage for file,\n')
 
         if verbose:
             tqdm.write('reading intervals\n')
@@ -203,8 +203,10 @@ def coverage(
             # queue in pool
             total_coverage_results = pool.apply_async(
                 single_coverage,
-                (input_file, None, 0, None, '.', "midpoint", quality_threshold,
-                False)
+                (input_file, None, 0, None, '.'),
+                {"intersect_policy": "midpoint",
+                 "quality_threshold": quality_threshold,
+                 "verbose": False}
             )
 
         intervals = _get_intervals(
@@ -284,7 +286,7 @@ def coverage(
 
     if verbose:
         end_time = time.time()
-        sys.stderr.write(
+        tqdm.write(
             f'coverage took {end_time - start_time} s to complete\n'
         )
     return returnVal
