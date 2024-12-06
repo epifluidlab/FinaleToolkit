@@ -165,10 +165,6 @@ def main_cli_parser():
         help='A .TSV file containing containing fragment lengths binned'
         ' according to the specified bin size.')
     cli_frag_length_bins.add_argument(
-        '--histogram',
-        action='store_true',
-        help='Enable histogram mode to display histogram.')
-    cli_frag_length_bins.add_argument(
         '--histogram-path',
         default=None,
         help='Path to store histogram.',

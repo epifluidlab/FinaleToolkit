@@ -232,11 +232,10 @@ def frag_length_bins(
     max_length: int=None,
     bin_size: int=1,
     output_file: str=None,
-    histogram: bool=False,
     intersect_policy: str="midpoint",
     quality_threshold: int=30,
     histogram_path: str=None,
-    verbose: Union[bool, int]=False
+    verbose: Union[bool, int]=False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
@@ -251,7 +250,6 @@ def frag_length_bins(
     stop : int, optional
     bin_size : int, optional
     output_file : str, optional
-    histogram: bool, optional
     intersect_policy : str, optional
         Specifies what policy is used to include fragments in the
         given interval. Default is "midpoint". Policies include:
