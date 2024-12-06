@@ -272,8 +272,9 @@ def frag_length_bins(
             stop: {stop}
             bin_size: {bin_size}
             output_file: {output_file}
-            histogram: {histogram}
+            intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
+            histogram_path: {histogram_path}
             verbose: {verbose}
             \n"""
         )
