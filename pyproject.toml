@@ -54,5 +54,5 @@ Changelog = "https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md
 "Lab Website" = "https://epifluidlab.github.io/"
 
 [dependency-groups]
-test = ["pytest", "coverage"]
-docs = ["sphinx", "sphinx-argparse"]
+test = ["pytest", "pytest-cov"]
+docs = ["sphinx", "sphinx-argparse", "pydata-sphinx-theme"]
