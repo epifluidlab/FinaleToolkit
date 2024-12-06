@@ -6,6 +6,7 @@ standalone program.
 
 from __future__ import annotations
 import argparse
+from sys import stderr
 
 from finaletoolkit import __version__
 from finaletoolkit.frag.frag_length import (
@@ -837,7 +838,9 @@ def main_cli():
         funcargs.pop('func')
 
         function(**funcargs)
-    except AttributeError:
+    except AttributeError as e:
+        stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
+        stderr.write("Please see usage instructions below.\n")
         parser.print_help()
     
 if __name__ == '__main__':

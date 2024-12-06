@@ -9,7 +9,7 @@ from functools import partial
 
 import numpy as np
 import pysam
-import tqdm
+from tqdm import trange, tqdm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
@@ -315,8 +315,7 @@ def frag_length_bins(
     counts = []
 
     # generate histogram data
-    for i in tqdm.tqdm(range(n_bins+1),
-                   disable=not verbose, desc="Binning fragments..."):
+    for i in trange(n_bins+1, disable=not verbose, desc="Binning fragments:"):
         bin_lower = bin_start + i * bin_size
         bin_upper = bin_start + (i + 1) * bin_size
         bin_count = sum(count for length, count in frag_len_dict.items()

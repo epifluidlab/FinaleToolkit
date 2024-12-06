@@ -7,6 +7,12 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2024-12-06
+
+### Fixed
+- fixed bug involving tqdm progress bar in `frag_length_intervals`
+
+
 ## [0.8.0] - 2024-12-04
 
 ### Removed
