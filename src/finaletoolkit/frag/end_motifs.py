@@ -9,7 +9,7 @@ import gzip
 from importlib.resources import files
 from pathlib import Path
 
-import tqdm
+from tqdm import tqdm
 import py2bit
 import numpy as np
 
@@ -753,12 +753,12 @@ def end_motifs(
         # uses tqdm loading bar if verbose == True
         counts_iter = pool.imap(
             _region_end_motifs_star,
-            tqdm.tqdm(intervals, 'Reading 1mb windows', position=0)if verbose else intervals,
+            tqdm(intervals, 'Reading 1mb windows', position=0)if verbose else intervals,
             chunksize=min(int(len(intervals)/workers/2+1), 1000)
         )
 
         ccounts = np.zeros((4**k,), np.float64)
-        for count in tqdm.tqdm(counts_iter, 'Counting end-motifs', len(intervals), position=1) if verbose else counts_iter:
+        for count in tqdm(counts_iter, 'Counting end-motifs', len(intervals), position=1) if verbose else counts_iter:
             ccounts = ccounts + count
 
     finally:
@@ -780,7 +780,7 @@ def end_motifs(
 
     if verbose:
         stop_time = time()
-        tqdm.tqdm.write(
+        tqdm.write(
             f'end_motifs took {stop_time-start_time} seconds to run\n'
         )
 
@@ -874,7 +874,7 @@ def interval_end_motifs(
         # uses tqdm loading bar if verbose == True
         counts_iter = pool.imap(
             _region_end_motifs_dict_star,
-            tqdm.tqdm(
+            tqdm(
                 mp_intervals,
                 'Reading intervals',
                 position=0) if verbose else mp_intervals,
@@ -899,7 +899,7 @@ def interval_end_motifs(
 
     if verbose:
         stop_time = time()
-        tqdm.tqdm.write(
+        tqdm.write(
             f'end_motifs took {stop_time-start_time} seconds to run\n'
         )
 
