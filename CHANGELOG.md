@@ -11,6 +11,7 @@ and this project adheres to
 
 ### Fixed
 - fixed bug involving tqdm progress bar in `frag_length_intervals`
+- some code formatting
 
 
 ## [0.8.0] - 2024-12-04
