@@ -17,10 +17,11 @@ from finaletoolkit.utils.utils import frag_generator
 import finaletoolkit.frag as pkg_data
 
 # path to tsv containing f-profiles from Zhou et al (2023)
-FPROFILE_PATH: Path = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
+FPROFILE_PATH = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
 
 # quality threshold used by Jiang et al (2020)
 MIN_QUALITY: int = 20
+
 
 class EndMotifFreqs():
     """
@@ -106,8 +107,8 @@ class EndMotifFreqs():
         # if freq is 0, ignore
         mds = -np.sum(
             freq * np.log(
-                freq, out=np.zeros_like(freq, dtype=np.float64), where=(freq!=0)
-                ) / np.log(num_kmers))
+                freq, out=np.zeros_like(freq, dtype=np.float64),
+                where=(freq!=0)) / np.log(num_kmers))
         return mds
 
     @classmethod
