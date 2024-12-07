@@ -4,6 +4,7 @@ from sys import stdout, stderr
 from multiprocessing import Pool
 import gzip
 from functools import partial
+from typing import Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -320,8 +321,8 @@ def frag_length_bins(
     counts_list = []
 
     # generate histogram
-    for i in tqdm.tqdm(
-        range(n_bins+1),
+    for i in trange(
+        n_bins+1,
         disable=not verbose,
         desc="Binning fragments..."
         ):
@@ -434,7 +435,7 @@ def frag_length_intervals(
         if verbose:
             tqdm.write('Retrieving fragment statistics for file\n')
         output_is_file = False
-        if output_file != None:
+        if output_file is not None:
             if verbose:
                 tqdm.write('Writing results to output. \n')
             try:
