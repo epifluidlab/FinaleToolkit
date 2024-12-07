@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys
 import time
-from typing import Union, Iterable
+from typing import Union
 from pathlib import Path
 from multiprocessing import Pool
 from functools import partial
@@ -16,17 +16,17 @@ from finaletoolkit.utils.utils import (
 
 
 def single_coverage(
-        input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
-        contig: str=None,
-        start: int=0,
-        stop: int=None,
-        name: str='.',
-        min_length: int=None,
-        max_length: int=None,
-        intersect_policy: str="midpoint",
-        quality_threshold: int=30,
-        verbose: Union[bool, int]=False
-    ) -> tuple[str, int, int, str, float]:
+    input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
+    contig: str | None = None,
+    start: int | None = 0,
+    stop: int | None = None,
+    name: str | None = '.',
+    min_length: int | None = None,
+    max_length: int | None = None,
+    intersect_policy: str = "midpoint",
+    quality_threshold: int = 30,
+    verbose: bool | int = False
+) -> tuple[str | None, int | None, int | None, str, float]:
     """
     Return estimated fragment coverage over specified `contig` and
     region of`input_file`. Uses an algorithm where the midpoints of
@@ -117,8 +117,8 @@ def coverage(
         interval_file: str,
         output_file: str,
         scale_factor: float=1.,
-        min_length: int=None,
-        max_length: int=None,
+        min_length: int | None=None,
+        max_length: int | None=None,
         normalize: bool=False,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
