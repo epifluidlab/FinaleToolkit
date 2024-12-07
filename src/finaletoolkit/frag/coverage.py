@@ -78,6 +78,8 @@ def _single_coverage(
             start: {start}
             stop: {stop}
             name: {name}
+            min_length: {min_length}
+            max_length: {max_length}
             intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
             verbose: {verbose}
@@ -105,7 +107,7 @@ def _single_coverage(
     if verbose:
         end_time = time.time()
         tqdm.write(
-            f'frag_coverage took {end_time - start_time} s to complete\n'
+            f'single_coverage took {end_time - start_time} s to complete\n'
         )
 
     return contig, start, stop, name, coverage*scale_factor
@@ -120,17 +122,15 @@ def coverage(
         input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
         interval_file: str,
         output_file: str=None,
-        scale_factor: float=1e6,
+        scale_factor: float=1.,
         min_length: int | None=None,
         max_length: int | None=None,
         normalize: bool=False,
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
-        lazy: bool=True,
         workers: int=1,
-        verbose: Union[bool, int]=False
-    ) -> (Iterable[tuple[str, int, int, str, float]]
-          | list[tuple[str, int, int, str, float]]):
+        verbose: Union[bool, int]=False,
+    ) -> list[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
@@ -151,14 +151,13 @@ def coverage(
         Path for bed file to print coverages to. If output_file = `-`,
         results will be printed to stdout.
     scale_factor : int, optional
-        Amount to multiply coverages by. Default is 10^6.
+        Amount to multiply coverages by. Default is 1.
     min_length: int or None, optional
         Minimum length of fragments to be included.
     max_length: int or None, optional
         Maximum length of fragments to be included.
     normalize : bool
-        When set to true, ignore `scale_factor` and divide by total
-        coverage.
+        When set to True, divide by total coverage
     intersect_policy: str, optional
         Specifies how to determine whether fragments are in interval.
         'midpoint' (default) calculates the central coordinate of each
@@ -167,9 +166,6 @@ def coverage(
         interval.
     quality_threshold : int, optional
         Minimum MAPQ. Default is 30.
-    lazy : bool, optional (default is True)
-        Specifies whether result is a Generator or list. Ignored and
-        treated as false if output_file is specified
     workers : int, optional
         Number of subprocesses to spawn. Increases speed at the expense
         of memory.
@@ -182,7 +178,7 @@ def coverage(
     """
     if (verbose):
         start_time = time.time()
-        sys.stderr.write(
+        tqdm.write(
             f"""
             input_file: {input_file}
             interval file: {interval_file}
@@ -199,11 +195,25 @@ def coverage(
         )
 
     if verbose:
-        sys.stderr.write('Creating process pool.\n')
+        tqdm.write('Creating process pool\n')
     try:
         pool = Pool(processes=workers)
         if verbose:
-            sys.stderr.write('Calculating total coverage for file.\n')
+            tqdm.write('Calculating total coverage for file,\n')
+        # XXX: implementation in develop branch
+        """
+        if normalize:
+            # queue in pool
+            total_coverage_results = pool.apply_async(
+                single_coverage,
+                (input_file, None, 0, None, '.'),
+                {"intersect_policy": "midpoint",
+                 "quality_threshold": quality_threshold,
+                 "verbose": False}
+            )
+
+        intervals = _get_intervals(interval_file)
+        """
 
         if normalize:
             total_coverage_results = pool.apply_async(
@@ -224,7 +234,7 @@ def coverage(
         coverages = pool.imap(
             partial(_single_coverage_star, partial_single_coverage),
             intervals, chunksize=max(len(intervals)//workers, 1))
-
+        
         if verbose:
             tqdm.write('Retrieving total coverage for file\n')
         
@@ -236,9 +246,9 @@ def coverage(
 
         if verbose and normalize:
                 tqdm.write(f'Total coverage is {total_coverage}\n')
-
+            
         output_is_file = False
-
+        return_val = []
         if output_file is not None:
             coverages_list = [i for i in coverages]
             if verbose:
@@ -263,19 +273,28 @@ def coverage(
                     for contig, start, stop, name, coverage in coverages_list:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
-                            f'{coverage/total_coverage}\n'
+                            f'{coverage * scale_factor}\n'
                         )
+                        return_val.append(
+                            (contig, start, stop, name,
+                             coverage * scale_factor))
                 else:
                     for contig, start, stop, name, coverage in coverages_list:
                         output.write(
                             f'{contig}\t{start}\t{stop}\t'
                             f'{name}\t'
-                            f'{coverage/total_coverage}\n'
+                            f'{coverage * scale_factor}\n'
                         )
-
+                        return_val.append(
+                            (contig, start, stop, name,
+                             coverage * scale_factor))
             finally:
                 if output_is_file:
                     output.close()
+        else:
+            return_val = [(contig, start, stop, name, coverage * scale_factor)
+                         for (contig, start, stop, name, coverage)
+                         in coverages]
     finally:
         pool.close()
 
@@ -284,12 +303,7 @@ def coverage(
         sys.stderr.write(
             f'Coverage over intervals took {end_time - start_time} s to complete\n'
         )
-    if output_file is not None:
-        return coverages_list
-    elif lazy:
-        return coverages
-    else:
-        return [i for i in coverages]
+    return return_val
 
 # deprecated functions
 @deprecated

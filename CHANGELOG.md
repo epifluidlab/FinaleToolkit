@@ -15,22 +15,12 @@ different fragmentomic features,
 - deprecating API functions and modules that are not necessary for user code,
 instead labeling these as internal e.g. `_utils.py`
 
-### Removed
-- `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig`
-option. This never had any functionality.
-- `finaletoolkit.frag.frag_length_bins` no longer generates a text-based
-histogram.
-
 ### Fixed
-- `contig_sizes` option included for `cleavage-profile` CLI command.
-- Some miscellaneous typehints thorughout all modules
+- fixed bug involving tqdm progress bar in `frag_length_intervals`
+- some code formatting
+- fixed bug involving arg names in `filter-bam`
 
 ### Changed
-- `finaletoolkit.frag.frag_length_bins` uses a dict based implementation
-that is more memory efficient.
-- `finaletoolkit.frag.frag_length_bins` and
-`finaletoolkit.frag.frag_length_intervals` now take `min_length` and 
-`max_length` keyword args to only consider fragments of certain lengths.
 - args for `frag-length-bins` and `frag-length-intervals` updated to
 match API
 - make `contig` arg for `finaletoolkit.utils.utils.frag_generator`
@@ -60,6 +50,35 @@ still available but deprecated):
 ### Added
 - `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
 - internal module for deprecation warnings
+
+
+## [0.8.0] - 2024-12-04
+
+### Removed
+- `finaletoolkit.frag.frag_length_bins` no longer has the `contig_by_contig`
+option. This never had any functionality.
+- `finaletoolkit.frag.frag_length_bins` no longer generates a text-based
+histogram.
+
+### Fixed
+- `contig_sizes` option included for `cleavage-profile` CLI command.
+- `normalize` option for `coverage` fixed so it no longer normalizes twice
+- `normalize=False` for `coverage` runs much faster
+- misc typehints and docstrings
+
+### Changed
+- `finaletoolkit.frag.frag_length_bins` uses a dict based implementation
+that is more memory efficient.
+- `finaletoolkit.frag.frag_length_bins` and
+`finaletoolkit.frag.frag_length_intervals` now take `min_length` and 
+`max_length` keyword args to only consider fragments of certain lengths.
+- flags for `frag-length-bins` and `frag-length-intervals` CLI commands updated to match Python API
+- `coverage` default argument for `normalize` changed to `False` 
+- `coverage` default argument for `scale_factor` changed to 1. 
+
+### Added
+- `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
+- tests for `frag_length` module
 
 ## [0.7.8] - 2024-11-28
 

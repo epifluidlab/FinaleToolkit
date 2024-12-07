@@ -197,12 +197,12 @@ def frags_in_region(frag_array: NDArray[np.int64],
 
 def frag_generator(
     input_file: str | pysam.AlignmentFile | pysam.TabixFile | Path,
-    contig: str|None=None,
-    quality_threshold: int=30,
-    start: int|None=None,
-    stop: int|None=None,
-    fraction_low: int|None=None,
-    fraction_high: int|None=None,
+    contig: str | None,
+    quality_threshold: int = 30,
+    start: int | None = None,
+    stop: int | None = None,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
     intersect_policy: str="midpoint",
     verbose: bool|int=False
 ) -> Generator[tuple]:
@@ -254,7 +254,7 @@ def frag_generator(
                 or str(input_file).endswith('.cram')
             ):
                 is_sam = True
-                sam_file = pysam.AlignmentFile(input_file, 'r')
+                sam_file = pysam.AlignmentFile(str(input_file), 'r')
             elif ( # Tabix indexed file
                 str(input_file).endswith('frag.gz')
                 or str(input_file).endswith('bed.gz')
@@ -265,8 +265,8 @@ def frag_generator(
                 is_frag = str(input_file).endswith('frag.gz') 
             else:
                 raise ValueError(
-                    "Unaccepted interval file type. Only SAM, CRAM, BAM"
-                    ", and Frag.gz files are accepted.")
+                    f"{input_file} is not an accepted file type. Only "
+                    "SAM, CRAM, BAM, and Frag.gz files are accepted.")
         elif type(input_file) == pysam.AlignmentFile:
             input_file_is_path = False
             is_sam = True
@@ -285,8 +285,8 @@ def frag_generator(
         # setting filter based on intersect policy
         if intersect_policy == 'midpoint':
             check_intersect = lambda r_start, r_stop, f_start, f_stop : (
-                (r_start is None or ((f_start+f_stop)/2) >= r_start)
-                and (r_stop is None or ((f_start+f_stop)/2) < r_stop)
+                (r_start is None or _none_geq(((f_start+f_stop)//2), r_start))
+                and (r_stop is None or ((f_start+f_stop)//2) < r_stop)
             )
         elif intersect_policy == 'any':
             check_intersect = lambda r_start, r_stop, f_start, f_stop : (
@@ -365,12 +365,19 @@ def frag_generator(
                 try:
                     if (_none_geq(frag_length, fraction_low)
                         and _none_leq(frag_length, fraction_high)
-                        and mapq >= quality_threshold
+                        and _none_geq(mapq, quality_threshold)
+                        and check_intersect(start, stop, read_start, read_stop)
                         ):
                         yield contig, read_start, read_stop, mapq, read_on_plus
                 # HACK: read_length is sometimes None
-                except TypeError:
-                    continue
+                except TypeError as e:
+                    stderr.writelines(["Type error encountered.\n",
+                                       f"Fragment length: {frag_length}\n",
+                                       f"fraction_low: {fraction_low}\n",
+                                       f"fraction_high: {fraction_high}\n",
+                                       "Skipping interval.\n",
+                                       f"Error: {e}\n"])
+
 
     finally:
         if input_file_is_path and is_sam:
@@ -512,11 +519,15 @@ def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
 
 
 def _get_intervals(
-    interval_file: str,
-) -> list[tuple[str, int, int, str]]:
-    
-    intervals = []  # List of inputs for single_coverage
-
+    interval_file: str
+) -> list[tuple[str, str, int, int, str, str, int]]:
+    """
+    Helper function to read intervals from bed file.
+    Returns list of tuples:
+    (input_file, chrom, start, stop, name, intersect_policy,
+    quality_threshold, verbosity)
+    """
+    intervals = []
     with open(interval_file) as bed:
         for line in bed:
             if not line.startswith('#'):
