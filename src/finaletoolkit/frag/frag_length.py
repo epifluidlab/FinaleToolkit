@@ -2,7 +2,6 @@ from __future__ import annotations
 import time
 from typing import Union
 from sys import stdout, stderr
-from shutil import get_terminal_size
 from multiprocessing import Pool
 import gzip
 from functools import partial
@@ -16,7 +15,6 @@ from matplotlib.ticker import FuncFormatter
 from finaletoolkit.utils.utils import (
     _get_intervals, frag_generator
 )
-from finaletoolkit.utils.cli_hist import _cli_hist
 
 
 def plot_histogram(
@@ -33,7 +31,8 @@ def plot_histogram(
     fig_size = (6, 4)
     font_size = 12
     plt.figure(figsize=fig_size, dpi=1000)
-    plt.hist(keys, bins=num_bins, weights=values, color='salmon', edgecolor='white', linewidth=0.1)
+    plt.hist(keys, bins=num_bins, weights=values, color='salmon',
+             edgecolor='white', linewidth=0.1)
     plt.xlabel("Fragment Size (bp)", fontsize=font_size*0.8)
     plt.ylabel("Number of Fragments", fontsize=font_size*0.8)
     plt.xticks(fontsize=font_size * 0.7)
@@ -53,9 +52,11 @@ def plot_histogram(
 
     if stats:
         stats_str = "\n".join([f"{stat[0]}: {stat[1]}" for stat in stats])
-        plt.text(0.95, 0.95, stats_str, transform=plt.gca().transAxes,
-                 fontsize=font_size * 0.6, verticalalignment='top', horizontalalignment='right',
-                 bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
+        plt.text(
+            0.95, 0.95, stats_str, transform=plt.gca().transAxes,
+            fontsize=font_size * 0.6, verticalalignment='top',
+            horizontalalignment='right',
+            bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
 
     plt.tight_layout()
     plt.savefig(histogram_path)
@@ -104,15 +105,19 @@ def _frag_length_stats(
     quality_threshold: int,
     verbose: Union[bool, int]
 ):
-    frag_gen = frag_generator(input_file, contig, quality_threshold, start, stop, min_length, max_length, intersect_policy, verbose)
+    frag_gen = frag_generator(input_file, contig, quality_threshold, start,
+                              stop, min_length, max_length, intersect_policy,
+                              verbose)
     frag_len_dict=_distribution_from_gen(frag_gen)
 
     if sum(frag_len_dict.values())==0:
         mean, median, stdev, minimum, maximum = 5*[-1]
     else:
-        mean = sum(value * count for value, count in frag_len_dict.items()) / sum(frag_len_dict.values())
+        mean = (sum(value * count for value, count in frag_len_dict.items())
+                / sum(frag_len_dict.values()))
         median = _find_median(frag_len_dict)
-        variance = sum(count * ((value - mean) ** 2) for value, count in frag_len_dict.items()) / sum(frag_len_dict.values())
+        variance = sum(count * ((value - mean) ** 2) for value, count
+                       in frag_len_dict.items()) / sum(frag_len_dict.values())
         stdev = variance ** 0.5
         minimum = min(frag_len_dict.keys())
         maximum = max(frag_len_dict.keys())
@@ -360,42 +365,6 @@ def frag_length_bins(
         )
 
     return bins, counts
-
-
-def _frag_length_stats(
-    input_file: Union[str, pysam.AlignmentFile],
-    contig: str,
-    start: int,
-    stop: int,
-    min_length: int,
-    max_length: int,
-    name: str,
-    intersect_policy: str,
-    quality_threshold: int,
-    verbose: Union[bool, int]
-):
-    frag_gen = frag_generator(input_file, contig, quality_threshold, start,
-                              stop, min_length, max_length, intersect_policy,
-                              verbose)
-    frag_len_dict=_distribution_from_gen(frag_gen)
-    if sum(frag_len_dict.values())==0:
-        mean, median, stdev, minimum, maximum = 5*[-1]
-    else:
-        mean = (sum(value * count for value, count in frag_len_dict.items())
-                / sum(frag_len_dict.values()))
-        median = _find_median(frag_len_dict)
-        variance = sum(count * ((value - mean) ** 2) for value, count
-                       in frag_len_dict.items()) / sum(frag_len_dict.values())
-        stdev = variance ** 0.5
-        minimum = min(frag_len_dict.keys())
-        maximum = max(frag_len_dict.keys())
-
-    return contig, start, stop, name, mean, median, stdev, minimum, maximum
-
-
-def _frag_length_stats_star(partial_frag_stat, interval):
-    contig, start, stop, name = interval
-    return partial_frag_stat(contig=contig, start=start, stop=stop, name=name)
 
 
 def frag_length_intervals(
