@@ -1,12 +1,12 @@
 from __future__ import annotations
 import time
-from typing import Union
 from sys import stdout, stderr
 from multiprocessing import Pool
 import gzip
 from functools import partial
 
 import numpy as np
+from numpy.typing import NDArray
 import pysam
 from tqdm import trange, tqdm
 import matplotlib.pyplot as plt
@@ -95,7 +95,7 @@ def _find_median(val_freq_dict):
 
 
 def _frag_length_stats(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: str | pysam.AlignmentFile,
     contig: str,
     start: int,
     stop: int,
@@ -104,12 +104,12 @@ def _frag_length_stats(
     max_length: int,
     intersect_policy: str,
     quality_threshold: int,
-    verbose: Union[bool, int]
+    verbose: bool | int
 ):
-    frag_gen = frag_generator(input_file, contig, quality_threshold, start,
-                              stop, min_length, max_length, intersect_policy,
-                              verbose)
-    frag_len_dict = _distribution_from_gen(frag_gen)
+    frag_gen = frag_generator(input_file, contig, quality_threshold,
+                              start, stop, min_length, max_length,
+                              intersect_policy, verbose)
+    frag_len_dict=_distribution_from_gen(frag_gen)
 
     if sum(frag_len_dict.values())==0:
         mean, median, stdev, minimum, maximum = 5*[-1]
@@ -230,7 +230,7 @@ def frag_length(
 
 
 def frag_length_bins(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: str | pysam.AlignmentFile,
     contig: str | None = None,
     start: int | None = None,
     stop: int | None = None,
@@ -241,7 +241,7 @@ def frag_length_bins(
     intersect_policy: str = "midpoint",
     quality_threshold: int = 30,
     histogram_path: str | None = None,
-    verbose: Union[bool, int] = False,
+    verbose: bool | int = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
@@ -254,6 +254,8 @@ def frag_length_bins(
     contig : str, optional
     start : int, optional
     stop : int, optional
+    min_length: int | None,
+    max_length: int | None,
     bin_size : int, optional
     output_file : str, optional
     intersect_policy : str, optional
@@ -290,8 +292,10 @@ def frag_length_bins(
         stderr.write("Generating fragment dictionary. \n")
 
     frag_gen = frag_generator(
-        input_file, contig, quality_threshold, start, stop, min_length,
-        max_length, intersect_policy, verbose)
+        input_file=input_file, contig=contig,
+        quality_threshold=quality_threshold, start=start, stop=stop,
+        fraction_low=min_length, fraction_high=max_length,
+        intersect_policy=intersect_policy, verbose=verbose)
     
     frag_len_dict = _distribution_from_gen(frag_gen)
 
@@ -312,20 +316,23 @@ def frag_length_bins(
     bin_start = min(frag_len_dict.keys())
     bin_stop = max(frag_len_dict.keys())
     n_bins = (bin_stop - bin_start) // bin_size
-    bins = np.arange(bin_start, bin_stop+bin_size, bin_size)
+    bins: NDArray = np.arange(bin_start, bin_stop+bin_size, bin_size)
+    counts_list = []
 
-    counts = []
-
-    # generate histogram data
-    for i in trange(n_bins+1, disable=not verbose, desc="Binning fragments:"):
+    # generate histogram
+    for i in tqdm.tqdm(
+        range(n_bins+1),
+        disable=not verbose,
+        desc="Binning fragments..."
+        ):
         bin_lower = bin_start + i * bin_size
         bin_upper = bin_start + (i + 1) * bin_size
         bin_count = sum(count for length, count in frag_len_dict.items()
                         if bin_lower <= length < bin_upper)
-        if bin_count is None:
-            bin_count = 0 
-        counts.append(bin_count)
 
+        counts_list.append(bin_count)
+
+    counts: NDArray = np.array(counts_list)
     # write results to output
     if output_file is not None:
         try:
@@ -366,7 +373,7 @@ def frag_length_bins(
 
 
 def frag_length_intervals(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: str | pysam.AlignmentFile,
     interval_file: str,
     output_file: str | None = None,
     min_length: int | None = 0,

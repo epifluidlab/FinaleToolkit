@@ -1,7 +1,7 @@
 from __future__ import annotations
 import time
 import gzip
-from typing import Union, Generator
+from typing import Generator
 from sys import stderr
 from pathlib import Path
 
@@ -12,7 +12,7 @@ import pysam
 
 
 def chrom_sizes_to_list(
-    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
+    chrom_sizes_file: str | Path) -> list[tuple[str, int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
 
@@ -37,7 +37,7 @@ def chrom_sizes_to_list(
 
 
 def chrom_sizes_to_dict(
-    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
+    chrom_sizes_file: str | Path) -> dict[str, int]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a dict.
 
@@ -61,6 +61,7 @@ def chrom_sizes_to_dict(
     return chrom_sizes
 
 
+# FIXME: is this for lists or arrays?
 def _merge_overlapping_intervals(intervals):
     intervals.sort(key=lambda x: x[0])
     merged = []
@@ -102,9 +103,9 @@ def _merge_all_intervals(converted_intervals):
     return all_intervals
 
 
-def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
+def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
                     output_file: str,
-                    contig: str=None,
+                    contig: str | None=None,
                     quality_threshold: int=30,
                     verbose: bool=False):
     """
@@ -144,6 +145,7 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
         for read1 in sam_file.fetch(contig=contig):
             # Only select forward strand and filter out non-paired-end
             # reads and low-quality reads
+            # FIXME: why is read1 not passing typechecking?
             if (_not_read1_or_low_quality(read1, quality_threshold)):
                 pass
             else:
@@ -156,7 +158,7 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
 
     finally:
         # Close everything when done
-        if (type(input_file) == str):
+        if (type(input_file) == str and type(sam_file) is pysam.AlignmentFile):
             sam_file.close()
         out.close()
 
@@ -165,7 +167,7 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
         print(f'frag_bam_to_bed took {end_time - start_time} s to complete',
               flush=True)
 
-
+# FIXME: where and why is this used? It is similar to overlaps.
 @jit(nopython=True)
 def frags_in_region(frag_array: NDArray[np.int64],
                     minimum: int,
@@ -194,15 +196,15 @@ def frags_in_region(frag_array: NDArray[np.int64],
 
 
 def frag_generator(
-    input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile, Path],
+    input_file: str | pysam.AlignmentFile | pysam.TabixFile | Path,
     contig: str | None,
-    quality_threshold: int=30,
-    start: int | None=None,
-    stop: int | None=None,
-    fraction_low: int=120,
-    fraction_high: int=180,
+    quality_threshold: int = 30,
+    start: int | None = None,
+    stop: int | None = None,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
     intersect_policy: str="midpoint",
-    verbose: bool=False
+    verbose: bool|int=False
 ) -> Generator[tuple]:
     """
     Reads from BAM, SAM, or BED file and returns tuples containing
@@ -220,10 +222,10 @@ def frag_generator(
     stop : int, optional
     fraction_low : int, optional
         Specifies lowest fragment length included in array. Default is
-        120, equivalent to long fraction.
+        None.
     fraction_high : int, optional
         Specifies highest fragment length included in array. Default is
-        120, equivalent to long fraction.
+        None.
     intersect_policy : str, optional
         Specifies what policy is used to include fragments in the
         given interval. Default is "midpoint". Policies include:
@@ -243,7 +245,8 @@ def frag_generator(
         # check type of input and open if needed
         input_file_is_path = False
         if isinstance(input_file, str) or isinstance(input_file, Path):
-            input_file_is_path = True
+            input_file_is_path == True
+            input_file = str(input_file)
             # check file type
             if ( # AlignmentFile
                 str(input_file).endswith('.sam')
@@ -298,7 +301,8 @@ def frag_generator(
             if contig is None and start==0 and stop is None:
                 pass
             else:
-                raise ValueError("contig should be specified if start or stop given.")
+                raise ValueError("contig should be specified if start or "
+                                 "stop given.")
 
         if is_sam: # AlignmentFile
             for read in sam_file.fetch(contig, start, stop):
@@ -383,11 +387,11 @@ def frag_generator(
 
 
 def frag_array(
-    input_file: Union[str,pysam.AlignmentFile, pysam.TabixFile, Path],
+    input_file: str | pysam.AlignmentFile | pysam.TabixFile | Path,
     contig: str,
     quality_threshold: int=30,
-    start: int=None,
-    stop: int=None,
+    start: int | None=None,
+    stop: int | None=None,
     fraction_low: int=120,
     fraction_high: int=180,
     intersect_policy: str="midpoint",
@@ -491,7 +495,7 @@ def low_quality_read_pairs(read, min_mapq=30):
             or (read.is_reverse and read.mate_is_reverse))   # -G 48
 
 
-def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
+def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
     """
     Return `True` if the sequenced read described in `read` is not read1
     and a properly paired read with a Phred score exceeding `min_mapq`.
@@ -545,6 +549,7 @@ def _get_intervals(
     return intervals
 
 
+@jit(nopython=True)
 def overlaps(
     contigs_1: NDArray,
     starts_1: NDArray,

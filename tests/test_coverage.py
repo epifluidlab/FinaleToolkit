@@ -10,6 +10,7 @@ import difflib
 import pytest
 
 from finaletoolkit.frag.coverage import *
+from finaletoolkit.frag.coverage import _single_coverage
 
 class TestSingleCoverage:
     def test_coverage(self, request):
@@ -23,8 +24,8 @@ class TestSingleCoverage:
 
     def test_coverage_interval(self, request):
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
-        chrom, start, stop, name, cov = single_coverage(
-            bam, '12', 34443000, 34447000, quality_threshold=0)
+        chrom, start, stop, name, cov = _single_coverage(
+            bam, '12', 34443000, 34447000, '.', None, None, 1., "midpoint", 0, False)
 
         assert chrom == '12'
         assert start == 34443000
@@ -33,13 +34,21 @@ class TestSingleCoverage:
 
     def test_coverage_interval_midpoints(self, request):
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
-        chrom, start, stop, name, cov = single_coverage(
-            bam, '12', 34443400, 34443600, quality_threshold=0)
+        chrom, start, stop, name, cov = _single_coverage(
+            bam, '12', 34443400, 34443600, '.', None, None, 1., "midpoint", 0, False)
 
         assert chrom == '12'
         assert start == 34443400
         assert stop == 34443600
         assert cov == pytest.approx(2)
+
+    def test_deprecated_coverage(self, request):
+        bam = request.path.parent / 'data' / '12.3444.b37.bam'
+        chrom, start, stop, name, cov = single_coverage(bam, '12', 0, None, '.', None, None, 1., "midpoint", 0, False)
+
+        assert chrom == '12'
+        assert start == 0
+        assert cov == pytest.approx(17)
 
 class TestCoverage:
     def test_coverage_normalize(self, request):
@@ -81,4 +90,4 @@ class TestCoverage:
                 assert start == 34444968
                 assert stop == 34446115
                 assert name == '.'
-                assert cov == pytest.approx(7)	
+                assert cov == pytest.approx(7)
