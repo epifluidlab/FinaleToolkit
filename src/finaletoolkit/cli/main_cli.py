@@ -76,6 +76,20 @@ def main_cli_parser():
         type=float,
         help='Scale factor for coverage values. Default is 1.')
     cli_coverage.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in coverage.'
+        )
+    cli_coverage.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in coverage.'
+        )
+    cli_coverage.add_argument(
         '-p',
         '--intersect_policy',
         choices=['midpoint', 'any'],
@@ -447,6 +461,11 @@ def main_cli_parser():
         help='Take the median of the first and last 500 bases in a window and '
         'subtract from the whole interval.')
     cli_adjust_wps.add_argument(
+        '--edge-size',
+        default=500,
+        help='size of the edge subtracted from ends of window when '
+        '--subtract-edges is set. Default is 500.')
+    cli_adjust_wps.add_argument(
         '-v',
         '--verbose',
         action='count',
@@ -515,6 +534,14 @@ def main_cli_parser():
         dest="merge_bins",
         help="Keep 100kb bins and do not merge to 5Mb size.")
     cli_delfi.add_argument(
+        '-s',
+        '--window-size',
+        default=5000000,    # TODO: consider accepting 5Mb or similar format.
+        help='Specify size of large genomic intervals to merge smaller 100kb '
+        'intervals (or whatever the user specified in bins_file) into. Default'
+        'is 5000000'
+    )
+    cli_delfi.add_argument(
         '-q',
         '--quality-threshold',
         default=30,
@@ -577,6 +604,20 @@ def main_cli_parser():
         default=4,
         type=int,
         help='Length of k-mer.')
+    cli_coverage.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in coverage.'
+        )
+    cli_coverage.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in coverage.'
+        )
     cli_motifs.add_argument(
         '-o',
         '--output-file',
@@ -835,6 +876,7 @@ def main_cli():
         stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
         stderr.write("Please see usage instructions below.\n")
         parser.print_help()
-    
+
+
 if __name__ == '__main__':
     main_cli()
