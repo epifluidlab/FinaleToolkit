@@ -2,14 +2,46 @@
 Tests for main_cli and entry points.
 """
 import os
+from inspect import getfullargspec
 
 import pytest
+
+from finaletoolkit.cli.main_cli import main_cli_parser
+
+parser = main_cli_parser()
+subcommands: dict = parser._subparsers._actions[2]._name_parser_map
+
+
+class TestCLIArgs:
+    """
+    Test if provided commandline flags match args in associated function.
+    """
+
+    @pytest.mark.parametrize("name,subparser", subcommands.items())
+    def test_cli_args(self, name, subparser):
+        # find args and associated func for each subparser
+        # get args for CLI
+        cli_args = [action.dest for action in subparser._actions[1:]]
+
+        # get args for func
+        func = subparser._defaults['func']
+        func_args = getfullargspec(func).args
+
+        # check cli args are subset of func args
+        for arg in cli_args:
+            assert arg in func_args, f"CLI arg {arg} of {name} not in {func}"
+            
+        # check func args are subset of cli args
+        for arg in func_args:
+            assert arg in cli_args, f"API arg {arg} of {func} not in {name}"
+
 
 class TestCLIEntryPoint:
     """
     Test all CLI subcommands related to end_motifs and MDS, genomewide
     and intervals.
     """
+
     def test_coverage(self):
         exit_status = os.system('finaletoolkit coverage --help')
         assert exit_status == 0
@@ -69,4 +101,3 @@ class TestCLIEntryPoint:
     def test_gap_bed(self):
         exit_status = os.system('finaletoolkit gap-bed --help')
         assert exit_status == 0
-    
