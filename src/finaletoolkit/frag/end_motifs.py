@@ -666,7 +666,7 @@ def end_motifs(
     k: int = 4,
     min_length: int = 10,
     max_length: int = 600,
-    both_strands: bool = False,
+    both_strands: bool = True,
     output_file: None | str = None,
     quality_threshold: int = 30,
     workers: int = 1,
@@ -693,6 +693,8 @@ def end_motifs(
         Minimum length of fragments to be included.
     max_length: int or None, optional
         Maximum length of fragments to be included.
+    both_strands: bool
+        Default is False.
     output_file : None or str, optional
         File path to write results to. Either tsv or csv.
     quality_threshold : int, optional
