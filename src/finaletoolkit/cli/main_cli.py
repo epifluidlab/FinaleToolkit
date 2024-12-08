@@ -604,14 +604,14 @@ def main_cli_parser():
         default=4,
         type=int,
         help='Length of k-mer.')
-    cli_coverage.add_argument(
+    cli_motifs.add_argument(
         '-min',
         '--min-length',
         default=0,
         type=int,
         help='Minimum length for a fragment to be included in coverage.'
         )
-    cli_coverage.add_argument(
+    cli_motifs.add_argument(
         '-max',
         '--max-length',
         default=None,
