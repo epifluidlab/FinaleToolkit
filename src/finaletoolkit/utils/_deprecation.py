@@ -5,7 +5,7 @@ from functools import wraps
 def deprecated(func):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
-    when the function is used. A similar decorator was introduced in 
+    when the function is used. A similar decorator was introduced in
     Python 3.13, which if backported should be used instead."""
     @wraps(func)
     def new_func(*args, **kwargs):
