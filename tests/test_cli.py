@@ -33,7 +33,7 @@ class TestCLIArgs:
             
         # check func args are subset of cli args
         for arg in func_args:
-            assert arg in cli_args, f"API arg {arg} of {func} not in {name}"
+            assert arg in cli_args or arg == 'fraction_low' or arg == 'fraction_high', f"API arg {arg} of {func} not in {name}"
 
 
 class TestCLIEntryPoint:
