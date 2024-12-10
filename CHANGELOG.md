@@ -9,6 +9,10 @@ and this project adheres to
 
 ## [UNRELEASED]
 
+### Removed
+- `strand_location` arg from `agg_bigwig`
+- `cli_hist` module
+
 ### Fixed
 - fixed bug involving tqdm progress bar in `frag_length_intervals`
 - some code formatting
@@ -23,6 +27,7 @@ for all features, deprecating old args as aliases if needed.
 
 ### Added
 - internal `utils._typing` and `utils._deprecation` modules
+- test for `delfi`
 
 ## [0.8.0] - 2024-12-04
 
