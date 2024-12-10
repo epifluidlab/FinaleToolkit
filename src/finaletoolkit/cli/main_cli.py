@@ -619,6 +619,13 @@ def main_cli_parser():
         help='Maximum length for a fragment to be included in coverage.'
         )
     cli_motifs.add_argument(
+        '-B',
+        '--no-both-strands',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for end-motifs."
+    )
+    cli_motifs.add_argument(
         '-o',
         '--output-file',
         default='-',
