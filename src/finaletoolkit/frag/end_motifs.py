@@ -222,8 +222,8 @@ class EndMotifsIntervals():
             cls,
             file_path: str,
             quality_threshold: int,
-            header: int = 0,
-            sep: str = ',',) -> EndMotifsIntervals:
+            sep: str = ',',
+            header: int = 0,) -> EndMotifsIntervals:
         """
         Reads kmer frequency from a tab-delimited file. Expected columns
         are contig, start, stop, name, count, (kmers). Because
@@ -1005,5 +1005,6 @@ def _cli_interval_mds(
         file_path,
         30,
         sep,
+        header,
     )
     motifs.mds_bed(file_out)
