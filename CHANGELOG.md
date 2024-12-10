@@ -24,6 +24,7 @@ and this project adheres to
 behavior of original scripts
 - rename `fraction_high` and `fraction_low` to  `min_length` and `max_length`
 for all features, deprecating old args as aliases if needed.
+- numpy 2 compatible
 
 ### Added
 - internal `utils._typing` and `utils._deprecation` modules
