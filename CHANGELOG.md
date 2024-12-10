@@ -7,6 +7,29 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2024-12-10
+
+### Removed
+- `strand_location` arg from `agg_bigwig`
+- `cli_hist` module
+
+### Fixed
+- fixed bug involving tqdm progress bar in `frag_length_intervals`
+- some code formatting
+- fixed bug involving arg names in `filter-bam`
+- add some missing args to CLI
+
+### Changed
+- change default of arg `both_strands` of `end_motifs` to True to match
+behavior of original scripts
+- rename `fraction_high` and `fraction_low` to  `min_length` and `max_length`
+for all features, deprecating old args as aliases if needed.
+- numpy 2 compatible
+
+### Added
+- internal `utils._typing` and `utils._deprecation` modules
+- test for `delfi`
+
 ## [0.8.0] - 2024-12-04
 
 ### Removed
@@ -27,12 +50,14 @@ that is more memory efficient.
 - `finaletoolkit.frag.frag_length_bins` and
 `finaletoolkit.frag.frag_length_intervals` now take `min_length` and 
 `max_length` keyword args to only consider fragments of certain lengths.
-- flags for `frag-length-bins` and `frag-length-intervals` CLI commands updated to match Python API
+- flags for `frag-length-bins` and `frag-length-intervals` CLI commands updated
+to match Python API
 - `coverage` default argument for `normalize` changed to `False` 
 - `coverage` default argument for `scale_factor` changed to 1. 
 
 ### Added
 - `finaletoolkit.frag.frag_length_bins` can generate a histogram figure
+- tests for `frag_length` module
 
 ## [0.7.8] - 2024-11-28
 
@@ -41,10 +66,11 @@ that is more memory efficient.
 `site_bed` must be sorted.
 
 ### Added
-- `normalize` keyword argument and `--normalize` flag to `finaletoolkit.frag.coverage` function and `finaletoolkit coverage` subcommand, respectively. Setting this argument/flag to true results in the output
+- `normalize` keyword argument and `--normalize` flag to
+`finaletoolkit.frag.coverage` function and `finaletoolkit coverage` subcommand,
+respectively. Setting this argument/flag to true results in the output
 being normalized by the total coverage, ignoring `scale_factor` if specified.
-- `--intersect-policy` or `-p` flag added to `finaletoolkit coverage` subcommand.
-- tests for `frag_length` module
+- `--intersect-policy` or `-p` flag added to `finaletoolkit coverage`subcommand.
 
 ## [0.7.7] - 2024-11-27
 
@@ -93,15 +119,18 @@ information when calculating end motifs on forward-strand only.
  - Added a test for the coverage function
 
 ### Fixed
- - Ensured that the coverage value returns the expected value (previously returned an empty generator)
+ - Ensured that the coverage value returns the expected value (previously
+ returned an empty generator)
 
 ## [0.7.2] - 2024-08-17
 
 ### Changed
- - Included `output_file` as required argument for `finaletoolkit cleavage-profile`.
+ - Included `output_file` as required argument for
+ `finaletoolkit cleavage-profile`.
 
 ### Fixed
- - Fixed incompatible types in min function through an explicit cast of chrom_sizes to integers.
+ - Fixed incompatible types in min function through an explicit cast of
+ chrom_sizes to integers.
 
 ## [0.7.1] - 2024-08-11
 
@@ -219,11 +248,13 @@ are specified without `contig`
 ## [0.5.2] - 2024-05-08
 
 ### Fixed
-- `interval-mds` CLI subcommand calculates correctly without large negative values.
+- `interval-mds` CLI subcommand calculates correctly without large negative
+values.
 - `interval-mds` CLI subcommand now correctly parses tsv files.
 
 ### Added
-- Most end-motif related Python functions accept Path instances as inputs for files.
+- Most end-motif related Python functions accept Path instances as inputs for
+files.
 - Unit and function tests, especially for end-motif related functions.
 
 
@@ -235,7 +266,8 @@ are specified without `contig`
 - Update contacts in TOML
 
 ### Fixed
-- `interval-mds` and `mds` both calculate correctly when one motif has a frequency of 0
+- `interval-mds` and `mds` both calculate correctly when one motif has a
+frequency of 0
 
 ## [0.5.0] - 2024-04-24
 

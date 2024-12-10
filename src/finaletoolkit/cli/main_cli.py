@@ -6,6 +6,7 @@ standalone program.
 
 from __future__ import annotations
 import argparse
+from sys import stderr
 
 from finaletoolkit import __version__
 from finaletoolkit.frag.frag_length import (
@@ -75,10 +76,23 @@ def main_cli_parser():
         type=float,
         help='Scale factor for coverage values. Default is 1.')
     cli_coverage.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in coverage.'
+        )
+    cli_coverage.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in coverage.'
+        )
+    cli_coverage.add_argument(
         '-p',
         '--intersect_policy',
-        choices=['midpoint',
-        'any'],
+        choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
         help='Specifies what policy is used to include fragments in the'
@@ -134,18 +148,19 @@ def main_cli_parser():
         '--min-length',
         default=0,
         type=int,
-        help='Minimum length for a fragment to be included in fragment length.')
+        help='Minimum length for a fragment to be included in fragment length.'
+        )
     cli_frag_length_bins.add_argument(
         '-max',
         '--max-length',
         default=None,
         type=int,
-        help='Maximum length for a fragment to be included in fragment length.')
+        help='Maximum length for a fragment to be included in fragment length.'
+        )
     cli_frag_length_bins.add_argument(
         '-p',
         '--intersect_policy',
-        choices=['midpoint',
-        'any'],
+        choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
         help='Specifies what policy is used to include fragments in the'
@@ -163,10 +178,6 @@ def main_cli_parser():
         type=str,
         help='A .TSV file containing containing fragment lengths binned'
         ' according to the specified bin size.')
-    cli_frag_length_bins.add_argument(
-        '--histogram',
-        action='store_true',
-        help='Enable histogram mode to display histogram.')
     cli_frag_length_bins.add_argument(
         '--histogram-path',
         default=None,
@@ -205,18 +216,19 @@ def main_cli_parser():
         '--min-length',
         default=0,
         type=int,
-        help='Minimum length for a fragment to be included in fragment length.')
+        help='Minimum length for a fragment to be included in fragment length.'
+        )
     cli_frag_length_intervals.add_argument(
         '-max',
         '--max-length',
         default=None,
         type=int,
-        help='Maximum length for a fragment to be included in fragment length.')
+        help='Maximum length for a fragment to be included in fragment length.'
+        )
     cli_frag_length_intervals.add_argument(
         '-p',
         '--intersect_policy',
-        choices=['midpoint',
-        'any'],
+        choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
         help='Specifies what policy is used to include fragments in the'
@@ -299,7 +311,7 @@ def main_cli_parser():
         ' interval. Useful when dealing with BED files with only CpG '
         'coordinates.')
     cli_cleavage_profile.add_argument(
-        '-r','--right',
+        '-r', '--right',
         default=0,
         type=int,
         help='Number of base pairs to add to stop coordinate to create '
@@ -364,8 +376,8 @@ def main_cli_parser():
         '--fraction_high',
         default=180,
         type=int,
-         help='Maximum length for a fragment to be included in WPS '
-         'calculation.')
+        help='Maximum length for a fragment to be included in WPS '
+        'calculation.')
     cli_wps.add_argument(
         '-q',
         '--quality_threshold',
@@ -449,6 +461,11 @@ def main_cli_parser():
         help='Take the median of the first and last 500 bases in a window and '
         'subtract from the whole interval.')
     cli_adjust_wps.add_argument(
+        '--edge-size',
+        default=500,
+        help='size of the edge subtracted from ends of window when '
+        '--subtract-edges is set. Default is 500.')
+    cli_adjust_wps.add_argument(
         '-v',
         '--verbose',
         action='count',
@@ -517,6 +534,14 @@ def main_cli_parser():
         dest="merge_bins",
         help="Keep 100kb bins and do not merge to 5Mb size.")
     cli_delfi.add_argument(
+        '-s',
+        '--window-size',
+        default=5000000,    # TODO: consider accepting 5Mb or similar format.
+        help='Specify size of large genomic intervals to merge smaller 100kb '
+        'intervals (or whatever the user specified in bins_file) into. Default'
+        'is 5000000'
+    )
+    cli_delfi.add_argument(
         '-q',
         '--quality-threshold',
         default=30,
@@ -580,6 +605,27 @@ def main_cli_parser():
         type=int,
         help='Length of k-mer.')
     cli_motifs.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_motifs.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_motifs.add_argument(
+        '-B',
+        '--no-both-strands',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for end-motifs."
+    )
+    cli_motifs.add_argument(
         '-o',
         '--output-file',
         default='-',
@@ -604,7 +650,6 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_motifs.set_defaults(func=end_motifs)
 
-
     cli_interval_motifs = subparsers.add_parser(
         'interval-end-motifs',
         prog='finaletoolkit-interval-end-motifs',
@@ -627,6 +672,20 @@ def main_cli_parser():
         type=int,
         help='Length of k-mer.')
     cli_interval_motifs.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_interval_motifs.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_interval_motifs.add_argument(
         '-lo',
         '--fraction-low',
         default=10,
@@ -640,6 +699,13 @@ def main_cli_parser():
         type=int,
         help='Maximum length for a fragment to be included in end motif '
         'frequency.')
+    cli_interval_motifs.add_argument(
+        '-B',
+        '--no-both-strands',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for end-motifs."
+    )
     cli_interval_motifs.add_argument(
         '-o',
         '--output-file',
@@ -711,6 +777,11 @@ def main_cli_parser():
         default='-',
         help='Path to the output BED/BEDGraph file containing MDS for each '
         'interval.')
+    cli_interval_mds.add_argument(
+        '--header',
+        default=0,
+        type=int,
+        help='Number of header rows to ignore. Default is 0')
     cli_interval_mds.set_defaults(func=_cli_interval_mds)
 
     cli_filter_bam = subparsers.add_parser(
@@ -792,6 +863,12 @@ def main_cli_parser():
         help='Size of the median filter window used to adjust WPS '
         'scores. Only modify if aggregating WPS signals.')
     cli_agg_bw.add_argument(
+        '-a',
+        '--mean',
+        action='store_true',
+        help='use mean instead'
+    )
+    cli_agg_bw.add_argument(
         '-v',
         '--verbose',
         action='count',
@@ -811,10 +888,7 @@ def main_cli_parser():
         'the reference sequence.')
     cli_gap_bed.add_argument(
         'reference_genome',
-        choices=['hg19',
-        'b37','human_g1k_v37',
-        'hg38',
-        'GRCh38'],
+        choices=['hg19', 'b37', 'human_g1k_v37', 'hg38', 'GRCh38'],
         help='Reference genome to provide gaps for.')
     cli_gap_bed.add_argument(
         'output_file',
@@ -837,8 +911,11 @@ def main_cli():
         funcargs.pop('func')
 
         function(**funcargs)
-    except AttributeError:
+    except AttributeError as e:
+        stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
+        stderr.write("Please see usage instructions below.\n")
         parser.print_help()
-    
+
+
 if __name__ == '__main__':
     main_cli()

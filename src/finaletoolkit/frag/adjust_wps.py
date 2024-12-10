@@ -196,6 +196,8 @@ def adjust_wps(
     subtract_edges : bool, optional
         If true, take the median of the first and last 500 bases in a
         window and subtract from the whole interval. Default is False.
+    edge_size : int, optional
+        size of the edge subtracted from ends of window. Default is 500.
     workers : int, optional
         Number of processes to use. Default is 1.
     verbose : bool or int, optional

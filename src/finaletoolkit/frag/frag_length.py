@@ -2,21 +2,19 @@ from __future__ import annotations
 import time
 from typing import Union
 from sys import stdout, stderr
-from shutil import get_terminal_size
 from multiprocessing import Pool
 import gzip
 from functools import partial
 
 import numpy as np
 import pysam
-import tqdm
+from tqdm import trange, tqdm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 from finaletoolkit.utils.utils import (
     _get_intervals, frag_generator
 )
-from finaletoolkit.utils.cli_hist import _cli_hist
 
 
 def plot_histogram(
@@ -33,7 +31,8 @@ def plot_histogram(
     fig_size = (6, 4)
     font_size = 12
     plt.figure(figsize=fig_size, dpi=1000)
-    plt.hist(keys, bins=num_bins, weights=values, color='salmon', edgecolor='white', linewidth=0.1)
+    plt.hist(keys, bins=num_bins, weights=values, color='salmon',
+             edgecolor='white', linewidth=0.1)
     plt.xlabel("Fragment Size (bp)", fontsize=font_size*0.8)
     plt.ylabel("Number of Fragments", fontsize=font_size*0.8)
     plt.xticks(fontsize=font_size * 0.7)
@@ -53,9 +52,11 @@ def plot_histogram(
 
     if stats:
         stats_str = "\n".join([f"{stat[0]}: {stat[1]}" for stat in stats])
-        plt.text(0.95, 0.95, stats_str, transform=plt.gca().transAxes,
-                 fontsize=font_size * 0.6, verticalalignment='top', horizontalalignment='right',
-                 bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
+        plt.text(
+            0.95, 0.95, stats_str, transform=plt.gca().transAxes,
+            fontsize=font_size * 0.6, verticalalignment='top',
+            horizontalalignment='right',
+            bbox=dict(facecolor='white', alpha=0.7, edgecolor='none'))
 
     plt.tight_layout()
     plt.savefig(histogram_path)
@@ -86,7 +87,8 @@ def _find_median(val_freq_dict):
         median_val = val[median_index]
         return float(median_val)
     else:
-        median_indices = np.searchsorted(cdf, [total_count // 2, total_count // 2 + 1])
+        median_indices = np.searchsorted(cdf, [total_count // 2, total_count
+                                               // 2 + 1])
         median_vals = val[median_indices]
         median_val = np.mean(median_vals)
         return float(median_val)
@@ -104,15 +106,19 @@ def _frag_length_stats(
     quality_threshold: int,
     verbose: Union[bool, int]
 ):
-    frag_gen = frag_generator(input_file, contig, quality_threshold, start, stop, min_length, max_length, intersect_policy, verbose)
-    frag_len_dict=_distribution_from_gen(frag_gen)
+    frag_gen = frag_generator(input_file, contig, quality_threshold, start,
+                              stop, min_length, max_length, intersect_policy,
+                              verbose)
+    frag_len_dict = _distribution_from_gen(frag_gen)
 
     if sum(frag_len_dict.values())==0:
         mean, median, stdev, minimum, maximum = 5*[-1]
     else:
-        mean = sum(value * count for value, count in frag_len_dict.items()) / sum(frag_len_dict.values())
+        mean = (sum(value * count for value, count in frag_len_dict.items())
+                / sum(frag_len_dict.values()))
         median = _find_median(frag_len_dict)
-        variance = sum(count * ((value - mean) ** 2) for value, count in frag_len_dict.items()) / sum(frag_len_dict.values())
+        variance = sum(count * ((value - mean) ** 2) for value, count
+                       in frag_len_dict.items()) / sum(frag_len_dict.values())
         stdev = variance ** 0.5
         minimum = min(frag_len_dict.keys())
         maximum = max(frag_len_dict.keys())
@@ -126,15 +132,15 @@ def _frag_length_stats_star(partial_frag_stat, interval):
 
 
 def frag_length(
-        input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
-        contig: str=None,
-        start: int=None,
-        stop: int=None,
-        intersect_policy: str="midpoint",
-        output_file: str=None,
-        quality_threshold: int=30,
-        verbose: bool=False
-    ) -> np.ndarray:
+    input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile],
+    contig: str | None = None,
+    start: int | None = None,
+    stop: int | None = None,
+    intersect_policy: str = "midpoint",
+    output_file: str | None = None,
+    quality_threshold: int = 30,
+    verbose: bool = False
+) -> np.ndarray:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file`
     that are above the quality threshold and are proper-paired reads.
@@ -225,18 +231,17 @@ def frag_length(
 
 def frag_length_bins(
     input_file: Union[str, pysam.AlignmentFile],
-    contig: str=None,
-    start: int=None,
-    stop: int=None,
-    min_length: int=0,
-    max_length: int=None,
-    bin_size: int=1,
-    output_file: str=None,
-    histogram: bool=False,
-    intersect_policy: str="midpoint",
-    quality_threshold: int=30,
-    histogram_path: str=None,
-    verbose: Union[bool, int]=False
+    contig: str | None = None,
+    start: int | None = None,
+    stop: int | None = None,
+    min_length: int | None = 0,
+    max_length: int | None = None,
+    bin_size: int = 1,
+    output_file: str | None = None,
+    intersect_policy: str = "midpoint",
+    quality_threshold: int = 30,
+    histogram_path: str | None = None,
+    verbose: Union[bool, int] = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
@@ -251,7 +256,6 @@ def frag_length_bins(
     stop : int, optional
     bin_size : int, optional
     output_file : str, optional
-    histogram: bool, optional
     intersect_policy : str, optional
         Specifies what policy is used to include fragments in the
         given interval. Default is "midpoint". Policies include:
@@ -274,8 +278,9 @@ def frag_length_bins(
             stop: {stop}
             bin_size: {bin_size}
             output_file: {output_file}
-            histogram: {histogram}
+            intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
+            histogram_path: {histogram_path}
             verbose: {verbose}
             \n"""
         )
@@ -284,7 +289,6 @@ def frag_length_bins(
     if verbose:
         stderr.write("Generating fragment dictionary. \n")
 
-    
     frag_gen = frag_generator(
         input_file, contig, quality_threshold, start, stop, min_length,
         max_length, intersect_policy, verbose)
@@ -295,8 +299,8 @@ def frag_length_bins(
             / sum(frag_len_dict.values()))
     variance = (sum(count * ((value - mean) ** 2)
                     for value, count in frag_len_dict.items())
-                / sum(frag_len_dict.values())
-    )
+                / sum(frag_len_dict.values()))
+    
     # get statistics
     stats = []
     stats.append(('mean', mean))
@@ -310,18 +314,15 @@ def frag_length_bins(
     n_bins = (bin_stop - bin_start) // bin_size
     bins = np.arange(bin_start, bin_stop+bin_size, bin_size)
 
-
-    bins = np.arange(bin_start, bin_stop, bin_size)
     counts = []
 
     # generate histogram data
-    for i in tqdm.tqdm(range(n_bins+1),
-                   disable=not verbose, desc="Binning fragments..."):
+    for i in trange(n_bins+1, disable=not verbose, desc="Binning fragments:"):
         bin_lower = bin_start + i * bin_size
         bin_upper = bin_start + (i + 1) * bin_size
         bin_count = sum(count for length, count in frag_len_dict.items()
                         if bin_lower <= length < bin_upper)
-        if bin_count == None:
+        if bin_count is None:
             bin_count = 0 
         counts.append(bin_count)
 
@@ -341,7 +342,7 @@ def frag_length_bins(
             out.write('min\tmax\tcount\n')
             for bin, count in zip(bins, counts):
                 out.write(f'{bin}\t{bin+bin_size}\t{count}\n')
-                
+
             if histogram_path!=None:
                 plot_histogram(frag_len_dict, num_bins=n_bins,
                                histogram_path=histogram_path, stats=stats)
@@ -364,52 +365,16 @@ def frag_length_bins(
     return bins, counts
 
 
-def _frag_length_stats(
-    input_file: Union[str, pysam.AlignmentFile],
-    contig: str,
-    start: int,
-    stop: int,
-    min_length: int,
-    max_length: int,
-    name: str,
-    intersect_policy: str,
-    quality_threshold: int,
-    verbose: Union[bool, int]
-):
-    frag_gen = frag_generator(input_file, contig, quality_threshold, start,
-                              stop, min_length, max_length, intersect_policy,
-                              verbose)
-    frag_len_dict=_distribution_from_gen(frag_gen)
-    if sum(frag_len_dict.values())==0:
-        mean, median, stdev, minimum, maximum = 5*[-1]
-    else:
-        mean = (sum(value * count for value, count in frag_len_dict.items())
-                / sum(frag_len_dict.values()))
-        median = _find_median(frag_len_dict)
-        variance = sum(count * ((value - mean) ** 2) for value, count
-                       in frag_len_dict.items()) / sum(frag_len_dict.values())
-        stdev = variance ** 0.5
-        minimum = min(frag_len_dict.keys())
-        maximum = max(frag_len_dict.keys())
-
-    return contig, start, stop, name, mean, median, stdev, minimum, maximum
-
-
-def _frag_length_stats_star(partial_frag_stat, interval):
-    contig, start, stop, name = interval
-    return partial_frag_stat(contig=contig, start=start, stop=stop, name=name)
-
-
 def frag_length_intervals(
     input_file: Union[str, pysam.AlignmentFile],
     interval_file: str,
-    output_file: str|None=None,
-    min_length: int|None=0,
-    max_length: int|None=None,
-    quality_threshold: int=30,
-    intersect_policy: str="midpoint",
-    workers: int=1,
-    verbose: Union[bool, int]=False
+    output_file: str | None = None,
+    min_length: int | None = 0,
+    max_length: int | None = None,
+    quality_threshold: int = 30,
+    intersect_policy: str = "midpoint",
+    workers: int = 1,
+    verbose: Union[bool, int] = False,
 )->list[tuple[str, int, int, str, float, float, int, int]]:
     """
     Takes fragments from BAM file and calculates fragment length
@@ -452,8 +417,13 @@ def frag_length_intervals(
             stderr.write('Reading intervals.\n')
         intervals = _get_intervals(interval_file)
         
-        partial_frag_stat = partial(_frag_length_stats, input_file=input_file, min_length=min_length, max_length=max_length, intersect_policy=intersect_policy, quality_threshold=quality_threshold, verbose=verbose)
-        results = pool.map(partial(_frag_length_stats_star, partial_frag_stat), intervals, chunksize=max(len(intervals)//workers, 1))
+        partial_frag_stat = partial(
+            _frag_length_stats, input_file=input_file,min_length=min_length,
+            max_length=max_length, intersect_policy=intersect_policy,
+            quality_threshold=quality_threshold, verbose=verbose)
+        results = pool.map(partial(_frag_length_stats_star, partial_frag_stat),
+                           intervals, chunksize=max(len(intervals)//workers,
+                                                    1))
         if verbose:
             tqdm.write('Retrieving fragment statistics for file\n')
         output_is_file = False
@@ -477,11 +447,13 @@ def frag_length_intervals(
                         'suffix.'
                     )
                 output.write('contig\tstart\tstop\tname\tmean\tmedian\t'
-                             'stdev\tmin\tmax\n') # type: ignore
+                             'stdev\tmin\tmax\n')   # type: ignore
                 output.write(
-                    '\n'.join('\t'.join(str(element) for element in 
-                                        item) for item in results)) # type: ignore
-                output.write('\n') # type: ignore
+                    '\n'.join(
+                        '\t'.join(
+                            str(element) for element in item)
+                        for item in results))   # type: ignore
+                output.write('\n')  # type: ignore
             finally:
                 if output_is_file:
                     output.close()
@@ -492,7 +464,8 @@ def frag_length_intervals(
     if verbose:
         stop_time = time.time()
         stderr.write(
-            f'Calculating fragment length statistics for intervals took {stop_time-start_time} s\n'
+            'Calculating fragment length statistics for intervals took '
+            f'{stop_time - start_time} s\n'
         )
 
     return results

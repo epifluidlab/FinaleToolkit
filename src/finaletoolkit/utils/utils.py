@@ -10,6 +10,8 @@ from numpy.typing import NDArray
 from numba import jit
 import pysam
 
+from ._typing import FragFile
+
 
 def chrom_sizes_to_list(
     chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
@@ -194,7 +196,7 @@ def frags_in_region(frag_array: NDArray[np.int64],
 
 
 def frag_generator(
-    input_file: Union[str, pysam.AlignmentFile, pysam.TabixFile, Path],
+    input_file: FragFile,
     contig: str | None,
     quality_threshold: int=30,
     start: int | None=None,
@@ -211,7 +213,7 @@ def frag_generator(
 
     Parameters
     ----------
-    input_file : str, pathlike, or AlignmentFile
+    input_file : str, pathlike, TabixFile, or AlignmentFile
         Fragment coordinates stored as a SAM, BAM, CRAM, tabix-indexed
         bed.gz, or tabix-indexed FinaleDB fragment file.
     contig : str
@@ -383,7 +385,7 @@ def frag_generator(
 
 
 def frag_array(
-    input_file: Union[str,pysam.AlignmentFile, pysam.TabixFile, Path],
+    input_file: FragFile,
     contig: str,
     quality_threshold: int=30,
     start: int=None,

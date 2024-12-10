@@ -5,12 +5,13 @@ import traceback
 
 import pysam
 
+
 def filter_bam(
         input_file: str,
         region_file: str=None,
         output_file: str=None,
-        max_length: int=None,
-        min_length: int=None,
+        fraction_low: int=None,
+        fraction_high: int=None,
         quality_threshold: int=30,
         workers: int=1,
         verbose: bool=False):
@@ -27,8 +28,8 @@ def filter_bam(
         filtered.
     region_file : str, option
     output_file : str, optional
-    min_length : int, optional
-    max_length : int, optional
+    fraction_low : int, optional
+    fraction_high : int, optional
     quality_threshold : int, optional
     workers : int, optional
     verbose : bool, optional
@@ -44,8 +45,7 @@ def filter_bam(
     elif not output_file.endswith('bam') and output_file != '-':
         raise ValueError('Output file should have suffix .bam')
 
-
-        # create temp dir to store intermediate sorted file
+    # create temp dir to store intermediate sorted file
     try:
         with tf.TemporaryDirectory() as temp_dir:
             flag_filtered_bam = f'{temp_dir}/flag_filtered.bam'
@@ -73,10 +73,10 @@ def filter_bam(
                     for read in in_file:
                         if (
                             read.reference_name == read.next_reference_name
-                            and (max_length is None
-                                 or read.template_length <= max_length)
-                            and (min_length is None
-                                 or read.template_length >= min_length)
+                            and (fraction_high is None
+                                 or read.template_length <= fraction_high)
+                            and (fraction_low is None
+                                 or read.template_length >= fraction_low)
                         ):
                             out_file.write(read)
 
