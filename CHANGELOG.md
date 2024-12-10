@@ -7,7 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [UNRELEASED]
+## [0.9.0] - 2024-12-10
 
 ### Removed
 - `strand_location` arg from `agg_bigwig`
