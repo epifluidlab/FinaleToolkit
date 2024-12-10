@@ -277,29 +277,29 @@ def delfi(input_file: str,
     # output
     if (verbose):
         stderr.write(f'{final_bins.shape[0]} bins remaining.\n')
-        
-    output_delfi = final_bins.rename(columns={'contig':'#contig'})
 
-    if output_file.endswith('.bed') or output_file.endswith('.tsv'):
-        output_delfi.to_csv(output_file, sep='\t', index=False)
-    elif output_file.endswith('.csv'):
-        final_bins.to_csv(output_file, sep=',', index=False)
-    elif output_file.endswith('.bed.gz'):
-        output_delfi.to_csv(
-            output_file,
-            sep='\t',
-            index=False,
-            encoding='gzip')
-    elif output_file == '-':
-        with stdout as out:
-            for window in final_bins.itertuples():
-                tab_separated = "\t".join(window)
-                out.write(
-                    f'{tab_separated}\n')
-    else:
-        raise ValueError(
-            'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
-        )
+    if output_file is not None:
+        output_delfi = final_bins.rename(columns={'contig':'#contig'})
+        if output_file.endswith('.bed') or output_file.endswith('.tsv'):
+            output_delfi.to_csv(output_file, sep='\t', index=False)
+        elif output_file.endswith('.csv'):
+            final_bins.to_csv(output_file, sep=',', index=False)
+        elif output_file.endswith('.bed.gz'):
+            output_delfi.to_csv(
+                output_file,
+                sep='\t',
+                index=False,
+                encoding='gzip')
+        elif output_file == '-':
+            with stdout as out:
+                for window in final_bins.itertuples():
+                    tab_separated = "\t".join(window)
+                    out.write(
+                        f'{tab_separated}\n')
+        else:
+            raise ValueError(
+                'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
+            )
 
     num_frags = sum(window[7] for window in windows)
 
@@ -307,7 +307,7 @@ def delfi(input_file: str,
         end_time = time.time()
         stderr.write(f'{num_frags} fragments included.\n')
         stderr.write(f'delfi took {end_time - start_time} s to complete\n')
-    return output_delfi
+    return final_bins
 
 
 def _delfi_single_window(
@@ -419,12 +419,11 @@ def _delfi_single_window(
 
             num_frags += 1
 
-    num_gc = 0  # cumulative sum of gc bases
-
+    # finding gc amount
     with py2bit.open(reference_file) as ref_seq:
         ref_bases = ref_seq.sequence(contig, window_start, window_stop).upper()
 
-    num_gc = sum((base == 'G' or base == 'C') for base in ref_bases)
+    num_gc = sum((base == 'G' or base == 'C') for base in ref_bases) # cumulative sum of gc bases
 
     # window_length
     window_coverage = window_stop - window_start
