@@ -777,6 +777,11 @@ def main_cli_parser():
         default='-',
         help='Path to the output BED/BEDGraph file containing MDS for each '
         'interval.')
+    cli_interval_mds.add_argument(
+        '--header',
+        default=0,
+        type=int,
+        help='Number of header rows to ignore. Default is 0')
     cli_interval_mds.set_defaults(func=_cli_interval_mds)
 
     cli_filter_bam = subparsers.add_parser(
@@ -857,6 +862,12 @@ def main_cli_parser():
         type=int,
         help='Size of the median filter window used to adjust WPS '
         'scores. Only modify if aggregating WPS signals.')
+    cli_agg_bw.add_argument(
+        '-a',
+        '--mean',
+        action='store_true',
+        help='use mean instead'
+    )
     cli_agg_bw.add_argument(
         '-v',
         '--verbose',
