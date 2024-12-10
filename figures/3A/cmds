@@ -1,0 +1,2 @@
+cd /ocean/projects/mcb190124p/rbandaru/finaletoolkit-figures/3A
+finaletoolkit delfi ../data/BH01.hg19.mdups.bam ../data/hg19.chrom.sizes ../data/hg19.2bit ../data/100kb.bins -o FTK_DELFI.bed -q 30 -w 128 -g ../data/hg19.gap.delfi_modified.txt -b ../data/ENCFF001TDO.bed

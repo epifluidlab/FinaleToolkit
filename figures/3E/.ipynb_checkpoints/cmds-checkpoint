@@ -1,0 +1,2 @@
+finaletools wps -min 50 -max 512 -c ../data/hg19.chrom.sizes -q 30 -w 128 ../data/BH01.hg19.frag.bed.gz ../outputs/3E/ctcf_intervals.sorted.bed 4000 ../outputs/3E/ctcf.wps.bw
+finaletools cleavage-profile -w 128 -min 50 -max 512 -c ../data/hg19.chrom.sizes ../data/BH01.hg19.frag.bed.gz ../outputs/3E/ctcf_intervals.bed ../outputs/3E/ctcf.cleavageprop.bw

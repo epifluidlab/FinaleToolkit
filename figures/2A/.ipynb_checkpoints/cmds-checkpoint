@@ -1,0 +1,1 @@
+sbatch -p RM-512 -t 72:00:00 --wrap='/jet/home/rbandaru/ravi/.conda/envs/ravi-ftk/bin/finaletools frag-length-bins --bin-size 1 -o /jet/home/rbandaru/ravi/finaletoolkit_figures/outputs/2A/BH01_fraglengths.unfiltered.tsv /jet/home/rbandaru/ravi/finaletoolkit_figures/data/BH01.hg19.frag.bed.gz -q 30 -v'

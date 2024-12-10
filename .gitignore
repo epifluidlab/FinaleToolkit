@@ -10,3 +10,4 @@ tests/tmp/*
 .coverage*
 test.py 
 test2.py
+figures/data/*
