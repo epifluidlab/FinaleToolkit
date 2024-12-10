@@ -5,9 +5,9 @@ from multiprocessing import Pool
 from time import time
 from sys import stderr, stdout, stdin
 import gzip
-
 from importlib.resources import files
 from pathlib import Path
+import warnings
 
 from tqdm import tqdm
 import py2bit
@@ -222,7 +222,8 @@ class EndMotifsIntervals():
             cls,
             file_path: str,
             quality_threshold: int,
-            sep: str = ',',) -> EndMotifFreqs:
+            sep: str = ',',
+            header: int = 0,) -> EndMotifsIntervals:
         """
         Reads kmer frequency from a tab-delimited file. Expected columns
         are contig, start, stop, name, count, (kmers). Because
@@ -240,7 +241,7 @@ class EndMotifsIntervals():
 
         Return
         ------
-        kmer_freqs : EndMotifFreqs
+        kmer_freqs : EndMotifsIntervals
         """
         try:
             # open file
@@ -253,6 +254,10 @@ class EndMotifsIntervals():
             else:
                 is_file = True
                 file = open(file_path)
+                
+            # ignore header
+            for _ in range(header):
+                file.readline()
 
             intervals = []
             lines = file.readlines()
@@ -664,13 +669,15 @@ def end_motifs(
     input_file: str,
     refseq_file: Union[str, Path],
     k: int = 4,
-    fraction_low: int = 10,
-    fraction_high: int = 600,
-    both_strands: bool = False,
-    output_file: Union[None, str] = None,
+    min_length: int = 10,
+    max_length: int = 600,
+    both_strands: bool = True,
+    output_file: None | str = None,
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union[bool, int] = False,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
 ) -> EndMotifFreqs:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
@@ -687,6 +694,12 @@ def end_motifs(
         aligned to.
     k : int, optional
         Length of end motif kmer. Default is 4.
+    min_length: int or None, optional
+        Minimum length of fragments to be included.
+    max_length: int or None, optional
+        Maximum length of fragments to be included.
+    both_strands: bool
+        Default is False.
     output_file : None or str, optional
         File path to write results to. Either tsv or csv.
     quality_threshold : int, optional
@@ -694,7 +707,10 @@ def end_motifs(
     workers : int, optional
         Number of worker processes.
     verbose : bool or int, optional
-
+    fraction_low : int or None, optional
+        Alias for `min_length`. *Deprecated.*
+    fraction_high : int or None, optional
+        Alias for `max_length`. *Deprecated.*
     Return
     ------
     end_motif_freq : EndMotifFreqs
@@ -702,7 +718,33 @@ def end_motifs(
     if verbose:
         start_time = time()
 
-    bases='ACGT'
+    # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
+
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
+
+    # getting possible kmers
+    bases = 'ACGT'
     kmer_list = _gen_kmers(k, bases)
 
     # read chromosomes from py2bit
@@ -724,8 +766,8 @@ def end_motifs(
                 start+window_size,
                 refseq_file,
                 k,
-                fraction_low,
-                fraction_high,
+                min_length,
+                max_length,
                 both_strands,
                 None,
                 quality_threshold,
@@ -738,8 +780,8 @@ def end_motifs(
             chrom_length,
             refseq_file,
             k,
-            fraction_low,
-            fraction_high,
+            min_length,
+            max_length,
             both_strands,
             None,
             quality_threshold,
@@ -793,13 +835,15 @@ def interval_end_motifs(
     refseq_file: Union[str, Path],
     intervals: Union[str, Iterable[tuple[str,int,int,str]]],
     k: int = 4,
-    fraction_low: int = 10,
-    fraction_high: int = 600,
+    min_length: int = 10,
+    max_length: int = 600,
     both_strands: bool = True,
     output_file: Union[None, str] = None,
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union[bool, int] = False,
+    fraction_low: int = None,
+    fraction_high: int = None,
 ) -> EndMotifsIntervals:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
@@ -831,6 +875,31 @@ def interval_end_motifs(
     """
     if verbose:
         start_time = time()
+        
+     # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
+
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
 
     bases='ACGT'
     kmer_list = _gen_kmers(k, bases)
@@ -858,8 +927,8 @@ def interval_end_motifs(
             stop,
             refseq_file,
             k,
-            fraction_low,
-            fraction_high,
+            min_length,
+            max_length,
             both_strands,
             None,
             quality_threshold,
@@ -911,7 +980,7 @@ def _cli_mds(
     file_path: str,
     sep: str = '\t',
     header: int = 0,
-) -> float:
+):
     """Function for commandline acces to MDS from a tsv file."""
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
@@ -929,12 +998,13 @@ def _cli_interval_mds(
     file_out: str,
     sep: str = ',',
     header: int = 0,
-) -> float:
+):
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
     motifs = EndMotifsIntervals.from_file(
         file_path,
         30,
         sep,
+        header,
     )
     motifs.mds_bed(file_out)

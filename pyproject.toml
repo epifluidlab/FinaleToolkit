@@ -26,7 +26,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 dependencies = [
-    "numpy<2",
+    "numpy",
     "pysam",
     "pybigwig",
     "py2bit",

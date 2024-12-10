@@ -76,6 +76,20 @@ def main_cli_parser():
         type=float,
         help='Scale factor for coverage values. Default is 1.')
     cli_coverage.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included in coverage.'
+        )
+    cli_coverage.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included in coverage.'
+        )
+    cli_coverage.add_argument(
         '-p',
         '--intersect_policy',
         choices=['midpoint', 'any'],
@@ -447,6 +461,11 @@ def main_cli_parser():
         help='Take the median of the first and last 500 bases in a window and '
         'subtract from the whole interval.')
     cli_adjust_wps.add_argument(
+        '--edge-size',
+        default=500,
+        help='size of the edge subtracted from ends of window when '
+        '--subtract-edges is set. Default is 500.')
+    cli_adjust_wps.add_argument(
         '-v',
         '--verbose',
         action='count',
@@ -515,6 +534,14 @@ def main_cli_parser():
         dest="merge_bins",
         help="Keep 100kb bins and do not merge to 5Mb size.")
     cli_delfi.add_argument(
+        '-s',
+        '--window-size',
+        default=5000000,    # TODO: consider accepting 5Mb or similar format.
+        help='Specify size of large genomic intervals to merge smaller 100kb '
+        'intervals (or whatever the user specified in bins_file) into. Default'
+        'is 5000000'
+    )
+    cli_delfi.add_argument(
         '-q',
         '--quality-threshold',
         default=30,
@@ -578,6 +605,27 @@ def main_cli_parser():
         type=int,
         help='Length of k-mer.')
     cli_motifs.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_motifs.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_motifs.add_argument(
+        '-B',
+        '--no-both-strands',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for end-motifs."
+    )
+    cli_motifs.add_argument(
         '-o',
         '--output-file',
         default='-',
@@ -624,6 +672,20 @@ def main_cli_parser():
         type=int,
         help='Length of k-mer.')
     cli_interval_motifs.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_interval_motifs.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_interval_motifs.add_argument(
         '-lo',
         '--fraction-low',
         default=10,
@@ -637,6 +699,13 @@ def main_cli_parser():
         type=int,
         help='Maximum length for a fragment to be included in end motif '
         'frequency.')
+    cli_interval_motifs.add_argument(
+        '-B',
+        '--no-both-strands',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for end-motifs."
+    )
     cli_interval_motifs.add_argument(
         '-o',
         '--output-file',
@@ -708,6 +777,11 @@ def main_cli_parser():
         default='-',
         help='Path to the output BED/BEDGraph file containing MDS for each '
         'interval.')
+    cli_interval_mds.add_argument(
+        '--header',
+        default=0,
+        type=int,
+        help='Number of header rows to ignore. Default is 0')
     cli_interval_mds.set_defaults(func=_cli_interval_mds)
 
     cli_filter_bam = subparsers.add_parser(
@@ -789,6 +863,12 @@ def main_cli_parser():
         help='Size of the median filter window used to adjust WPS '
         'scores. Only modify if aggregating WPS signals.')
     cli_agg_bw.add_argument(
+        '-a',
+        '--mean',
+        action='store_true',
+        help='use mean instead'
+    )
+    cli_agg_bw.add_argument(
         '-v',
         '--verbose',
         action='count',
@@ -835,6 +915,7 @@ def main_cli():
         stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
         stderr.write("Please see usage instructions below.\n")
         parser.print_help()
-    
+
+
 if __name__ == '__main__':
     main_cli()

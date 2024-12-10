@@ -14,7 +14,6 @@ def agg_bw(
     output_file: Union[str, PathLike],
     median_window_size: int=120,
     mean: bool=False,
-    strand_location: int=5,
     verbose: bool=False
 ):
     """
@@ -42,14 +41,12 @@ def agg_bw(
     ----------
     input_file : str
     interval_file : str
+        BED file containing intervals. 6th column should have strand.
     output_file : str
     median_window_size : int, optional
         default is 0
     mean : bool
         use mean instead
-    strand_location : int
-        which column (starting at 0) of the interval file contains the
-        strand. Default is 5.
     verbose : int or bool, optional
         default is False
 
@@ -74,7 +71,7 @@ def agg_bw(
                 contig = contents[0]
                 start = int(contents[1])
                 stop = int(contents[2])
-                strand = contents[strand_location]
+                strand = contents[5]
 
                 intervals.append((
                     contig,
@@ -93,7 +90,7 @@ def agg_bw(
         for contig, start, stop, strand in intervals:
             try:
                 signal = raw_wps.values(contig, start, stop)
-                if signal==None:
+                if signal is None:
                     print(
                         "There was no information found in the interval: ",
                         contig, start, stop)

@@ -23,10 +23,11 @@ from finaletoolkit.utils.utils import (
     frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
     _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
     )
+from finaletoolkit.utils._typing import FragFile
 
 
 def cleavage_profile(
-    input_file: str,
+    input_file: FragFile,
     chrom_size: int,
     contig: str,
     start: int,
@@ -145,7 +146,7 @@ def _cleavage_profile_star(args):
 
 
 def _cli_cleavage_profile(
-    input_file: Union[str, Path],
+    input_file: FragFile,
     interval_file: Union[str, Path],
     chrom_sizes: Union[str, Path],
     left: int=0,
@@ -165,7 +166,7 @@ def _cli_cleavage_profile(
     input_file: str or pathlike
         SAM, BAM, CRAM, or FRAG file with fragment information.
     interval_file: str or pathlike
-        BED file containing intervals
+        Sorted BED file containing intervals.
     chrom_sizes: str or pathlike
         Tab-delimited file with name and lengths of each contig.
     left: int
@@ -207,26 +208,11 @@ def _cli_cleavage_profile(
         raise ValueError(
             '--chrom_sizes must be specified'
         )
-    
-      # get header from input_file
-    if (input_file.endswith('.sam')
-        or input_file.endswith('.bam')
-        or input_file.endswith('.cram')):
-        with pysam.AlignmentFile(input_file, 'r') as bam:
-            references = bam.references
-            lengths = bam.lengths
-            header = list(zip(references, lengths))
-    elif (input_file.endswith('.bed')
-          or input_file.endswith('.bed.gz')
-          or input_file.endswith('.frag')
-          or input_file.endswith('.frag.gz')
-    ):
-        header = chrom_sizes_to_list(chrom_sizes)
-    else:
-        raise ValueError("Not a supported file type.")
+    # get chroms
+    header = chrom_sizes_to_list(chrom_sizes)
 
     if (verbose > 1):
-        stderr.write(f'header is {header}\n')
+        stderr.write(f'chrom sizes {header}\n')
     
     # reading intervals from bed and removing overlaps
     # NOTE: assumes that bed file is sorted.
