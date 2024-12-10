@@ -13,7 +13,7 @@ from finaletoolkit.frag.delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
 from finaletoolkit.utils.utils import frag_generator, overlaps
 from finaletoolkit.genome.gaps import GenomeGaps, ContigGaps
-    
+
 
 def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     """
@@ -145,9 +145,9 @@ def delfi(input_file: str,
         raise TypeError(
             f'{type(gap_file)} is not accepted type for gap_file'
         )
-    
+
     # Read 100kb bins and filter out bins that overlap gaps, darkregions
-    
+
     # opening 100kb bins BED file into a dataframe
     if verbose:
         stderr.write('Opening bins file...\n')
@@ -164,7 +164,7 @@ def delfi(input_file: str,
     if verbose:
         stderr.write(f'{bins.shape[0]} bins read from file.\n')
         stderr.write('Filtering gaps...\n')
-        
+
     # filtering for gaps
     if gaps is not None:
         # finding overlap
@@ -229,7 +229,7 @@ def delfi(input_file: str,
     if (verbose):
         stderr.write('Done.\n')
         stderr.write('Removing remaining accrocentric bins...\n')
-   
+
     window_df = pandas.DataFrame(
         windows,
         columns=[

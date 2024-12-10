@@ -9,6 +9,8 @@ import pytest
 import pandas as pd
 
 from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
+from finaletoolkit.frag.delfi import delfi
+from finaletoolkit.genome.gaps import GenomeGaps
 
 
 def test_merge_bins(request):
@@ -34,4 +36,15 @@ def test_merge_bins(request):
     assert (pytest.approx(merged_bins['ratio_corrected'], rel=5e-2)
             == delfi_merged_bins['ratio_corrected'])
 
-
+def test_overall(request):
+    """Testing entire delfi method on first 5Mb bin of hg19."""
+    # getting files
+    frag_file = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.6Mb.bam'
+    autosomes = request.path.parent / 'data' / 'delfi' / 'human.hg19.chr1.6Mb.genome'
+    bins_file = request.path.parent / 'data' / 'delfi' / 'hg19.hic.chr1.6Mb.txt'
+    twobit = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.10Mb.2bit'
+    blacklist = request.path.parent / 'data' / 'delfi' / 'hg19_darkregion.bed'
+    gaps = GenomeGaps.ucsc_hg19()
+    
+    results = delfi(frag_file, autosomes, bins_file, twobit, blacklist, gaps)
+    
