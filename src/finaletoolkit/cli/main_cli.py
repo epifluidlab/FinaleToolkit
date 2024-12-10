@@ -609,14 +609,14 @@ def main_cli_parser():
         '--min-length',
         default=0,
         type=int,
-        help='Minimum length for a fragment to be included in coverage.'
+        help='Minimum length for a fragment to be included.'
         )
     cli_motifs.add_argument(
         '-max',
         '--max-length',
         default=None,
         type=int,
-        help='Maximum length for a fragment to be included in coverage.'
+        help='Maximum length for a fragment to be included.'
         )
     cli_motifs.add_argument(
         '-B',
@@ -672,6 +672,20 @@ def main_cli_parser():
         type=int,
         help='Length of k-mer.')
     cli_interval_motifs.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_interval_motifs.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_interval_motifs.add_argument(
         '-lo',
         '--fraction-low',
         default=10,
@@ -685,6 +699,13 @@ def main_cli_parser():
         type=int,
         help='Maximum length for a fragment to be included in end motif '
         'frequency.')
+    cli_interval_motifs.add_argument(
+        '-B',
+        '--no-both-strands',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for end-motifs."
+    )
     cli_interval_motifs.add_argument(
         '-o',
         '--output-file',
