@@ -222,7 +222,8 @@ class EndMotifsIntervals():
             cls,
             file_path: str,
             quality_threshold: int,
-            sep: str = ',',) -> EndMotifFreqs:
+            header: int = 0,
+            sep: str = ',',) -> EndMotifsIntervals:
         """
         Reads kmer frequency from a tab-delimited file. Expected columns
         are contig, start, stop, name, count, (kmers). Because
@@ -240,7 +241,7 @@ class EndMotifsIntervals():
 
         Return
         ------
-        kmer_freqs : EndMotifFreqs
+        kmer_freqs : EndMotifsIntervals
         """
         try:
             # open file
@@ -253,6 +254,10 @@ class EndMotifsIntervals():
             else:
                 is_file = True
                 file = open(file_path)
+                
+            # ignore header
+            for _ in range(header):
+                file.readline()
 
             intervals = []
             lines = file.readlines()
@@ -975,7 +980,7 @@ def _cli_mds(
     file_path: str,
     sep: str = '\t',
     header: int = 0,
-) -> float:
+):
     """Function for commandline acces to MDS from a tsv file."""
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
@@ -993,7 +998,7 @@ def _cli_interval_mds(
     file_out: str,
     sep: str = ',',
     header: int = 0,
-) -> float:
+):
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
     motifs = EndMotifsIntervals.from_file(
