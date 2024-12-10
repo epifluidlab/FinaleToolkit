@@ -830,13 +830,15 @@ def interval_end_motifs(
     refseq_file: Union[str, Path],
     intervals: Union[str, Iterable[tuple[str,int,int,str]]],
     k: int = 4,
-    fraction_low: int = 10,
-    fraction_high: int = 600,
+    min_length: int = 10,
+    max_length: int = 600,
     both_strands: bool = True,
     output_file: Union[None, str] = None,
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union[bool, int] = False,
+    fraction_low: int = None,
+    fraction_high: int = None,
 ) -> EndMotifsIntervals:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
@@ -868,6 +870,31 @@ def interval_end_motifs(
     """
     if verbose:
         start_time = time()
+        
+     # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
+
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
 
     bases='ACGT'
     kmer_list = _gen_kmers(k, bases)
@@ -895,8 +922,8 @@ def interval_end_motifs(
             stop,
             refseq_file,
             k,
-            fraction_low,
-            fraction_high,
+            min_length,
+            max_length,
             both_strands,
             None,
             quality_threshold,
