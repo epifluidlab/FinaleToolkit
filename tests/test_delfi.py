@@ -40,9 +40,9 @@ def test_overall(request):
     """Testing entire delfi method on first 5Mb bin of hg19."""
     # getting files
     frag_file = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.6Mb.bam'
-    autosomes = request.path.parent / 'data' / 'delfi' / 'human.hg19.autosomes.genome'
+    autosomes = request.path.parent / 'data' / 'delfi' / 'human.hg19.chr1.6Mb.genome'
     bins_file = request.path.parent / 'data' / 'delfi' / 'hg19.hic.chr1.6Mb.txt'
-    twobit = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.6Mb.2bit'
+    twobit = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.10Mb.2bit'
     blacklist = request.path.parent / 'data' / 'delfi' / 'hg19_darkregion.bed'
     gaps = GenomeGaps.ucsc_hg19()
     
