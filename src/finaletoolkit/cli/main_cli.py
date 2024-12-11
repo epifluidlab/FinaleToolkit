@@ -300,12 +300,14 @@ def main_cli_parser():
         '-lo',
         '--fraction_low',
         type=int,
+        dest='min_length',
         help="Minimum length for a fragment to be included in cleavage "
         "proportion calculation. Deprecated. Use --min-length instead.")
     cli_cleavage_profile.add_argument(
         '-hi',
         '--fraction-high',
         type=int,
+        dest='max_length',
         help="Maximum length for a fragment to be included in cleavage "
         "proportion calculation. Deprecated. Use --max-length instead.")
     cli_cleavage_profile.add_argument(
@@ -394,12 +396,14 @@ def main_cli_parser():
         '-lo',
         '--fraction_low',
         type=int,
+        dest='min_length',
         help='Minimum length for a fragment to be included in WPS '
         'calculation. Deprecated. Use --min-length instead.')
     cli_wps.add_argument(
         '-hi',
         '--fraction_high',
         type=int,
+        dest='max_length',
         help='Maximum length for a fragment to be included in WPS '
         'calculation. Deprecated. Use --max-length instead.')
     cli_wps.add_argument(
@@ -714,15 +718,15 @@ def main_cli_parser():
         '--fraction-low',
         default=10,
         type=int,
-        help='Minimum length for a fragment to be included in end motif '
-        'frequency.')
+        dest='min_length',
+        help='Deprecated alias for --min-length')
     cli_interval_motifs.add_argument(
         '-hi',
         '--fraction-high',
         default=600,
         type=int,
-        help='Maximum length for a fragment to be included in end motif '
-        'frequency.')
+        dest='max_length',
+        help='Deprecated alias for --max-length')
     cli_interval_motifs.add_argument(
         '-B',
         '--no-both-strands',
@@ -836,17 +840,31 @@ def main_cli_parser():
         default=30,
         help='Minimum mapping quality threshold.')
     cli_filter_bam.add_argument(
-        '-hi',
-        '--fraction-high',
-        type=int,
+        '-min',
+        '--min-length',
         default=None,
-        help='Maximum length for a fragment to be included in output BAM.')
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_filter_bam.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
     cli_filter_bam.add_argument(
         '-lo',
         '--fraction-low',
         type=int,
-        default=None,
-        help='Minimum length for a fragment to be included in output BAM.')
+        dest='min_length',
+        help='Deprecated alias for --min-length')
+    cli_filter_bam.add_argument(
+        '-hi',
+        '--fraction-high',
+        type=int,
+        dest='max_length',
+        help='Deprecated alias for --max-length')
     cli_filter_bam.add_argument(
         '-w',
         '--workers',
