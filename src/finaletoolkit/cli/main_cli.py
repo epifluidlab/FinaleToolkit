@@ -21,7 +21,7 @@ from finaletoolkit.frag.adjust_wps import adjust_wps
 from finaletoolkit.frag.delfi_gc_correct import cli_delfi_gc_correct
 from finaletoolkit.frag.end_motifs import (
     end_motifs, _cli_mds, _cli_interval_mds, interval_end_motifs)
-from finaletoolkit.frag.cleavage_profile import _cli_cleavage_profile
+from finaletoolkit.frag.cleavage_profile import multi_cleavage_profile
 from finaletoolkit.genome.gaps import _cli_gap_bed
 
 
@@ -278,7 +278,8 @@ def main_cli_parser():
         'chrom_sizes',
         help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_cleavage_profile.add_argument(
-        'output_file',
+        '-o',
+        '--output-file',
         default='-',
         help='A bigWig file containing the cleavage proportion results over '
         'the intervals specified in interval file.',)
@@ -343,7 +344,7 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_cleavage_profile.set_defaults(func=_cli_cleavage_profile)
+    cli_cleavage_profile.set_defaults(func=multi_cleavage_profile)
 
     cli_wps = subparsers.add_parser(
         'wps',

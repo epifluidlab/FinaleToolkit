@@ -177,7 +177,7 @@ def _cleavage_profile_star(args):
     return cleavage_profile(*args)
 
 
-def _cli_cleavage_profile(
+def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Union[str, Path],
     chrom_sizes: Union[str, Path],
@@ -314,7 +314,7 @@ def _cli_cleavage_profile(
     try:
         pool = Pool(workers, maxtasksperchild=500)
         # chunksize limited for memory
-        interval_scores = pool.imap(
+        interval_scores = pool.map(
             _cleavage_profile_star,
             interval_list,
             chunksize=100
@@ -392,4 +392,4 @@ def _cli_cleavage_profile(
             f'cleavage profile took {end_time - start_time} s to complete\n'
         )
     
-    return None
+    return interval_scores
