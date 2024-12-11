@@ -260,8 +260,6 @@ def frag_generator(
             ):
                 tbx = pysam.TabixFile(str(input_file), 'r')
                 is_sam = False
-                # check if input is FinaleDB Fragment file
-                is_frag = str(input_file).endswith('frag.gz') 
             else:
                 raise ValueError(
                     f"{input_file} is not an accepted file type. Only "
@@ -274,7 +272,6 @@ def frag_generator(
             input_file_is_path = False
             is_sam = False
             tbx = input_file
-            is_frag = tbx.filename.endswith('frag.gz')
         else:
             raise TypeError(
                 f'{type(input_file)} is invalid type for input_file.'
@@ -346,19 +343,15 @@ def frag_generator(
                                        "Skipping interval.\n",
                                        f"Error: {e}\n"])
 
-        else: # Tabix Indexed
+        else: # Tabix Indexed FinaleDB Fragment file
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 frag_length = read_stop - read_start
-                if is_frag:
-                    mapq = int(line[3])
-                    read_on_plus = '+' in line[4]
-                else:
-                    mapq = int(line[4])
-                    read_on_plus = '+' in line[5]
+                mapq = int(line[3])
+                read_on_plus = '+' in line[4]
                     
                 try:
                     if (_none_geq(frag_length, fraction_low)

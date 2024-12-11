@@ -25,6 +25,9 @@ behavior of original scripts
 - rename `fraction_high` and `fraction_low` to  `min_length` and `max_length`
 for all features, deprecating old args as aliases if needed.
 - numpy 2 compatible
+- fragmentomics functions assume Tabix indexed files all follow the
+FinaleDB Frag.gz file format. That is, columns are `chrom`, `start`, `stop`,
+`score`, and `strand`.
 
 ### Added
 - internal `utils._typing` and `utils._deprecation` modules
