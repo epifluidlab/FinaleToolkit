@@ -383,13 +383,15 @@ def main_cli_parser():
         '--interval_size',
         default=5000,
         type=int,
-        help='Size in bp of each interval in the interval file.')
+        help='Size in bp of each interval in the interval file. Default is '
+        '5000')
     cli_wps.add_argument(
         '-W',
         '--window_size',
         default=120,
         type=int,
-        help='Size of the sliding window used to calculate WPS scores.')
+        help='Size of the sliding window used to calculate WPS scores.'
+        ' Default is 120')
     cli_wps.add_argument(
         '-min',
         '--min-length',
@@ -423,7 +425,7 @@ def main_cli_parser():
         '--quality_threshold',
         default=30,
         type=int,
-        help="Minimum mapping quality threshold.")
+        help="Minimum mapping quality threshold. Default is 30")
     cli_wps.add_argument(
         '-w',
         '--workers',
