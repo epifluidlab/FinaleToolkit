@@ -51,6 +51,7 @@ Homepage = "https://epifluidlab.github.io/FinaleToolkit/"
 Repository = "https://github.com/epifluidlab/finaletoolkit"
 Issues = "https://github.com/epifluidlab/FinaleToolkit/issues"
 Changelog = "https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md"
+Wiki = "https://github.com/epifluidlab/FinaleToolkit/wiki"
 "Lab Website" = "https://epifluidlab.github.io/"
 
 [dependency-groups]
