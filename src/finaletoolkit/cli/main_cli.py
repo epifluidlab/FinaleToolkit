@@ -365,6 +365,20 @@ def main_cli_parser():
         type=int,
         help='Size of the sliding window used to calculate WPS scores.')
     cli_wps.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_wps.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_wps.add_argument(
         '-lo',
         '--fraction_low',
         default=120,

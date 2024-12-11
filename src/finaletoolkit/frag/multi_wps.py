@@ -4,6 +4,7 @@ import time
 from multiprocessing.pool import Pool
 from typing import Union
 from sys import stderr, stdin
+import warnings
 
 import pysam
 import numpy as np
@@ -23,11 +24,13 @@ def multi_wps(
         output_file: Union[str, None]=None,
         window_size: int=120,
         interval_size: int=5000,
-        fraction_low: int=120,
-        fraction_high: int=180,
+        min_length: int=120,
+        max_length: int=180,
         quality_threshold: int=30,
         workers: int=1,
-        verbose: Union[bool, int]=0
+        verbose: Union[bool, int]=0,
+        fraction_low: int=None,
+        fraction_high: int=None,
         ) -> np.ndarray:
     """
     Function that aggregates WPS over sites in BED file according to the
@@ -49,15 +52,19 @@ def multi_wps(
     interval_size : int, optional
         Size of each interval specified in the bed file. Should be the
         same for every interval. Default is 5000.
-    fraction_low : int, optional
+    min_length : int, optional
         Specifies lowest fragment length included in calculation.
         Default is 120, equivalent to long fraction.
-    fraction_high : int, optional
+    max_length : int, optional
         Specifies highest fragment length included in calculation.
         Default is 120, equivalent to long fraction.
     quality_threshold : int, optional
     workers : int, optional
     verbose : bool, optional
+    fraction_low : int, optional
+        Deprecated alias for min_length
+    fraction_high : int, optional
+        Deprecated alias for max_length
 
     Returns
     -------
@@ -85,6 +92,31 @@ def multi_wps(
 
     if (input_file == '-' and site_bed == '-'):
         raise ValueError('input_file and site_bed cannot both read from stdin')
+    
+    # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
+
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
 
     # get header from input_file
     if (input_file.endswith('.sam')
@@ -170,8 +202,8 @@ def multi_wps(
         stops,
         count*[None],
         count*[window_size],
-        count*[fraction_low],
-        count*[fraction_high],
+        count*[min_length],
+        count*[max_length],
         count*[quality_threshold],
         count*[verbose-2 if verbose>2 else 0]
     )
