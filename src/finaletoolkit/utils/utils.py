@@ -4,6 +4,7 @@ import gzip
 from typing import Union, Generator
 from sys import stderr
 from pathlib import Path
+import warnings
 
 import numpy as np
 from numpy.typing import NDArray
@@ -244,6 +245,7 @@ def frag_generator(
     try:
         # check type of input and open if needed
         input_file_is_path = False
+        is_sam = False
         if isinstance(input_file, str) or isinstance(input_file, Path):
             input_file_is_path = True
             # check file type
@@ -343,15 +345,29 @@ def frag_generator(
                                        "Skipping interval.\n",
                                        f"Error: {e}\n"])
 
-        else: # Tabix Indexed FinaleDB Fragment file
+        else: # Tabix Indexed
+            # check for number of columns
+            first_line = tbx.fetch(parser=pysam.asTuple()).next()
+            if len(first_line) > 5:
+                warnings.warn("input_file is does not follow Framentation file"
+                              " format accepted by FinaleToolkit. Attempting "
+                              "to read as a BED6 file.")
+                bed_format = True
+            else:
+                bed_format = False
+            
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 frag_length = read_stop - read_start
-                mapq = int(line[3])
-                read_on_plus = '+' in line[4]
+                if bed_format:
+                    mapq = int(line[5])
+                    read_on_plus = '+' in line[6]
+                else:
+                    mapq = int(line[4])
+                    read_on_plus = '+' in line[5]
                     
                 try:
                     if (_none_geq(frag_length, fraction_low)
