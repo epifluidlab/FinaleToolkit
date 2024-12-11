@@ -283,19 +283,31 @@ def main_cli_parser():
         help='A bigWig file containing the cleavage proportion results over '
         'the intervals specified in interval file.',)
     cli_cleavage_profile.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_cleavage_profile.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_cleavage_profile.add_argument(
         '-lo',
         '--fraction_low',
-        default=120,
         type=int,
         help="Minimum length for a fragment to be included in cleavage "
-        "proportion calculation.")
+        "proportion calculation. Deprecated. Use --min-length instead.")
     cli_cleavage_profile.add_argument(
         '-hi',
-        '--fraction_high',
-        default=180,
+        '--fraction-high',
         type=int,
         help="Maximum length for a fragment to be included in cleavage "
-        "proportion calculation.")
+        "proportion calculation. Deprecated. Use --max-length instead.")
     cli_cleavage_profile.add_argument(
         '-q',
         '--quality-threshold',
@@ -381,17 +393,15 @@ def main_cli_parser():
     cli_wps.add_argument(
         '-lo',
         '--fraction_low',
-        default=120,
         type=int,
         help='Minimum length for a fragment to be included in WPS '
-        'calculation.')
+        'calculation. Deprecated. Use --min-length instead.')
     cli_wps.add_argument(
         '-hi',
         '--fraction_high',
-        default=180,
         type=int,
         help='Maximum length for a fragment to be included in WPS '
-        'calculation.')
+        'calculation. Deprecated. Use --max-length instead.')
     cli_wps.add_argument(
         '-q',
         '--quality_threshold',

@@ -14,10 +14,10 @@ from sys import stderr
 from multiprocessing import Pool
 import gzip
 import time
+import warnings
 
 import numpy as np
 import pyBigWig as pbw
-import pysam
 
 from finaletoolkit.utils.utils import (
     frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
@@ -34,10 +34,12 @@ def cleavage_profile(
     stop: int,
     left: int=0,
     right: int=0,
-    fraction_low: int=1,
-    fraction_high: int=10000000,
+    min_length: int|None=None,
+    max_length: int|None=None,
     quality_threshold: int=30,
-    verbose: Union[bool, int]=0
+    verbose: Union[bool, int]=0,
+    fraction_low: int|None=None,
+    fraction_high: int|None=None,
 ) -> np.ndarray:
     """
     Cleavage profile calculated over a single interval.
@@ -59,13 +61,17 @@ def cleavage_profile(
         coordinates of CpG.
     right: int
         Amount to add to stop coordinate.
-    fraction_low: int
+    min_length: int
         Minimum fragment size to include
-    fraction_high: int
+    max_length: int
         Maximum fragment size to include
     quality_threshold: int
         Minimum MAPQ
     verbose: bool or in
+    fraction_low : int, optional
+        Deprecated alias for min_length
+    fraction_high : int, optional
+        Deprecated alias for max_length
 
     Return
     ------
@@ -87,6 +93,32 @@ def cleavage_profile(
             verbose: {verbose}
             """
         )
+
+    # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
+
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
+
     adj_start = max(start-left, 0)
     adj_stop = min(stop+right, chrom_size)
 
@@ -96,8 +128,8 @@ def cleavage_profile(
         quality_threshold=quality_threshold,
         start=adj_start,
         stop=adj_stop,
-        fraction_low=fraction_low,
-        fraction_high=fraction_high,
+        fraction_low=min_length,
+        fraction_high=max_length,
         intersect_policy="any"
     )
 
@@ -151,12 +183,14 @@ def _cli_cleavage_profile(
     chrom_sizes: Union[str, Path],
     left: int=0,
     right: int=0,
-    fraction_low: int=1,
-    fraction_high: int=10000000,
+    min_length: int|None=None,
+    max_length: int|None=None,
     quality_threshold: int=30,
     output_file: str='-',
     workers: int=1,
-    verbose: Union[bool, int]=0
+    verbose: Union[bool, int]=0,
+    fraction_low: int|None=None,
+    fraction_high: int|None=None,
 ):
     """
     Multithreaded cleavage profile implementation over intervals in a
@@ -174,15 +208,19 @@ def _cli_cleavage_profile(
         coordinates of CpG.
     right: int
         Amount to add to stop coordinate.
-    fraction_low: int
+    min_length: int
         Minimum fragment size to include
-    fraction_high: int
+    max_length: int
         Maximum fragment size to include
     quality_threshold: int
         Minimum MAPQ
     workers: int, default = 1
         Number of processes to spawn
     verbose: bool or int
+    fraction_low : int, optional
+        Deprecated alias for min_length
+    fraction_high : int, optional
+        Deprecated alias for max_length
     """
 
     if (verbose):
@@ -200,6 +238,30 @@ def _cli_cleavage_profile(
             verbose: {verbose}
             """
         )
+    # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
+
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
     
     if (input_file == '-' and interval_file == '-'):
         raise ValueError('input_file and site_bed cannot both read from stdin')
@@ -240,8 +302,8 @@ def _cli_cleavage_profile(
         stops,
         count*[left],
         count*[right],
-        count*[fraction_low],
-        count*[fraction_high],
+        count*[min_length],
+        count*[max_length],
         count*[quality_threshold],
         count*[max(verbose-1, 0)]
     )
