@@ -275,7 +275,8 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to calculates cleavage '
         'proportion over.')
     cli_cleavage_profile.add_argument(
-        'chrom_sizes',
+        '-c',
+        '--chrom-sizes',
         help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_cleavage_profile.add_argument(
         '-o',
@@ -361,6 +362,10 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to calculate WPS '
         'over. The intervals in this BED file should be sorted, first '
         'by `contig` then `start`.')
+    cli_wps.add_argument(
+        '-c',
+        '--chrom-sizes',
+        help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_wps.add_argument(
         '-o',
         '--output_file',

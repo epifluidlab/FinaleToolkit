@@ -11,6 +11,7 @@ import numpy as np
 import pyBigWig as pbw
 
 from finaletoolkit.frag.wps import wps
+from finaletoolkit.utils.utils import chrom_sizes_to_list
 
 
 def _wps_star(args):
@@ -21,6 +22,7 @@ def _wps_star(args):
 def multi_wps(
         input_file: Union[pysam.AlignmentFile, str],
         site_bed: str,
+        chrom_sizes: str=None,
         output_file: Union[str, None]=None,
         window_size: int=120,
         interval_size: int=5000,
@@ -45,6 +47,9 @@ def multi_wps(
         BED file containing intervals to perform WPS on. The intervals
         in this BED file should be sorted, first by `contig` then
         `start`.
+    chrom_sizes: str or pathlike, optional
+        Tab separated file containing names and sizes of chromosomes in
+        `input_file`. Required if `input_file` is tabix-indexed.
     output_file : string, optional
     window_size : int, optional
         Size of window to calculate WPS. Default is k = 120, equivalent
@@ -118,7 +123,7 @@ def multi_wps(
         raise ValueError(
             'fraction_high and max_length cannot both be specified')
 
-    # get header from input_file
+    # get chrom sizes from input_file or chrom_sizes
     if (input_file.endswith('.sam')
         or input_file.endswith('.bam')
         or input_file.endswith('.cram')):
@@ -126,16 +131,14 @@ def multi_wps(
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
-    # TODO: get a header when reading tabix
-    elif (input_file.endswith('.bed')
-          or input_file.endswith('.bed.gz')
-          or input_file.endswith('.frag')
-          or input_file.endswith('.frag.gz')
-    ):
-        with pysam.TabixFile(input_file, 'r') as tbx:
-            raise NotImplementedError('tabix files not yet supported!')
+    elif (isinstance(input_file, pysam.AlignmentFile)):
+        pass
     else:
-        raise ValueError("Not a supported file type.")
+        if chrom_sizes is None:
+            raise ValueError(
+                'chrom_sizes must be specified for BED/Fragment files'
+            )
+        header = chrom_sizes_to_list(chrom_sizes)
 
     if (verbose > 1):
         stderr.write(f'header is {header}\n')

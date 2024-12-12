@@ -180,7 +180,7 @@ def _cleavage_profile_star(args):
 def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Union[str, Path],
-    chrom_sizes: Union[str, Path],
+    chrom_sizes: Union[str, Path]=None,
     left: int=0,
     right: int=0,
     min_length: int|None=None,
@@ -202,7 +202,8 @@ def multi_cleavage_profile(
     interval_file: str or pathlike
         Sorted BED file containing intervals.
     chrom_sizes: str or pathlike
-        Tab-delimited file with name and lengths of each contig.
+        Tab-delimited file with name and lengths of each contig. Required
+        if input_file is a tabix-indexed frag file.
     left: int
         Amount to subtract from start coordinate. Useful if only given
         coordinates of CpG.
@@ -284,8 +285,23 @@ def multi_cleavage_profile(
     contigs, starts, stops = zip(*all_intervals)
 
     # reading chrom.sizes file
-
-    size_dict = chrom_sizes_to_dict(chrom_sizes)
+    # get chrom sizes from input_file or chrom_sizes
+    if (input_file.endswith('.sam')
+        or input_file.endswith('.bam')
+        or input_file.endswith('.cram')):
+        with pysam.AlignmentFile(input_file, 'r') as bam:
+            references = bam.references
+            lengths = bam.lengths
+            header = list(zip(references, lengths))
+    elif (isinstance(input_file, pysam.AlignmentFile)):
+        pass
+    else:
+        if chrom_sizes is None:
+            raise ValueError(
+                'chrom_sizes must be specified for BED/Fragment files'
+            )
+        header = chrom_sizes_to_list(chrom_sizes)
+    size_dict = dict(header)
 
     sizes = [size_dict[contig] for contig in contigs]
     
@@ -314,7 +330,7 @@ def multi_cleavage_profile(
     try:
         pool = Pool(workers, maxtasksperchild=500)
         # chunksize limited for memory
-        interval_scores = pool.map(
+        interval_scores = pool.imap(
             _cleavage_profile_star,
             interval_list,
             chunksize=100
@@ -326,6 +342,7 @@ def multi_cleavage_profile(
                 stderr.write(
                     f'Output file {output_file} specified. Opening...\n'
                 )
+            output_list = []
 
             if output_file.endswith(".bw"): # BigWig
                 with pbw.open(output_file, 'w') as bigwig:
@@ -341,6 +358,7 @@ def multi_cleavage_profile(
                             continue
 
                         try:
+                            output_list.append((contigs, starts, scores, stops))
                             bigwig.addEntries(
                                 chroms=contigs,
                                 starts=starts,
