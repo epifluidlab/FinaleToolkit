@@ -27,11 +27,17 @@ for all features, deprecating old args as aliases if needed.
 - numpy 2 compatible
 - fragmentomics functions assume Tabix indexed files all follow the
 FinaleDB Frag.gz file format. That is, columns are `chrom`, `start`, `stop`,
-`score`, and `strand`.
+`score`, and `strand`. If more columns are detect, a warning is issued, and
+FinaleToolkit will attempt to parse the file as a BED6 format.
+- renamed `genome_file` to `chrom_sizes` for most functions.
 
 ### Added
 - internal `utils._typing` and `utils._deprecation` modules
 - test for `delfi`
+
+### Deprecated
+- `delfi-gc-correct` command. GC-correction is performed automatically by `delfi`
+already.
 
 ## [0.8.0] - 2024-12-04
 
