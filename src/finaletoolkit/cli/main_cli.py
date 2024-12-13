@@ -330,14 +330,14 @@ def main_cli_parser():
         type=int,
         help='Number of base pairs to subtract from start coordinate to create'
         ' interval. Useful when dealing with BED files with only CpG '
-        'coordinates.')
+        'coordinates. Default is 0.')
     cli_cleavage_profile.add_argument(
         '-r', '--right',
         default=0,
         type=int,
         help='Number of base pairs to add to stop coordinate to create '
         'interval. Useful when dealing with BED files with only CpG '
-        'coordinates.')
+        'coordinates. Default is 0.')
     cli_cleavage_profile.add_argument(
         '-w',
         '--workers',
