@@ -16,7 +16,8 @@ from ._typing import FragFile
 
 
 def chrom_sizes_to_list(
-    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
+    chrom_sizes_file: Union[str, Path]
+) -> list[tuple[str, int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
 

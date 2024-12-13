@@ -7,7 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0] - 2024-12-10
+## [0.9.0] - 2024-12-13
 
 ### Removed
 - `strand_location` arg from `agg_bigwig`
@@ -18,6 +18,8 @@ and this project adheres to
 - some code formatting
 - fixed bug involving arg names in `filter-bam`
 - add some missing args to CLI
+- issues with running `cleavage-profile` (#115)
+- issues with writing to bigwig with `wps`
 
 ### Changed
 - change default of arg `both_strands` of `end_motifs` to True to match

@@ -237,7 +237,6 @@ def multi_wps(
                         contigs = interval_score['contig']
                         starts = interval_score['start']
                         scores = interval_score['wps']
-                        stops = starts + 1
 
                         # skip empty intervals
                         if contigs.shape == (0,):
@@ -247,8 +246,9 @@ def multi_wps(
                             bigwig.addEntries(
                                 chroms=contigs,
                                 starts=starts,
-                                ends=stops,
                                 values=scores.astype(np.float64),
+                                step=1,
+                                span=1
                             )
                         except RuntimeError:
                             stderr.write(

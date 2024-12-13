@@ -10,6 +10,7 @@ CpG site.
 from __future__ import annotations
 from typing import Union
 from pathlib import Path
+from os import PathLike
 from sys import stderr
 from multiprocessing import Pool
 import gzip
@@ -181,7 +182,7 @@ def _cleavage_profile_star(args):
 def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Union[str, Path],
-    chrom_sizes: Union[str, Path]=None,
+    chrom_sizes: Union[str, Path, None] = None,
     left: int=0,
     right: int=0,
     min_length: int|None=None,
@@ -223,6 +224,11 @@ def multi_cleavage_profile(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
+        
+    Returns
+    -------
+    scores: list of (str, int, int, float)
+        list of tuples of (contig, start, stop, score)
     """
 
     if (verbose):
@@ -287,21 +293,30 @@ def multi_cleavage_profile(
 
     # reading chrom.sizes file
     # get chrom sizes from input_file or chrom_sizes
-    if (input_file.endswith('.sam')
-        or input_file.endswith('.bam')
-        or input_file.endswith('.cram')):
+    
+    if (isinstance(input_file, pysam.AlignmentFile)):
+        references = input_file.references
+        lengths = input_file.lengths
+        header = list(zip(references, lengths))
+    elif (
+            (isinstance(input_file, str)
+            or isinstance(input_file, PathLike))
+        and
+            (str(input_file).endswith('.sam')
+            or str(input_file).endswith('.bam')
+            or str(input_file).endswith('.cram'))
+    ):
         with pysam.AlignmentFile(input_file, 'r') as bam:
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
-    elif (isinstance(input_file, pysam.AlignmentFile)):
-        pass
-    else:
-        if chrom_sizes is None:
-            raise ValueError(
-                'chrom_sizes must be specified for BED/Fragment files'
-            )
+    elif chrom_sizes is not None:
         header = chrom_sizes_to_list(chrom_sizes)
+    else:
+        raise ValueError(
+            'chrom_sizes must be specified for Tabix-indexed files'
+        )
+        
     size_dict = dict(header)
 
     sizes = [size_dict[contig] for contig in contigs]
@@ -343,7 +358,10 @@ def multi_cleavage_profile(
                 stderr.write(
                     f'Output file {output_file} specified. Opening...\n'
                 )
-            output_list = []
+            contigs_list = []
+            starts_list = []
+            scores_list = []
+            stops_list = []
 
             if output_file.endswith(".bw"): # BigWig
                 with pbw.open(output_file, 'w') as bigwig:
@@ -359,21 +377,28 @@ def multi_cleavage_profile(
                             continue
 
                         try:
-                            output_list.append((contigs, starts, scores, stops))
+                            contigs_list.extend(contigs)
+                            starts_list.extend(starts)
+                            stops_list.extend(stops)
+                            scores_list.extend(scores)
+
                             bigwig.addEntries(
-                                chroms=contigs,
-                                starts=starts,
-                                ends=stops,
+                                chroms=contigs[0],
+                                start=starts,
                                 values=scores.astype(np.float64),
+                                step=1,
+                                span=1
                             )
-                        except RuntimeError:
+                        except RuntimeError as e:
                             stderr.write(
                                 f'{contigs[0]}:{starts[0]}-{stops[-1]}\n'
                             )
                             stderr.write(
-                                '/n invalid or out of order interval '
+                                'invalid or out of order interval '
                                 'encountered. Skipping to next.\n'
                             )
+                            stderr.write(
+                                f"captured error:\n{e}\n")
                             continue
             elif (output_file.endswith('.bed.gz')
                   or output_file.endswith('bedgraph.gz')
@@ -410,5 +435,6 @@ def multi_cleavage_profile(
         stderr.write(
             f'cleavage profile took {end_time - start_time} s to complete\n'
         )
+    output_list = (i for i in zip(contigs_list, starts_list, stops_list, scores_list))
     
-    return interval_scores
+    return output_list
