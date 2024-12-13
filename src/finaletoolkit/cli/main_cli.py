@@ -30,6 +30,7 @@ def main_cli_parser():
     Returns argparse parser for CLI.
     """
 
+    # top level parser
     parser = argparse.ArgumentParser(
         description='FinaleToolkit is a package and standalone program '
         'to extract fragmentation features of cell-free DNA from '
@@ -42,6 +43,7 @@ def main_cli_parser():
         version=f'FinaleToolkit {__version__}')
     subparsers = parser.add_subparsers()
 
+    # coverage
     cli_coverage = subparsers.add_parser(
         'coverage',
         description='Calculates fragmentation coverage over intervals '
@@ -117,6 +119,7 @@ def main_cli_parser():
     cli_coverage.set_defaults(
         func=coverage)
 
+    # frag-length-bins
     cli_frag_length_bins = subparsers.add_parser(
         'frag-length-bins',
         prog='finaletoolkit-frag-length-bins',
@@ -198,6 +201,7 @@ def main_cli_parser():
         'information.')
     cli_frag_length_bins.set_defaults(func=frag_length_bins)
 
+    # frag-length-intervals
     cli_frag_length_intervals = subparsers.add_parser(
         'frag-length-intervals',
         description='Retrieves fragment length summary statistics over '
@@ -261,6 +265,7 @@ def main_cli_parser():
         'information.')
     cli_frag_length_intervals.set_defaults(func=frag_length_intervals)
 
+    # cleavage-profile
     cli_cleavage_profile = subparsers.add_parser(
         'cleavage-profile',
         prog='finaletoolkit-cleavage-profile',
@@ -347,6 +352,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_cleavage_profile.set_defaults(func=multi_cleavage_profile)
 
+    # wps
     cli_wps = subparsers.add_parser(
         'wps',
         prog='finaletoolkit-wps',
@@ -432,6 +438,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_wps.set_defaults(func=multi_wps)
 
+    # adjust wps
     cli_adjust_wps = subparsers.add_parser(
         'adjust-wps',
         prog='finaletoolkit-adjust-wps',
@@ -506,6 +513,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_adjust_wps.set_defaults(func=adjust_wps)
 
+    # delfi
     cli_delfi = subparsers.add_parser(
         'delfi',
         prog='finaletoolkit-delfi',
@@ -517,9 +525,10 @@ def main_cli_parser():
         'input_file',
         help="Path to a BAM/SAM/CRAM/Fragment file containing fragment data.")
     cli_delfi.add_argument(
-        'autosomes',
-        help="Tab-delimited file containing (1) autosome name and (2) integer "
-        "length of chromosome in base pairs.")
+        'chrom_sizes',
+        help="Tab-delimited file containing (1) chrom name and (2) integer "
+        "length of chromosome in base pairs. Should contain only autosomes if"
+        "You want to replicate the original scripts.")
     cli_delfi.add_argument(
         'reference_file',
         help="The .2bit file for the associate reference genome sequence used "
@@ -595,6 +604,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_delfi.set_defaults(func=delfi)
 
+    # delfi-gc-correct
     cli_delfi_gc = subparsers.add_parser(
         'delfi-gc-correct',
         prog='finaletoolkit-delfi-gc-correct',
@@ -622,6 +632,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_delfi_gc.set_defaults(func=cli_delfi_gc_correct)
 
+    # end-motifs
     cli_motifs = subparsers.add_parser(
         'end-motifs',
         prog='finaletoolkit-end-motifs',
@@ -684,6 +695,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_motifs.set_defaults(func=end_motifs)
 
+    # interval-end-motifs
     cli_interval_motifs = subparsers.add_parser(
         'interval-end-motifs',
         prog='finaletoolkit-interval-end-motifs',
@@ -765,6 +777,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_interval_motifs.set_defaults(func=interval_end_motifs)
 
+    # mds
     cli_mds = subparsers.add_parser(
         'mds',
         prog='finaletoolkit-mds',
@@ -789,6 +802,7 @@ def main_cli_parser():
         help='Number of header rows to ignore. Default is 0')
     cli_mds.set_defaults(func=_cli_mds)
 
+    # interval-mds
     cli_interval_mds = subparsers.add_parser(
         'interval-mds',
         prog='finaletoolkit-interval-mds',
@@ -818,6 +832,7 @@ def main_cli_parser():
         help='Number of header rows to ignore. Default is 0')
     cli_interval_mds.set_defaults(func=_cli_interval_mds)
 
+    # filter-bam
     cli_filter_bam = subparsers.add_parser(
         'filter-bam',
         prog='finaletoolkit-filter-bam',
@@ -884,6 +899,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_filter_bam.set_defaults(func=filter_bam)
 
+    # agg-bw
     cli_agg_bw = subparsers.add_parser(
         'agg-bw',
         prog='finaletoolkit-agg-wps',
@@ -924,6 +940,7 @@ def main_cli_parser():
         'information.')
     cli_agg_bw.set_defaults(func=agg_bw)
 
+    # gap-bed
     cli_gap_bed = subparsers.add_parser(
         'gap-bed',
         prog='finaletoolkit-gap-bed',
