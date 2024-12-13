@@ -363,7 +363,14 @@
 <section id="coverage">
 <h3>coverage<a class="headerlink" href="#coverage" title="Link to this heading">#</a></h3>
 <p>Calculates fragmentation coverage over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">coverage</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SCALE_FACTOR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">coverage</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span>
+                       <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SCALE_FACTOR</span><span class="p">]</span>
+                       <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                       <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                       <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span>
+                       <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                       <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                       <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments">
@@ -392,6 +399,13 @@
 <dd><p>Scale factor for coverage values. Default is 1.</p>
 <p>Default: 1.0</p>
 </dd>
+<dt><kbd>-min, --min-length</kbd></dt>
+<dd><p>Minimum length for a fragment to be included in coverage.</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>-max, --max-length</kbd></dt>
+<dd><p>Maximum length for a fragment to be included in coverage.</p>
+</dd>
 <dt><kbd>-p, --intersect_policy</kbd></dt>
 <dd><p>Possible choices: midpoint, any</p>
 <p>Specifies what policy is used to include fragments in the given interval. See User Guide for more information.</p>
@@ -415,8 +429,16 @@
 <section id="frag-length-bins">
 <h3>frag-length-bins<a class="headerlink" href="#frag-length-bins" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment lengths grouped in bins given a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span>
-                               <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="o">-</span><span class="n">path</span> <span class="n">HISTOGRAM_PATH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span>
+                               <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="o">-</span><span class="n">path</span> <span class="n">HISTOGRAM_PATH</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                <span class="n">input_file</span>
 </pre></div>
 </div>
@@ -477,9 +499,15 @@
 <section id="frag-length-intervals">
 <h3>frag-length-intervals<a class="headerlink" href="#frag-length-intervals" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
-                                    <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                                    <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span>
+                                    <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                                    <span class="n">input_file</span>
+                                    <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat2">
@@ -530,8 +558,16 @@
 <section id="cleavage-profile">
 <h3>cleavage-profile<a class="headerlink" href="#cleavage-profile" title="Link to this heading">#</a></h3>
 <p>Calculates cleavage proportion over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                               <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">chrom_sizes</span> <span class="n">output_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CHROM_SIZES</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                               <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat3">
@@ -543,36 +579,41 @@
 <dt><kbd>interval_file</kbd></dt>
 <dd><p>Path to a BED file containing intervals to calculates cleavage proportion over.</p>
 </dd>
-<dt><kbd>chrom_sizes</kbd></dt>
-<dd><p>A .chrom.sizes file containing chromosome names and sizes.</p>
-</dd>
-<dt><kbd>output_file</kbd></dt>
-<dd><p>A bigWig file containing the cleavage proportion results over the intervals specified in interval file.</p>
-<p>Default: “-”</p>
-</dd>
 </dl>
 </section>
 <section id="named-arguments_repeat4">
 <h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat4" title="Link to this heading">#</a></h4>
 <dl class="option-list">
-<dt><kbd>-lo, --fraction_low</kbd></dt>
-<dd><p>Minimum length for a fragment to be included in cleavage proportion calculation.</p>
-<p>Default: 120</p>
+<dt><kbd>-c, --chrom-sizes</kbd></dt>
+<dd><p>A .chrom.sizes file containing chromosome names and sizes.</p>
 </dd>
-<dt><kbd>-hi, --fraction_high</kbd></dt>
-<dd><p>Maximum length for a fragment to be included in cleavage proportion calculation.</p>
-<p>Default: 180</p>
+<dt><kbd>-o, --output-file</kbd></dt>
+<dd><p>A bigWig file containing the cleavage proportion results over the intervals specified in interval file.</p>
+<p>Default: “-”</p>
+</dd>
+<dt><kbd>-min, --min-length</kbd></dt>
+<dd><p>Minimum length for a fragment to be included.</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>-max, --max-length</kbd></dt>
+<dd><p>Maximum length for a fragment to be included.</p>
+</dd>
+<dt><kbd>-lo, --fraction_low</kbd></dt>
+<dd><p>Minimum length for a fragment to be included in cleavage proportion calculation. Deprecated. Use –min-length instead.</p>
+</dd>
+<dt><kbd>-hi, --fraction-high</kbd></dt>
+<dd><p>Maximum length for a fragment to be included in cleavage proportion calculation. Deprecated. Use –max-length instead.</p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 20</p>
 </dd>
 <dt><kbd>-l, --left</kbd></dt>
-<dd><p>Number of base pairs to subtract from start coordinate to create interval. Useful when dealing with BED files with only CpG coordinates.</p>
+<dd><p>Number of base pairs to subtract from start coordinate to create interval. Useful when dealing with BED files with only CpG coordinates. Default is 0.</p>
 <p>Default: 0</p>
 </dd>
 <dt><kbd>-r, --right</kbd></dt>
-<dd><p>Number of base pairs to add to stop coordinate to create interval. Useful when dealing with BED files with only CpG coordinates.</p>
+<dd><p>Number of base pairs to add to stop coordinate to create interval. Useful when dealing with BED files with only CpG coordinates. Default is 0.</p>
 <p>Default: 0</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
@@ -589,7 +630,11 @@
 <section id="wps">
 <h3>wps<a class="headerlink" href="#wps" title="Link to this heading">#</a></h3>
 <p>Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/SAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CHROM_SIZES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
                   <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                   <span class="n">input_file</span> <span class="n">site_bed</span>
 </pre></div>
@@ -608,6 +653,9 @@
 <section id="named-arguments_repeat5">
 <h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Link to this heading">#</a></h4>
 <dl class="option-list">
+<dt><kbd>-c, --chrom-sizes</kbd></dt>
+<dd><p>A .chrom.sizes file containing chromosome names and sizes.</p>
+</dd>
 <dt><kbd>-o, --output_file</kbd></dt>
 <dd><p>A bigWig file containing the WPS results over the intervals specified in interval file.</p>
 <p>Default: “-”</p>
@@ -620,13 +668,18 @@
 <dd><p>Size of the sliding window used to calculate WPS scores.</p>
 <p>Default: 120</p>
 </dd>
+<dt><kbd>-min, --min-length</kbd></dt>
+<dd><p>Minimum length for a fragment to be included.</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>-max, --max-length</kbd></dt>
+<dd><p>Maximum length for a fragment to be included.</p>
+</dd>
 <dt><kbd>-lo, --fraction_low</kbd></dt>
-<dd><p>Minimum length for a fragment to be included in WPS calculation.</p>
-<p>Default: 120</p>
+<dd><p>Minimum length for a fragment to be included in WPS calculation. Deprecated. Use –min-length instead.</p>
 </dd>
 <dt><kbd>-hi, --fraction_high</kbd></dt>
-<dd><p>Maximum length for a fragment to be included in WPS calculation.</p>
-<p>Default: 180</p>
+<dd><p>Maximum length for a fragment to be included in WPS calculation. Deprecated. Use –max-length instead.</p>
 </dd>
 <dt><kbd>-q, --quality_threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
@@ -646,9 +699,16 @@
 <section id="adjust-wps">
 <h3>adjust-wps<a class="headerlink" href="#adjust-wps" title="Link to this heading">#</a></h3>
 <p>Adjusts raw Windowed Protection Score (WPS) by applying a median filter and Savitsky-Golay filter.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                         <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">genome_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">--</span><span class="n">edge</span><span class="o">-</span><span class="n">size</span> <span class="n">EDGE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                         <span class="n">input_file</span> <span class="n">interval_file</span>
+                         <span class="n">chrom_sizes</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat5">
@@ -660,8 +720,8 @@
 <dt><kbd>interval_file</kbd></dt>
 <dd><p>Path to a BED file containing intervals to WPS was calculated over.</p>
 </dd>
-<dt><kbd>genome_file</kbd></dt>
-<dd><p>A .chrom.sizes file containing chromosome sizes.</p>
+<dt><kbd>chrom_sizes</kbd></dt>
+<dd><p>A .chrom.sizes file containing chromosome names and sizes.</p>
 </dd>
 </dl>
 </section>
@@ -700,6 +760,10 @@
 <dd><p>Take the median of the first and last 500 bases in a window and subtract from the whole interval.</p>
 <p>Default: False</p>
 </dd>
+<dt><kbd>--edge-size</kbd></dt>
+<dd><p>size of the edge subtracted from ends of window when –subtract-edges is set. Default is 500.</p>
+<p>Default: 500</p>
+</dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
 </dd>
@@ -709,8 +773,13 @@
 <section id="delfi">
 <h3>delfi<a class="headerlink" href="#delfi" title="Link to this heading">#</a></h3>
 <p>Calculates DELFI features over genome, returning information about (GC-corrected) short fragments, long fragments, DELFI ratio, and total fragments.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">GAP_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">G</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">R</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">M</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                    <span class="n">input_file</span> <span class="n">autosomes</span> <span class="n">reference_file</span> <span class="n">bins_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">g</span> <span class="n">GAP_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">G</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">R</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">M</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                    <span class="n">input_file</span> <span class="n">chrom_sizes</span>
+                    <span class="n">reference_file</span> <span class="n">bins_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat6">
@@ -719,8 +788,8 @@
 <dt><kbd>input_file</kbd></dt>
 <dd><p>Path to a BAM/SAM/CRAM/Fragment file containing fragment data.</p>
 </dd>
-<dt><kbd>autosomes</kbd></dt>
-<dd><p>Tab-delimited file containing (1) autosome name and (2) integer length of chromosome in base pairs.</p>
+<dt><kbd>chrom_sizes</kbd></dt>
+<dd><p>Tab-delimited file containing (1) chrom name and (2) integer length of chromosome in base pairs. Should contain only autosomes ifYou want to replicate the original scripts.</p>
 </dd>
 <dt><kbd>reference_file</kbd></dt>
 <dd><p>The .2bit file for the associate reference genome sequence used during alignment.</p>
@@ -755,6 +824,10 @@
 <dd><p>Keep 100kb bins and do not merge to 5Mb size.</p>
 <p>Default: True</p>
 </dd>
+<dt><kbd>-s, --window-size</kbd></dt>
+<dd><p>Specify size of large genomic intervals to merge smaller 100kb intervals (or whatever the user specified in bins_file) into. Defaultis 5000000</p>
+<p>Default: 5000000</p>
+</dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 30</p>
@@ -772,8 +845,11 @@
 </section>
 <section id="delfi-gc-correct">
 <h3>delfi-gc-correct<a class="headerlink" href="#delfi-gc-correct" title="Link to this heading">#</a></h3>
-<p>Performs gc-correction on raw delfi data.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span><span class="o">-</span><span class="n">gc</span><span class="o">-</span><span class="n">correct</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span><span class="o">-</span><span class="n">lines</span> <span class="n">HEADER_LINES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span>
+<p>Performs gc-correction on raw delfi data. This command is deprecated and will be removed in a future version of FinaleToolkit. The delfi command has gc correction on by default.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">delfi</span><span class="o">-</span><span class="n">gc</span><span class="o">-</span><span class="n">correct</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">--</span><span class="n">header</span><span class="o">-</span><span class="n">lines</span> <span class="n">HEADER_LINES</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                               <span class="n">input_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat7">
@@ -804,7 +880,12 @@
 <section id="end-motifs">
 <h3>end-motifs<a class="headerlink" href="#end-motifs" title="Link to this heading">#</a></h3>
 <p>Measures frequency of k-mer 5’ end motifs.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">refseq_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                         <span class="n">input_file</span> <span class="n">refseq_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat8">
@@ -824,6 +905,17 @@
 <dt><kbd>-k</kbd></dt>
 <dd><p>Length of k-mer.</p>
 <p>Default: 4</p>
+</dd>
+<dt><kbd>-min, --min-length</kbd></dt>
+<dd><p>Minimum length for a fragment to be included.</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>-max, --max-length</kbd></dt>
+<dd><p>Maximum length for a fragment to be included.</p>
+</dd>
+<dt><kbd>-B, --no-both-strands</kbd></dt>
+<dd><p>Set flag to only consider one strand for end-motifs.</p>
+<p>Default: True</p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>TSV to print k-mer frequencies. If “-”, will write to stdout.</p>
@@ -847,8 +939,16 @@
 <section id="interval-end-motifs">
 <h3>interval-end-motifs<a class="headerlink" href="#interval-end-motifs" title="Link to this heading">#</a></h3>
 <p>Measures frequency of k-mer 5’ end motifs in each region specified in a BED file and writes data into a table.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                                  <span class="n">input_file</span> <span class="n">refseq_file</span> <span class="n">intervals</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                                  <span class="n">input_file</span> <span class="n">refseq_file</span>
+                                  <span class="n">intervals</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat9">
@@ -872,13 +972,24 @@
 <dd><p>Length of k-mer.</p>
 <p>Default: 4</p>
 </dd>
+<dt><kbd>-min, --min-length</kbd></dt>
+<dd><p>Minimum length for a fragment to be included.</p>
+<p>Default: 0</p>
+</dd>
+<dt><kbd>-max, --max-length</kbd></dt>
+<dd><p>Maximum length for a fragment to be included.</p>
+</dd>
 <dt><kbd>-lo, --fraction-low</kbd></dt>
-<dd><p>Minimum length for a fragment to be included in end motif frequency.</p>
+<dd><p>Deprecated alias for –min-length</p>
 <p>Default: 10</p>
 </dd>
 <dt><kbd>-hi, --fraction-high</kbd></dt>
-<dd><p>Maximum length for a fragment to be included in end motif frequency.</p>
+<dd><p>Deprecated alias for –max-length</p>
 <p>Default: 600</p>
+</dd>
+<dt><kbd>-B, --no-both-strands</kbd></dt>
+<dd><p>Set flag to only consider one strand for end-motifs.</p>
+<p>Default: True</p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>Path to TSV or CSV file to write end motif frequencies to.</p>
@@ -902,7 +1013,8 @@
 <section id="mds">
 <h3>mds<a class="headerlink" href="#mds" title="Link to this heading">#</a></h3>
 <p>Reads k-mer frequencies from a file and calculates a motif diversity score (MDS) using normalized Shannon entropy as described by Jiang et al (2020).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span> <span class="n">HEADER</span><span class="p">]</span> <span class="p">[</span><span class="n">file_path</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">header</span> <span class="n">HEADER</span><span class="p">]</span>
+                  <span class="p">[</span><span class="n">file_path</span><span class="p">]</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat10">
@@ -931,7 +1043,9 @@
 <section id="interval-mds">
 <h3>interval-mds<a class="headerlink" href="#interval-mds" title="Link to this heading">#</a></h3>
 <p>Reads k-mer frequencies from a file and calculates a motif diversity score (MDS) for each interval using normalized Shannon entropy as described by Jiang et al (2020).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span> <span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="n">file_out</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">mds</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SEP</span><span class="p">]</span>
+                           <span class="p">[</span><span class="o">--</span><span class="n">header</span> <span class="n">HEADER</span><span class="p">]</span>
+                           <span class="p">[</span><span class="n">file_path</span><span class="p">]</span> <span class="n">file_out</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat11">
@@ -954,13 +1068,24 @@
 <dd><p>Separator used in tabular file.</p>
 <p>Default: “      “</p>
 </dd>
+<dt><kbd>--header</kbd></dt>
+<dd><p>Number of header rows to ignore. Default is 0</p>
+<p>Default: 0</p>
+</dd>
 </dl>
 </section>
 </section>
 <section id="filter-bam">
 <h3>filter-bam<a class="headerlink" href="#filter-bam" title="Link to this heading">#</a></h3>
 <p>Filters a BAM file so that all reads are in mapped pairs, exceed a certain MAPQ, are not flagged for quality, are read1, are not secondary or supplementary alignments, and are on the same reference sequence as the mate.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">bam</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGION_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">FRACTION_HIGH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">FRACTION_LOW</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">bam</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGION_FILE</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                          <span class="n">input_file</span>
 </pre></div>
 </div>
@@ -986,11 +1111,17 @@
 <dd><p>Minimum mapping quality threshold.</p>
 <p>Default: 30</p>
 </dd>
-<dt><kbd>-hi, --fraction-high</kbd></dt>
-<dd><p>Maximum length for a fragment to be included in output BAM.</p>
+<dt><kbd>-min, --min-length</kbd></dt>
+<dd><p>Minimum length for a fragment to be included.</p>
+</dd>
+<dt><kbd>-max, --max-length</kbd></dt>
+<dd><p>Maximum length for a fragment to be included.</p>
 </dd>
 <dt><kbd>-lo, --fraction-low</kbd></dt>
-<dd><p>Minimum length for a fragment to be included in output BAM.</p>
+<dd><p>Deprecated alias for –min-length</p>
+</dd>
+<dt><kbd>-hi, --fraction-high</kbd></dt>
+<dd><p>Deprecated alias for –max-length</p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
@@ -1005,7 +1136,9 @@
 <section id="agg-bw">
 <h3>agg-bw<a class="headerlink" href="#agg-bw" title="Link to this heading">#</a></h3>
 <p>Aggregates a bigWig signal over constant-length intervals defined in a BED file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">agg</span><span class="o">-</span><span class="n">bw</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">agg</span><span class="o">-</span><span class="n">bw</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                     <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+                     <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat13">
@@ -1032,6 +1165,10 @@
 <dd><p>Size of the median filter window used to adjust WPS scores. Only modify if aggregating WPS signals.</p>
 <p>Default: 0</p>
 </dd>
+<dt><kbd>-a, --mean</kbd></dt>
+<dd><p>use mean instead</p>
+<p>Default: False</p>
+</dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
 </dd>
@@ -1041,7 +1178,9 @@
 <section id="gap-bed">
 <h3>gap-bed<a class="headerlink" href="#gap-bed" title="Link to this heading">#</a></h3>
 <p>Creates a BED4 file containing centromeres, telomeres, and short-arm intervals, similar to the gaps annotation track for hg19 found on the UCSC Genome Browser (Kent et al 2002). Currently only supports hg19, b37, human_g1k_v37, hg38, and GRCh38</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">gap</span><span class="o">-</span><span class="n">bed</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">{</span><span class="n">hg19</span><span class="p">,</span><span class="n">b37</span><span class="p">,</span><span class="n">human_g1k_v37</span><span class="p">,</span><span class="n">hg38</span><span class="p">,</span><span class="n">GRCh38</span><span class="p">}</span> <span class="n">output_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">gap</span><span class="o">-</span><span class="n">bed</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span>
+                      <span class="p">{</span><span class="n">hg19</span><span class="p">,</span><span class="n">b37</span><span class="p">,</span><span class="n">human_g1k_v37</span><span class="p">,</span><span class="n">hg38</span><span class="p">,</span><span class="n">GRCh38</span><span class="p">}</span>
+                      <span class="n">output_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat14">
