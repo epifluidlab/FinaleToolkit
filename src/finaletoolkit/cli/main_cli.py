@@ -608,7 +608,10 @@ def main_cli_parser():
     cli_delfi_gc = subparsers.add_parser(
         'delfi-gc-correct',
         prog='finaletoolkit-delfi-gc-correct',
-        description='Performs gc-correction on raw delfi data.')
+        description='Performs gc-correction on raw delfi data. This '
+        'command is deprecated and will be removed in a future version '
+        'of FinaleToolkit. The delfi command has gc correction on by '
+        'default.')
     cli_delfi_gc.add_argument(
         'input_file',
         help='BED file containing raw DELFI data. Raw DELFI data should'
