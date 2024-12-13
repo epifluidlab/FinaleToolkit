@@ -85,8 +85,8 @@ class TestFragGenerator:
         expected = [
             ('12', 34443118, 34443284, 60, True),
             ('12', 34443139, 34443300, 60, True),
+            ('12', 34443294, 34443491, 60, True),
             ('12', 34443358, 34443538, 60, False),
-            ('12', 34443483, 34443660, 54, True),
         ]
         for i, frag in enumerate(g):
             assert frag == expected[i]

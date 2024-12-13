@@ -347,48 +347,21 @@ def frag_generator(
 
         else: # Tabix Indexed
             # check for number of columns
-            first_line = tbx.fetch(parser=pysam.asTuple()).__next__()
+            first_line = tbx.fetch(parser=pysam.asTuple(),
+                                   multiple_iterators=True).__next__()
             if len(first_line) > 5:
                 warnings.warn(
                     "input_file is does not follow Fragmentation file format "
                     "accepted by FinaleToolkit. Attempting to read as a BED6 "
                     "file.",
-                    
                     )
                 bed_format = True
             else:
                 bed_format = False
             
-            # processing first line
-            read_start = int(first_line[1])
-            read_stop = int(first_line[2])
-            frag_length = read_stop - read_start
-            if bed_format:
-                mapq = int(first_line[4])
-                read_on_plus = '+' in first_line[5]
-                
-            else:
-                mapq = int(first_line[3])
-                read_on_plus = '+' in first_line[4]
-                
-            try:
-                if (_none_geq(frag_length, fraction_low)
-                    and _none_leq(frag_length, fraction_high)
-                    and _none_geq(mapq, quality_threshold)
-                    and check_intersect(start, stop, read_start, read_stop)
-                    ):
-                    yield contig, read_start, read_stop, mapq, read_on_plus
-            # HACK: read_length is sometimes None
-            except TypeError as e:
-                stderr.writelines(["Type error encountered.\n",
-                                    f"Fragment length: {frag_length}\n",
-                                    f"fraction_low: {fraction_low}\n",
-                                    f"fraction_high: {fraction_high}\n",
-                                    "Skipping interval.\n",
-                                    f"Error: {e}\n"])
-            
             for line in tbx.fetch(
-                contig, start, stop, parser=pysam.asTuple()
+                contig, start, stop, parser=pysam.asTuple(),
+                multiple_iterators=True
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
