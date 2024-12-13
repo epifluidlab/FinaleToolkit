@@ -32,6 +32,7 @@ FinaleDB Frag.gz file format. That is, columns are `chrom`, `start`, `stop`,
 `score`, and `strand`. If more columns are detect, a warning is issued, and
 FinaleToolkit will attempt to parse the file as a BED6 format.
 - renamed `genome_file` to `chrom_sizes` for most functions.
+- `multi_wps` and `multi_cleavage_profile` no longer return a value due to memory issues when attempting to calculate these genomewide. Instead, users should refer to the file specified with `output_file`.
 
 ### Added
 - internal `utils._typing` and `utils._deprecation` modules

@@ -70,6 +70,11 @@ def multi_wps(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
+        
+    Returns
+    -------
+    output_file: str
+        location results are stored.
     """
     if (verbose):
         start_time = time.time()
@@ -286,3 +291,4 @@ def multi_wps(
         stderr.write(
             f'multi_wps took {end_time - start_time} s to complete\n'
         )
+    return output_file

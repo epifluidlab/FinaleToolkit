@@ -226,6 +226,11 @@ def multi_cleavage_profile(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
+        
+    Returns
+    -------
+    output_file: str
+        location results are stored.
     """
 
     if (verbose):
@@ -424,3 +429,4 @@ def multi_cleavage_profile(
         stderr.write(
             f'cleavage profile took {end_time - start_time} s to complete\n'
         )
+    return output_file
