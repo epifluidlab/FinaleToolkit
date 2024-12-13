@@ -446,8 +446,8 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to WPS was calculated '
         'over.')
     cli_adjust_wps.add_argument(
-        'genome_file',
-        help='A .chrom.sizes file containing chromosome sizes.')
+        'chrom_sizes',
+        help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_adjust_wps.add_argument(
         '-o',
         '--output-file',

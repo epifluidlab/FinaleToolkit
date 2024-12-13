@@ -156,7 +156,7 @@ def adjust_wps(
     input_file: str,
     interval_file: str,
     output_file: str,
-    genome_file: str,
+    chrom_sizes: str,
     interval_size: int=5000,
     median_window_size: int=1000,
     savgol_window_size: int=21,
@@ -180,10 +180,11 @@ def adjust_wps(
         calculated on.
     output_file : str
         BigWig file to write adjusted WPS to.
-    genome_file : str
-        The genome file for the reference genome that WGS was aligned
-        to. A tab delimited file where column 1 contains the name of
-        chromosomes and column 2 contains chromosome length.
+    chrom_sizes : str
+        The chrom.sizes file for the reference genome (e.g. HG38)
+        that WGS was aligned to. A tab delimited file where column 1
+        contains the name of chromosomes and column 2 contains
+        chromosome length.
     median_window_size : int, optional
         Size of median filter window. Default is 1000.
     savgol_window_size : int, optional
@@ -202,7 +203,6 @@ def adjust_wps(
         Number of processes to use. Default is 1.
     verbose : bool or int, optional
         Default is False.
-
     """
     if verbose:
         start_time = time()
@@ -273,7 +273,7 @@ def adjust_wps(
 
         # write to output
         with pbw.open(output_file, 'w') as output_bw:
-            output_bw.addHeader(chrom_sizes_to_list(genome_file))
+            output_bw.addHeader(chrom_sizes_to_list(chrom_sizes))
             for scores in processed_scores:
                 contigs, starts, stops, values = scores
                 if len(contigs) == 0:
