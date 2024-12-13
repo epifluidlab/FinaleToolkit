@@ -242,8 +242,8 @@ def multi_wps(
 
                         try:
                             bigwig.addEntries(
-                                chroms=contigs,
-                                starts=starts,
+                                contigs[0],
+                                starts[0],
                                 values=scores.astype(np.float64),
                                 step=1,
                                 span=1

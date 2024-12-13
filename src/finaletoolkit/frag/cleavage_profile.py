@@ -364,11 +364,12 @@ def multi_cleavage_profile(
             if output_file.endswith(".bw"): # BigWig
                 with pbw.open(output_file, 'w') as bigwig:
                     bigwig.addHeader(header)
+                    last = "None"
                     for interval_score in interval_scores:
+                        
                         contigs = interval_score['contig']
                         starts = interval_score['pos']
                         scores = interval_score['proportion']
-                        stops = starts + 1
 
                         # skip empty intervals
                         if contigs.shape == (0,):
@@ -377,8 +378,8 @@ def multi_cleavage_profile(
                         try:
 
                             bigwig.addEntries(
-                                chroms=contigs[0],
-                                start=starts,
+                                contigs[0],
+                                starts[0],
                                 values=scores.astype(np.float64),
                                 step=1,
                                 span=1
@@ -393,7 +394,10 @@ def multi_cleavage_profile(
                             )
                             stderr.write(
                                 f"captured error:\n{e}\n")
+                            stderr.write(
+                                f"last output:\n{last}\n")
                             continue
+                        last = interval_score
             elif (output_file.endswith('.bed.gz')
                   or output_file.endswith('bedgraph.gz')
                   or output_file == "-"):
