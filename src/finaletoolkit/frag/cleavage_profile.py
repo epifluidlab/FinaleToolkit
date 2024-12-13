@@ -217,6 +217,8 @@ def multi_cleavage_profile(
         Maximum fragment size to include
     quality_threshold: int
         Minimum MAPQ
+    output_file: str or Pathlike
+        Bigwig or bedgraph file to write results to.
     workers: int, default = 1
         Number of processes to spawn
     verbose: bool or int
@@ -224,11 +226,6 @@ def multi_cleavage_profile(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
-        
-    Returns
-    -------
-    scores: list of (str, int, int, float)
-        list of tuples of (contig, start, stop, score)
     """
 
     if (verbose):
@@ -358,10 +355,6 @@ def multi_cleavage_profile(
                 stderr.write(
                     f'Output file {output_file} specified. Opening...\n'
                 )
-            contigs_list = []
-            starts_list = []
-            scores_list = []
-            stops_list = []
 
             if output_file.endswith(".bw"): # BigWig
                 with pbw.open(output_file, 'w') as bigwig:
@@ -377,10 +370,6 @@ def multi_cleavage_profile(
                             continue
 
                         try:
-                            contigs_list.extend(contigs)
-                            starts_list.extend(starts)
-                            stops_list.extend(stops)
-                            scores_list.extend(scores)
 
                             bigwig.addEntries(
                                 chroms=contigs[0],
@@ -418,7 +407,7 @@ def multi_cleavage_profile(
 
             else:   # unaccepted file type
                 raise ValueError(
-                    'output_file can only have suffix .bw'
+                    'output_file can only have suffix .bw, .bedgraph.gz, or .bed.gz.'
                     )
 
         elif (output_file is not None):
@@ -435,6 +424,3 @@ def multi_cleavage_profile(
         stderr.write(
             f'cleavage profile took {end_time - start_time} s to complete\n'
         )
-    output_list = (i for i in zip(contigs_list, starts_list, stops_list, scores_list))
-    
-    return output_list

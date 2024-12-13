@@ -33,7 +33,7 @@ def multi_wps(
         verbose: Union[bool, int]=0,
         fraction_low: int=None,
         fraction_high: int=None,
-        ) -> np.ndarray:
+        ):
     """
     Function that aggregates WPS over sites in BED file according to the
     method described by Snyder et al (2016).
@@ -70,13 +70,6 @@ def multi_wps(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
-
-    Returns
-    -------
-    scores : numpy.ndarray
-        np array of shape (n, 2) where column 1 is the coordinate and
-        column 2 is the score and n is the number of coordinates in
-        region [start,stop)
     """
     if (verbose):
         start_time = time.time()
@@ -293,5 +286,3 @@ def multi_wps(
         stderr.write(
             f'multi_wps took {end_time - start_time} s to complete\n'
         )
-
-    return scores
