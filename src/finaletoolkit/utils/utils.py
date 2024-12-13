@@ -203,8 +203,8 @@ def frag_generator(
     quality_threshold: int=30,
     start: int | None=None,
     stop: int | None=None,
-    fraction_low: int=120,
-    fraction_high: int=180,
+    fraction_low: int=None,
+    fraction_high: int=None,
     intersect_policy: str="midpoint",
     verbose: bool=False
 ) -> Generator[tuple]:
@@ -350,7 +350,7 @@ def frag_generator(
             first_line = tbx.fetch(parser=pysam.asTuple()).__next__()
             if len(first_line) > 5:
                 warnings.warn(
-                    "input_file is does not follow Framentation file format "
+                    "input_file is does not follow Fragmentation file format "
                     "accepted by FinaleToolkit. Attempting to read as a BED6 "
                     "file.",
                     
@@ -358,6 +358,34 @@ def frag_generator(
                 bed_format = True
             else:
                 bed_format = False
+            
+            # processing first line
+            read_start = int(first_line[1])
+            read_stop = int(first_line[2])
+            frag_length = read_stop - read_start
+            if bed_format:
+                mapq = int(first_line[4])
+                read_on_plus = '+' in first_line[5]
+                
+            else:
+                mapq = int(first_line[3])
+                read_on_plus = '+' in first_line[4]
+                
+            try:
+                if (_none_geq(frag_length, fraction_low)
+                    and _none_leq(frag_length, fraction_high)
+                    and _none_geq(mapq, quality_threshold)
+                    and check_intersect(start, stop, read_start, read_stop)
+                    ):
+                    yield contig, read_start, read_stop, mapq, read_on_plus
+            # HACK: read_length is sometimes None
+            except TypeError as e:
+                stderr.writelines(["Type error encountered.\n",
+                                    f"Fragment length: {frag_length}\n",
+                                    f"fraction_low: {fraction_low}\n",
+                                    f"fraction_high: {fraction_high}\n",
+                                    "Skipping interval.\n",
+                                    f"Error: {e}\n"])
             
             for line in tbx.fetch(
                 contig, start, stop, parser=pysam.asTuple()
