@@ -927,10 +927,10 @@ def main_cli_parser():
     cli_agg_bw.add_argument(
         '-m',
         '--median-window-size',
-        default=0,
+        default=1,
         type=int,
         help='Size of the median filter window used to adjust WPS '
-        'scores. Only modify if aggregating WPS signals.')
+        'scores. Set to 120 if aggregating WPS signals.')
     cli_agg_bw.add_argument(
         '-a',
         '--mean',
