@@ -96,7 +96,6 @@ def single_coverage(
     # Iterating on each frag in file in
     # specified contig/chromosome
     for frag in frags:
-        print(frag)
         coverage += 1
         
     if verbose:
