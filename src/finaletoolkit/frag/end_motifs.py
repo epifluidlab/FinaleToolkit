@@ -717,6 +717,20 @@ def end_motifs(
     """
     if verbose:
         start_time = time()
+        tqdm.write(
+            f"""
+            input_file: {input_file}
+            refseq_file: {refseq_file}
+            k: {k}
+            min_length: {min_length}
+            max_length: {max_length}
+            both_strands: {both_strands}
+            output_file: {output_file}
+            quality_threshold: {quality_threshold}
+            workers: {workers}
+            verbose: {verbose}
+            """
+        )
 
     # Pass aliases and check for conflicts
     if fraction_low is not None and min_length is None:
