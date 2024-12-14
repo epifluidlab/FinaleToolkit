@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Union
 from pathlib import Path
 from os import PathLike
-from sys import stderr
+from sys import stderr, stdin
 from multiprocessing import Pool
 import gzip
 import time
@@ -240,8 +240,11 @@ def multi_cleavage_profile(
             Calculating cleavage profile
             input_file: {input_file}
             interval_file: {interval_file}
-            fraction_low: {fraction_low}
-            fraction_high: {fraction_high}
+            chrom_sizes: {chrom_sizes}
+            left: {left}
+            right: {right}
+            min_length: {min_length}
+            max_length: {max_length}
             quality_threshold: {quality_threshold}
             output_file: {output_file}
             workers: {workers}
@@ -282,16 +285,52 @@ def multi_cleavage_profile(
         )
     # get chroms
     header = chrom_sizes_to_list(chrom_sizes)
+    chrom_dict = chrom_sizes_to_dict(chrom_sizes)
 
     if (verbose > 1):
         stderr.write(f'chrom sizes {header}\n')
     
     # reading intervals from bed and removing overlaps
     # NOTE: assumes that bed file is sorted.
-    reduced_intervals = _reduce_overlaps_in_file(interval_file)
-    converted_intervals = _convert_to_list(reduced_intervals)
-    all_intervals = _merge_all_intervals(converted_intervals)
-    contigs, starts, stops = zip(*all_intervals)
+    contigs = []
+    starts = []
+    stops = []
+    try:
+        if interval_file == '-':
+            bed = stdin
+        else:
+            bed = open(interval_file)
+
+        # for overlap checking
+        prev_contig = None
+        prev_start = 0
+        prev_stop = 0
+        for line in bed:
+            # parse file
+            contents = line.split()
+            contig = contents[0].strip()
+            start, stop = int(contents[1]), int(contents[2])
+            start = max(0, start - left)
+            stop = min(stop + right, chrom_dict[contig])
+
+            # if overlapping:
+            if (prev_contig == contig and start < prev_stop):
+                prev_stop = max(prev_stop, stop)
+            else:
+                contigs.append(prev_contig)
+                starts.append(prev_start)
+                stops.append(prev_stop)
+                prev_contig, prev_start, prev_stop = contig, start, stop
+        contigs.append(prev_contig)
+        starts.append(prev_start)
+        stops.append(prev_stop)
+    finally:
+        if interval_file != '-':
+            bed.close()  
+            
+    contigs = contigs[1:]
+    starts = starts[1:]
+    stops = stops[1:]
 
     # reading chrom.sizes file
     # get chrom sizes from input_file or chrom_sizes
@@ -334,8 +373,8 @@ def multi_cleavage_profile(
         contigs,
         starts,
         stops,
-        count*[left],
-        count*[right],
+        count*[0],  # left and right precomputed to avoid overlaps
+        count*[0],
         count*[min_length],
         count*[max_length],
         count*[quality_threshold],
@@ -386,7 +425,7 @@ def multi_cleavage_profile(
                             )
                         except RuntimeError as e:
                             stderr.write(
-                                f'{contigs[0]}:{starts[0]}-{stops[-1]}\n'
+                                f'{contigs[0]}:{starts[0]}-{starts[-1]+1}\n'
                             )
                             stderr.write(
                                 'invalid or out of order interval '
@@ -394,6 +433,8 @@ def multi_cleavage_profile(
                             )
                             stderr.write(
                                 f"captured error:\n{e}\n")
+                            stderr.write(
+                                f"current output:\n{interval_score}\n")
                             stderr.write(
                                 f"last output:\n{last}\n")
                             continue

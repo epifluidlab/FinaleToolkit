@@ -42,7 +42,7 @@ def chrom_sizes_to_list(
 
 
 def chrom_sizes_to_dict(
-    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
+    chrom_sizes_file: Union[str, Path]) -> dict[str, int]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a dict.
 
