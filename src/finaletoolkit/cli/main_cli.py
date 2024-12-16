@@ -21,7 +21,7 @@ from finaletoolkit.frag.adjust_wps import adjust_wps
 from finaletoolkit.frag.delfi_gc_correct import cli_delfi_gc_correct
 from finaletoolkit.frag.end_motifs import (
     end_motifs, _cli_mds, _cli_interval_mds, interval_end_motifs)
-from finaletoolkit.frag.cleavage_profile import _cli_cleavage_profile
+from finaletoolkit.frag.cleavage_profile import multi_cleavage_profile
 from finaletoolkit.genome.gaps import _cli_gap_bed
 
 
@@ -30,6 +30,7 @@ def main_cli_parser():
     Returns argparse parser for CLI.
     """
 
+    # top level parser
     parser = argparse.ArgumentParser(
         description='FinaleToolkit is a package and standalone program '
         'to extract fragmentation features of cell-free DNA from '
@@ -42,6 +43,7 @@ def main_cli_parser():
         version=f'FinaleToolkit {__version__}')
     subparsers = parser.add_subparsers()
 
+    # coverage
     cli_coverage = subparsers.add_parser(
         'coverage',
         description='Calculates fragmentation coverage over intervals '
@@ -117,6 +119,7 @@ def main_cli_parser():
     cli_coverage.set_defaults(
         func=coverage)
 
+    # frag-length-bins
     cli_frag_length_bins = subparsers.add_parser(
         'frag-length-bins',
         prog='finaletoolkit-frag-length-bins',
@@ -198,6 +201,7 @@ def main_cli_parser():
         'information.')
     cli_frag_length_bins.set_defaults(func=frag_length_bins)
 
+    # frag-length-intervals
     cli_frag_length_intervals = subparsers.add_parser(
         'frag-length-intervals',
         description='Retrieves fragment length summary statistics over '
@@ -261,6 +265,7 @@ def main_cli_parser():
         'information.')
     cli_frag_length_intervals.set_defaults(func=frag_length_intervals)
 
+    # cleavage-profile
     cli_cleavage_profile = subparsers.add_parser(
         'cleavage-profile',
         prog='finaletoolkit-cleavage-profile',
@@ -275,27 +280,43 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to calculates cleavage '
         'proportion over.')
     cli_cleavage_profile.add_argument(
-        'chrom_sizes',
+        '-c',
+        '--chrom-sizes',
         help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_cleavage_profile.add_argument(
-        'output_file',
+        '-o',
+        '--output-file',
         default='-',
         help='A bigWig file containing the cleavage proportion results over '
         'the intervals specified in interval file.',)
     cli_cleavage_profile.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_cleavage_profile.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_cleavage_profile.add_argument(
         '-lo',
         '--fraction_low',
-        default=120,
         type=int,
+        dest='min_length',
         help="Minimum length for a fragment to be included in cleavage "
-        "proportion calculation.")
+        "proportion calculation. Deprecated. Use --min-length instead.")
     cli_cleavage_profile.add_argument(
         '-hi',
-        '--fraction_high',
-        default=180,
+        '--fraction-high',
         type=int,
+        dest='max_length',
         help="Maximum length for a fragment to be included in cleavage "
-        "proportion calculation.")
+        "proportion calculation. Deprecated. Use --max-length instead.")
     cli_cleavage_profile.add_argument(
         '-q',
         '--quality-threshold',
@@ -309,14 +330,14 @@ def main_cli_parser():
         type=int,
         help='Number of base pairs to subtract from start coordinate to create'
         ' interval. Useful when dealing with BED files with only CpG '
-        'coordinates.')
+        'coordinates. Default is 0.')
     cli_cleavage_profile.add_argument(
         '-r', '--right',
         default=0,
         type=int,
         help='Number of base pairs to add to stop coordinate to create '
         'interval. Useful when dealing with BED files with only CpG '
-        'coordinates.')
+        'coordinates. Default is 0.')
     cli_cleavage_profile.add_argument(
         '-w',
         '--workers',
@@ -329,8 +350,9 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_cleavage_profile.set_defaults(func=_cli_cleavage_profile)
+    cli_cleavage_profile.set_defaults(func=multi_cleavage_profile)
 
+    # wps
     cli_wps = subparsers.add_parser(
         'wps',
         prog='finaletoolkit-wps',
@@ -347,6 +369,10 @@ def main_cli_parser():
         'over. The intervals in this BED file should be sorted, first '
         'by `contig` then `start`.')
     cli_wps.add_argument(
+        '-c',
+        '--chrom-sizes',
+        help='A .chrom.sizes file containing chromosome names and sizes.')
+    cli_wps.add_argument(
         '-o',
         '--output_file',
         default='-',
@@ -357,33 +383,49 @@ def main_cli_parser():
         '--interval_size',
         default=5000,
         type=int,
-        help='Size in bp of each interval in the interval file.')
+        help='Size in bp of each interval in the interval file. Default is '
+        '5000')
     cli_wps.add_argument(
         '-W',
         '--window_size',
         default=120,
         type=int,
-        help='Size of the sliding window used to calculate WPS scores.')
+        help='Size of the sliding window used to calculate WPS scores.'
+        ' Default is 120')
+    cli_wps.add_argument(
+        '-min',
+        '--min-length',
+        default=0,
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_wps.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
     cli_wps.add_argument(
         '-lo',
         '--fraction_low',
-        default=120,
         type=int,
+        dest='min_length',
         help='Minimum length for a fragment to be included in WPS '
-        'calculation.')
+        'calculation. Deprecated. Use --min-length instead.')
     cli_wps.add_argument(
         '-hi',
         '--fraction_high',
-        default=180,
         type=int,
+        dest='max_length',
         help='Maximum length for a fragment to be included in WPS '
-        'calculation.')
+        'calculation. Deprecated. Use --max-length instead.')
     cli_wps.add_argument(
         '-q',
         '--quality_threshold',
         default=30,
         type=int,
-        help="Minimum mapping quality threshold.")
+        help="Minimum mapping quality threshold. Default is 30")
     cli_wps.add_argument(
         '-w',
         '--workers',
@@ -398,6 +440,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_wps.set_defaults(func=multi_wps)
 
+    # adjust wps
     cli_adjust_wps = subparsers.add_parser(
         'adjust-wps',
         prog='finaletoolkit-adjust-wps',
@@ -412,8 +455,8 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to WPS was calculated '
         'over.')
     cli_adjust_wps.add_argument(
-        'genome_file',
-        help='A .chrom.sizes file containing chromosome sizes.')
+        'chrom_sizes',
+        help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_adjust_wps.add_argument(
         '-o',
         '--output-file',
@@ -472,6 +515,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_adjust_wps.set_defaults(func=adjust_wps)
 
+    # delfi
     cli_delfi = subparsers.add_parser(
         'delfi',
         prog='finaletoolkit-delfi',
@@ -483,9 +527,10 @@ def main_cli_parser():
         'input_file',
         help="Path to a BAM/SAM/CRAM/Fragment file containing fragment data.")
     cli_delfi.add_argument(
-        'autosomes',
-        help="Tab-delimited file containing (1) autosome name and (2) integer "
-        "length of chromosome in base pairs.")
+        'chrom_sizes',
+        help="Tab-delimited file containing (1) chrom name and (2) integer "
+        "length of chromosome in base pairs. Should contain only autosomes if"
+        "You want to replicate the original scripts.")
     cli_delfi.add_argument(
         'reference_file',
         help="The .2bit file for the associate reference genome sequence used "
@@ -561,10 +606,14 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_delfi.set_defaults(func=delfi)
 
+    # delfi-gc-correct
     cli_delfi_gc = subparsers.add_parser(
         'delfi-gc-correct',
         prog='finaletoolkit-delfi-gc-correct',
-        description='Performs gc-correction on raw delfi data.')
+        description='Performs gc-correction on raw delfi data. This '
+        'command is deprecated and will be removed in a future version '
+        'of FinaleToolkit. The delfi command has gc correction on by '
+        'default.')
     cli_delfi_gc.add_argument(
         'input_file',
         help='BED file containing raw DELFI data. Raw DELFI data should'
@@ -588,6 +637,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_delfi_gc.set_defaults(func=cli_delfi_gc_correct)
 
+    # end-motifs
     cli_motifs = subparsers.add_parser(
         'end-motifs',
         prog='finaletoolkit-end-motifs',
@@ -650,6 +700,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_motifs.set_defaults(func=end_motifs)
 
+    # interval-end-motifs
     cli_interval_motifs = subparsers.add_parser(
         'interval-end-motifs',
         prog='finaletoolkit-interval-end-motifs',
@@ -690,15 +741,15 @@ def main_cli_parser():
         '--fraction-low',
         default=10,
         type=int,
-        help='Minimum length for a fragment to be included in end motif '
-        'frequency.')
+        dest='min_length',
+        help='Deprecated alias for --min-length')
     cli_interval_motifs.add_argument(
         '-hi',
         '--fraction-high',
         default=600,
         type=int,
-        help='Maximum length for a fragment to be included in end motif '
-        'frequency.')
+        dest='max_length',
+        help='Deprecated alias for --max-length')
     cli_interval_motifs.add_argument(
         '-B',
         '--no-both-strands',
@@ -731,6 +782,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_interval_motifs.set_defaults(func=interval_end_motifs)
 
+    # mds
     cli_mds = subparsers.add_parser(
         'mds',
         prog='finaletoolkit-mds',
@@ -755,6 +807,7 @@ def main_cli_parser():
         help='Number of header rows to ignore. Default is 0')
     cli_mds.set_defaults(func=_cli_mds)
 
+    # interval-mds
     cli_interval_mds = subparsers.add_parser(
         'interval-mds',
         prog='finaletoolkit-interval-mds',
@@ -784,6 +837,7 @@ def main_cli_parser():
         help='Number of header rows to ignore. Default is 0')
     cli_interval_mds.set_defaults(func=_cli_interval_mds)
 
+    # filter-bam
     cli_filter_bam = subparsers.add_parser(
         'filter-bam',
         prog='finaletoolkit-filter-bam',
@@ -812,17 +866,31 @@ def main_cli_parser():
         default=30,
         help='Minimum mapping quality threshold.')
     cli_filter_bam.add_argument(
-        '-hi',
-        '--fraction-high',
-        type=int,
+        '-min',
+        '--min-length',
         default=None,
-        help='Maximum length for a fragment to be included in output BAM.')
+        type=int,
+        help='Minimum length for a fragment to be included.'
+        )
+    cli_filter_bam.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
     cli_filter_bam.add_argument(
         '-lo',
         '--fraction-low',
         type=int,
-        default=None,
-        help='Minimum length for a fragment to be included in output BAM.')
+        dest='min_length',
+        help='Deprecated alias for --min-length')
+    cli_filter_bam.add_argument(
+        '-hi',
+        '--fraction-high',
+        type=int,
+        dest='max_length',
+        help='Deprecated alias for --max-length')
     cli_filter_bam.add_argument(
         '-w',
         '--workers',
@@ -836,6 +904,7 @@ def main_cli_parser():
         help='Enable verbose mode to display detailed processing information.')
     cli_filter_bam.set_defaults(func=filter_bam)
 
+    # agg-bw
     cli_agg_bw = subparsers.add_parser(
         'agg-bw',
         prog='finaletoolkit-agg-wps',
@@ -858,10 +927,10 @@ def main_cli_parser():
     cli_agg_bw.add_argument(
         '-m',
         '--median-window-size',
-        default=0,
+        default=1,
         type=int,
         help='Size of the median filter window used to adjust WPS '
-        'scores. Only modify if aggregating WPS signals.')
+        'scores. Set to 120 if aggregating WPS signals.')
     cli_agg_bw.add_argument(
         '-a',
         '--mean',
@@ -876,6 +945,7 @@ def main_cli_parser():
         'information.')
     cli_agg_bw.set_defaults(func=agg_bw)
 
+    # gap-bed
     cli_gap_bed = subparsers.add_parser(
         'gap-bed',
         prog='finaletoolkit-gap-bed',

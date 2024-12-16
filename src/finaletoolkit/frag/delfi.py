@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from finaletoolkit.frag.delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
-from finaletoolkit.utils.utils import frag_generator, overlaps
+from finaletoolkit.utils.utils import frag_generator, overlaps, chrom_sizes_to_list
 from finaletoolkit.genome.gaps import GenomeGaps, ContigGaps
 
 
@@ -32,7 +32,7 @@ def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
 
 
 def delfi(input_file: str,
-          autosomes: str,
+          chrom_sizes: str,
           bins_file: str,
           reference_file: str,
           blacklist_file: str=None,
@@ -54,7 +54,7 @@ def delfi(input_file: str,
     input_file: str
         Path string pointing to a bam file containing PE
         fragment reads.
-    autosomes: str
+    chrom_sizes: str
         Path string to a chrom.sizes file containing only autosomal
         chromosomes
     bins_file: str
@@ -108,7 +108,7 @@ def delfi(input_file: str,
         start_time = time.time()
         stderr.write(f"""
         input_file: {input_file}
-        autosomes: {autosomes}
+        chrom_sizes: {chrom_sizes}
         reference_file: {reference_file}
         blacklist_file: {blacklist_file}
         output_file: {output_file}
@@ -125,13 +125,7 @@ def delfi(input_file: str,
         stderr.write('Reading genome file...\n')
 
     # Read chromosome names and lengths from .genome file
-    contigs = []
-    with open(autosomes) as genome:
-        for line in genome:
-            contents = line.split('\t')
-            # account for empty lines
-            if len(contents) > 1:
-                contigs.append((contents[0],  int(contents[1])))
+    contigs = chrom_sizes_to_list(chrom_sizes)
 
     # Prepare genome gaps using GenomeGaps class
     gaps = None

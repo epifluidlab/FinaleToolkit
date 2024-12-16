@@ -4,6 +4,8 @@ import gzip
 from typing import Union, Generator
 from sys import stderr
 from pathlib import Path
+import warnings
+import os
 
 import numpy as np
 from numpy.typing import NDArray
@@ -14,7 +16,8 @@ from ._typing import FragFile
 
 
 def chrom_sizes_to_list(
-    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
+    chrom_sizes_file: Union[str, Path]
+) -> list[tuple[str, int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
 
@@ -39,7 +42,7 @@ def chrom_sizes_to_list(
 
 
 def chrom_sizes_to_dict(
-    chrom_sizes_file: Union[str, Path]) -> list[tuple[str][int]]:
+    chrom_sizes_file: Union[str, Path]) -> dict[str, int]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a dict.
 
@@ -201,8 +204,8 @@ def frag_generator(
     quality_threshold: int=30,
     start: int | None=None,
     stop: int | None=None,
-    fraction_low: int=120,
-    fraction_high: int=180,
+    fraction_low: int=None,
+    fraction_high: int=None,
     intersect_policy: str="midpoint",
     verbose: bool=False
 ) -> Generator[tuple]:
@@ -244,24 +247,22 @@ def frag_generator(
     try:
         # check type of input and open if needed
         input_file_is_path = False
+        is_sam = False
         if isinstance(input_file, str) or isinstance(input_file, Path):
             input_file_is_path = True
             # check file type
-            if ( # AlignmentFile
+            if (  # AlignmentFile
                 str(input_file).endswith('.sam')
                 or str(input_file).endswith('.bam')
                 or str(input_file).endswith('.cram')
             ):
                 is_sam = True
                 sam_file = pysam.AlignmentFile(str(input_file), 'r')
-            elif ( # Tabix indexed file
-                str(input_file).endswith('frag.gz')
-                or str(input_file).endswith('bed.gz')
+            elif (  # Tabix indexed file
+                os.path.isfile(str(input_file)+".tbi")
             ):
                 tbx = pysam.TabixFile(str(input_file), 'r')
                 is_sam = False
-                # check if input is FinaleDB Fragment file
-                is_frag = str(input_file).endswith('frag.gz') 
             else:
                 raise ValueError(
                     f"{input_file} is not an accepted file type. Only "
@@ -274,7 +275,6 @@ def frag_generator(
             input_file_is_path = False
             is_sam = False
             tbx = input_file
-            is_frag = tbx.filename.endswith('frag.gz')
         else:
             raise TypeError(
                 f'{type(input_file)} is invalid type for input_file.'
@@ -347,18 +347,33 @@ def frag_generator(
                                        f"Error: {e}\n"])
 
         else: # Tabix Indexed
+            # check for number of columns
+            first_line = tbx.fetch(parser=pysam.asTuple(),
+                                   multiple_iterators=True).__next__()
+            if len(first_line) > 5:
+                warnings.warn(
+                    "input_file is does not follow Fragmentation file format "
+                    "accepted by FinaleToolkit. Attempting to read as a BED6 "
+                    "file.",
+                    )
+                bed_format = True
+            else:
+                bed_format = False
+            
             for line in tbx.fetch(
-                contig, start, stop, parser=pysam.asTuple()
+                contig, start, stop, parser=pysam.asTuple(),
+                multiple_iterators=True
             ):
                 read_start = int(line[1])
                 read_stop = int(line[2])
                 frag_length = read_stop - read_start
-                if is_frag:
-                    mapq = int(line[3])
-                    read_on_plus = '+' in line[4]
-                else:
+                if bed_format:
                     mapq = int(line[4])
                     read_on_plus = '+' in line[5]
+                    
+                else:
+                    mapq = int(line[3])
+                    read_on_plus = '+' in line[4]
                     
                 try:
                     if (_none_geq(frag_length, fraction_low)

@@ -34,3 +34,5 @@ If you want to load a *specific* function, you can do so by using the following:
 Assuming we wanted to load the DELFI function::
 
     >>> from finaletoolkit.frag import delfi
+
+For more detailed tutorials, please check out our [wiki](https://github.com/epifluidlab/FinaleToolkit/wiki).

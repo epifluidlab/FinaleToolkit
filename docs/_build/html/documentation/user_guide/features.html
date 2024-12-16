@@ -1,12 +1,13 @@
 
+
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="../../" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Features &#8212; FinaleToolkit  documentation</title>
   
@@ -16,31 +17,28 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
-  -->
-  <noscript>
-    <style>
-      .pst-js-only { display: none !important; }
-
-    </style>
-  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
   
-  <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
-  <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
 
-    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9a2dae69"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/user_guide/features';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -49,7 +47,6 @@
     <link rel="prev" title="Input Data" href="inputdata.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="" />
   </head>
   
   
@@ -65,8 +62,19 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <dialog id="pst-search-dialog">
-    
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -74,6 +82,7 @@
   <input type="search"
          class="form-control"
          name="q"
+         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -81,8 +90,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-  </dialog>
+</form></div>
+  </div>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -116,7 +125,7 @@
     
     
     <img src="../../_static/finaletoolkit_logo_rounded.png" class="logo__image only-light" alt=""/>
-    <img src="../../_static/finaletoolkit_logo_rounded.png" class="logo__image only-dark pst-js-only" alt=""/>
+    <script>document.write(`<img src="../../_static/finaletoolkit_logo_rounded.png" class="logo__image only-dark" alt=""/>`);</script>
   
   
     <p class="title logo__title">FinaleToolkit</p>
@@ -171,21 +180,29 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
       
     </div>
     
@@ -194,11 +211,15 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
- <i class="fa-solid fa-magnifying-glass"></i>
- <span class="search-button__default-text">Search</span>
- <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-</button>
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -217,8 +238,7 @@
       
       
       
-      <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -272,11 +292,15 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
         
       </div>
     
@@ -323,6 +347,8 @@
       
         <div class="header-article-item">
 
+
+
 <nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
@@ -337,7 +363,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Features</span></li>
+    <li class="breadcrumb-item active" aria-current="page">Features</li>
   </ul>
 </nav>
 </div>
@@ -355,37 +381,37 @@
                 <article class="bd-article">
                   
   <section id="features">
-<h1>Features<a class="headerlink" href="#features" title="Link to this heading">#</a></h1>
+<h1>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h1>
 <p><strong>FinaleToolkit</strong> has support for the following cell-free DNA fragmentomic features:</p>
 <section id="fragment-length">
-<h2>Fragment Length<a class="headerlink" href="#fragment-length" title="Link to this heading">#</a></h2>
+<h2>Fragment Length<a class="headerlink" href="#fragment-length" title="Permalink to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the fragment length distribution and summary statistics of cell-free DNA fragments.</p>
 </section>
 <section id="fragment-coverage">
-<h2>Fragment Coverage<a class="headerlink" href="#fragment-coverage" title="Link to this heading">#</a></h2>
+<h2>Fragment Coverage<a class="headerlink" href="#fragment-coverage" title="Permalink to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate fragment coverage (the number of reads mapped to a specific region of the genome). This coverage can be normalized by the total number of reads in the sample, or simply the raw value.</p>
 </section>
 <section id="windowed-protection-score-wps">
-<h2>Windowed Protection Score (WPS)<a class="headerlink" href="#windowed-protection-score-wps" title="Link to this heading">#</a></h2>
+<h2>Windowed Protection Score (WPS)<a class="headerlink" href="#windowed-protection-score-wps" title="Permalink to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the Windowed Protection Score (WPS), which is a metric designed by <em>Snyder et al. 2016</em>.</p>
 <p>It is used to quantify the level of protection or coverage of DNA fragments across a specific genomic region. It’s calculated by assessing the number of DNA fragments that fully span a defined window (typically 120 base pairs) centered around a particular genomic coordinate, and then subtracting the number of fragments with an endpoint falling within the same window. This score is correlated with the location of nucleosomes and other genomic features, including transcriptional start sites (TSS) and DNase I hypersensitive sites (DHSs).</p>
 </section>
 <section id="delfi">
-<h2>DELFI<a class="headerlink" href="#delfi" title="Link to this heading">#</a></h2>
+<h2>DELFI<a class="headerlink" href="#delfi" title="Permalink to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate DELFI, which is a metric designed by <em>Cristiano et al. 2019</em>.</p>
 <p>DELFI is a metric that was introduced to identify abnormalities in cfDNA from their fragmentation patterns. In the original paper, DELFI was used to categorize patients with cancer and the associated tumor tissues of origin. The associated DELFI score is the ratio between the GC%-corrected short fragment count and the GC%-corrected long fragment count.</p>
 </section>
 <section id="end-motifs">
-<h2>End Motifs<a class="headerlink" href="#end-motifs" title="Link to this heading">#</a></h2>
+<h2>End Motifs<a class="headerlink" href="#end-motifs" title="Permalink to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the frequency of end-motif k-mers of cell-free DNA fragments. Since end motifs are specific sequences found at the ends of cfDNA fragments resulting from cleavage, they can be used to potentially detect patterns associated with certain conditions or diseases.</p>
 </section>
 <section id="motif-diversity-score-mds">
-<h2>Motif Diversity Score (MDS)<a class="headerlink" href="#motif-diversity-score-mds" title="Link to this heading">#</a></h2>
+<h2>Motif Diversity Score (MDS)<a class="headerlink" href="#motif-diversity-score-mds" title="Permalink to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the Motif Diversity Score (MDS), which is a metric designed by <em>Jiang et al. 2020</em>.</p>
 <p>The MDS is a metric that quantifies the diversity of cfDNA end motifs. It is the normalized Shannon entropy of the categorical distribution of all possible end-motif k-mers.</p>
 </section>
 <section id="cleavage-profile">
-<h2>Cleavage Profile<a class="headerlink" href="#cleavage-profile" title="Link to this heading">#</a></h2>
+<h2>Cleavage Profile<a class="headerlink" href="#cleavage-profile" title="Permalink to this heading">#</a></h2>
 <p><strong>FinaleToolkit</strong> can calculate the Cleavage Proportion, which is a metric designed by <em>Zhou et al. 2022</em>.</p>
 <p>The cleavage proportion is, by definition, the number of fragment ends that fall within a nucleotide location over the total number of fragment ends that overlap that nucleotide location. According to the authors, this metric shows a relationship to DNA methylation, specifically methylation at CpG sites.</p>
 </section>
@@ -426,8 +452,7 @@
             
             
               
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
   <div class="sidebar-secondary-item">
@@ -470,8 +495,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -491,7 +516,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
     <br/>
   </p>
 </div>
@@ -504,7 +529,7 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
 </p></div>
       
     </div>

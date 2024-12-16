@@ -4,12 +4,14 @@ import time
 from multiprocessing.pool import Pool
 from typing import Union
 from sys import stderr, stdin
+import warnings
 
 import pysam
 import numpy as np
 import pyBigWig as pbw
 
 from finaletoolkit.frag.wps import wps
+from finaletoolkit.utils.utils import chrom_sizes_to_list
 
 
 def _wps_star(args):
@@ -20,15 +22,18 @@ def _wps_star(args):
 def multi_wps(
         input_file: Union[pysam.AlignmentFile, str],
         site_bed: str,
+        chrom_sizes: str=None,
         output_file: Union[str, None]=None,
         window_size: int=120,
         interval_size: int=5000,
-        fraction_low: int=120,
-        fraction_high: int=180,
+        min_length: int=120,
+        max_length: int=180,
         quality_threshold: int=30,
         workers: int=1,
-        verbose: Union[bool, int]=0
-        ) -> np.ndarray:
+        verbose: Union[bool, int]=0,
+        fraction_low: int=None,
+        fraction_high: int=None,
+        ):
     """
     Function that aggregates WPS over sites in BED file according to the
     method described by Snyder et al (2016).
@@ -42,6 +47,9 @@ def multi_wps(
         BED file containing intervals to perform WPS on. The intervals
         in this BED file should be sorted, first by `contig` then
         `start`.
+    chrom_sizes: str or pathlike, optional
+        Tab separated file containing names and sizes of chromosomes in
+        `input_file`. Required if `input_file` is tabix-indexed.
     output_file : string, optional
     window_size : int, optional
         Size of window to calculate WPS. Default is k = 120, equivalent
@@ -49,22 +57,24 @@ def multi_wps(
     interval_size : int, optional
         Size of each interval specified in the bed file. Should be the
         same for every interval. Default is 5000.
-    fraction_low : int, optional
+    min_length : int, optional
         Specifies lowest fragment length included in calculation.
         Default is 120, equivalent to long fraction.
-    fraction_high : int, optional
+    max_length : int, optional
         Specifies highest fragment length included in calculation.
         Default is 120, equivalent to long fraction.
     quality_threshold : int, optional
     workers : int, optional
     verbose : bool, optional
-
+    fraction_low : int, optional
+        Deprecated alias for min_length
+    fraction_high : int, optional
+        Deprecated alias for max_length
+        
     Returns
     -------
-    scores : numpy.ndarray
-        np array of shape (n, 2) where column 1 is the coordinate and
-        column 2 is the score and n is the number of coordinates in
-        region [start,stop)
+    output_file: str
+        location results are stored.
     """
     if (verbose):
         start_time = time.time()
@@ -85,8 +95,33 @@ def multi_wps(
 
     if (input_file == '-' and site_bed == '-'):
         raise ValueError('input_file and site_bed cannot both read from stdin')
+    
+    # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
 
-    # get header from input_file
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
+
+    # get chrom sizes from input_file or chrom_sizes
     if (input_file.endswith('.sam')
         or input_file.endswith('.bam')
         or input_file.endswith('.cram')):
@@ -94,16 +129,14 @@ def multi_wps(
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
-    # TODO: get a header when reading tabix
-    elif (input_file.endswith('.bed')
-          or input_file.endswith('.bed.gz')
-          or input_file.endswith('.frag')
-          or input_file.endswith('.frag.gz')
-    ):
-        with pysam.TabixFile(input_file, 'r') as tbx:
-            raise NotImplementedError('tabix files not yet supported!')
+    elif (isinstance(input_file, pysam.AlignmentFile)):
+        pass
     else:
-        raise ValueError("Not a supported file type.")
+        if chrom_sizes is None:
+            raise ValueError(
+                'chrom_sizes must be specified for BED/Fragment files'
+            )
+        header = chrom_sizes_to_list(chrom_sizes)
 
     if (verbose > 1):
         stderr.write(f'header is {header}\n')
@@ -170,8 +203,8 @@ def multi_wps(
         stops,
         count*[None],
         count*[window_size],
-        count*[fraction_low],
-        count*[fraction_high],
+        count*[min_length],
+        count*[max_length],
         count*[quality_threshold],
         count*[verbose-2 if verbose>2 else 0]
     )
@@ -202,7 +235,6 @@ def multi_wps(
                         contigs = interval_score['contig']
                         starts = interval_score['start']
                         scores = interval_score['wps']
-                        stops = starts + 1
 
                         # skip empty intervals
                         if contigs.shape == (0,):
@@ -210,10 +242,11 @@ def multi_wps(
 
                         try:
                             bigwig.addEntries(
-                                chroms=contigs,
-                                starts=starts,
-                                ends=stops,
+                                contigs[0],
+                                starts[0],
                                 values=scores.astype(np.float64),
+                                step=1,
+                                span=1
                             )
                         except RuntimeError:
                             stderr.write(
@@ -258,5 +291,4 @@ def multi_wps(
         stderr.write(
             f'multi_wps took {end_time - start_time} s to complete\n'
         )
-
-    return scores
+    return output_file

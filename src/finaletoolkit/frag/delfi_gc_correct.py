@@ -8,12 +8,14 @@ import pandas
 import numpy as np
 from loess.loess_1d import loess_1d
 
+from finaletoolkit.utils._deprecation import deprecated
+
 
 def delfi_gc_correct(
         windows: pandas.DataFrame,
         alpha: float = 0.75,
         it: int = 8,
-        verbose:bool=False
+        verbose: bool = False
 ):
     """
     Helper function that takes window data and performs GC adjustment.
@@ -68,6 +70,7 @@ def delfi_gc_correct(
     return corrected_windows
 
 
+@deprecated
 def cli_delfi_gc_correct(
         input_file: str,
         output_file: str,

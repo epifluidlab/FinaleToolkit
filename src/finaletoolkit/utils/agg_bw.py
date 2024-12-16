@@ -8,11 +8,13 @@ from os import PathLike
 import numpy as np
 import pyBigWig as pbw
 
+from finaletoolkit.utils.utils import _get_intervals
+
 def agg_bw(
     input_file: Union[str, PathLike],
     interval_file: Union[str, PathLike],
     output_file: Union[str, PathLike],
-    median_window_size: int=120,
+    median_window_size: int=1,
     mean: bool=False,
     verbose: bool=False
 ):
@@ -44,9 +46,9 @@ def agg_bw(
         BED file containing intervals. 6th column should have strand.
     output_file : str
     median_window_size : int, optional
-        default is 0
+        default is 1 (no smoothing). Set to 120 if replicating Snyder et al.
     mean : bool
-        use mean instead
+        use mean filter instead
     verbose : int or bool, optional
         default is False
 
@@ -104,7 +106,8 @@ def agg_bw(
             trimmed = values[median_window_size//2:-median_window_size//2]
             if trimmed.shape[0] != interval_size:
                 print(
-                    f"Trimmed size {trimmed.shape[0]} is not equal to "
+                    f"Trimmed size {trimmed.shape[0]} for {contig}:{start}"
+                    f"-{stop} is not equal to "
                     f"interval size {interval_size}. Skipping.")
                 continue
 

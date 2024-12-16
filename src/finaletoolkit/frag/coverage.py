@@ -204,9 +204,11 @@ def coverage(
             total_coverage_results = pool.apply_async(
                 single_coverage,
                 (input_file, None, 0, None, '.'),
-                {"intersect_policy": "midpoint",
+                {"min_length": min_length,
+                 "max_length": max_length,
+                 "intersect_policy": intersect_policy,
                  "quality_threshold": quality_threshold,
-                 "verbose": False}
+                 "verbose": verbose}
             )
 
         intervals = _get_intervals(

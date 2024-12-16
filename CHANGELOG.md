@@ -7,7 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0] - 2024-12-10
+## [0.9.0] - 2024-12-13
 
 ### Removed
 - `strand_location` arg from `agg_bigwig`
@@ -18,6 +18,8 @@ and this project adheres to
 - some code formatting
 - fixed bug involving arg names in `filter-bam`
 - add some missing args to CLI
+- issues with running `cleavage-profile` (#115)
+- issues with writing to bigwig with `wps`
 
 ### Changed
 - change default of arg `both_strands` of `end_motifs` to True to match
@@ -25,10 +27,20 @@ behavior of original scripts
 - rename `fraction_high` and `fraction_low` to  `min_length` and `max_length`
 for all features, deprecating old args as aliases if needed.
 - numpy 2 compatible
+- fragmentomics functions assume Tabix indexed files all follow the
+FinaleDB Frag.gz file format. That is, columns are `chrom`, `start`, `stop`,
+`score`, and `strand`. If more columns are detect, a warning is issued, and
+FinaleToolkit will attempt to parse the file as a BED6 format.
+- renamed `genome_file` to `chrom_sizes` for most functions.
+- `multi_wps` and `multi_cleavage_profile` no longer return a value due to memory issues when attempting to calculate these genomewide. Instead, users should refer to the file specified with `output_file`.
 
 ### Added
 - internal `utils._typing` and `utils._deprecation` modules
 - test for `delfi`
+
+### Deprecated
+- `delfi-gc-correct` command. GC-correction is performed automatically by `delfi`
+already.
 
 ## [0.8.0] - 2024-12-04
 
