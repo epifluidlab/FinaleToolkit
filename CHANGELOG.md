@@ -7,6 +7,10 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2024-12-13
+### Fixed
+- CLI no longer prints an error message if `finaletoolkit` is called without args.
+
 ## [0.9.0] - 2024-12-13
 
 ### Removed
