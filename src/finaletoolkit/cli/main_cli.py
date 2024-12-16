@@ -59,7 +59,7 @@ def main_cli_parser():
         'coverage over.')
     cli_coverage.add_argument(
         '-o',
-        '--output_file',
+        '--output-file',
         default='-',
         help='A BED file containing coverage values over the intervals '
         'specified in interval file.')
@@ -93,7 +93,7 @@ def main_cli_parser():
         )
     cli_coverage.add_argument(
         '-p',
-        '--intersect_policy',
+        '--intersect-policy',
         choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
@@ -101,7 +101,7 @@ def main_cli_parser():
         ' given interval. See User Guide for more information.')
     cli_coverage.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int,
         help='Minimum mapping quality threshold.')
@@ -162,7 +162,7 @@ def main_cli_parser():
         )
     cli_frag_length_bins.add_argument(
         '-p',
-        '--intersect_policy',
+        '--intersect-policy',
         choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
@@ -176,7 +176,7 @@ def main_cli_parser():
         'into.')
     cli_frag_length_bins.add_argument(
         '-o',
-        '--output_file',
+        '--output-file',
         default='-',
         type=str,
         help='A .TSV file containing containing fragment lengths binned'
@@ -188,7 +188,7 @@ def main_cli_parser():
     )
     cli_frag_length_bins.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int,
         help="Minimum mapping quality threshold.")
@@ -231,7 +231,7 @@ def main_cli_parser():
         )
     cli_frag_length_intervals.add_argument(
         '-p',
-        '--intersect_policy',
+        '--intersect-policy',
         choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
@@ -374,7 +374,7 @@ def main_cli_parser():
         help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_wps.add_argument(
         '-o',
-        '--output_file',
+        '--output-file',
         default='-',
         help='A bigWig file containing the WPS results over the '
         'intervals specified in interval file.')
@@ -422,7 +422,7 @@ def main_cli_parser():
         'calculation. Deprecated. Use --max-length instead.')
     cli_wps.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int,
         help="Minimum mapping quality threshold. Default is 30")
@@ -861,7 +861,7 @@ def main_cli_parser():
         help='Output BAM file path.')
     cli_filter_bam.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         type=int,
         default=30,
         help='Minimum mapping quality threshold.')
