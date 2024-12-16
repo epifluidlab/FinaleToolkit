@@ -380,14 +380,14 @@ def main_cli_parser():
         'intervals specified in interval file.')
     cli_wps.add_argument(
         '-i',
-        '--interval_size',
+        '--interval-size',
         default=5000,
         type=int,
         help='Size in bp of each interval in the interval file. Default is '
         '5000')
     cli_wps.add_argument(
         '-W',
-        '--window_size',
+        '--window-size',
         default=120,
         type=int,
         help='Size of the sliding window used to calculate WPS scores.'
