@@ -490,6 +490,13 @@ def main_cli_parser():
         type=int,
         help='Degree polynomial for Savitsky-Golay filter.')
     cli_adjust_wps.add_argument(
+        '-S',
+        '--exclude-savgol',
+        dest='savgol',
+        action='store_false'
+        help='Do not perform Savitsky-Golay filtering'
+        'scores.')
+    cli_adjust_wps.add_argument(
         '-w',
         '--workers',
         default=1,
