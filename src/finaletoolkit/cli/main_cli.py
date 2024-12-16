@@ -475,7 +475,7 @@ def main_cli_parser():
         '--median-window-size',
         default=1000,
         type=int,
-        help='Size of the median filter window used to adjust WPS scores.')
+        help='Size of the median filter or mean filter window used to adjust WPS scores.')
     cli_adjust_wps.add_argument(
         '-s',
         '--savgol-window-size',
