@@ -975,15 +975,18 @@ def main_cli():
     parser = main_cli_parser()
 
     args = parser.parse_args()
-    try:
-        function = args.func
-        funcargs = vars(args)
-        funcargs.pop('func')
+    if hasattr(args, "func"):
+        try:
+            function = args.func
+            funcargs = vars(args)
+            funcargs.pop('func')
 
-        function(**funcargs)
-    except AttributeError as e:
-        stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
-        stderr.write("Please see usage instructions below.\n")
+            function(**funcargs)
+        except AttributeError as e:
+            stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
+            stderr.write("Please see usage instructions below.\n")
+            parser.print_help()
+    else:
         parser.print_help()
 
 
