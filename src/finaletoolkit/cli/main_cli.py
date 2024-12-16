@@ -493,7 +493,7 @@ def main_cli_parser():
         '-S',
         '--exclude-savgol',
         dest='savgol',
-        action='store_false'
+        action='store_false',
         help='Do not perform Savitsky-Golay filtering'
         'scores.')
     cli_adjust_wps.add_argument(
