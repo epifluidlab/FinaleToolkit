@@ -365,7 +365,7 @@ def main_cli_parser():
         'data.')
     cli_wps.add_argument(
         'site_bed',
-        help='Path to a BED file containing intervals to calculate WPS '
+        help='Path to a BED file containing sites to calculate WPS '
         'over. The intervals in this BED file should be sorted, first '
         'by `contig` then `start`.')
     cli_wps.add_argument(
@@ -383,8 +383,9 @@ def main_cli_parser():
         '--interval-size',
         default=5000,
         type=int,
-        help='Size in bp of each interval in the interval file. Default is '
-        '5000')
+        help='Size in bp of the intervals to calculate WPS over. These'
+        'new intervals are centered over those specified in the site_bed.'
+        'Default is 5000')
     cli_wps.add_argument(
         '-W',
         '--window-size',
