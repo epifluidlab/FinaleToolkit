@@ -7,11 +7,25 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.1] - 2024-12-13
+## [0.9.1] - 2024-12-17
+
 ### Fixed
 - CLI no longer prints an error message if `finaletoolkit` is called without args.
+- `frag-length-bins`, when writing a file, now writes the interval between
+`min` and `max` as inclusive. That is, previously when `min=1` and `max=2`,
+only fragments of length 1 are reported. Now when such a result is calculated, 
+the interval given is `min=1` and `max=1`.
+- Updated some descriptions and docstrings.
 
-## [0.9.0] - 2024-12-13
+### Added
+- `adjust-wps` now has an option `-S` or `--exclude-savgol` to not perform
+Savitsky-Golay filtering.
+
+### Changed
+- Several CLI options were renamed so that underscores become hyphens. This is
+for consistency and to simplify writing commands.
+
+## [0.9.0] - 2024-12-16
 
 ### Removed
 - `strand_location` arg from `agg_bigwig`
