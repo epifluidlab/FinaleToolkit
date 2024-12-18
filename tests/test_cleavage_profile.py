@@ -10,7 +10,7 @@ import difflib
 import pytest
 import numpy as np
 
-from finaletoolkit.frag.cleavage_profile import *
+from finaletoolkit.frag import cleavage_profile
 
 class TestIntervalCleavageProfile:
     def test_cpg_34443200(self, request):

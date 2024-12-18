@@ -9,8 +9,8 @@ import numpy as np
 import pandas
 from tqdm import tqdm
 
-from finaletoolkit.frag.delfi_gc_correct import delfi_gc_correct
-from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
+from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
+from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
 from finaletoolkit.utils.utils import frag_generator, overlaps, chrom_sizes_to_list
 from finaletoolkit.genome.gaps import GenomeGaps, ContigGaps
 

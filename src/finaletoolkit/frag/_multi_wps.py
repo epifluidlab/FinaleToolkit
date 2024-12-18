@@ -10,7 +10,7 @@ import pysam
 import numpy as np
 import pyBigWig as pbw
 
-from finaletoolkit.frag.wps import wps
+from finaletoolkit.frag._wps import wps
 from finaletoolkit.utils.utils import chrom_sizes_to_list
 
 

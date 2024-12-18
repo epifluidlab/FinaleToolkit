@@ -8,10 +8,9 @@ import filecmp
 import difflib
 
 import pytest
+import numpy as np
 
-from finaletoolkit.frag.wps import *
-from finaletoolkit.frag.multi_wps import *
-from finaletoolkit.frag.adjust_wps import *
+from finaletoolkit.frag import wps, multi_wps
 
 class TestWPS:
     def test_lwps(self, request):

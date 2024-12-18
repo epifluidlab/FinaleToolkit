@@ -9,19 +9,19 @@ import argparse
 from sys import stderr
 
 from finaletoolkit import __version__
-from finaletoolkit.frag.frag_length import (
+from finaletoolkit.frag._frag_length import (
     frag_length_bins, frag_length_intervals
 )
 from finaletoolkit.utils.agg_bw import agg_bw
 from finaletoolkit.utils.filter_bam import filter_bam
-from finaletoolkit.frag.coverage import coverage
-from finaletoolkit.frag.multi_wps import multi_wps
-from finaletoolkit.frag.delfi import delfi
-from finaletoolkit.frag.adjust_wps import adjust_wps
-from finaletoolkit.frag.delfi_gc_correct import cli_delfi_gc_correct
-from finaletoolkit.frag.end_motifs import (
+from finaletoolkit.frag._coverage import coverage
+from finaletoolkit.frag._multi_wps import multi_wps
+from finaletoolkit.frag._delfi import delfi
+from finaletoolkit.frag._adjust_wps import adjust_wps
+from finaletoolkit.frag._delfi_gc_correct import cli_delfi_gc_correct
+from finaletoolkit.frag._end_motifs import (
     end_motifs, _cli_mds, _cli_interval_mds, interval_end_motifs)
-from finaletoolkit.frag.cleavage_profile import multi_cleavage_profile
+from finaletoolkit.frag._cleavage_profile import multi_cleavage_profile
 from finaletoolkit.genome.gaps import _cli_gap_bed
 
 

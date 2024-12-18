@@ -8,8 +8,9 @@ import filecmp
 import difflib
 
 import pytest
+import numpy as np
 
-from finaletoolkit.frag.frag_length import *
+from finaletoolkit.frag import frag_length, frag_length_bins, frag_length_intervals
 
 class TestFragLength:
     def test_frag_lengths(self, request):

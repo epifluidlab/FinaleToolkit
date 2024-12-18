@@ -8,8 +8,8 @@ import pytest
 
 import pandas as pd
 
-from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
-from finaletoolkit.frag.delfi import delfi
+from finaletoolkit.frag import delfi_merge_bins
+from finaletoolkit.frag import delfi
 from finaletoolkit.genome.gaps import GenomeGaps
 
 
