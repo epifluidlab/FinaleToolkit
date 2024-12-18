@@ -7,22 +7,9 @@ standalone program.
 from __future__ import annotations
 import argparse
 from sys import stderr
+import importlib
 
-from finaletoolkit import __version__
-from finaletoolkit.frag._frag_length import (
-    frag_length_bins, frag_length_intervals
-)
-from finaletoolkit.utils.agg_bw import agg_bw
-from finaletoolkit.utils.filter_bam import filter_bam
-from finaletoolkit.frag._coverage import coverage
-from finaletoolkit.frag._multi_wps import multi_wps
-from finaletoolkit.frag._delfi import delfi
-from finaletoolkit.frag._adjust_wps import adjust_wps
-from finaletoolkit.frag._delfi_gc_correct import cli_delfi_gc_correct
-from finaletoolkit.frag._end_motifs import (
-    end_motifs, _cli_mds, _cli_interval_mds, interval_end_motifs)
-from finaletoolkit.frag._cleavage_profile import multi_cleavage_profile
-from finaletoolkit.genome.gaps import _cli_gap_bed
+from .. import __version__
 
 
 def main_cli_parser():
@@ -117,7 +104,7 @@ def main_cli_parser():
         action='store_true',
         help='Enable verbose mode to display detailed processing information.')
     cli_coverage.set_defaults(
-        func=coverage)
+        module='..frag._coverage', func='coverage')
 
     # frag-length-bins
     cli_frag_length_bins = subparsers.add_parser(
@@ -199,7 +186,7 @@ def main_cli_parser():
         default=0,
         help='Enable verbose mode to display detailed processing '
         'information.')
-    cli_frag_length_bins.set_defaults(func=frag_length_bins)
+    cli_frag_length_bins.set_defaults(module='..frag._frag_length', func='frag_length_bins')
 
     # frag-length-intervals
     cli_frag_length_intervals = subparsers.add_parser(
@@ -263,7 +250,7 @@ def main_cli_parser():
         action='count',
         help='Enable verbose mode to display detailed processing '
         'information.')
-    cli_frag_length_intervals.set_defaults(func=frag_length_intervals)
+    cli_frag_length_intervals.set_defaults(module='..frag._frag_length', func='frag_length_intervals')
 
     # cleavage-profile
     cli_cleavage_profile = subparsers.add_parser(
@@ -350,7 +337,7 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_cleavage_profile.set_defaults(func=multi_cleavage_profile)
+    cli_cleavage_profile.set_defaults(module='..frag._cleavage_profile', func='multi_cleavage_profile')
 
     # wps
     cli_wps = subparsers.add_parser(
@@ -439,7 +426,7 @@ def main_cli_parser():
         action='count',
         default=0,
         help='Enable verbose mode to display detailed processing information.')
-    cli_wps.set_defaults(func=multi_wps)
+    cli_wps.set_defaults(module='..frag', func='_multi_wps')
 
     # adjust wps
     cli_adjust_wps = subparsers.add_parser(
@@ -521,7 +508,7 @@ def main_cli_parser():
         '--verbose',
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_adjust_wps.set_defaults(func=adjust_wps)
+    cli_adjust_wps.set_defaults(module='..frag._adjust_wps', func='adjust_wps')
 
     # delfi
     cli_delfi = subparsers.add_parser(
@@ -612,7 +599,7 @@ def main_cli_parser():
         action='count',
         default=0,
         help='Enable verbose mode to display detailed processing information.')
-    cli_delfi.set_defaults(func=delfi)
+    cli_delfi.set_defaults(module='..frag._delfi', func='delfi')
 
     # delfi-gc-correct
     cli_delfi_gc = subparsers.add_parser(
@@ -643,7 +630,7 @@ def main_cli_parser():
         '--verbose',
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_delfi_gc.set_defaults(func=cli_delfi_gc_correct)
+    cli_delfi_gc.set_defaults(module='..frag._delfi_gc_correct', func='cli_delfi_gc_correct')
 
     # end-motifs
     cli_motifs = subparsers.add_parser(
@@ -706,7 +693,7 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_motifs.set_defaults(func=end_motifs)
+    cli_motifs.set_defaults(module='..frag._end_motifs', func='end_motifs')
 
     # interval-end-motifs
     cli_interval_motifs = subparsers.add_parser(
@@ -788,7 +775,7 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_interval_motifs.set_defaults(func=interval_end_motifs)
+    cli_interval_motifs.set_defaults(module='..frag._end_motifs', func='interval_end_motifs')
 
     # mds
     cli_mds = subparsers.add_parser(
@@ -813,7 +800,7 @@ def main_cli_parser():
         default=0,
         type=int,
         help='Number of header rows to ignore. Default is 0')
-    cli_mds.set_defaults(func=_cli_mds)
+    cli_mds.set_defaults(module='..frag._end_motifs', func='_cli_mds')
 
     # interval-mds
     cli_interval_mds = subparsers.add_parser(
@@ -843,7 +830,7 @@ def main_cli_parser():
         default=0,
         type=int,
         help='Number of header rows to ignore. Default is 0')
-    cli_interval_mds.set_defaults(func=_cli_interval_mds)
+    cli_interval_mds.set_defaults(module='..frag._end_motifs', func='_cli_interval_mds')
 
     # filter-bam
     cli_filter_bam = subparsers.add_parser(
@@ -910,7 +897,7 @@ def main_cli_parser():
         '--verbose',
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_filter_bam.set_defaults(func=filter_bam)
+    cli_filter_bam.set_defaults(module='..utils', func='filter_bam')
 
     # agg-bw
     cli_agg_bw = subparsers.add_parser(
@@ -937,7 +924,7 @@ def main_cli_parser():
         '--median-window-size',
         default=1,
         type=int,
-        help='Size of the median filter window used to adjust WPS '
+        help='Size of the median filter window used to aggregate '
         'scores. Set to 120 if aggregating WPS signals.')
     cli_agg_bw.add_argument(
         '-a',
@@ -951,7 +938,7 @@ def main_cli_parser():
         action='count',
         help='Enable verbose mode to display detailed processing '
         'information.')
-    cli_agg_bw.set_defaults(func=agg_bw)
+    cli_agg_bw.set_defaults(module='..utils', func='_agg_bw')
 
     # gap-bed
     cli_gap_bed = subparsers.add_parser(
@@ -971,7 +958,7 @@ def main_cli_parser():
     cli_gap_bed.add_argument(
         'output_file',
         help='Path to write BED file to. If "-" used, writes to stdout.')
-    cli_gap_bed.set_defaults(func=_cli_gap_bed)
+    cli_gap_bed.set_defaults(module='..genome.gaps', func='_cli_gap_bed')
 
     return parser
 
@@ -985,9 +972,13 @@ def main_cli():
     args = parser.parse_args()
     if hasattr(args, "func"):
         try:
-            function = args.func
+            # lazy loading function
             funcargs = vars(args)
-            funcargs.pop('func')
+            func_module = funcargs.pop('module')
+            func_name = funcargs.pop('func')
+            
+            module = importlib.import_module(func_module, 'finaletoolkit.cli')
+            function = getattr(module, func_name)
 
             function(**funcargs)
         except AttributeError as e:
