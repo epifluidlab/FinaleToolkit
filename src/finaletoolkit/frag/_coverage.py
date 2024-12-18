@@ -220,7 +220,7 @@ def coverage(
         partial_single_coverage = partial(
             single_coverage, input_file=input_file, min_length=min_length,
             max_length=max_length, intersect_policy=intersect_policy,
-            quality_threshold=quality_threshold, verbose=verbose)
+            quality_threshold=quality_threshold, verbose=max(0, verbose-1))
         coverages = pool.imap(
             partial(_single_coverage_star, partial_single_coverage), intervals,
             chunksize=max(len(intervals)//workers, 1))
