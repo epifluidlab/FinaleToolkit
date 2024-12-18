@@ -59,7 +59,7 @@ def main_cli_parser():
         'coverage over.')
     cli_coverage.add_argument(
         '-o',
-        '--output_file',
+        '--output-file',
         default='-',
         help='A BED file containing coverage values over the intervals '
         'specified in interval file.')
@@ -93,7 +93,7 @@ def main_cli_parser():
         )
     cli_coverage.add_argument(
         '-p',
-        '--intersect_policy',
+        '--intersect-policy',
         choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
@@ -101,7 +101,7 @@ def main_cli_parser():
         ' given interval. See User Guide for more information.')
     cli_coverage.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int,
         help='Minimum mapping quality threshold.')
@@ -162,7 +162,7 @@ def main_cli_parser():
         )
     cli_frag_length_bins.add_argument(
         '-p',
-        '--intersect_policy',
+        '--intersect-policy',
         choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
@@ -176,7 +176,7 @@ def main_cli_parser():
         'into.')
     cli_frag_length_bins.add_argument(
         '-o',
-        '--output_file',
+        '--output-file',
         default='-',
         type=str,
         help='A .TSV file containing containing fragment lengths binned'
@@ -188,7 +188,7 @@ def main_cli_parser():
     )
     cli_frag_length_bins.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int,
         help="Minimum mapping quality threshold.")
@@ -231,7 +231,7 @@ def main_cli_parser():
         )
     cli_frag_length_intervals.add_argument(
         '-p',
-        '--intersect_policy',
+        '--intersect-policy',
         choices=['midpoint', 'any'],
         default='midpoint',
         type=str,
@@ -365,7 +365,7 @@ def main_cli_parser():
         'data.')
     cli_wps.add_argument(
         'site_bed',
-        help='Path to a BED file containing intervals to calculate WPS '
+        help='Path to a BED file containing sites to calculate WPS '
         'over. The intervals in this BED file should be sorted, first '
         'by `contig` then `start`.')
     cli_wps.add_argument(
@@ -374,20 +374,21 @@ def main_cli_parser():
         help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_wps.add_argument(
         '-o',
-        '--output_file',
+        '--output-file',
         default='-',
         help='A bigWig file containing the WPS results over the '
         'intervals specified in interval file.')
     cli_wps.add_argument(
         '-i',
-        '--interval_size',
+        '--interval-size',
         default=5000,
         type=int,
-        help='Size in bp of each interval in the interval file. Default is '
-        '5000')
+        help='Size in bp of the intervals to calculate WPS over. These'
+        'new intervals are centered over those specified in the site_bed.'
+        'Default is 5000')
     cli_wps.add_argument(
         '-W',
-        '--window_size',
+        '--window-size',
         default=120,
         type=int,
         help='Size of the sliding window used to calculate WPS scores.'
@@ -422,7 +423,7 @@ def main_cli_parser():
         'calculation. Deprecated. Use --max-length instead.')
     cli_wps.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         default=30,
         type=int,
         help="Minimum mapping quality threshold. Default is 30")
@@ -474,7 +475,7 @@ def main_cli_parser():
         '--median-window-size',
         default=1000,
         type=int,
-        help='Size of the median filter window used to adjust WPS scores.')
+        help='Size of the median filter or mean filter window used to adjust WPS scores.')
     cli_adjust_wps.add_argument(
         '-s',
         '--savgol-window-size',
@@ -488,6 +489,13 @@ def main_cli_parser():
         default=2,
         type=int,
         help='Degree polynomial for Savitsky-Golay filter.')
+    cli_adjust_wps.add_argument(
+        '-S',
+        '--exclude-savgol',
+        dest='savgol',
+        action='store_false',
+        help='Do not perform Savitsky-Golay filtering'
+        'scores.')
     cli_adjust_wps.add_argument(
         '-w',
         '--workers',
@@ -861,7 +869,7 @@ def main_cli_parser():
         help='Output BAM file path.')
     cli_filter_bam.add_argument(
         '-q',
-        '--quality_threshold',
+        '--quality-threshold',
         type=int,
         default=30,
         help='Minimum mapping quality threshold.')
@@ -975,15 +983,18 @@ def main_cli():
     parser = main_cli_parser()
 
     args = parser.parse_args()
-    try:
-        function = args.func
-        funcargs = vars(args)
-        funcargs.pop('func')
+    if hasattr(args, "func"):
+        try:
+            function = args.func
+            funcargs = vars(args)
+            funcargs.pop('func')
 
-        function(**funcargs)
-    except AttributeError as e:
-        stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
-        stderr.write("Please see usage instructions below.\n")
+            function(**funcargs)
+        except AttributeError as e:
+            stderr.write(f"FinaleToolkit recieved AttributeError: {e}\n")
+            stderr.write("Please see usage instructions below.\n")
+            parser.print_help()
+    else:
         parser.print_help()
 
 

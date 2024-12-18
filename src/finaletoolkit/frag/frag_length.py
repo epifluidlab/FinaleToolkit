@@ -341,7 +341,7 @@ def frag_length_bins(
 
             out.write('min\tmax\tcount\n')
             for bin, count in zip(bins, counts):
-                out.write(f'{bin}\t{bin+bin_size}\t{count}\n')
+                out.write(f'{bin}\t{bin+bin_size-1}\t{count}\n')
 
             if histogram_path!=None:
                 plot_histogram(frag_len_dict, num_bins=n_bins,

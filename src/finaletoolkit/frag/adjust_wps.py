@@ -64,6 +64,7 @@ def _single_adjust_wps(
         mean: bool,
         subtract_edges: bool,
         edge_size: int,
+        savgol: bool,
 ):
     """
     Takes a wps WIG file and applies a median filter and a Savitsky-
@@ -123,9 +124,11 @@ def _single_adjust_wps(
         else:
             adjusted_positions, adjusted_scores = _mean_filter(
                 intervals['starts'], intervals['scores'], median_window_size)
-
-        filtered_scores = savgol_filter(
-            adjusted_scores, savgol_window_size, savgol_poly_deg)
+        if savgol:
+            filtered_scores = savgol_filter(
+                adjusted_scores, savgol_window_size, savgol_poly_deg)
+        else:
+            filtered_scores = adjusted_scores
 
         assert len(adjusted_positions) == len(filtered_scores)
 
@@ -161,6 +164,7 @@ def adjust_wps(
     median_window_size: int=1000,
     savgol_window_size: int=21,
     savgol_poly_deg: int=2,
+    savgol: bool=True,
     mean: bool=False,
     subtract_edges: bool=False,
     edge_size: int=500,
@@ -191,6 +195,8 @@ def adjust_wps(
         Size of Savitsky Golay filter window. Default is 21.
     savgol_poly_deg : int, optional
         Degree polynomial for Savitsky Golay filter. Default is 2.
+    savgol : bool, optional
+        Set to true to perform Savitsky-Golay filtering.
     mean : bool, optional
         If true, a mean filter is used instead of median. Default is
         False.
@@ -256,6 +262,7 @@ def adjust_wps(
                     mean,
                     subtract_edges,
                     edge_size,
+                    savgol
                 ))
     else:
         raise ValueError('Invalid filetype for interval_file.')

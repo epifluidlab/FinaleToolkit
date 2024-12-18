@@ -44,7 +44,7 @@ def multi_wps(
         BAM, SAM, or tabix file containing paired-end fragment reads or its
         path. `AlignmentFile` must be opened in read mode.
     site_bed: str
-        BED file containing intervals to perform WPS on. The intervals
+        BED file containing sites to perform WPS on. The intervals
         in this BED file should be sorted, first by `contig` then
         `start`.
     chrom_sizes: str or pathlike, optional
@@ -55,8 +55,11 @@ def multi_wps(
         Size of window to calculate WPS. Default is k = 120, equivalent
         to L-WPS.
     interval_size : int, optional
-        Size of each interval specified in the bed file. Should be the
-        same for every interval. Default is 5000.
+        Size of intervals to calculate WPS over. A mid-point is calculated
+        for each interval in the BED file, and an interval of the specified
+        size is used. This is helpful especially when calculating a window
+        around a genomic feature like transcription start sites. Default
+        is 5000.
     min_length : int, optional
         Specifies lowest fragment length included in calculation.
         Default is 120, equivalent to long fraction.
