@@ -3,11 +3,14 @@ A package and standalone program to extract fragmentation features of
 cell-free DNA from paired-end sequencing data.
 """
 
-import lazy_loader as lazy
-
 from .version import __version__
 
 
-subpackages = ["cli", "frag", "genome", "utils"]
+__all__ = ["cli", "frag", "genome", "utils"]
 
-__getattr__, __dir__, _ = lazy.attach(__name__, subpackages)
+# Delay imports until the submodule is actually accessed.
+def __getattr__(name):
+    if name in __all__:
+        import importlib
+        return importlib.import_module(f".{name}", __name__)
+    raise AttributeError(f"Module {__name__} has no attribute {name}")
