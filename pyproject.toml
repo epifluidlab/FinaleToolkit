@@ -37,6 +37,7 @@ dependencies = [
     "statsmodels",
     "loess",
     "matplotlib",
+    "lazy_loader",
 ]
 dynamic = ["version"]
 
