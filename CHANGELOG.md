@@ -7,6 +7,17 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2024-12-18
+
+### Changed
+- several modules containing implementations of fragmentomic features or
+utiliy functions have been made internal. This means there is now only one
+obvious import for each function. For example, `multi_wps` is imported from
+`finaletoolkit.frag`, and no longer can be imported from
+`finaletoolkit.frag.multi_wps`
+- The CLI now uses lazy importing, drastically speeding up finaletoolkit when
+called from a shell.
+
 ## [0.9.1] - 2024-12-17
 
 ### Fixed

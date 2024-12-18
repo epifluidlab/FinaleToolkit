@@ -938,7 +938,7 @@ def main_cli_parser():
         action='count',
         help='Enable verbose mode to display detailed processing '
         'information.')
-    cli_agg_bw.set_defaults(module='..utils', func='_agg_bw')
+    cli_agg_bw.set_defaults(module='..utils._agg_bw', func='agg_bw')
 
     # gap-bed
     cli_gap_bed = subparsers.add_parser(
