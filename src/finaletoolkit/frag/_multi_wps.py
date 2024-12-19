@@ -1,5 +1,6 @@
 from __future__ import annotations
 import gzip
+from os import PathLike
 import time
 from multiprocessing.pool import Pool
 from typing import Union
@@ -132,10 +133,12 @@ def multi_wps(
         references = input_file.references
         lengths = input_file.lengths
         header = list(zip(references, lengths))
-    elif (input_file.endswith('.sam')
-        or input_file.endswith('.bam')
-        or input_file.endswith('.cram')):
-        with pysam.AlignmentFile(input_file, 'r') as bam:
+    elif (
+        isinstance(input_file, (str, PathLike))
+        and (str(input_file).endswith('.sam')
+        or str(input_file).endswith('.bam')
+        or str(input_file).endswith('.cram'))):
+        with pysam.AlignmentFile(str(input_file), 'r') as bam:
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
