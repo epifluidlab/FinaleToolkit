@@ -7,11 +7,15 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.1] - 2024-12-18
+## [0.10.1] - 2024-12-19
 
 ### Fixed
 - Added missing `-n` arg to `end-motifs`.
 - Fixed incorrect `ValueError` regarding the `negative_strand` arg.
+- Incorrect function name for `wps` leading to errors when called from CLI.
+
+### Added
+- Additional tests for the CLI lazy loading implementation
 
 ## [0.10.0] - 2024-12-18
 
