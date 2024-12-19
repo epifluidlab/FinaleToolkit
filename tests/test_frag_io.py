@@ -6,6 +6,7 @@ all finaletoolkit features.
 """
 
 import numpy as np
+import pytest
 
 from finaletoolkit.utils.utils import frag_generator, frag_array, overlaps
 
@@ -58,9 +59,10 @@ class TestFragGenerator:
         right number of reads
         """
         path = request.path.parent / 'data' / '12.3444.b37.frag.bed.gz'
-        frag_gen = frag_generator(
-            path, "12", quality_threshold=0, min_length=0, max_length=9999
-        )
+        with pytest.warns(UserWarning):
+            frag_gen = frag_generator(
+                path, "12", quality_threshold=0, min_length=0, max_length=9999
+            )
         frags = [frag for frag in frag_gen]
 
         chroms = np.array([chrom for chrom, *_ in frags])
