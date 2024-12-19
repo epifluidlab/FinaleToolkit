@@ -21,7 +21,7 @@ called from a command line.
 used in conjunction with `both_strands`, only end motifs on the negative
 (Crick) strand are considered in calculations.
 - Renamed `fraction_high` and `fraction_low` in `utils.utils.frag_generator`
-to `min_length` and `max_length`
+to `min_length` and `max_length`.
 
 ### Fixed
 - deprecated arguments for `end-motifs` had default values which could
