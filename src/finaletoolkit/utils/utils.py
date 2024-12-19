@@ -109,9 +109,9 @@ def _merge_all_intervals(converted_intervals):
 
 def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
                     output_file: str,
-                    contig: str=None,
-                    quality_threshold: int=30,
-                    verbose: bool=False):
+                    contig: str | None = None,
+                    quality_threshold: int = 30,
+                    verbose: bool = False):
     """
     Take paired-end reads from bam_file and write to a BED file.
 
