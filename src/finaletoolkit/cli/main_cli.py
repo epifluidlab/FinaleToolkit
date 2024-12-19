@@ -991,7 +991,7 @@ def main_cli():
             func_module = funcargs.pop('module')
             func_name = funcargs.pop('func')
             
-            module = importlib.import_module(func_module, 'finaletoolkit.cli')
+            module = importlib.import_module(func_module)
             function = getattr(module, func_name)
 
             function(**funcargs)

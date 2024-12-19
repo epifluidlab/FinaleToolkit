@@ -355,6 +355,7 @@ def frag_generator(
                     "input_file is does not follow Fragmentation file format "
                     "accepted by FinaleToolkit. Attempting to read as a BED6 "
                     "file.",
+                    UserWarning
                     )
                 bed_format = True
             else:

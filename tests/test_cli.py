@@ -3,6 +3,7 @@ Tests for main_cli and entry points.
 """
 import os
 from inspect import getfullargspec
+import importlib
 
 import pytest
 
@@ -17,6 +18,17 @@ class TestCLIArgs:
     """
     Test if provided commandline flags match args in associated function.
     """
+    @pytest.mark.parametrize("name,subparser", subcommands.items())
+    def test_lazy_import(self, name, subparser):
+        # getting module and func
+        module = subparser._defaults['module']
+        func = subparser._defaults['func']
+        
+        # try to see module spec
+        module = importlib.import_module(module)
+        function = getattr(module, func)
+        assert callable(function), f'The {func} is not a callable in {module}.'
+    
     @pytest.mark.skip(reason="Currently does not work with the lazy loading implementation")
     @pytest.mark.skipif(
         IN_GITHUB_ACTIONS,
