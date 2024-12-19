@@ -571,9 +571,9 @@ def region_end_motifs(
     if verbose:
         start_time = time()
         
-    if not both_strands and negative_strand:
+    if both_strands and negative_strand:
         raise ValueError(
-            'Cannot have both both_strands=False and negative_strand=True.')
+            'Cannot have both both_strands and negative_strand.')
 
     # iterable of fragments
     frag_ends = frag_generator(

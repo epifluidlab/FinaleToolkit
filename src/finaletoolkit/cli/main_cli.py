@@ -671,6 +671,13 @@ def main_cli_parser():
         help="Set flag to only consider one strand for end-motifs."
     )
     cli_motifs.add_argument(
+        '-n',
+        '--negative-strand',
+        action="store_true",
+        help="Set flag in conjunction with -B to only consider 5' end motifs "
+        "on the negative strand."
+    )
+    cli_motifs.add_argument(
         '-o',
         '--output-file',
         default='-',
