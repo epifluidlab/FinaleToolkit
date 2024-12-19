@@ -89,8 +89,8 @@ def single_coverage(
         quality_threshold=quality_threshold,
         start=start,
         stop=stop,
-        fraction_low=min_length,
-        fraction_high=max_length,
+        min_length=min_length,
+        max_length=max_length,
         intersect_policy=intersect_policy)
 
     # Iterating on each frag in file in

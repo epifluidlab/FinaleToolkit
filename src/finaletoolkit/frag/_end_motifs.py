@@ -581,8 +581,8 @@ def region_end_motifs(
         quality_threshold,
         start,
         stop,
-        fraction_low=fraction_low,
-        fraction_high=fraction_high,
+        min_length=fraction_low,
+        max_length=fraction_high,
     )
     # create dict where keys are kmers and values are counts
     bases='ACGT'

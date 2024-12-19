@@ -374,8 +374,8 @@ def _delfi_single_window(
         quality_threshold,
         window_start,
         window_stop,
-        fraction_low=100,
-        fraction_high=220):
+        min_length=100,
+        max_length=220):
 
         frag_length = frag_stop - frag_start
 

@@ -17,7 +17,7 @@ class TestFragGenerator:
         """
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         frag_gen = frag_generator(
-            bam, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+            bam, "12", quality_threshold=0, min_length=0, max_length=9999
         )
         frags = [frag for frag in frag_gen]
 
@@ -38,7 +38,7 @@ class TestFragGenerator:
         """
         path = request.path.parent / 'data' / '12.3444.b37.frag.gz'
         frag_gen = frag_generator(
-            path, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+            path, "12", quality_threshold=0, min_length=0, max_length=9999
         )
         frags = [frag for frag in frag_gen]
 
@@ -59,7 +59,7 @@ class TestFragGenerator:
         """
         path = request.path.parent / 'data' / '12.3444.b37.frag.bed.gz'
         frag_gen = frag_generator(
-            path, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+            path, "12", quality_threshold=0, min_length=0, max_length=9999
         )
         frags = [frag for frag in frag_gen]
 

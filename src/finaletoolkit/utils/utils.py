@@ -204,10 +204,10 @@ def frag_generator(
     quality_threshold: int=30,
     start: int | None=None,
     stop: int | None=None,
-    fraction_low: int=None,
-    fraction_high: int=None,
-    intersect_policy: str="midpoint",
-    verbose: bool=False
+    min_length: int | None = None,
+    max_length: int | None = None,
+    intersect_policy: str = "midpoint",
+    verbose: bool = False
 ) -> Generator[tuple]:
     """
     Reads from BAM, SAM, or BED file and returns tuples containing
@@ -223,10 +223,10 @@ def frag_generator(
     quality_threshold : int, optional
     start : int, optional
     stop : int, optional
-    fraction_low : int, optional
+    min_length : int, optional
         Specifies lowest fragment length included in array. Default is
         120, equivalent to long fraction.
-    fraction_high : int, optional
+    max_length : int, optional
         Specifies highest fragment length included in array. Default is
         120, equivalent to long fraction.
     intersect_policy : str, optional
@@ -311,8 +311,8 @@ def frag_generator(
                         or read.is_read2):
                         pass
                     elif (
-                        _none_geq(abs(frag_length := read.template_length), fraction_low)
-                        and _none_leq(abs(frag_length), fraction_high)
+                        _none_geq(abs(frag_length := read.template_length), min_length)
+                        and _none_leq(abs(frag_length), max_length)
                     ):
                         if read.template_length > 0:
                             f_start = read.reference_start
@@ -341,8 +341,8 @@ def frag_generator(
                 except TypeError as e:
                     stderr.writelines(["Type error encountered.\n",
                                        f"Fragment length: {frag_length}\n",
-                                       f"fraction_low: {fraction_low}\n",
-                                       f"fraction_high: {fraction_high}\n",
+                                       f"fraction_low: {min_length}\n",
+                                       f"fraction_high: {max_length}\n",
                                        "Skipping interval.\n",
                                        f"Error: {e}\n"])
 
@@ -376,8 +376,8 @@ def frag_generator(
                     read_on_plus = '+' in line[4]
                     
                 try:
-                    if (_none_geq(frag_length, fraction_low)
-                        and _none_leq(frag_length, fraction_high)
+                    if (_none_geq(frag_length, min_length)
+                        and _none_leq(frag_length, max_length)
                         and _none_geq(mapq, quality_threshold)
                         and check_intersect(start, stop, read_start, read_stop)
                         ):
@@ -386,8 +386,8 @@ def frag_generator(
                 except TypeError as e:
                     stderr.writelines(["Type error encountered.\n",
                                        f"Fragment length: {frag_length}\n",
-                                       f"fraction_low: {fraction_low}\n",
-                                       f"fraction_high: {fraction_high}\n",
+                                       f"fraction_low: {min_length}\n",
+                                       f"fraction_high: {max_length}\n",
                                        "Skipping interval.\n",
                                        f"Error: {e}\n"])
 
