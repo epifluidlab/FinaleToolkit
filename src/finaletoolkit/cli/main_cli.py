@@ -104,7 +104,7 @@ def main_cli_parser():
         action='store_true',
         help='Enable verbose mode to display detailed processing information.')
     cli_coverage.set_defaults(
-        module='..frag._coverage', func='coverage')
+        module='finaletoolkit.frag._coverage', func='coverage')
 
     # frag-length-bins
     cli_frag_length_bins = subparsers.add_parser(
@@ -186,7 +186,7 @@ def main_cli_parser():
         default=0,
         help='Enable verbose mode to display detailed processing '
         'information.')
-    cli_frag_length_bins.set_defaults(module='..frag._frag_length', func='frag_length_bins')
+    cli_frag_length_bins.set_defaults(module='finaletoolkit.frag._frag_length', func='frag_length_bins')
 
     # frag-length-intervals
     cli_frag_length_intervals = subparsers.add_parser(
@@ -250,7 +250,7 @@ def main_cli_parser():
         action='count',
         help='Enable verbose mode to display detailed processing '
         'information.')
-    cli_frag_length_intervals.set_defaults(module='..frag._frag_length', func='frag_length_intervals')
+    cli_frag_length_intervals.set_defaults(module='finaletoolkit.frag._frag_length', func='frag_length_intervals')
 
     # cleavage-profile
     cli_cleavage_profile = subparsers.add_parser(
@@ -337,7 +337,7 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_cleavage_profile.set_defaults(module='..frag._cleavage_profile', func='multi_cleavage_profile')
+    cli_cleavage_profile.set_defaults(module='finaletoolkit.frag._cleavage_profile', func='multi_cleavage_profile')
 
     # wps
     cli_wps = subparsers.add_parser(
@@ -426,7 +426,7 @@ def main_cli_parser():
         action='count',
         default=0,
         help='Enable verbose mode to display detailed processing information.')
-    cli_wps.set_defaults(module='..frag', func='_multi_wps')
+    cli_wps.set_defaults(module='finaletoolkit.frag', func='multi_wps')
 
     # adjust wps
     cli_adjust_wps = subparsers.add_parser(
@@ -508,7 +508,7 @@ def main_cli_parser():
         '--verbose',
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_adjust_wps.set_defaults(module='..frag._adjust_wps', func='adjust_wps')
+    cli_adjust_wps.set_defaults(module='finaletoolkit.frag._adjust_wps', func='adjust_wps')
 
     # delfi
     cli_delfi = subparsers.add_parser(
@@ -599,7 +599,7 @@ def main_cli_parser():
         action='count',
         default=0,
         help='Enable verbose mode to display detailed processing information.')
-    cli_delfi.set_defaults(module='..frag._delfi', func='delfi')
+    cli_delfi.set_defaults(module='finaletoolkit.frag._delfi', func='delfi')
 
     # delfi-gc-correct
     cli_delfi_gc = subparsers.add_parser(
@@ -630,7 +630,7 @@ def main_cli_parser():
         '--verbose',
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_delfi_gc.set_defaults(module='..frag._delfi_gc_correct', func='cli_delfi_gc_correct')
+    cli_delfi_gc.set_defaults(module='finaletoolkit.frag._delfi_gc_correct', func='cli_delfi_gc_correct')
 
     # end-motifs
     cli_motifs = subparsers.add_parser(
@@ -671,6 +671,13 @@ def main_cli_parser():
         help="Set flag to only consider one strand for end-motifs."
     )
     cli_motifs.add_argument(
+        '-n',
+        '--negative-strand',
+        action="store_true",
+        help="Set flag in conjunction with -B to only consider 5' end motifs "
+        "on the negative strand."
+    )
+    cli_motifs.add_argument(
         '-o',
         '--output-file',
         default='-',
@@ -693,7 +700,7 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_motifs.set_defaults(module='..frag._end_motifs', func='end_motifs')
+    cli_motifs.set_defaults(module='finaletoolkit.frag._end_motifs', func='end_motifs')
 
     # interval-end-motifs
     cli_interval_motifs = subparsers.add_parser(
@@ -782,7 +789,7 @@ def main_cli_parser():
         default=0,
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_interval_motifs.set_defaults(module='..frag._end_motifs', func='interval_end_motifs')
+    cli_interval_motifs.set_defaults(module='finaletoolkit.frag._end_motifs', func='interval_end_motifs')
 
     # mds
     cli_mds = subparsers.add_parser(
@@ -807,7 +814,7 @@ def main_cli_parser():
         default=0,
         type=int,
         help='Number of header rows to ignore. Default is 0')
-    cli_mds.set_defaults(module='..frag._end_motifs', func='_cli_mds')
+    cli_mds.set_defaults(module='finaletoolkit.frag._end_motifs', func='_cli_mds')
 
     # interval-mds
     cli_interval_mds = subparsers.add_parser(
@@ -837,7 +844,7 @@ def main_cli_parser():
         default=0,
         type=int,
         help='Number of header rows to ignore. Default is 0')
-    cli_interval_mds.set_defaults(module='..frag._end_motifs', func='_cli_interval_mds')
+    cli_interval_mds.set_defaults(module='finaletoolkit.frag._end_motifs', func='_cli_interval_mds')
 
     # filter-bam
     cli_filter_bam = subparsers.add_parser(
@@ -904,7 +911,7 @@ def main_cli_parser():
         '--verbose',
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_filter_bam.set_defaults(module='..utils', func='filter_bam')
+    cli_filter_bam.set_defaults(module='finaletoolkit.utils', func='filter_bam')
 
     # agg-bw
     cli_agg_bw = subparsers.add_parser(
@@ -945,7 +952,7 @@ def main_cli_parser():
         action='count',
         help='Enable verbose mode to display detailed processing '
         'information.')
-    cli_agg_bw.set_defaults(module='..utils._agg_bw', func='agg_bw')
+    cli_agg_bw.set_defaults(module='finaletoolkit.utils._agg_bw', func='agg_bw')
 
     # gap-bed
     cli_gap_bed = subparsers.add_parser(
@@ -965,7 +972,7 @@ def main_cli_parser():
     cli_gap_bed.add_argument(
         'output_file',
         help='Path to write BED file to. If "-" used, writes to stdout.')
-    cli_gap_bed.set_defaults(module='..genome.gaps', func='_cli_gap_bed')
+    cli_gap_bed.set_defaults(module='finaletoolkit.genome.gaps', func='_cli_gap_bed')
 
     return parser
 
@@ -984,7 +991,7 @@ def main_cli():
             func_module = funcargs.pop('module')
             func_name = funcargs.pop('func')
             
-            module = importlib.import_module(func_module, 'finaletoolkit.cli')
+            module = importlib.import_module(func_module)
             function = getattr(module, func_name)
 
             function(**funcargs)

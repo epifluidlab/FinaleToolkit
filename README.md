@@ -8,6 +8,7 @@
     <ul>
       <li><a href="#functionality">Functionality</a></li>
       <li><a href="#documentation">Documentation</a></li>
+      <li><a href="#wiki">Wiki/Tutorials</a></li>
       <li><a href="#compatible-file-formats">Compatible File Formats</a></li>
       <li><a href="#using-fragment-files">Using Fragment Files</a></li>
     </ul>
@@ -53,12 +54,14 @@ FinaleToolkit has support for the following cell-free DNA fragmentation features
 ### Documentation
 Documentation for FinaleToolkit can be found [here](https://epifluidlab.github.io/finaletoolkit-docs/).
 
+### Wiki/Tutorials
+The wiki and tutorial page for FinaleToolkit can be found [here](https://github.com/epifluidlab/FinaleToolkit/wiki).
+
 ### Compatible File Formats
 
 FinaleToolkit is compatible with almost any paired-end sequence data:
 
 - Binary Alignment Map (`.bam`) files with an associated index file (`.bam.bai`).
-- Sequence Alignment Map (`.sam`) files.
 - Compressed Reference-oriented Alignment Map (`.cram`) files.
 - Fragment (`.frag.gz`) files with an associated tabix index file (`.frag.gz.tbi`).
 
