@@ -63,7 +63,7 @@ class TestFragGenerator:
             frag_gen = frag_generator(
                 path, "12", quality_threshold=0, min_length=0, max_length=9999
             )
-        frags = [frag for frag in frag_gen]
+            frags = [frag for frag in frag_gen]
 
         chroms = np.array([chrom for chrom, *_ in frags])
         starts = np.array([start for _, start, *_ in frags])
