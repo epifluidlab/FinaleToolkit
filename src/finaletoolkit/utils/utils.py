@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from numba import jit
 import pysam
 
-from ._typing import FragFile
+from .typing import FragFile
 
 
 def chrom_sizes_to_list(
@@ -207,7 +207,7 @@ def frag_generator(
     min_length: int | None = None,
     max_length: int | None = None,
     intersect_policy: str = "midpoint",
-    verbose: bool = False
+    verbose: bool | int = False
 ) -> Generator[tuple]:
     """
     Reads from BAM, SAM, or BED file and returns tuples containing

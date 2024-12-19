@@ -1,5 +1,4 @@
 """
-# _typing
 Some useful type aliases
 """
 from __future__ import annotations
