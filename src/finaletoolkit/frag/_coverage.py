@@ -47,7 +47,8 @@ def single_coverage(
         1-based stop coordinate to get coverage from. Default is None
         and goes to end of chromosome/contig.
     name : str, optional
-        Name of interval. Default is '.'.
+        Name of interval. Default is '.'. '.' is used if `None` is
+        supplied.
     intersect_policy: str, optional
         Specifies how to determine whether fragments are in interval.
         'midpoint' (default) calculates the central coordinate of each
@@ -89,8 +90,8 @@ def single_coverage(
         quality_threshold=quality_threshold,
         start=start,
         stop=stop,
-        fraction_low=min_length,
-        fraction_high=max_length,
+        min_length=min_length,
+        max_length=max_length,
         intersect_policy=intersect_policy)
 
     # Iterating on each frag in file in
@@ -103,8 +104,10 @@ def single_coverage(
         tqdm.write(
             f'single_coverage took {end_time - start_time} s to complete\n'
         )
+    
+    adjusted_name = '.' if name is None else name
 
-    return contig, start, stop, name, coverage
+    return contig, start, stop, adjusted_name, coverage
 
 
 def _single_coverage_star(partial_coverage, interval):
