@@ -201,6 +201,10 @@ def multi_wps(
     finally:
         if site_bed != '-':
             bed.close()  
+            
+    chrom_sizes_dict = dict(header)
+    
+    chrom_sizes_intervals = [chrom_sizes_dict[contig] for contig in contigs]
 
     count = len(contigs)
 
@@ -212,6 +216,7 @@ def multi_wps(
         contigs,
         starts,
         stops,
+        chrom_sizes_intervals,
         count*[None],
         count*[window_size],
         count*[min_length],
