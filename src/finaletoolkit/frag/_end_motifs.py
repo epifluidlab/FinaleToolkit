@@ -75,7 +75,7 @@ class EndMotifFreqs():
     def freq(self, kmer: str) -> float:
         return self.freq_dict[kmer]
 
-    def to_tsv(self, output_file: Union[str,Path], sep: str='\t'):
+    def to_tsv(self, output_file: str | Path, sep: str='\t'):
         """Prints k-mer frequencies to a tsv"""
         if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
@@ -115,7 +115,7 @@ class EndMotifFreqs():
     @classmethod
     def from_file(
             cls,
-            file_path: Union[str, Path],
+            file_path: str | Path,
             quality_threshold: int,
             sep: str='\t',
             header: int=0,) -> EndMotifFreqs:
@@ -949,7 +949,7 @@ def interval_end_motifs(
                 for chrom, start, stop, *name
                 in (line.split() for line in interval_file.readlines())
             ]
-    elif isinstance(intervals, Iterable):
+    elif isinstance(intervals, list):
         intervals_tuples = intervals
     else:
         raise TypeError("Intervals should be string or list.")
