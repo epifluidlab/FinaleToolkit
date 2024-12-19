@@ -14,6 +14,9 @@ and this project adheres to
 - Fixed incorrect `ValueError` regarding the `negative_strand` arg.
 - Incorrect function name for `wps` leading to errors when called from CLI.
 
+### Added
+- Additional tests for the CLI lazy loading implementation
+
 ## [0.10.0] - 2024-12-18
 
 ### Changed
