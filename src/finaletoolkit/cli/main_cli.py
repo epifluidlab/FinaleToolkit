@@ -734,23 +734,30 @@ def main_cli_parser():
     cli_interval_motifs.add_argument(
         '-lo',
         '--fraction-low',
-        default=10,
         type=int,
         dest='min_length',
         help='Deprecated alias for --min-length')
     cli_interval_motifs.add_argument(
         '-hi',
         '--fraction-high',
-        default=600,
         type=int,
         dest='max_length',
         help='Deprecated alias for --max-length')
     cli_interval_motifs.add_argument(
         '-B',
-        '--no-both-strands',
+        '--single-strand',
         action="store_false",
         dest="both_strands",
-        help="Set flag to only consider one strand for end-motifs."
+        help="Set flag to only consider one strand for end-motifs. By default,"
+        " the positive strand is calculated, but with the -n flag, the "
+        "5' end motifs of the negative strand are considered instead."
+    )
+    cli_interval_motifs.add_argument(
+        '-n',
+        '--negative-strand',
+        action="store_true",
+        help="Set flag in conjunction with -B to only consider 5' end motifs "
+        "on the negative strand."
     )
     cli_interval_motifs.add_argument(
         '-o',
