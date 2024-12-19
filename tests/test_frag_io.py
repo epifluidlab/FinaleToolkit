@@ -101,7 +101,7 @@ class TestFragArray:
         """
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
         frags = frag_array(
-            bam, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+            bam, "12", quality_threshold=0, min_length=0, max_length=9999
         )
 
         starts = frags['start']
@@ -121,7 +121,7 @@ class TestFragArray:
         """
         path = request.path.parent / 'data' / '12.3444.b37.frag.gz'
         frags = frag_array(
-            path, "12", quality_threshold=0, fraction_low=0, fraction_high=9999
+            path, "12", quality_threshold=0, min_length=0, max_length=9999
         )
 
         starts = frags['start']

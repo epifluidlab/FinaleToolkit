@@ -409,8 +409,8 @@ def frag_array(
     quality_threshold: int=30,
     start: int | None = None,
     stop: int | None = None,
-    fraction_low: int | None = None,
-    fraction_high: int | None = None,
+    min_length: int | None = None,
+    max_length: int | None = None,
     intersect_policy: str="midpoint",
     verbose: bool=False
     ) -> NDArray:
@@ -425,10 +425,10 @@ def frag_array(
     quality_threshold : int, optional
     start : int, optional
     stop : int, optional
-    fraction_low : int, optional
+    min_length : int, optional
         Specifies lowest fragment length included in array. Default is
         120, equivalent to long fraction.
-    fraction_high : int, optional
+    max_length : int, optional
         Specifies highest fragment length included in array. Default is
         120, equivalent to long fraction.
         intersect_policy : str, optional
@@ -461,8 +461,8 @@ def frag_array(
             quality_threshold,
             start,
             stop,
-            fraction_low,
-            fraction_high,
+            min_length,
+            max_length,
             intersect_policy,
             verbose
         )
@@ -564,7 +564,7 @@ def _get_intervals(
                     break
 
     return intervals
-
+    
 
 def overlaps(
     contigs_1: NDArray,

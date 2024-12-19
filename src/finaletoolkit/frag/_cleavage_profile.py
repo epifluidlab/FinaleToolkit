@@ -25,7 +25,7 @@ from finaletoolkit.utils.utils import (
     frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
     _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
     )
-from finaletoolkit.utils._typing import FragFile
+from finaletoolkit.utils.typing import FragFile
 
 
 def cleavage_profile(
@@ -130,8 +130,8 @@ def cleavage_profile(
         quality_threshold=quality_threshold,
         start=adj_start,
         stop=adj_stop,
-        fraction_low=min_length,
-        fraction_high=max_length,
+        min_length=min_length,
+        max_length=max_length,
         intersect_policy="any"
     )
 
