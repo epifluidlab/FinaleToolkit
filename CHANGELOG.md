@@ -7,6 +7,11 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2024-12-18
+
+### Fixed
+- Added missing `-n` arg to `end-motifs`.
+
 ## [0.10.0] - 2024-12-18
 
 ### Changed
