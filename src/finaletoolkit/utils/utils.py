@@ -566,13 +566,6 @@ def _get_intervals(
     return intervals
 
 
-def _is_alignment_file_path(input_file: FragFile):
-    """
-    Checks to see if input_file is a string or pathlike pointing to a BAM or
-    CRAM file.
-    """
-
-
 def overlaps(
     contigs_1: NDArray,
     starts_1: NDArray,
