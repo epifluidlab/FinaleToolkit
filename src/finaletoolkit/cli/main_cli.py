@@ -426,7 +426,7 @@ def main_cli_parser():
         action='count',
         default=0,
         help='Enable verbose mode to display detailed processing information.')
-    cli_wps.set_defaults(module='finaletoolkit.frag', func='_multi_wps')
+    cli_wps.set_defaults(module='finaletoolkit.frag', func='multi_wps')
 
     # adjust wps
     cli_adjust_wps = subparsers.add_parser(
