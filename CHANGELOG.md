@@ -11,6 +11,7 @@ and this project adheres to
 
 ### Fixed
 - Added missing `-n` arg to `end-motifs`.
+- Fixed incorrect `ValueError` regarding the `negative_strand` arg.
 
 ## [0.10.0] - 2024-12-18
 
