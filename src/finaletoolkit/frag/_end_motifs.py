@@ -12,6 +12,7 @@ import warnings
 from tqdm import tqdm
 import py2bit
 import numpy as np
+from numpy.typing import NDArray
 
 from finaletoolkit.utils.utils import frag_generator
 import finaletoolkit.frag as pkg_data
@@ -520,6 +521,7 @@ def region_end_motifs(
     fraction_low: int = 10,
     fraction_high: int = 600,
     both_strands: bool = True,
+    negative_strand: bool = False,
     output_file: Union[None, str] = None,
     quality_threshold: int = MIN_QUALITY,
     verbose: Union[bool, int] = False,
@@ -550,7 +552,11 @@ def region_end_motifs(
         Maximum fragment length.
     both_strands: bool, optional
         Choose whether to use forward 5' ends only or use 5' ends for
-        both ends of PE reads.
+        both ends of PE reads. If `negative_strand` is True, only
+        reverse 5' ends are used.
+    negative_strand: bool
+        Only considered if the `both_strands` option is False. When set 
+        to True, only ends on the negative strand are considered.
     output_file : None or str, optional
     quality_threshold : int, optional
     verbose : bool or int, optional
@@ -563,6 +569,9 @@ def region_end_motifs(
 
     if verbose:
         start_time = time()
+        
+    if not(both_strands and negative_strand):
+        raise ValueError('Cannot have both both_strands and negative strand.')
 
     # iterable of fragments
     frag_ends = frag_generator(
@@ -596,24 +605,16 @@ def region_end_motifs(
                     end_motif_counts[forward_kmer] += 1
                     
                 # reverse end-motif
-                try:
-                    reverse_kmer = refseq.sequence(
-                        contig, int(frag[2]-k), int(frag[2])
-                    )
-                    assert len(reverse_kmer) == k
+                reverse_kmer = refseq.sequence(
+                    contig, int(frag[2]-k), int(frag[2])
+                )
+                assert len(reverse_kmer) == k
 
-                    if 'N' not in reverse_kmer:
-                        end_motif_counts[_reverse_complement(reverse_kmer)] += 1
-                except RuntimeError:
-                    if verbose > 1:
-                        stderr.write(
-                            f'Attempt to read interval at {contig}:'
-                            f'{int(frag[2]-k)}-{int(frag[2])} failed.'
-                            'Skipping.')
-                    continue
+                if 'N' not in reverse_kmer:
+                    end_motif_counts[_reverse_complement(reverse_kmer)] += 1
         else:
             for frag in frag_ends:
-                if frag[4]: # is on forward strand or not
+                if frag[4] and not negative_strand: # is on indicated strand
                     # py2bit uses 0-based for start, 1-based for end
                     # forward end-motif
                     forward_kmer = refseq.sequence(
@@ -624,7 +625,7 @@ def region_end_motifs(
                     if 'N' not in forward_kmer:
                         end_motif_counts[forward_kmer] += 1
                     
-                else:
+                elif negative_strand:
                     # reverse end-motif
                     try:
                         reverse_kmer = refseq.sequence(
@@ -655,7 +656,7 @@ def region_end_motifs(
     return end_motif_counts
 
 
-def _region_end_motifs_star(args) -> dict:
+def _region_end_motifs_star(args) -> NDArray[np.float64]:
     results_dict = region_end_motifs(*args)
     return np.array(list(results_dict.values()), dtype='<f8')
 
@@ -672,6 +673,7 @@ def end_motifs(
     min_length: int = 10,
     max_length: int = 600,
     both_strands: bool = True,
+    negative_strand: bool = False,
     output_file: None | str = None,
     quality_threshold: int = 30,
     workers: int = 1,
@@ -699,13 +701,20 @@ def end_motifs(
     max_length: int or None, optional
         Maximum length of fragments to be included.
     both_strands: bool
-        Default is False.
+        Indicate whether to calculate 5' end motifs on both positive and
+        negative strands or not. If False, only 5' ends of the positive
+        strand are considered, unless the `negative_strand` option is
+        set to True. Default is True. 
+    negative_strand: bool
+        Only considered if the `both_strands` option is False. When set 
+        to True, only ends on the negative strand are considered.
     output_file : None or str, optional
-        File path to write results to. Either tsv or csv.
+        File path to write results to. Either tsv or csv. Default is
+        None.
     quality_threshold : int, optional
-        Minimum MAPQ to filter.
+        Minimum MAPQ to filter. Default is 30.
     workers : int, optional
-        Number of worker processes.
+        Number of worker processes. Default is 1.
     verbose : bool or int, optional
     fraction_low : int or None, optional
         Alias for `min_length`. *Deprecated.*
@@ -783,6 +792,7 @@ def end_motifs(
                 min_length,
                 max_length,
                 both_strands,
+                negative_strand, 
                 None,
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0
@@ -797,6 +807,7 @@ def end_motifs(
             min_length,
             max_length,
             both_strands,
+            negative_strand,
             None,
             quality_threshold,
             verbose - 2 if verbose > 2 else 0
@@ -852,6 +863,7 @@ def interval_end_motifs(
     min_length: int = 10,
     max_length: int = 600,
     both_strands: bool = True,
+    negative_strand: bool = False,
     output_file: Union[None, str] = None,
     quality_threshold: int = 30,
     workers: int = 1,
@@ -875,6 +887,14 @@ def interval_end_motifs(
         (chrom, start, stop, name).
     k : int, optional
         Length of end motif kmer. Default is 4.
+    both_strands: bool
+        Indicate whether to calculate 5' end motifs on both positive and
+        negative strands or not. If False, only 5' ends of the positive
+        strand are considered, unless the `negative_strand` option is
+        set to True. Default is True. 
+    negative_strand: bool
+        Only considered if the `both_strands` option is False. When set 
+        to True, only ends on the negative strand are considered.
     output_file : None or str, optional
         File path to write results to. Either tsv or csv.
     quality_threshold : int, optional
@@ -944,6 +964,7 @@ def interval_end_motifs(
             min_length,
             max_length,
             both_strands,
+            negative_strand,
             None,
             quality_threshold,
             verbose - 2 if verbose > 2 else 0
