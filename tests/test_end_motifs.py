@@ -9,7 +9,7 @@ import difflib
 
 import pytest
 
-from finaletoolkit.frag.end_motifs import *
+from finaletoolkit.frag import end_motifs, EndMotifFreqs, EndMotifsIntervals, interval_end_motifs
 
 class TestGenomewideEndMotifs:
     def test_end_motifs(self, request):

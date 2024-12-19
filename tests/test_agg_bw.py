@@ -4,7 +4,7 @@ Tests for finaletoolkit.utils.agg_bw().
 
 import pytest
 
-from finaletoolkit.utils.agg_bw import agg_bw
+from finaletoolkit.utils._agg_bw import agg_bw
 
 class TestAggBigWig:
     def test_agg_bw(self, request, tmp_path):

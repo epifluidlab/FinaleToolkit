@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections.abc import Iterator
-from typing import Union, Iterable
+from typing import Iterable
 from multiprocessing import Pool
 from time import time
 from sys import stderr, stdout, stdin
@@ -12,6 +12,7 @@ import warnings
 from tqdm import tqdm
 import py2bit
 import numpy as np
+from numpy.typing import NDArray
 
 from finaletoolkit.utils.utils import frag_generator
 import finaletoolkit.frag as pkg_data
@@ -74,7 +75,7 @@ class EndMotifFreqs():
     def freq(self, kmer: str) -> float:
         return self.freq_dict[kmer]
 
-    def to_tsv(self, output_file: Union[str,Path], sep: str='\t'):
+    def to_tsv(self, output_file: str | Path, sep: str='\t'):
         """Prints k-mer frequencies to a tsv"""
         if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
@@ -114,7 +115,7 @@ class EndMotifFreqs():
     @classmethod
     def from_file(
             cls,
-            file_path: Union[str, Path],
+            file_path: str | Path,
             quality_threshold: int,
             sep: str='\t',
             header: int=0,) -> EndMotifFreqs:
@@ -139,12 +140,12 @@ class EndMotifFreqs():
             is_file = False
             if str(file_path).endswith('gz'):
                 is_file = True
-                file = gzip.open(file_path)
+                file = gzip.open(file_path, 'rt')
             elif str(file_path) == '-':
                 file = stdin
             else:
                 is_file = True
-                file = open(file_path)
+                file = open(file_path, 'rt')
 
             # ignore header
             for _ in range(header):
@@ -183,8 +184,8 @@ class EndMotifsIntervals():
 
     Parameters
     ----------
-    intervals : Iterable
-        A collection of tuples, each containing a tuple representing
+    intervals : list
+        A list of tuples, each containing a tuple representing
         a genomic interval (chrom, 0-based start, 1-based stop) and a
         dict that maps kmers to frequencies in the interval.
     k : int
@@ -195,7 +196,7 @@ class EndMotifsIntervals():
 
     def __init__(
         self,
-        intervals: Iterable[tuple[tuple, dict]],
+        intervals: list[tuple[tuple, dict]],
         k: int,
         quality_threshold: int = MIN_QUALITY,
     ):
@@ -248,7 +249,7 @@ class EndMotifsIntervals():
             is_file = False
             if file_path.endswith('gz'):
                 is_file = True
-                file = gzip.open(file_path)
+                file = gzip.open(file_path, 'wt')
             elif file_path == '-':
                 file = stdin
             else:
@@ -276,7 +277,7 @@ class EndMotifsIntervals():
                 file.close()
         return cls(intervals, k, quality_threshold)
 
-    def freq(self, kmer: str) -> list[tuple[str, int, int, float]]:
+    def freq(self, kmer: str) -> dict[tuple[str, int, int], float]:
         """
         Returns a list of intervals and associated frquency for given
         kmer. Results are in the form (chrom, 0-based start, 1-based
@@ -307,7 +308,7 @@ class EndMotifsIntervals():
             mds.append((interval, interval_mds))
         return mds
 
-    def mds_bed(self, output_file: Union[str, Path], sep: str='\t'):
+    def mds_bed(self, output_file: str | Path, sep: str='\t'):
         """Writes MDS for each interval to a bed/bedgraph file."""
         mds = self.motif_diversity_score()
         with open(output_file, 'w') as out:
@@ -322,7 +323,7 @@ class EndMotifsIntervals():
     
     def to_tsv(
             self,
-            output_file: Union[str, Path],
+            output_file: str | Path,
             calc_freq: bool=True, sep: str='\t'):
         """
         Writes all intervals and associated frquencies to file. Columns
@@ -383,7 +384,7 @@ class EndMotifsIntervals():
     def to_bedgraph(
             self,
             kmer: str,
-            output_file: Union[str, Path],
+            output_file: str | Path,
             calc_freq: bool=True,
             sep: str='\t'
         ):
@@ -418,7 +419,7 @@ class EndMotifsIntervals():
                             interval[0],
                             str(interval[1]),
                             str(interval[2]),
-                            (self.freq[kmer] if not calc_freq
+                            (freqs[kmer] if not calc_freq
                              else f"{(freqs[kmer]/count):.6f}"
                                 if count!=0
                                 else "NaN"
@@ -436,7 +437,7 @@ class EndMotifsIntervals():
     def to_bed(
             self,
             kmer: str,
-            output_file: Union[str, Path],
+            output_file: str | Path,
             calc_freq: bool=True,
             sep: str='\t'
         ):
@@ -472,7 +473,7 @@ class EndMotifsIntervals():
                             str(interval[1]),
                             str(interval[2]),
                             interval[3],
-                            (self.freq[kmer] if not calc_freq
+                            (freqs[kmer] if not calc_freq
                              else f"{(freqs[kmer]/count):.6f}"
                                 if count!=0
                                 else "NaN"
@@ -515,14 +516,15 @@ def region_end_motifs(
     contig: str,
     start: int,
     stop: int,
-    refseq_file: Union[str, Path],
+    refseq_file: str | Path,
     k: int = 4,
     fraction_low: int = 10,
     fraction_high: int = 600,
     both_strands: bool = True,
-    output_file: Union[None, str] = None,
+    negative_strand: bool = False,
+    output_file: str | None = None,
     quality_threshold: int = MIN_QUALITY,
-    verbose: Union[bool, int] = False,
+    verbose: bool | int = False,
 ) -> dict:
     """
     Function that reads fragments in the specified region from a BAM,
@@ -550,8 +552,13 @@ def region_end_motifs(
         Maximum fragment length.
     both_strands: bool, optional
         Choose whether to use forward 5' ends only or use 5' ends for
-        both ends of PE reads.
+        both ends of PE reads. If `negative_strand` is True, only
+        reverse 5' ends are used.
+    negative_strand: bool
+        Only considered if the `both_strands` option is False. When set 
+        to True, only ends on the negative strand are considered.
     output_file : None or str, optional
+        Ignored.
     quality_threshold : int, optional
     verbose : bool or int, optional
 
@@ -563,6 +570,10 @@ def region_end_motifs(
 
     if verbose:
         start_time = time()
+        
+    if not both_strands and negative_strand:
+        raise ValueError(
+            'Cannot have both both_strands=False and negative_strand=True.')
 
     # iterable of fragments
     frag_ends = frag_generator(
@@ -571,8 +582,8 @@ def region_end_motifs(
         quality_threshold,
         start,
         stop,
-        fraction_low=fraction_low,
-        fraction_high=fraction_high,
+        min_length=fraction_low,
+        max_length=fraction_high,
     )
     # create dict where keys are kmers and values are counts
     bases='ACGT'
@@ -596,24 +607,16 @@ def region_end_motifs(
                     end_motif_counts[forward_kmer] += 1
                     
                 # reverse end-motif
-                try:
-                    reverse_kmer = refseq.sequence(
-                        contig, int(frag[2]-k), int(frag[2])
-                    )
-                    assert len(reverse_kmer) == k
+                reverse_kmer = refseq.sequence(
+                    contig, int(frag[2]-k), int(frag[2])
+                )
+                assert len(reverse_kmer) == k
 
-                    if 'N' not in reverse_kmer:
-                        end_motif_counts[_reverse_complement(reverse_kmer)] += 1
-                except RuntimeError:
-                    if verbose > 1:
-                        stderr.write(
-                            f'Attempt to read interval at {contig}:'
-                            f'{int(frag[2]-k)}-{int(frag[2])} failed.'
-                            'Skipping.')
-                    continue
+                if 'N' not in reverse_kmer:
+                    end_motif_counts[_reverse_complement(reverse_kmer)] += 1
         else:
             for frag in frag_ends:
-                if frag[4]: # is on forward strand or not
+                if frag[4] and not negative_strand: # is on indicated strand
                     # py2bit uses 0-based for start, 1-based for end
                     # forward end-motif
                     forward_kmer = refseq.sequence(
@@ -624,7 +627,7 @@ def region_end_motifs(
                     if 'N' not in forward_kmer:
                         end_motif_counts[forward_kmer] += 1
                     
-                else:
+                elif negative_strand:
                     # reverse end-motif
                     try:
                         reverse_kmer = refseq.sequence(
@@ -655,7 +658,7 @@ def region_end_motifs(
     return end_motif_counts
 
 
-def _region_end_motifs_star(args) -> dict:
+def _region_end_motifs_star(args) -> NDArray[np.float64]:
     results_dict = region_end_motifs(*args)
     return np.array(list(results_dict.values()), dtype='<f8')
 
@@ -667,15 +670,16 @@ def _region_end_motifs_dict_star(args) -> dict:
 
 def end_motifs(
     input_file: str,
-    refseq_file: Union[str, Path],
+    refseq_file: str | Path,
     k: int = 4,
     min_length: int = 10,
     max_length: int = 600,
     both_strands: bool = True,
+    negative_strand: bool = False,
     output_file: None | str = None,
     quality_threshold: int = 30,
     workers: int = 1,
-    verbose: Union[bool, int] = False,
+    verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
 ) -> EndMotifFreqs:
@@ -699,13 +703,20 @@ def end_motifs(
     max_length: int or None, optional
         Maximum length of fragments to be included.
     both_strands: bool
-        Default is False.
+        Indicate whether to calculate 5' end motifs on both positive and
+        negative strands or not. If False, only 5' ends of the positive
+        strand are considered, unless the `negative_strand` option is
+        set to True. Default is True. 
+    negative_strand: bool
+        Only considered if the `both_strands` option is False. When set 
+        to True, only ends on the negative strand are considered.
     output_file : None or str, optional
-        File path to write results to. Either tsv or csv.
+        File path to write results to. Either tsv or csv. Default is
+        None.
     quality_threshold : int, optional
-        Minimum MAPQ to filter.
+        Minimum MAPQ to filter. Default is 30.
     workers : int, optional
-        Number of worker processes.
+        Number of worker processes. Default is 1.
     verbose : bool or int, optional
     fraction_low : int or None, optional
         Alias for `min_length`. *Deprecated.*
@@ -783,6 +794,7 @@ def end_motifs(
                 min_length,
                 max_length,
                 both_strands,
+                negative_strand, 
                 None,
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0
@@ -797,6 +809,7 @@ def end_motifs(
             min_length,
             max_length,
             both_strands,
+            negative_strand,
             None,
             quality_threshold,
             verbose - 2 if verbose > 2 else 0
@@ -846,18 +859,19 @@ def end_motifs(
 
 def interval_end_motifs(
     input_file: str,
-    refseq_file: Union[str, Path],
-    intervals: Union[str, Iterable[tuple[str,int,int,str]]],
+    refseq_file: str | Path,
+    intervals: str | Iterable[tuple[str,int,int,str]],
     k: int = 4,
-    min_length: int = 10,
-    max_length: int = 600,
+    min_length: int | None = 10,
+    max_length: int | None = 600,
     both_strands: bool = True,
-    output_file: Union[None, str] = None,
+    negative_strand: bool = False,
+    output_file: str | None = None,
     quality_threshold: int = 30,
     workers: int = 1,
-    verbose: Union[bool, int] = False,
-    fraction_low: int = None,
-    fraction_high: int = None,
+    verbose: bool | int = False,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
 ) -> EndMotifsIntervals:
     """
     Function that reads fragments from a BAM, SAM, or tabix indexed
@@ -875,6 +889,14 @@ def interval_end_motifs(
         (chrom, start, stop, name).
     k : int, optional
         Length of end motif kmer. Default is 4.
+    both_strands: bool
+        Indicate whether to calculate 5' end motifs on both positive and
+        negative strands or not. If False, only 5' ends of the positive
+        strand are considered, unless the `negative_strand` option is
+        set to True. Default is True. 
+    negative_strand: bool
+        Only considered if the `both_strands` option is False. When set 
+        to True, only ends on the negative strand are considered.
     output_file : None or str, optional
         File path to write results to. Either tsv or csv.
     quality_threshold : int, optional
@@ -927,7 +949,7 @@ def interval_end_motifs(
                 for chrom, start, stop, *name
                 in (line.split() for line in interval_file.readlines())
             ]
-    elif isinstance(intervals, Iterable):
+    elif isinstance(intervals, list):
         intervals_tuples = intervals
     else:
         raise TypeError("Intervals should be string or list.")
@@ -944,6 +966,7 @@ def interval_end_motifs(
             min_length,
             max_length,
             both_strands,
+            negative_strand,
             None,
             quality_threshold,
             verbose - 2 if verbose > 2 else 0

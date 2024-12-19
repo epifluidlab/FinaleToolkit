@@ -9,7 +9,7 @@ import difflib
 
 import pytest
 
-from finaletoolkit.frag.coverage import coverage, single_coverage
+from finaletoolkit.frag import coverage, single_coverage
 
 class TestSingleCoverage:
     def test_coverage(self, request):

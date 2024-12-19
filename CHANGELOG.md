@@ -7,6 +7,26 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2024-12-18
+
+### Changed
+- several modules containing implementations of fragmentomic features or
+utiliy functions have been made internal. This means there is now only one
+obvious import for each function. For example, `multi_wps` is imported from
+`finaletoolkit.frag`, and no longer can be imported from
+`finaletoolkit.frag.multi_wps`
+- The CLI now uses lazy importing, drastically speeding up finaletoolkit when
+called from a command line.
+- Added `negative_strand` option for end motifs related functions. When
+used in conjunction with `both_strands`, only end motifs on the negative
+(Crick) strand are considered in calculations.
+- Renamed `fraction_high` and `fraction_low` in `utils.utils.frag_generator`
+to `min_length` and `max_length`.
+
+### Fixed
+- deprecated arguments for `end-motifs` had default values which could
+lead to an error. This is fixed.
+
 ## [0.9.1] - 2024-12-17
 
 ### Fixed

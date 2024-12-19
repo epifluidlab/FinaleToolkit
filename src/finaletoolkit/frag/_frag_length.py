@@ -184,8 +184,8 @@ def frag_length(
         quality_threshold=quality_threshold,
         start=start,
         stop=stop,
-        fraction_low=0,
-        fraction_high=1000000000,   #TODO: allow to have None
+        min_length=0,
+        max_length=1000000000,   #TODO: allow to have None
         intersect_policy=intersect_policy,
         verbose=verbose,
     )

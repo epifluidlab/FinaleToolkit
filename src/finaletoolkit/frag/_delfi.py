@@ -9,8 +9,8 @@ import numpy as np
 import pandas
 from tqdm import tqdm
 
-from finaletoolkit.frag.delfi_gc_correct import delfi_gc_correct
-from finaletoolkit.frag.delfi_merge_bins import delfi_merge_bins
+from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
+from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
 from finaletoolkit.utils.utils import frag_generator, overlaps, chrom_sizes_to_list
 from finaletoolkit.genome.gaps import GenomeGaps, ContigGaps
 
@@ -374,8 +374,8 @@ def _delfi_single_window(
         quality_threshold,
         window_start,
         window_stop,
-        fraction_low=100,
-        fraction_high=220):
+        min_length=100,
+        max_length=220):
 
         frag_length = frag_stop - frag_start
 
