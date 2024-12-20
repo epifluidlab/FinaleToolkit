@@ -15,7 +15,7 @@ from finaletoolkit.frag import wps, multi_wps
 class TestWPS:
     def test_lwps(self, request):
         bam = request.path.parent / 'data' / '12.3444.b37.bam'
-        results = wps(bam, '12', 34444145, 34444155, quality_threshold=0)
+        results = wps(bam, '12', 34444145, 34444155, 133851895, quality_threshold=0)
 
         assert np.all(results['contig'] == '12')
         assert np.all(
