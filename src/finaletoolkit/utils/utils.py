@@ -1,7 +1,7 @@
 from __future__ import annotations
 import time
 import gzip
-from typing import Union, Generator
+from typing import Generator
 from sys import stderr
 from pathlib import Path
 import warnings
@@ -12,11 +12,11 @@ from numpy.typing import NDArray
 from numba import jit
 import pysam
 
-from ._typing import FragFile
+from .typing import FragFile, ChromSizes, Intervals
 
 
 def chrom_sizes_to_list(
-    chrom_sizes_file: Union[str, Path]
+    chrom_sizes_file: ChromSizes
 ) -> list[tuple[str, int]]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a list.
@@ -42,7 +42,7 @@ def chrom_sizes_to_list(
 
 
 def chrom_sizes_to_dict(
-    chrom_sizes_file: Union[str, Path]) -> dict[str, int]:
+    chrom_sizes_file: ChromSizes) -> dict[str, int]:
     """
     Reads chromosome names and sizes from a CHROMSIZE file into a dict.
 
@@ -107,7 +107,7 @@ def _merge_all_intervals(converted_intervals):
     return all_intervals
 
 
-def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
+def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
                     output_file: str,
                     contig: str | None = None,
                     quality_threshold: int = 30,
@@ -161,7 +161,7 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
 
     finally:
         # Close everything when done
-        if (type(input_file) == str):
+        if (type(input_file) == str and type(sam_file) == pysam.AlignmentFile):
             sam_file.close()
         out.close()
 
@@ -172,9 +172,9 @@ def frag_bam_to_bed(input_file: Union[str, pysam.AlignmentFile],
 
 
 @jit(nopython=True)
-def frags_in_region(frag_array: NDArray[np.int64],
-                    minimum: int,
-                    maximum: int) -> NDArray[np.int64]:
+def frags_in_region(frag_array: NDArray,
+                    start: int,
+                    stop: int) -> NDArray[np.int64]:
     """
     Takes an array of coordinates for ends of fragments and returns an
     array of fragments with coverage in the specified region. That is, a
@@ -193,7 +193,7 @@ def frags_in_region(frag_array: NDArray[np.int64],
     # Changed the code a bit to make it compatible with numba and not raise an error 
     starts = frag_array['start']
     stops = frag_array['stop']
-    in_region = np.logical_and(np.less(starts,maximum), np.greater_equal(stops,minimum))
+    in_region = np.logical_and(np.less(starts,stop), np.greater_equal(stops,start))
     filtered_frags = frag_array[in_region]
     return filtered_frags
 
@@ -201,28 +201,31 @@ def frags_in_region(frag_array: NDArray[np.int64],
 def frag_generator(
     input_file: FragFile,
     contig: str | None,
-    quality_threshold: int=30,
+    quality_threshold: int = 30,
     start: int | None=None,
     stop: int | None=None,
     min_length: int | None = None,
     max_length: int | None = None,
     intersect_policy: str = "midpoint",
-    verbose: bool = False
+    verbose: bool | int = False
 ) -> Generator[tuple]:
     """
-    Reads from BAM, SAM, or BED file and returns tuples containing
+    Reads from BAM, CRAM, Fragment file and returns tuples containing
     contig (chromosome), start, stop (end), mapq, and strand for each fragment.
     Optionally may filter for mapq, size, and intersection with a region.
 
     Parameters
     ----------
-    input_file : str, pathlike, TabixFile, or AlignmentFile
-        Fragment coordinates stored as a SAM, BAM, CRAM, tabix-indexed
-        bed.gz, or tabix-indexed FinaleDB fragment file.
-    contig : str
+    input_file : str, pathlike, pysam TabixFile, or  pysam AlignmentFile
+        Fragment coordinates stored as a SAM, BAM, CRAM, or tabix-indexed
+        FinaleDB fragment file. Can also be a pysam object of these files.
+    contig : str or None
+        Chromosome to fetch fragments over. May be None for genome-wide.
     quality_threshold : int, optional
     start : int, optional
+        Left-most coordinate of interval to fetch from. See intersect_policy.
     stop : int, optional
+        Right-most coordinate of interval to fetch from. See intersect_policy.
     min_length : int, optional
         Specifies lowest fragment length included in array. Default is
         120, equivalent to long fraction.
@@ -404,10 +407,10 @@ def frag_array(
     input_file: FragFile,
     contig: str,
     quality_threshold: int=30,
-    start: int=None,
-    stop: int=None,
-    fraction_low: int=120,
-    fraction_high: int=180,
+    start: int | None = None,
+    stop: int | None = None,
+    min_length: int | None = None,
+    max_length: int | None = None,
     intersect_policy: str="midpoint",
     verbose: bool=False
     ) -> NDArray:
@@ -422,10 +425,10 @@ def frag_array(
     quality_threshold : int, optional
     start : int, optional
     stop : int, optional
-    fraction_low : int, optional
+    min_length : int, optional
         Specifies lowest fragment length included in array. Default is
         120, equivalent to long fraction.
-    fraction_high : int, optional
+    max_length : int, optional
         Specifies highest fragment length included in array. Default is
         120, equivalent to long fraction.
         intersect_policy : str, optional
@@ -458,8 +461,8 @@ def frag_array(
             quality_threshold,
             start,
             stop,
-            fraction_low,
-            fraction_high,
+            min_length,
+            max_length,
             intersect_policy,
             verbose
         )
@@ -509,7 +512,7 @@ def low_quality_read_pairs(read, min_mapq=30):
             or (read.is_reverse and read.mate_is_reverse))   # -G 48
 
 
-def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
+def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
     """
     Return `True` if the sequenced read described in `read` is not read1
     and a properly paired read with a Phred score exceeding `min_mapq`.
@@ -533,7 +536,7 @@ def _not_read1_or_low_quality(read: pysam.AlignedRead, min_mapq: int=30):
 
 
 def _get_intervals(
-    interval_file: str
+    interval_file: Intervals
 ) -> list[tuple[str, str, int, int, str, str, int]]:
     """
     Helper function to read intervals from bed file.
@@ -561,7 +564,7 @@ def _get_intervals(
                     break
 
     return intervals
-
+    
 
 def overlaps(
     contigs_1: NDArray,

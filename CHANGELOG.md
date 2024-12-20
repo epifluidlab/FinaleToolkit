@@ -7,6 +7,20 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2024-12-19
+
+### Fixed
+- changed default args for `wps` would lead to errors. Now `wps` defaults to
+LWPS fragment lengths (120-180nt).
+
+### Changed
+- made `finaeltoolkit.utils.typing` public. This is a module containing some
+useful type aliases
+- minor formatting and typing changes
+- renamed `fraction_low` and `fraction_high` to `min_length` and `max_length`
+for `.utils.frag_array` and `.frag.wps`. `wps` retains the deprecated arg names
+but issues a warning.
+
 ## [0.10.1] - 2024-12-19
 
 ### Fixed

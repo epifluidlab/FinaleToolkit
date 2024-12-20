@@ -1,5 +1,6 @@
 from __future__ import annotations
 import gzip
+from os import PathLike
 import time
 from multiprocessing.pool import Pool
 from typing import Union
@@ -12,6 +13,7 @@ import pyBigWig as pbw
 
 from finaletoolkit.frag._wps import wps
 from finaletoolkit.utils.utils import chrom_sizes_to_list
+from ..utils.typing import FragFile, ChromSizes, Intervals
 
 
 def _wps_star(args):
@@ -20,10 +22,10 @@ def _wps_star(args):
 
 
 def multi_wps(
-        input_file: Union[pysam.AlignmentFile, str],
-        site_bed: str,
-        chrom_sizes: str=None,
-        output_file: Union[str, None]=None,
+        input_file: FragFile,
+        site_bed: Intervals,
+        chrom_sizes: ChromSizes | None = None,
+        output_file: str | None = None,
         window_size: int=120,
         interval_size: int=5000,
         min_length: int=120,
@@ -31,8 +33,8 @@ def multi_wps(
         quality_threshold: int=30,
         workers: int=1,
         verbose: Union[bool, int]=0,
-        fraction_low: int=None,
-        fraction_high: int=None,
+        fraction_low: int | None = None,
+        fraction_high: int | None = None,
         ):
     """
     Function that aggregates WPS over sites in BED file according to the
@@ -43,10 +45,12 @@ def multi_wps(
     input_file : str or pysam.AlignmentFile
         BAM, SAM, or tabix file containing paired-end fragment reads or its
         path. `AlignmentFile` must be opened in read mode.
-    site_bed: str
+    site_bed: str or pathlike
         BED file containing sites to perform WPS on. The intervals
         in this BED file should be sorted, first by `contig` then
-        `start`.
+        `start`. The intervals over which WPS is calculated by finding the
+        midpoint of these sites and creating a window of `window_size` length
+        centered on that midpoint. 
     chrom_sizes: str or pathlike, optional
         Tab separated file containing names and sizes of chromosomes in
         `input_file`. Required if `input_file` is tabix-indexed.
@@ -125,15 +129,19 @@ def multi_wps(
             'fraction_high and max_length cannot both be specified')
 
     # get chrom sizes from input_file or chrom_sizes
-    if (input_file.endswith('.sam')
-        or input_file.endswith('.bam')
-        or input_file.endswith('.cram')):
-        with pysam.AlignmentFile(input_file, 'r') as bam:
+    if (isinstance(input_file, pysam.AlignmentFile)):
+        references = input_file.references
+        lengths = input_file.lengths
+        header = list(zip(references, lengths))
+    elif (
+        isinstance(input_file, (str, PathLike))
+        and (str(input_file).endswith('.sam')
+        or str(input_file).endswith('.bam')
+        or str(input_file).endswith('.cram'))):
+        with pysam.AlignmentFile(str(input_file), 'r') as bam:
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
-    elif (isinstance(input_file, pysam.AlignmentFile)):
-        pass
     else:
         if chrom_sizes is None:
             raise ValueError(
@@ -193,6 +201,10 @@ def multi_wps(
     finally:
         if site_bed != '-':
             bed.close()  
+            
+    chrom_sizes_dict = dict(header)
+    
+    chrom_sizes_intervals = [chrom_sizes_dict[contig] for contig in contigs]
 
     count = len(contigs)
 
@@ -204,6 +216,7 @@ def multi_wps(
         contigs,
         starts,
         stops,
+        chrom_sizes_intervals,
         count*[None],
         count*[window_size],
         count*[min_length],

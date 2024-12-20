@@ -383,16 +383,18 @@ def main_cli_parser():
     cli_wps.add_argument(
         '-min',
         '--min-length',
-        default=0,
+        default=120,
         type=int,
-        help='Minimum length for a fragment to be included.'
+        help='Minimum length for a fragment to be included. Default is 120,'
+        ' corresponding to L-WPS.'
         )
     cli_wps.add_argument(
         '-max',
         '--max-length',
-        default=None,
+        default=180,
         type=int,
-        help='Maximum length for a fragment to be included.'
+        help='Maximum length for a fragment to be included. Default is 180,'
+        ' corresponding to L-WPS.'
         )
     cli_wps.add_argument(
         '-lo',

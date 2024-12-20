@@ -3,15 +3,17 @@ import gzip
 import time
 from typing import Union
 from sys import stdout, stderr
+import warnings
 
 import pysam
 import numpy as np
 from numba import jit
 
 from finaletoolkit.utils import frag_array
+from ..utils.typing import ChromSizes
 
 @jit(nopython=True)
-def _single_wps(contig: str,
+def _single_nt_wps(chrom: str,
                 window_start: int,
                 window_stop: int,
                 window_position: int,
@@ -31,19 +33,22 @@ def _single_wps(contig: str,
     num_end_in = np.sum(is_end_in)
 
     # calculate wps and return
-    return (contig, window_position, num_spanning - num_end_in)
+    return (chrom, window_position, num_spanning - num_end_in)
 
 
 def wps(input_file: Union[str, pysam.AlignmentFile],
-        contig: str,
-        start: Union[int, str],
-        stop: Union[int, str],
-        output_file: str=None,
-        window_size: int=120,
-        fraction_low: int=120,
-        fraction_high: int=180,
-        quality_threshold: int=30,
-        verbose: Union[bool, int]=0
+        chrom: str,
+        start: int,
+        stop: int,
+        chrom_size: int,
+        output_file: str | None = None,
+        window_size: int = 120,
+        min_length: int = 120,
+        max_length: int = 180,
+        quality_threshold: int = 30,
+        verbose: bool | int = 0,
+        fraction_low: int | None = None,
+        fraction_high: int | None = None,
         ) -> np.ndarray:
     """
     Return (raw) Windowed Protection Scores as specified in Snyder et al
@@ -54,22 +59,28 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     input_file : str or pysam.AlignmentFile
         BAM, SAM or tabix file containing paired-end fragment reads or its
         path. `AlignmentFile` must be opened in read mode.
-    contig : str
+    chrom : str
     start : int
     stop : int
+    chrom_size : int
+        Size of chrom
     output_file : string, optional
     window_size : int, optional
         Size of window to calculate WPS. Default is k = 120, equivalent
         to L-WPS.
-    fraction_low : int, optional
+    min_length : int, optional
         Specifies lowest fragment length included in calculation.
-        Default is 120, equivalent to long fraction.
-    fraction_high : int, optional
+        Default is 120, equivalent to long WPS.
+    max_length : int, optional
         Specifies highest fragment length included in calculation.
-        Default is 180, equivalent to long fraction.
+        Default is 180, equivalent to long WPS.
     quality_threshold : int, optional
     workers : int, optional
     verbose : bool, optional
+    fraction_low : int, optional
+        Deprecated alias for `min_length`
+    fraction_high : int, optional
+        Deprecated alias for `max_length`
 
     Returns
     -------
@@ -80,7 +91,32 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     if (verbose):
         start_time = time.time()
         stderr.write("[finaletoolkit-wps] Reading fragments\n")
-        stderr.write(f'Region: {contig}:{start}-{stop}\n')
+        stderr.write(f'Region: {chrom}:{start}-{stop}\n')
+    
+    # Pass aliases and check for conflicts
+    if fraction_low is not None and min_length is None:
+        min_length = fraction_low
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_low is not None and min_length is not None:
+        warnings.warn("fraction_low is deprecated. Use min_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_low and min_length cannot both be specified')
+
+    if fraction_high is not None and max_length is None:
+        max_length = fraction_high
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn("fraction_high is deprecated. Use max_length instead.",
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        raise ValueError(
+            'fraction_high and max_length cannot both be specified')
 
     # set start and stop to ints
     start = int(start)
@@ -88,17 +124,17 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     # set minimum and maximum values for fragments. These extend farther
     # than needed
-    minimum = max(round(start - fraction_high), 0)
-    maximum = round(stop + fraction_high)
+    minimum = max(round(start - max_length), 0)
+    maximum = min(round(stop + max_length), chrom_size)
 
     # read fragments from file
     frag_ends = frag_array(input_file,
-                           contig,
+                           chrom,
                            quality_threshold,
                            start=minimum,
                            stop=maximum,
-                           fraction_low=fraction_low,
-                           fraction_high=fraction_high,
+                           min_length=min_length,
+                           max_length=max_length,
                            verbose=(verbose>=2))
 
     if (verbose):
@@ -115,7 +151,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
             ]
         )
         scores['start'] = np.arange(start, stop, dtype=int)
-        scores['contig'] = contig
+        scores['contig'] = chrom
     else:
 
         window_centers = np.arange(start, stop, dtype=np.int64)
@@ -134,8 +170,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
             ]
         )
         for i in range(stop-start):
-            scores[i] = _single_wps(
-                contig,
+            scores[i] = _single_nt_wps(
+                chrom,
                 window_starts[i],
                 window_stops[i],
                 window_centers[i],
@@ -153,7 +189,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
             with gzip.open(output_file, 'wt') as out:
                 # declaration line
                 out.write(
-                    f'fixedStep\tchrom={contig}\tstart={start}\t'
+                    f'fixedStep\tchrom={chrom}\tstart={start}\t'
                     f'step={1}\tspan={stop-start}\n'
                     )
                 for score in scores['wps']:
@@ -163,7 +199,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
             with open(output_file, 'wt') as out:
                 # declaration line
                 out.write(
-                    f'fixedStep\tchrom={contig}\tstart={start}\tstep='
+                    f'fixedStep\tchrom={chrom}\tstart={start}\tstep='
                     f'{1}\tspan={stop-start}\n'
                     )
                 for score in scores['wps']:
@@ -171,7 +207,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
         elif output_file == '-':    #stdout
             stdout.write(
-                f'fixedStep\tchrom={contig}\tstart={start}\tstep='
+                f'fixedStep\tchrom={chrom}\tstart={start}\tstep='
                 f'{1}\tspan={stop-start}\n'
                 )
             for score in scores['wps']:
