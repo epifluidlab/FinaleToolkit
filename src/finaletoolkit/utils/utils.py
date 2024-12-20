@@ -173,8 +173,8 @@ def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
 
 @jit(nopython=True)
 def frags_in_region(frag_array: NDArray,
-                    minimum: int,
-                    maximum: int) -> NDArray[np.int64]:
+                    start: int,
+                    stop: int) -> NDArray[np.int64]:
     """
     Takes an array of coordinates for ends of fragments and returns an
     array of fragments with coverage in the specified region. That is, a
@@ -193,7 +193,7 @@ def frags_in_region(frag_array: NDArray,
     # Changed the code a bit to make it compatible with numba and not raise an error 
     starts = frag_array['start']
     stops = frag_array['stop']
-    in_region = np.logical_and(np.less(starts,maximum), np.greater_equal(stops,minimum))
+    in_region = np.logical_and(np.less(starts,stop), np.greater_equal(stops,start))
     filtered_frags = frag_array[in_region]
     return filtered_frags
 
