@@ -43,7 +43,7 @@ def multi_wps(
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, or tabix file containing paired-end fragment reads or its
+        BAM, CRAM, or tabix file containing paired-end fragment reads or its
         path. `AlignmentFile` must be opened in read mode.
     site_bed: str or pathlike
         BED file containing sites to perform WPS on. The intervals

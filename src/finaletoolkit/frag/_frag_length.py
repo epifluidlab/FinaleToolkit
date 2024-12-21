@@ -148,7 +148,7 @@ def frag_length(
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, or CRAM file containing paired-end fragment reads or
+        BAM, CRAM, or fragment file containing paired-end fragment reads or
         its path. `AlignmentFile` must be opened in read mode.
     contig : string, optional
         Contig or chromosome to get fragments from

@@ -217,7 +217,7 @@ def frag_generator(
     Parameters
     ----------
     input_file : str, pathlike, pysam TabixFile, or  pysam AlignmentFile
-        Fragment coordinates stored as a SAM, BAM, CRAM, or tabix-indexed
+        Fragment coordinates stored as a BAM, CRAM, or tabix-indexed
         FinaleDB fragment file. Can also be a pysam object of these files.
     contig : str or None
         Chromosome to fetch fragments over. May be None for genome-wide.
@@ -269,7 +269,7 @@ def frag_generator(
             else:
                 raise ValueError(
                     f"{input_file} is not an accepted file type. Only "
-                    "SAM, CRAM, BAM, and Frag.gz files are accepted.")
+                    "CRAM, BAM, and Frag.gz files are accepted.")
         elif type(input_file) == pysam.AlignmentFile:
             input_file_is_path = False
             is_sam = True
@@ -415,7 +415,7 @@ def frag_array(
     verbose: bool=False
     ) -> NDArray:
     """
-    Reads from BAM, SAM, or BED file and returns a three column matrix
+    Reads from BAM, CRAM, or fragment file and returns a three column matrix
     with fragment start and stop positions and strand.
 
     Parameters

@@ -37,7 +37,7 @@ def single_coverage(
     Parameters
     ----------
     input_file : str or pysam.AlignmentFile
-        BAM, SAM, CRAM, or Frag.gz file containing paired-end fragment
+        BAM, CRAM, or Frag.gz file containing paired-end fragment
         reads or its path. `AlignmentFile` must be opened in read mode.
     contig : string, optional
         Default is None.
@@ -131,7 +131,7 @@ def coverage(
     """
     Return estimated fragment coverage over intervals specified in
     `intervals`. Fragments are read from `input_file` which may be
-    a SAM, BAM, CRAM, or Frag.gz file. Uses an algorithm where the
+    a BAM, CRAM, or fragment file. Uses an algorithm where the
     midpoints of fragments are calculated and coverage is tabulated from
     the midpoints that fall into the specified region. Not suitable for
     fragments of size approaching interval size.
