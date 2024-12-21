@@ -528,14 +528,14 @@ def region_end_motifs(
 ) -> dict:
     """
     Function that reads fragments in the specified region from a BAM,
-    SAM, or tabix indexed file and returns the 5' k-mer (default is
-    4-mer) end motif counts as a dictionary. This function
+    CRAM, or tabix indexed fragment file and returns the 5' k-mer (
+    default is 4-mer) end motif counts as a dictionary. This function
     reproduces the methodology of Zhou et al (2023).
 
     Parameters
     ----------
     input_file : str
-        Path of SAM, BAM, CRAM, or Frag.gz containing pair-end reads.
+        Path of BAM, CRAM, or Frag.gz containing pair-end reads.
     contig : str
         Name of contig or chromosome for region.
     start : int
@@ -684,7 +684,7 @@ def end_motifs(
     fraction_high: int | None = None,
 ) -> EndMotifFreqs:
     """
-    Function that reads fragments from a BAM, SAM, or tabix indexed
+    Function that reads fragments from a BAM, CRAM, or tabix indexed
     file and returns the 5' k-mer (default is 4-mer) end motif
     frequencies as a dictionary. Optionally writes data to a tsv. This
     function reproduces the methodology of Zhou et al (2023).
@@ -692,7 +692,7 @@ def end_motifs(
     Parameters
     ----------
     input_file : str
-        SAM, BAM, CRAM, or Frag.gz file with paired-end reads.
+        BAM, CRAM, or Frag.gz file with paired-end reads.
     refseq_file : str or Path
         2bit file with sequence of reference genome input_file is
         aligned to.
@@ -874,14 +874,14 @@ def interval_end_motifs(
     fraction_high: int | None = None,
 ) -> EndMotifsIntervals:
     """
-    Function that reads fragments from a BAM, SAM, or tabix indexed
+    Function that reads fragments from a BAM, CRAM, or tabix indexed
     file and user-specified intervals and returns the 5' k-mer
     (default is 4-mer) end motif. Optionally writes data to a tsv.
 
     Parameters
     ----------
     input_file : str
-        Path of SAM, BAM, CRAM, or Frag.gz containing pair-end reads.
+        Path of BAM, CRAM, or Frag.gz containing pair-end reads.
     refseq_file : str or Path
         Path of 2bit file for reference genome that reads are aligned to.
     intervals : str or tuple

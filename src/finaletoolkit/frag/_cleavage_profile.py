@@ -49,7 +49,7 @@ def cleavage_profile(
     Parameters
     ---------
     input_file: str
-        SAM, BAM, CRAM, or FRAG file with fragment information.
+        BAM, CRAM, or FRAG file with fragment information.
     chrom_size: int
         length of contig.
     contig: str
@@ -200,7 +200,7 @@ def multi_cleavage_profile(
     Parameters
     ---------
     input_file: str or pathlike
-        SAM, BAM, CRAM, or FRAG file with fragment information.
+        BAM, CRAM, or FRAG file with fragment information.
     interval_file: str or pathlike
         Sorted BED file containing intervals.
     chrom_sizes: str or pathlike

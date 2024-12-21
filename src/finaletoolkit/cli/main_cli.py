@@ -35,10 +35,10 @@ def main_cli_parser():
         'coverage',
         description='Calculates fragmentation coverage over intervals '
         'defined in a BED file based on alignment data from a '
-        'BAM/SAM/CRAM/Fragment file.')
+        'BAM/CRAM/Fragment file.')
     cli_coverage.add_argument(
         'input_file',
-        help='Path to a BAM/SAM/CRAM/Fragment file containing fragment '
+        help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
     cli_coverage.add_argument(
         'interval_file',
@@ -111,10 +111,10 @@ def main_cli_parser():
         'frag-length-bins',
         prog='finaletoolkit-frag-length-bins',
         description='Retrieves fragment lengths grouped in bins given a'
-        ' BAM/SAM/CRAM/Fragment file.')
+        ' BAM/CRAM/Fragment file.')
     cli_frag_length_bins.add_argument(
         'input_file',
-        help='Path to a BAM/SAM/CRAM/Fragment file containing fragment data.')
+        help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_frag_length_bins.add_argument(
         '-c',
         '--contig',
@@ -193,10 +193,10 @@ def main_cli_parser():
         'frag-length-intervals',
         description='Retrieves fragment length summary statistics over '
         'intervals defined in a BED file based on alignment data from a'
-        ' BAM/SAM/CRAM/Fragment file.')
+        ' BAM/CRAM/Fragment file.')
     cli_frag_length_intervals.add_argument(
         'input_file',
-        help='Path to a BAM/SAM/CRAM/Fragment file containing fragment '
+        help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
     cli_frag_length_intervals.add_argument(
         'interval_file',
@@ -257,11 +257,11 @@ def main_cli_parser():
         'cleavage-profile',
         prog='finaletoolkit-cleavage-profile',
         description='Calculates cleavage proportion over intervals defined in '
-        'a BED file based on alignment data from a BAM/SAM/CRAM/Fragment '
+        'a BED file based on alignment data from a BAM/CRAM/Fragment '
         'file.')
     cli_cleavage_profile.add_argument(
         'input_file',
-        help='Path to a BAM/SAM/CRAM/Fragment file containing fragment data.')
+        help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_cleavage_profile.add_argument(
         'interval_file',
         help='Path to a BED file containing intervals to calculates cleavage '
@@ -345,10 +345,10 @@ def main_cli_parser():
         prog='finaletoolkit-wps',
         description='Calculates Windowed Protection Score (WPS) over '
         'intervals defined in a BED file based on alignment data from a'
-        ' BAM/SAM/CRAM/Fragment file.')
+        ' BAM/CRAM/Fragment file.')
     cli_wps.add_argument(
         'input_file',
-        help='Path to a BAM/SAM/CRAM/Fragment file containing fragment '
+        help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
     cli_wps.add_argument(
         'site_bed',
@@ -522,7 +522,7 @@ def main_cli_parser():
         )
     cli_delfi.add_argument(
         'input_file',
-        help="Path to a BAM/SAM/CRAM/Fragment file containing fragment data.")
+        help="Path to a BAM/CRAM/Fragment file containing fragment data.")
     cli_delfi.add_argument(
         'chrom_sizes',
         help="Tab-delimited file containing (1) chrom name and (2) integer "
@@ -641,7 +641,7 @@ def main_cli_parser():
         description="Measures frequency of k-mer 5' end motifs.")
     cli_motifs.add_argument(
         'input_file',
-        help='Path to a BAM/SAM/CRAM/Fragment file containing fragment data.')
+        help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_motifs.add_argument(
         'refseq_file',
         help='The .2bit file for the associate reference genome sequence used '
@@ -712,7 +712,7 @@ def main_cli_parser():
         "specified in a BED file and writes data into a table.")
     cli_interval_motifs.add_argument(
         'input_file',
-        help='Path to a BAM/SAM/CRAM/Fragment file containing fragment data.')
+        help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_interval_motifs.add_argument(
         'refseq_file',
         help='The .2bit file for the associate reference genome sequence used '

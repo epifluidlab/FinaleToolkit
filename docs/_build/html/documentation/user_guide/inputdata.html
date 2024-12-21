@@ -359,23 +359,42 @@
 <p><strong>FinaleToolkit</strong> is compatible with almost any paired-end sequence data.</p>
 <section id="sam">
 <h2>SAM<a class="headerlink" href="#sam" title="Link to this heading">#</a></h2>
-<p>A sequence alignment map (SAM) file is a human-readable file format that stores the results of sequence alignment. It contains information about the alignment of each read to the reference genome, as well as information about the read itself.</p>
+<p>A sequence alignment map (SAM) file is a human-readable file format that stores
+the results of sequence alignment. It contains information about the alignment
+of each read to the reference genome, as well as information about the read
+itself.</p>
 </section>
 <section id="bam">
 <h2>BAM<a class="headerlink" href="#bam" title="Link to this heading">#</a></h2>
-<p>A binary alignment file (BAM) provides the same information as a SAM file, but in a binary format. This can be useful for saving space on disk, but is not human-readable.</p>
-<p><strong>FinaleToolkit</strong> requires that BAM files be BAI indexed. Therefore, you should have an associated <code class="docutils literal notranslate"><span class="pre">.bam.bai</span></code> file in the same directory of your input data.</p>
+<p>A binary alignment file (BAM) that stores the results of sequence alignment.
+It contains information about the alignment of each read to the reference
+genome, as well as information about the read itself. This file format is not
+human-readable but relatively space-efficient when compared to its plaintext
+counterpart, the sequence alignment map (SAM) file format.</p>
+<p><strong>FinaleToolkit</strong> requires that BAM files be BAI indexed. Therefore, you should
+have an associated <code class="docutils literal notranslate"><span class="pre">.bam.bai</span></code> file in the same directory of your input data.</p>
 </section>
 <section id="cram">
 <h2>CRAM<a class="headerlink" href="#cram" title="Link to this heading">#</a></h2>
-<p>A compressed read alignment map file is a compressed version of a SAM file. It is a binary file that is smaller than a BAM file, but still contains all of the same information.</p>
-<p><strong>FinaleToolkit</strong> requires that CRAM files be CRAI indexed. Therefore, you should have an associated <code class="docutils literal notranslate"><span class="pre">.cram.crai</span></code> file in the same directory of your input data.</p>
+<p>A compressed read alignment map file is another binary file standard. It
+is a binary file that is smaller than a BAM file, but still contains all of the
+same information.</p>
+<p><strong>FinaleToolkit</strong> requires that CRAM files be CRAI indexed. Therefore, you
+should have an associated <code class="docutils literal notranslate"><span class="pre">.cram.crai</span></code> file in the same directory of your
+input data.</p>
 </section>
 <section id="fragment-file">
 <h2>Fragment File<a class="headerlink" href="#fragment-file" title="Link to this heading">#</a></h2>
-<p>A fragment file (<cite>.frag.gz</cite>) file that is derived from information in a BAM file. A fragment file is a block-gzipped BED3+2 file (similar to a tab-separated value file) that contains the following columns (with one row entry for each fragment): <code class="docutils literal notranslate"><span class="pre">chrom</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>, <code class="docutils literal notranslate"><span class="pre">mapq</span></code>, and <code class="docutils literal notranslate"><span class="pre">strand</span></code>.</p>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">mapq</span></code> is the mapping quality of the fragment, and <code class="docutils literal notranslate"><span class="pre">strand</span></code> is the strand of the fragment. The <code class="docutils literal notranslate"><span class="pre">strand</span></code> column can be either <code class="docutils literal notranslate"><span class="pre">+</span></code> or <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p>
-<p><strong>FinaleToolkit</strong> requires that fragment files be Tabix indexed. Therefore, you should have an associated <code class="docutils literal notranslate"><span class="pre">.frag.gz.tbi</span></code> file in the same directory of your input data.</p>
+<p>A fragment file (<code class="docutils literal notranslate"><span class="pre">.frag.gz</span></code> or <code class="docutils literal notranslate"><span class="pre">frag.tsv.bgz</span></code>) file that is derived from
+information in a BAM file. A fragment file is a block-gzipped BED3+2 file
+(similar to a tab-separated value file) that contains the following columns
+(with one row entry for each fragment): <code class="docutils literal notranslate"><span class="pre">`chrom</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mapq</span></code>, and <code class="docutils literal notranslate"><span class="pre">strand</span></code>.</p>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">mapq</span></code> is the mapping quality of the fragment, and <code class="docutils literal notranslate"><span class="pre">strand</span></code> is the
+strand of the fragment. The <code class="docutils literal notranslate"><span class="pre">strand</span></code> column can be either <code class="docutils literal notranslate"><span class="pre">+</span></code> or <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p>
+<p><strong>FinaleToolkit</strong> requires that fragment files be Tabix indexed. Therefore,
+you should have an associated <code class="docutils literal notranslate"><span class="pre">.tbi</span></code> file in the same directory of
+your input data.</p>
 <p>For your reference, here is an example fragment file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#chrom    start    stop    mapq    strand</span>
 <span class="n">chr1</span>    <span class="mi">10000</span>    <span class="mi">10050</span>    <span class="mi">60</span>    <span class="o">+</span>
@@ -390,7 +409,9 @@
 <span class="n">chr1</span>    <span class="mi">10450</span>    <span class="mi">10500</span>    <span class="mi">60</span>    <span class="o">-</span>
 </pre></div>
 </div>
-<p>We encourage you to use our comprehensive database, <strong>FinaleDB</strong>, to access relevant fragment files. Learn more about <strong>FinaleDB</strong> <a class="reference external" href="http://finaledb.research.cchmc.org">here</a> .</p>
+<p>We encourage you to use our comprehensive database, <strong>FinaleDB</strong>, to access
+relevant fragment files. Learn more about <strong>FinaleDB</strong>
+<a class="reference external" href="http://finaledb.research.cchmc.org">here</a> .</p>
 </section>
 </section>
 
