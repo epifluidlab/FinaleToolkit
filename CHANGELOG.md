@@ -7,6 +7,12 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] - 2024-12-21
+
+### Fixed
+- Update various docstrings and help statements to no longer mention SAM
+files as an accepted format
+
 ## [0.10.2] - 2024-12-19
 
 ### Fixed
