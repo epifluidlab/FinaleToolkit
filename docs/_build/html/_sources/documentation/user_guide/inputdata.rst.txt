@@ -4,14 +4,6 @@ Input Data
 
 **FinaleToolkit** is compatible with almost any paired-end sequence data.
 
-SAM
-^^^^^^^^^^^
-
-A sequence alignment map (SAM) file is a human-readable file format that stores
-the results of sequence alignment. It contains information about the alignment
-of each read to the reference genome, as well as information about the read
-itself. 
-
 BAM
 ^^^^^^^^^^^
 
