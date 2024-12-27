@@ -1,4 +1,4 @@
-# <img alt="dna with letters FT" src="https://bananasrlowkeygood.github.io/images/finaletools_logo_rounded.png" height="60"> ‎ ‎ ‎FinaleToolkit
+# <img alt="dna with letters FT" src="https://github.com/epifluidlab/FinaleToolkit/blob/b99b38e22a3b07ee9b7e0fa44a488a1eb5442efe/docs/_static/finaletoolkit_logo_rounded.png?raw=true" height="60"> ‎ ‎ ‎FinaleToolkit
 <summary><h3>Table of Contents</h2></summary>
 <ol>
   <li><a href="#about-the-project">About The Project</a></li>
