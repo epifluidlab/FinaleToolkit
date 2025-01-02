@@ -109,8 +109,8 @@ class TestCLIEntryPoint:
         exit_status = os.system('finaletoolkit interval-mds --help')
         assert exit_status == 0
 
-    def test_filter_bam(self):
-        exit_status = os.system('finaletoolkit filter-bam --help')
+    def test_filter_file(self):
+        exit_status = os.system('finaletoolkit filter-file --help')
         assert exit_status == 0
 
     def test_agg_bw(self):
