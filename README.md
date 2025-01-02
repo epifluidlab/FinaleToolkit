@@ -8,7 +8,7 @@
     <ul>
       <li><a href="#functionality">Functionality</a></li>
       <li><a href="#documentation">Documentation</a></li>
-      <li><a href="#wiki">Wiki/Tutorials</a></li>
+      <li><a href="#wikitutorials">Wiki/Tutorials</a></li>
       <li><a href="#compatible-file-formats">Compatible File Formats</a></li>
       <li><a href="#using-fragment-files">Using Fragment Files</a></li>
     </ul>
@@ -27,6 +27,7 @@ features of cell-free DNA from paired-end sequencing data.
 
 ### Citation
 If you use FinaleToolkit in your research, please consider citing our paper:
+
 Li J*, Bandaru R*, Liu Y (2024) FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit. BioRxiv Preprint [![Static Badge](https://img.shields.io/badge/DOI-10.1101%2F2024.05.29.596414-blue?style=flat-square)](https://doi.org/10.1101/2024.05.29.596414)
 
 
