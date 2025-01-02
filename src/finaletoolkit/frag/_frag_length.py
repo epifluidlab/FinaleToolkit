@@ -388,7 +388,7 @@ def frag_length_intervals(
     output_file : str, optional
     quality_threshold : int, optional
     workers : int, optional
-    verbose : boo or int, optional
+    verbose : bool or int, optional
 
     Returns
     -------

@@ -848,72 +848,78 @@ def main_cli_parser():
         help='Number of header rows to ignore. Default is 0')
     cli_interval_mds.set_defaults(module='finaletoolkit.frag._end_motifs', func='_cli_interval_mds')
 
-    # filter-bam
-    cli_filter_bam = subparsers.add_parser(
-        'filter-bam',
-        prog='finaletoolkit-filter-bam',
-        description='Filters a BAM file so that all reads are in mapped pairs,'
-        ' exceed a certain MAPQ, are not flagged for quality, are read1, are '
-        'not secondary or supplementary alignments, and are on the same '
-        'reference sequence as the mate.')
-    cli_filter_bam.add_argument(
+    # filter-file
+    cli_filter_file = subparsers.add_parser(
+        'filter-file',
+        prog='finaletoolkit-filter-file',
+        description='Filters a BED/BAM/CRAM file so that all reads/intervals, when applicable,'
+        'are in mapped pairs, exceed a certain MAPQ, are not flagged for quality, are read1, are '
+        'not secondary or supplementary alignments, are within/excluding specified intervals, '
+        'and are on the same reference sequence as the mate.')
+    cli_filter_file.add_argument(
         'input_file',
         help='Path to BAM file.')
-    cli_filter_bam.add_argument(
-        '-r',
-        '--region-file',
+    cli_filter_file.add_argument(
+        '-W',
+        '--whitelist-file',
         default=None,
         help='Only output alignments overlapping the intervals in this BED '
         'file will be included.')
-    cli_filter_bam.add_argument(
+    cli_filter_file.add_argument(
+        '-B',
+        '--blacklist-file',
+        default=None,
+        help='Only output alignments outside of the intervals in this BED '
+        'file will be included.')
+    cli_filter_file.add_argument(
         '-o',
         '--output-file',
         default='-',
-        help='Output BAM file path.')
-    cli_filter_bam.add_argument(
+        help='Output BED/BAM/CRAM file path.')
+    cli_filter_file.add_argument(
         '-q',
         '--quality-threshold',
         type=int,
         default=30,
         help='Minimum mapping quality threshold.')
-    cli_filter_bam.add_argument(
+    cli_filter_file.add_argument(
         '-min',
         '--min-length',
         default=None,
         type=int,
         help='Minimum length for a fragment to be included.'
         )
-    cli_filter_bam.add_argument(
+    cli_filter_file.add_argument(
         '-max',
         '--max-length',
         default=None,
         type=int,
         help='Maximum length for a fragment to be included.'
         )
-    cli_filter_bam.add_argument(
+    cli_filter_file.add_argument(
         '-lo',
         '--fraction-low',
         type=int,
         dest='min_length',
         help='Deprecated alias for --min-length')
-    cli_filter_bam.add_argument(
+    cli_filter_file.add_argument(
         '-hi',
         '--fraction-high',
         type=int,
         dest='max_length',
         help='Deprecated alias for --max-length')
-    cli_filter_bam.add_argument(
+    cli_filter_file.add_argument(
         '-w',
         '--workers',
         type=int,
         default=1,
         help='Number of worker processes.')
-    cli_filter_bam.add_argument(
+    cli_filter_file.add_argument(
         '-v',
         '--verbose',
         action='count',
         help='Enable verbose mode to display detailed processing information.')
-    cli_filter_bam.set_defaults(module='finaletoolkit.utils', func='filter_bam')
+    cli_filter_file.set_defaults(module='finaletoolkit.utils', func='filter_file')
 
     # agg-bw
     cli_agg_bw = subparsers.add_parser(
