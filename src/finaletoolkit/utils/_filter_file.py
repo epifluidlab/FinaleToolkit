@@ -116,19 +116,32 @@ def filter_file(
         # create temp dir to store intermediate sorted file
         try:
             with tf.TemporaryDirectory() as temp_dir:
-                flag_filtered_bam = f'{temp_dir}/flag_filtered{suffix}'
+                temp_1 = f"{temp_dir}/output1{suffix}"
+                temp_2 = f"{temp_dir}/output2{suffix}"
+                if blacklist_file is not None:
+                    try:
+                        subprocess.run(
+                            f"samtools view {input_file} -U {temp_1} -L {blacklist_file} -@ {workers} -b > /dev/null && samtools index {temp_1}", 
+                            shell=True, 
+                            check=True)
+                    except Exception:
+                        traceback.print_exc()
+                        exit(1)
+                else:
+                    subprocess.run(f"mv {input_file} {temp_1}")
+
                 samtools_command = (
-                    f'samtools view {input_file} -F 3852 -f 3 -b -h -o '
-                    f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
+                    f'samtools view {temp_1} -F 3852 -f 3 -b -h -o '
+                    f'{temp_2} -q {quality_threshold} -@ {workers}'
                 )
 
                 if whitelist_file is not None:
                     samtools_command += f' -M -L {whitelist_file}'
-                if blacklist_file is not None:
-                    samtools_command += f' -U {blacklist_file}'
+
                 try:
                     subprocess.run(samtools_command, shell=True, check=True)
-                except Exception:
+                except subprocess.CalledProcessError as e:
+                    print(e)
                     traceback.print_exc()
                     exit(1)
 
@@ -136,7 +149,7 @@ def filter_file(
                 save = pysam.set_verbosity(0)
                 
                 # filter for reads on different reference and length
-                with pysam.AlignmentFile(flag_filtered_bam, 'rb',threads=workers//3) as in_file:
+                with pysam.AlignmentFile(temp_2, 'rb',threads=workers//3) as in_file:
                     with pysam.AlignmentFile(
                         output_file, 'wb', template=in_file, threads=workers-workers//3) as out_file:
                         for read in in_file:
