@@ -8,16 +8,16 @@ import pysam
 
 def filter_file(
         input_file: str,
-        whitelist_file: str=None,
-        blacklist_file: str=None,
-        output_file: str=None,
-        min_length: int=None,
-        max_length: int=None,
-        quality_threshold: int=30,
-        workers: int=1,
-        verbose: bool=False,
-        fraction_low: int=None,
-        fraction_high: int=None,):
+        whitelist_file: str | None = None,
+        blacklist_file: str | None = None,
+        output_file: str | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        quality_threshold: int = 30,
+        workers: int = 1,
+        verbose: bool = False,
+        fraction_low: int | None = None,
+        fraction_high: int | None = None,):
     """
     Accepts the path to a BAM, CRAM, or BED file and creates a filtered version.
 
