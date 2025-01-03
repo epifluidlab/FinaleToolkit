@@ -7,6 +7,12 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.4] - 2025-1-2
+
+### Changed
+- Changed filter-bam function into filter-file; Now accepts BED and CRAM in addition to BAM
+- filter-file command can now accept a blacklist file
+
 ## [0.10.3] - 2024-12-21
 
 ### Fixed
