@@ -13,6 +13,7 @@ def filter_file(
         output_file: str | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
+        intersect_policy: str = "midpoint",
         quality_threshold: int = 30,
         workers: int = 1,
         verbose: bool = False,
@@ -40,6 +41,12 @@ def filter_file(
         Minimum length for reads/intervals
     max_length : int, optional
         Maximum length for reads/intervals
+    intersect_policy: str, optional
+        Specifies how to determine whether fragments are in interval for
+        whitelisting and blacklisting functionality.'midpoint' (default) 
+        calculates the central coordinate of each fragment and only 
+        selects the fragment if the midpoint is in the interval. 
+        'any' includes fragments with any overlap with the interval.
     quality_threshold : int, optional
         Minimum mapping quality score
     workers : int, optional
@@ -66,6 +73,7 @@ def filter_file(
         output_file: {output_file}
         min_length: {min_length}
         max_length: {max_length}
+        intersect_policy: {intersect_policy}
         quality_threshold: {quality_threshold}
         workers: {workers}
         verbose: {verbose}     
@@ -112,34 +120,45 @@ def filter_file(
     elif not output_file.endswith(suffix) and output_file != '-':
         raise ValueError('Output file should share same suffix as input file.')
 
-    if input_file.endswith(('.bam', '.cram')):
-        # create temp dir to store intermediate sorted file
-        try:
-            with tf.TemporaryDirectory() as temp_dir:
-                temp_1 = f"{temp_dir}/output1{suffix}"
-                temp_2 = f"{temp_dir}/output2{suffix}"
-                if blacklist_file is not None:
+    intersect = "-f 0.500" if intersect_policy == "midpoint" else ""
+
+    with tf.TemporaryDirectory() as temp_dir:
+        temp_1 = f"{temp_dir}/output1{suffix}"
+        temp_2 = f"{temp_dir}/output2{suffix}"
+        temp_3 = f"{temp_dir}/output3{suffix}"
+        if input_file.endswith(('.bam', '.cram')):
+            # create temp dir to store intermediate sorted file
+            try:
+                if whitelist_file is not None:
                     try:
                         subprocess.run(
-                            f"samtools view {input_file} -U {temp_1} -L {blacklist_file} -@ {workers} -b > /dev/null && samtools index {temp_1}", 
+                            f"bedtools intersect -abam {input_file} -b {whitelist_file} {intersect} > {temp_1} && samtools index {temp_1}", 
                             shell=True, 
                             check=True)
                     except Exception:
                         traceback.print_exc()
                         exit(1)
                 else:
-                    subprocess.run(f"mv {input_file} {temp_1}")
-
-                samtools_command = (
-                    f'samtools view {temp_1} -F 3852 -f 3 -b -h -o '
-                    f'{temp_2} -q {quality_threshold} -@ {workers}'
-                )
-
-                if whitelist_file is not None:
-                    samtools_command += f' -M -L {whitelist_file}'
+                    subprocess.run(
+                        f"cp {input_file} {temp_1}", shell=True, check=True)
+                if blacklist_file is not None:
+                    try:
+                        subprocess.run(
+                            f"bedtools intersect -abam {temp_1} -b {blacklist_file} -v {intersect} > {temp_2} && samtools index {temp_2}", 
+                            shell=True, 
+                            check=True)
+                    except Exception:
+                        traceback.print_exc()
+                        exit(1)
+                else:
+                    subprocess.run(
+                        f"mv {temp_1} {temp_2}", shell=True, check=True)
 
                 try:
-                    subprocess.run(samtools_command, shell=True, check=True)
+                    subprocess.run(
+                        f"samtools view {temp_2} -F 3852 -f 3 -b -h -o {temp_3} -q {quality_threshold} -@ {workers}",
+                        shell=True,
+                        check=True)  
                 except Exception:
                     traceback.print_exc()
                     exit(1)
@@ -148,36 +167,35 @@ def filter_file(
                 save = pysam.set_verbosity(0)
                 
                 # filter for reads on different reference and length
-                with pysam.AlignmentFile(temp_2, 'rb',threads=workers//3) as in_file:
+                with pysam.AlignmentFile(temp_3, 'rb',threads=workers//3) as in_file:
                     with pysam.AlignmentFile(
                         output_file, 'wb', template=in_file, threads=workers-workers//3) as out_file:
                         for read in in_file:
                             if (
                                 read.reference_name == read.next_reference_name
                                 and (max_length is None
-                                     or read.template_length <= max_length)
+                                        or read.template_length <= max_length)
                                 and (min_length is None
-                                     or read.template_length >= min_length)
+                                        or read.template_length >= min_length)
                             ):
                                 out_file.write(read)
 
-        finally:
-            pysam.set_verbosity(save)
+            finally:
+                pysam.set_verbosity(save)
 
-        if output_file != '-':
-            # generate index for output_file
-            try:
-                subprocess.run(
-                    f'samtools index {output_file} {output_file}.bai',
-                    shell=True,
-                    check=True
-                )
-            except Exception:
-                traceback.print_exc()
-                exit(1)
-    elif input_file.endswith('.gz'):
-        with tf.TemporaryDirectory() as temp_dir:
-            with gzip.open(input_file, 'r') as infile, open(f"{temp_dir}/output1.bed", 'w') as outfile:
+            if output_file != '-':
+                # generate index for output_file
+                try:
+                    subprocess.run(
+                        f'samtools index {output_file} {output_file}.bai',
+                        shell=True,
+                        check=True
+                    )
+                except Exception:
+                    traceback.print_exc()
+                    exit(1)
+        elif input_file.endswith('.gz'):
+            with gzip.open(input_file, 'r') as infile, open(temp_1, 'w') as outfile:
                 mapq_column = 0 # 1-index for sanity when comparing with len()
                 for line in infile:
                     line = line.decode('utf-8')
@@ -221,7 +239,7 @@ def filter_file(
                 if whitelist_file is not None:
                     try:
                         subprocess.run(
-                            f"bedtools intersect -f 0.50 -a {temp_dir}/output1.bed -b {whitelist_file} > {temp_dir}/output2.bed", 
+                            f"bedtools intersect -a {temp_1} -b {whitelist_file} {intersect} > {temp_2}", 
                             shell=True, 
                             check=True
                             )
@@ -229,12 +247,12 @@ def filter_file(
                         traceback.print_exc()
                         exit(1)
                 else:
-                    subprocess.run(f"mv {temp_dir}/output1.bed {temp_dir}/output2.bed", shell=True, check=True)
+                    subprocess.run(f"mv {temp_1} {temp_2}", shell=True, check=True)
 
                 if blacklist_file is not None:
                     try:
                         subprocess.run(
-                            f"bedtools intersect -v -f 0.50 -a {temp_dir}/output2.bed -b {blacklist_file} > {temp_dir}/output3.bed", 
+                            f"bedtools intersect -v -a {temp_2} -b {blacklist_file} {intersect} > {temp_3}", 
                             shell=True, 
                             check=True
                             )
@@ -242,10 +260,10 @@ def filter_file(
                         traceback.print_exc()
                         exit(1)  
                 else:
-                    subprocess.run(f"mv {temp_dir}/output2.bed {temp_dir}/output3.bed", shell=True, check=True)
+                    subprocess.run(f"mv {temp_2} {temp_3}", shell=True, check=True)
                 try:
                     subprocess.run(
-                        f"bgzip -@ {workers} -c {temp_dir}/output3.bed > {output_file}", 
+                        f"bgzip -@ {workers} -c {temp_3} > {output_file}", 
                         shell=True, 
                         check=True
                         )
@@ -263,6 +281,6 @@ def filter_file(
                     except Exception:
                         traceback.print_exc()
                         exit(1)                        
-    else:
-        raise ValueError("Input file must be a BAM, CRAM, or BED file.")
+        else:
+            raise ValueError("Input file must be a BAM, CRAM, or BED file.")
     return output_file
