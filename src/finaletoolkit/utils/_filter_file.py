@@ -140,8 +140,7 @@ def filter_file(
 
                 try:
                     subprocess.run(samtools_command, shell=True, check=True)
-                except subprocess.CalledProcessError as e:
-                    print(e)
+                except Exception:
                     traceback.print_exc()
                     exit(1)
 
