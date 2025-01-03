@@ -96,19 +96,27 @@ def filter_file(
                       stacklevel=2)
         raise ValueError(
             'fraction_high and max_length cannot both be specified.')
-    
+
+    if input_file.endswith(".gz"):
+        suffix = ".gz"
+    elif input_file.endswith(".bam"):
+        suffix = ".bam"
+    elif input_file.endswith(".cram"):
+        suffix = ".cram"
+    else:
+        raise ValueError('Input file should have suffix .bam, .cram, or .gz')      
+
     # create tempfile to contain filtered output
     if output_file is None:
-        suffix = '.bam' if input_file.endswith(('.bam', '.cram')) else '.gz'
         _, output_file = tf.mkstemp(suffix=suffix)
-    elif not output_file.endswith(('.bam', '.cram')) and not output_file.endswith('.gz') and output_file != '-':
-        raise ValueError('Output file should have suffix .bam, .cram, or .gz')
+    elif not output_file.endswith(suffix) and output_file != '-':
+        raise ValueError('Output file should share same suffix as input file.')
 
     if input_file.endswith(('.bam', '.cram')):
         # create temp dir to store intermediate sorted file
         try:
             with tf.TemporaryDirectory() as temp_dir:
-                flag_filtered_bam = f'{temp_dir}/flag_filtered.{suffix}'
+                flag_filtered_bam = f'{temp_dir}/flag_filtered{suffix}'
                 samtools_command = (
                     f'samtools view {input_file} -F 3852 -f 3 -b -h -o '
                     f'{flag_filtered_bam} -q {quality_threshold} -@ {workers}'
