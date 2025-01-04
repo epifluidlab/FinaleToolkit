@@ -180,20 +180,21 @@ def filter_file(
                             ):
                                 out_file.write(read)
 
+                if output_file != '-':
+                # generate index for output_file
+                    try:
+                        subprocess.run(
+                            f'samtools index {output_file} {output_file}.bai',
+                            shell=True,
+                            check=True
+                        )
+                    except Exception:
+                        traceback.print_exc()
+                        exit(1)
+
             finally:
                 pysam.set_verbosity(save)
 
-            if output_file != '-':
-                # generate index for output_file
-                try:
-                    subprocess.run(
-                        f'samtools index {output_file} {output_file}.bai',
-                        shell=True,
-                        check=True
-                    )
-                except Exception:
-                    traceback.print_exc()
-                    exit(1)
         elif input_file.endswith('.gz'):
             with gzip.open(input_file, 'r') as infile, open(temp_1, 'w') as outfile:
                 mapq_column = 0 # 1-index for sanity when comparing with len()
@@ -269,7 +270,8 @@ def filter_file(
                         )
                 except Exception:
                     traceback.print_exc()
-                    exit(1)    
+                    exit(1)
+
                 if output_file != '-':
                     # generate index for output_file
                     try:
