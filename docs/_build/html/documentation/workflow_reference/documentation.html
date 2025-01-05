@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Input Data &#8212; FinaleToolkit  documentation</title>
+    <title>Documentation &#8212; FinaleToolkit  documentation</title>
   
   
   
@@ -41,12 +41,11 @@
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/user_guide/inputdata';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/workflow_reference/documentation';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Features" href="features.html" />
-    <link rel="prev" title="Introduction" href="what.html" />
+    <link rel="prev" title="Features" href="features.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -140,8 +139,8 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
     User Guide
   </a>
 </li>
@@ -161,8 +160,8 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../workflow_reference/index.html">
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
     Workflow
   </a>
 </li>
@@ -247,8 +246,8 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
     User Guide
   </a>
 </li>
@@ -268,8 +267,8 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../workflow_reference/index.html">
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
     Workflow
   </a>
 </li>
@@ -302,14 +301,8 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="what.html">Introduction</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Input Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="intersectpolicy.html">Intersect Policy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="help.html">Help</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Documentation</a></li>
 </ul>
 </div>
 </nav></div>
@@ -354,9 +347,9 @@
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">FinaleToolkit Documentation</a></li>
     
     
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Workflow</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Input Data</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Documentation</span></li>
   </ul>
 </nav>
 </div>
@@ -373,57 +366,30 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="input-data">
-<h1>Input Data<a class="headerlink" href="#input-data" title="Link to this heading">#</a></h1>
-<p><strong>FinaleToolkit</strong> is compatible with almost any paired-end sequence data.</p>
-<section id="bam">
-<h2>BAM<a class="headerlink" href="#bam" title="Link to this heading">#</a></h2>
-<p>A binary alignment file (BAM) that stores the results of sequence alignment.
-It contains information about the alignment of each read to the reference
-genome, as well as information about the read itself. This file format is not
-human-readable but relatively space-efficient when compared to its plaintext
-counterpart, the sequence alignment map (SAM) file format.</p>
-<p><strong>FinaleToolkit</strong> requires that BAM files be BAI indexed. Therefore, you should
-have an associated <code class="docutils literal notranslate"><span class="pre">.bam.bai</span></code> file in the same directory of your input data.</p>
+  <section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">#</a></h1>
+<section id="basic-i-o">
+<h2>Basic I/O<a class="headerlink" href="#basic-i-o" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code> in <a class="reference external" href="https://github.com/epifluidlab/finaletoolkit_workflow">this repository</a> and a YAML file specifying the parameters to process your data must be present when running the workflow, in a manner similar to the example usage section above.</p>
+<p>YAML parameters (mappings) are of the form: <code class="docutils literal notranslate"><span class="pre">key:</span> <span class="pre">value</span></code>, where values that are strings must be wrapped in double quotes, and each parameter is on its own line. This workflow requires the keys <code class="docutils literal notranslate"><span class="pre">input_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> to specify the folders in the working directory of which genomic data should be taken from and where it should be processed into.</p>
+<p><code class="docutils literal notranslate"><span class="pre">supplement_dir</span></code> is also necessary to denote the folder of files that are not processed themselves in a command, but are needed to process input data. For example, you would put your blacklist, whitelist, mappability, and interval files in the folder specified by <code class="docutils literal notranslate"><span class="pre">supplement_dir</span></code>.</p>
+<p>Files in the <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> directory will have an extension added before their format type. All files that make their way from the input to the output directory (after being run through <code class="docutils literal notranslate"><span class="pre">filter-file</span></code> if present) will have a <code class="docutils literal notranslate"><span class="pre">.final</span></code> extension before the type denoting the format. For example, <code class="docutils literal notranslate"><span class="pre">input/file.bed.gz</span></code> would be filtered into <code class="docutils literal notranslate"><span class="pre">output/file.final.bed.gz</span></code>.</p>
+<p>Additionally if Finaletoolkit commands other than <code class="docutils literal notranslate"><span class="pre">filter-file</span></code> are specified, the secondary extension will be the name of the command the file was run through with hyphens substituted for underscores. For example, if you run <code class="docutils literal notranslate"><span class="pre">frag-length-bins</span></code>, files in an input directory like <code class="docutils literal notranslate"><span class="pre">input/file.bed.gz</span></code> would be run through Finaletoolkit and outputted as <code class="docutils literal notranslate"><span class="pre">output/file.frag_length_bins.bed.gz</span></code>. If multiple Finaletoolkit commands are specified, then each file will be outputted for each Finaletoolkit command.</p>
 </section>
-<section id="cram">
-<h2>CRAM<a class="headerlink" href="#cram" title="Link to this heading">#</a></h2>
-<p>A compressed read alignment map file is another binary file standard. It
-is a binary file that is smaller than a BAM file, but still contains all of the
-same information.</p>
-<p><strong>FinaleToolkit</strong> requires that CRAM files be CRAI indexed. Therefore, you
-should have an associated <code class="docutils literal notranslate"><span class="pre">.cram.crai</span></code> file in the same directory of your
-input data.</p>
+<section id="filtering-by-mappability">
+<h2>Filtering by mappability<a class="headerlink" href="#filtering-by-mappability" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mappability_file</span></code> and <code class="docutils literal notranslate"><span class="pre">mappability_threshold</span></code> are used to filter interval files located in <code class="docutils literal notranslate"><span class="pre">supplement_dir</span></code>. <code class="docutils literal notranslate"><span class="pre">mappability_file</span></code> should be the name of the bigWig file in <code class="docutils literal notranslate"><span class="pre">supplement_dir</span></code> that filters all interval files, and <code class="docutils literal notranslate"><span class="pre">mappability_threshold</span></code> should be a floating point value from 0.0 to 1.0 to denote the minimum average mappability value that intervals will be filtered by as per the mappability file. Finaletoolkit commands that take in these interval files will recieve the interval file filtered by mappability.</p>
 </section>
-<section id="fragment-file">
-<h2>Fragment File<a class="headerlink" href="#fragment-file" title="Link to this heading">#</a></h2>
-<p>A fragment file (<code class="docutils literal notranslate"><span class="pre">.frag.gz</span></code> or <code class="docutils literal notranslate"><span class="pre">frag.tsv.bgz</span></code>) file that is derived from
-information in a BAM file. A fragment file is a block-gzipped BED3+2 file
-(similar to a tab-separated value file) that contains the following columns
-(with one row entry for each fragment): <code class="docutils literal notranslate"><span class="pre">`chrom</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>,
-<code class="docutils literal notranslate"><span class="pre">mapq</span></code>, and <code class="docutils literal notranslate"><span class="pre">strand</span></code>.</p>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">mapq</span></code> is the mapping quality of the fragment, and <code class="docutils literal notranslate"><span class="pre">strand</span></code> is the
-strand of the fragment. The <code class="docutils literal notranslate"><span class="pre">strand</span></code> column can be either <code class="docutils literal notranslate"><span class="pre">+</span></code> or <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p>
-<p><strong>FinaleToolkit</strong> requires that fragment files be Tabix indexed. Therefore,
-you should have an associated <code class="docutils literal notranslate"><span class="pre">.tbi</span></code> file in the same directory of
-your input data.</p>
-<p>For your reference, here is an example fragment file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#chrom    start    stop    mapq    strand</span>
-<span class="n">chr1</span>    <span class="mi">10000</span>    <span class="mi">10050</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10050</span>    <span class="mi">10100</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10100</span>    <span class="mi">10150</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10150</span>    <span class="mi">10200</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10200</span>    <span class="mi">10250</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10250</span>    <span class="mi">10300</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10300</span>    <span class="mi">10350</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10350</span>    <span class="mi">10400</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10400</span>    <span class="mi">10450</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10450</span>    <span class="mi">10500</span>    <span class="mi">60</span>    <span class="o">-</span>
-</pre></div>
-</div>
-<p>We encourage you to use our comprehensive database, <strong>FinaleDB</strong>, to access
-relevant fragment files. Learn more about <strong>FinaleDB</strong>
-<a class="reference external" href="http://finaledb.research.cchmc.org">here</a> .</p>
+<section id="using-finaletoolkit-in-this-workflow">
+<h2>Using Finaletoolkit in this workflow<a class="headerlink" href="#using-finaletoolkit-in-this-workflow" title="Link to this heading">#</a></h2>
+<p>Finaletoolkit CLI commands and flags directly correspond to parameters in this workflow, with hyphens turning into underscores, and flags being seperated from their command by an underscore. For example, <code class="docutils literal notranslate"><span class="pre">adjust-wps</span></code> would be <code class="docutils literal notranslate"><span class="pre">adjust_wps</span></code>, and the max length flag of this command would be set through the key <code class="docutils literal notranslate"><span class="pre">adjust_wps_max_length</span></code>.</p>
+<p>If you want to use a Finaletoolkit command, set the converted command name in YAML to <code class="docutils literal notranslate"><span class="pre">True</span></code>. For example, if you wanted to run <code class="docutils literal notranslate"><span class="pre">adjust-wps</span></code> on your input files, include the line <code class="docutils literal notranslate"><span class="pre">adjust_wps:</span> <span class="pre">True</span></code>. Flags may be set through the naming scheme as specified in the paragraph above (<code class="docutils literal notranslate"><span class="pre">adjust_wps_max_length:</span> <span class="pre">250</span></code>). Flags for this workflow do not exist for <code class="docutils literal notranslate"><span class="pre">input_file</span></code>, <code class="docutils literal notranslate"><span class="pre">output_file</span></code>, deperecated flags, or <code class="docutils literal notranslate"><span class="pre">verbose</span></code>, which is on by default.</p>
+<p>Certain commands require prerequisite commands to run. For example, you must run <code class="docutils literal notranslate"><span class="pre">wps</span></code> to run <code class="docutils literal notranslate"><span class="pre">adjust-wps</span></code> since the <code class="docutils literal notranslate"><span class="pre">adjust-wps</span></code> rule takes in the output of <code class="docutils literal notranslate"><span class="pre">wps</span></code>. Similarly, <code class="docutils literal notranslate"><span class="pre">mds</span></code> requires <code class="docutils literal notranslate"><span class="pre">end-motifs</span></code>, <code class="docutils literal notranslate"><span class="pre">interval-end-motifs</span></code> requires <code class="docutils literal notranslate"><span class="pre">interval-mds</span></code>, and <code class="docutils literal notranslate"><span class="pre">agg-bw</span></code> requires <code class="docutils literal notranslate"><span class="pre">cleavage-profile</span></code>.</p>
+</section>
+<section id="filter-file">
+<h2>Filter-file<a class="headerlink" href="#filter-file" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">filter-file</span></code> command can be used in a different manner than the other Finaletoolkit commands. If only <code class="docutils literal notranslate"><span class="pre">filter-file</span></code> is set to run, then it will be the output of the workflow. However, if other Finaletoolkit commands are set to run, then they will take in the output of <code class="docutils literal notranslate"><span class="pre">filter-file</span></code>.</p>
+<p>Files associated with <code class="docutils literal notranslate"><span class="pre">filter_file_blacklist_file</span></code> and <code class="docutils literal notranslate"><span class="pre">filter_file_whitelist_file</span></code> will automatically be block gzipped and indexed if they do not end in <code class="docutils literal notranslate"><span class="pre">.gz</span></code>.</p>
 </section>
 </section>
 
@@ -438,22 +404,13 @@ relevant fragment files. Learn more about <strong>FinaleDB</strong>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="what.html"
+       href="features.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Introduction</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="features.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
         <p class="prev-next-title">Features</p>
       </div>
-      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
@@ -474,9 +431,10 @@ relevant fragment files. Learn more about <strong>FinaleDB</strong>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bam">BAM</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cram">CRAM</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fragment-file">Fragment File</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-i-o">Basic I/O</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#filtering-by-mappability">Filtering by mappability</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-finaletoolkit-in-this-workflow">Using Finaletoolkit in this workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-file">Filter-file</a></li>
 </ul>
   </nav></div>
 
@@ -484,7 +442,7 @@ relevant fragment files. Learn more about <strong>FinaleDB</strong>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/documentation/user_guide/inputdata.rst.txt"
+      <li><a href="../../_sources/documentation/workflow_reference/documentation.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

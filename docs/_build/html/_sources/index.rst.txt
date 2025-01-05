@@ -27,6 +27,7 @@ Documentation
    documentation/user_guide/index
    documentation/cli_reference/index
    documentation/api_reference/index
+   documentation/workflow_reference/index
    
 -----------------
 Citations

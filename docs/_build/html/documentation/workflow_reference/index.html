@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Input Data &#8212; FinaleToolkit  documentation</title>
+    <title>Workflow &#8212; FinaleToolkit  documentation</title>
   
   
   
@@ -41,12 +41,12 @@
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/user_guide/inputdata';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/workflow_reference/index';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Features" href="features.html" />
-    <link rel="prev" title="Introduction" href="what.html" />
+    <link rel="prev" title="Genome Utilities" href="../api_reference/genomeutils.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -140,8 +140,8 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
     User Guide
   </a>
 </li>
@@ -161,8 +161,8 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../workflow_reference/index.html">
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
     Workflow
   </a>
 </li>
@@ -247,8 +247,8 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
     User Guide
   </a>
 </li>
@@ -268,8 +268,8 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../workflow_reference/index.html">
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
     Workflow
   </a>
 </li>
@@ -301,15 +301,9 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="what.html">Introduction</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Input Data</a></li>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="intersectpolicy.html">Intersect Policy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="help.html">Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a></li>
 </ul>
 </div>
 </nav></div>
@@ -353,10 +347,7 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">FinaleToolkit Documentation</a></li>
     
-    
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Input Data</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Workflow</span></li>
   </ul>
 </nav>
 </div>
@@ -373,58 +364,24 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="input-data">
-<h1>Input Data<a class="headerlink" href="#input-data" title="Link to this heading">#</a></h1>
-<p><strong>FinaleToolkit</strong> is compatible with almost any paired-end sequence data.</p>
-<section id="bam">
-<h2>BAM<a class="headerlink" href="#bam" title="Link to this heading">#</a></h2>
-<p>A binary alignment file (BAM) that stores the results of sequence alignment.
-It contains information about the alignment of each read to the reference
-genome, as well as information about the read itself. This file format is not
-human-readable but relatively space-efficient when compared to its plaintext
-counterpart, the sequence alignment map (SAM) file format.</p>
-<p><strong>FinaleToolkit</strong> requires that BAM files be BAI indexed. Therefore, you should
-have an associated <code class="docutils literal notranslate"><span class="pre">.bam.bai</span></code> file in the same directory of your input data.</p>
-</section>
-<section id="cram">
-<h2>CRAM<a class="headerlink" href="#cram" title="Link to this heading">#</a></h2>
-<p>A compressed read alignment map file is another binary file standard. It
-is a binary file that is smaller than a BAM file, but still contains all of the
-same information.</p>
-<p><strong>FinaleToolkit</strong> requires that CRAM files be CRAI indexed. Therefore, you
-should have an associated <code class="docutils literal notranslate"><span class="pre">.cram.crai</span></code> file in the same directory of your
-input data.</p>
-</section>
-<section id="fragment-file">
-<h2>Fragment File<a class="headerlink" href="#fragment-file" title="Link to this heading">#</a></h2>
-<p>A fragment file (<code class="docutils literal notranslate"><span class="pre">.frag.gz</span></code> or <code class="docutils literal notranslate"><span class="pre">frag.tsv.bgz</span></code>) file that is derived from
-information in a BAM file. A fragment file is a block-gzipped BED3+2 file
-(similar to a tab-separated value file) that contains the following columns
-(with one row entry for each fragment): <code class="docutils literal notranslate"><span class="pre">`chrom</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>,
-<code class="docutils literal notranslate"><span class="pre">mapq</span></code>, and <code class="docutils literal notranslate"><span class="pre">strand</span></code>.</p>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">mapq</span></code> is the mapping quality of the fragment, and <code class="docutils literal notranslate"><span class="pre">strand</span></code> is the
-strand of the fragment. The <code class="docutils literal notranslate"><span class="pre">strand</span></code> column can be either <code class="docutils literal notranslate"><span class="pre">+</span></code> or <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p>
-<p><strong>FinaleToolkit</strong> requires that fragment files be Tabix indexed. Therefore,
-you should have an associated <code class="docutils literal notranslate"><span class="pre">.tbi</span></code> file in the same directory of
-your input data.</p>
-<p>For your reference, here is an example fragment file:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#chrom    start    stop    mapq    strand</span>
-<span class="n">chr1</span>    <span class="mi">10000</span>    <span class="mi">10050</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10050</span>    <span class="mi">10100</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10100</span>    <span class="mi">10150</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10150</span>    <span class="mi">10200</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10200</span>    <span class="mi">10250</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10250</span>    <span class="mi">10300</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10300</span>    <span class="mi">10350</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10350</span>    <span class="mi">10400</span>    <span class="mi">60</span>    <span class="o">-</span>
-<span class="n">chr1</span>    <span class="mi">10400</span>    <span class="mi">10450</span>    <span class="mi">60</span>    <span class="o">+</span>
-<span class="n">chr1</span>    <span class="mi">10450</span>    <span class="mi">10500</span>    <span class="mi">60</span>    <span class="o">-</span>
-</pre></div>
+  <section id="workflow">
+<h1>Workflow<a class="headerlink" href="#workflow" title="Link to this heading">#</a></h1>
+<p>A Snakemake workflow designed to extract epigenomic features from several files in a folder. You can find and download the worklow <a class="reference external" href="https://github.com/epifluidlab/finaletoolkit_workflow">here</a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="features.html#example-usage">Example usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html#basic-i-o">Basic I/O</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html#filtering-by-mappability">Filtering by mappability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html#using-finaletoolkit-in-this-workflow">Using Finaletoolkit in this workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html#filter-file">Filter-file</a></li>
+</ul>
+</li>
+</ul>
 </div>
-<p>We encourage you to use our comprehensive database, <strong>FinaleDB</strong>, to access
-relevant fragment files. Learn more about <strong>FinaleDB</strong>
-<a class="reference external" href="http://finaledb.research.cchmc.org">here</a> .</p>
-</section>
 </section>
 
 
@@ -438,12 +395,12 @@ relevant fragment files. Learn more about <strong>FinaleDB</strong>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="what.html"
+       href="../api_reference/genomeutils.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Introduction</p>
+        <p class="prev-next-title">Genome Utilities</p>
       </div>
     </a>
     <a class="right-next"
@@ -467,24 +424,10 @@ relevant fragment files. Learn more about <strong>FinaleDB</strong>
 
 
   <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bam">BAM</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cram">CRAM</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fragment-file">Fragment File</a></li>
-</ul>
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/documentation/user_guide/inputdata.rst.txt"
+      <li><a href="../../_sources/documentation/workflow_reference/index.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

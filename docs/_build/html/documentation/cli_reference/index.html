@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/cli_reference/index';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
@@ -160,6 +160,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../workflow_reference/index.html">
+    Workflow
+  </a>
+</li>
+
   </ul>
 </nav></div>
       
@@ -260,6 +267,13 @@
   </a>
 </li>
 
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../workflow_reference/index.html">
+    Workflow
+  </a>
+</li>
+
   </ul>
 </nav></div>
           
@@ -355,8 +369,8 @@
                      <span class="o">...</span>
 </pre></div>
 </div>
-<section id="named-arguments">
-<h2>Named Arguments<a class="headerlink" href="#named-arguments" title="Link to this heading">#</a></h2>
+<section id="finaletoolkit.cli.main_cli-main_cli_parser-named-arguments">
+<h2>Named Arguments<a class="headerlink" href="#finaletoolkit.cli.main_cli-main_cli_parser-named-arguments" title="Link to this heading">#</a></h2>
 <dl class="option-list">
 <dt><kbd>-v, --version</kbd></dt>
 <dd><p>show program’s version number and exit</p>
@@ -368,8 +382,7 @@
 <section id="coverage">
 <h3>coverage<a class="headerlink" href="#coverage" title="Link to this heading">#</a></h3>
 <p>Calculates fragmentation coverage over intervals defined in a BED file based on alignment data from a BAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">coverage</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SCALE_FACTOR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
-                       <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">coverage</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SCALE_FACTOR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                        <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
@@ -384,24 +397,24 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat1">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat1" title="Link to this heading">#</a></h4>
+<section id="named-arguments">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A BED file containing coverage values over the intervals specified in interval file.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-n, --normalize</kbd></dt>
 <dd><p>If flag set, multiplies by user inputed scale factor if given and normalizes output by total coverage. May lead to longer execution time for high-throughput data.</p>
-<p>Default: False</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt><kbd>-s, --scale-factor</kbd></dt>
 <dd><p>Scale factor for coverage values. Default is 1.</p>
-<p>Default: 1.0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1.0</span></code></p>
 </dd>
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included in coverage.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-max, --max-length</kbd></dt>
 <dd><p>Maximum length for a fragment to be included in coverage.</p>
@@ -409,19 +422,19 @@
 <dt><kbd>-p, --intersect-policy</kbd></dt>
 <dd><p>Possible choices: midpoint, any</p>
 <p>Specifies what policy is used to include fragments in the given interval. See User Guide for more information.</p>
-<p>Default: “midpoint”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'midpoint'</span></code></p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 30</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">30</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: False</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 </dl>
 </section>
@@ -429,8 +442,8 @@
 <section id="frag-length-bins">
 <h3>frag-length-bins<a class="headerlink" href="#frag-length-bins" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment lengths grouped in bins given a BAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span>
-                               <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="o">-</span><span class="n">path</span> <span class="n">HISTOGRAM_PATH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">bins</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CONTIG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span> <span class="n">START</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">E</span> <span class="n">STOP</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">--</span><span class="nb">bin</span><span class="o">-</span><span class="n">size</span> <span class="n">BIN_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">--</span><span class="n">histogram</span><span class="o">-</span><span class="n">path</span> <span class="n">HISTOGRAM_PATH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                <span class="n">input_file</span>
 </pre></div>
 </div>
@@ -442,8 +455,8 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat2">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat2" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat1">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat1" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-c, --contig</kbd></dt>
 <dd><p>Specify the contig or chromosome to select fragments from. (Required if using –start or –stop.)</p>
@@ -456,7 +469,7 @@
 </dd>
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included in fragment length.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-max, --max-length</kbd></dt>
 <dd><p>Maximum length for a fragment to be included in fragment length.</p>
@@ -464,26 +477,26 @@
 <dt><kbd>-p, --intersect-policy</kbd></dt>
 <dd><p>Possible choices: midpoint, any</p>
 <p>Specifies what policy is used to include fragments in the given interval. See User Guide for more information.</p>
-<p>Default: “midpoint”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'midpoint'</span></code></p>
 </dd>
 <dt><kbd>--bin-size</kbd></dt>
 <dd><p>Specify the size of the bins to group fragment lengths into.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A .TSV file containing containing fragment lengths binned according to the specified bin size.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>--histogram-path</kbd></dt>
 <dd><p>Path to store histogram.</p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 30</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">30</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -491,8 +504,7 @@
 <section id="frag-length-intervals">
 <h3>frag-length-intervals<a class="headerlink" href="#frag-length-intervals" title="Link to this heading">#</a></h3>
 <p>Retrieves fragment length summary statistics over intervals defined in a BED file based on alignment data from a BAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                                    <span class="n">input_file</span> <span class="n">interval_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">frag</span><span class="o">-</span><span class="n">length</span><span class="o">-</span><span class="n">intervals</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="p">{</span><span class="n">midpoint</span><span class="p">,</span><span class="nb">any</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat2">
@@ -506,12 +518,12 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat3">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat3" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat2">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat2" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included in fragment length.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-max, --max-length</kbd></dt>
 <dd><p>Maximum length for a fragment to be included in fragment length.</p>
@@ -519,23 +531,23 @@
 <dt><kbd>-p, --intersect-policy</kbd></dt>
 <dd><p>Possible choices: midpoint, any</p>
 <p>Specifies what policy is used to include fragments in the given interval. See User Guide for more information.</p>
-<p>Default: “midpoint”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'midpoint'</span></code></p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A BED file containing fragment length summary statistics (mean, median, st. dev, min, max) over the intervals specified in the interval file.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 30</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">30</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -543,8 +555,8 @@
 <section id="cleavage-profile">
 <h3>cleavage-profile<a class="headerlink" href="#cleavage-profile" title="Link to this heading">#</a></h3>
 <p>Calculates cleavage proportion over intervals defined in a BED file based on alignment data from a BAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CHROM_SIZES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
-                               <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">cleavage</span><span class="o">-</span><span class="n">profile</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CHROM_SIZES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEFT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">RIGHT</span><span class="p">]</span>
+                               <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                <span class="n">input_file</span> <span class="n">interval_file</span>
 </pre></div>
 </div>
@@ -559,19 +571,19 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat4">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat4" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat3">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat3" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-c, --chrom-sizes</kbd></dt>
 <dd><p>A .chrom.sizes file containing chromosome names and sizes.</p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A bigWig file containing the cleavage proportion results over the intervals specified in interval file.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-max, --max-length</kbd></dt>
 <dd><p>Maximum length for a fragment to be included.</p>
@@ -584,23 +596,23 @@
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 20</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">20</span></code></p>
 </dd>
 <dt><kbd>-l, --left</kbd></dt>
 <dd><p>Number of base pairs to subtract from start coordinate to create interval. Useful when dealing with BED files with only CpG coordinates. Default is 0.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-r, --right</kbd></dt>
 <dd><p>Number of base pairs to add to stop coordinate to create interval. Useful when dealing with BED files with only CpG coordinates. Default is 0.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -608,8 +620,8 @@
 <section id="wps">
 <h3>wps<a class="headerlink" href="#wps" title="Link to this heading">#</a></h3>
 <p>Calculates Windowed Protection Score (WPS) over intervals defined in a BED file based on alignment data from a BAM/CRAM/Fragment file.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CHROM_SIZES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span>
-                  <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">CHROM_SIZES</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                   <span class="n">input_file</span> <span class="n">site_bed</span>
 </pre></div>
 </div>
@@ -624,31 +636,31 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat5">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat4">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat4" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-c, --chrom-sizes</kbd></dt>
 <dd><p>A .chrom.sizes file containing chromosome names and sizes.</p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A bigWig file containing the WPS results over the intervals specified in interval file.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-i, --interval-size</kbd></dt>
 <dd><p>Size in bp of the intervals to calculate WPS over. Thesenew intervals are centered over those specified in the site_bed.Default is 5000</p>
-<p>Default: 5000</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">5000</span></code></p>
 </dd>
 <dt><kbd>-W, --window-size</kbd></dt>
 <dd><p>Size of the sliding window used to calculate WPS scores. Default is 120</p>
-<p>Default: 120</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">120</span></code></p>
 </dd>
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included. Default is 120, corresponding to L-WPS.</p>
-<p>Default: 120</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">120</span></code></p>
 </dd>
 <dt><kbd>-max, --max-length</kbd></dt>
 <dd><p>Maximum length for a fragment to be included. Default is 180, corresponding to L-WPS.</p>
-<p>Default: 180</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">180</span></code></p>
 </dd>
 <dt><kbd>-lo, --fraction_low</kbd></dt>
 <dd><p>Minimum length for a fragment to be included in WPS calculation. Deprecated. Use –min-length instead.</p>
@@ -658,15 +670,15 @@
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold. Default is 30</p>
-<p>Default: 30</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">30</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -674,8 +686,8 @@
 <section id="adjust-wps">
 <h3>adjust-wps<a class="headerlink" href="#adjust-wps" title="Link to this heading">#</a></h3>
 <p>Adjusts raw Windowed Protection Score (WPS) by applying a median filter and Savitsky-Golay filter.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span>
-                         <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">edge</span><span class="o">-</span><span class="n">size</span> <span class="n">EDGE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">adjust</span><span class="o">-</span><span class="n">wps</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INTERVAL_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">MEDIAN_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="n">SAVGOL_WINDOW_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">SAVGOL_POLY_DEG</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">S</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mean</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">subtract</span><span class="o">-</span><span class="n">edges</span><span class="p">]</span>
+                         <span class="p">[</span><span class="o">--</span><span class="n">edge</span><span class="o">-</span><span class="n">size</span> <span class="n">EDGE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                          <span class="n">input_file</span> <span class="n">interval_file</span> <span class="n">chrom_sizes</span>
 </pre></div>
 </div>
@@ -693,48 +705,48 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat6">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat6" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat5">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat5" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A bigWig file containing the adjusted WPS results over the intervals specified in interval file.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-i, --interval_size</kbd></dt>
 <dd><p>Size in bp of each interval in the interval file.</p>
-<p>Default: 5000</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">5000</span></code></p>
 </dd>
 <dt><kbd>-m, --median-window-size</kbd></dt>
 <dd><p>Size of the median filter or mean filter window used to adjust WPS scores.</p>
-<p>Default: 1000</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p>
 </dd>
 <dt><kbd>-s, --savgol-window-size</kbd></dt>
 <dd><p>Size of the Savitsky-Golay filter window used to adjust WPS scores.</p>
-<p>Default: 21</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">21</span></code></p>
 </dd>
 <dt><kbd>-p, --savgol-poly-deg</kbd></dt>
 <dd><p>Degree polynomial for Savitsky-Golay filter.</p>
-<p>Default: 2</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">2</span></code></p>
 </dd>
 <dt><kbd>-S, --exclude-savgol</kbd></dt>
 <dd><p>Do not perform Savitsky-Golay filteringscores.</p>
-<p>Default: True</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>--mean</kbd></dt>
 <dd><p>A mean filter is used instead of median.</p>
-<p>Default: False</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt><kbd>--subtract-edges</kbd></dt>
 <dd><p>Take the median of the first and last 500 bases in a window and subtract from the whole interval.</p>
-<p>Default: False</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt><kbd>--edge-size</kbd></dt>
 <dd><p>size of the edge subtracted from ends of window when –subtract-edges is set. Default is 500.</p>
-<p>Default: 500</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">500</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
@@ -766,8 +778,8 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat7">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat7" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat6">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat6" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-b, --blacklist-file</kbd></dt>
 <dd><p>BED file containing regions to ignore when calculating DELFI.</p>
@@ -777,35 +789,35 @@
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>BED, bed.gz, TSV, or CSV file to write DELFI data to. If “-”, writes to stdout.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-G, --no-gc-correct</kbd></dt>
 <dd><p>Skip GC correction.</p>
-<p>Default: True</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
 </dd>
 <dt><kbd>-R, --keep-nocov</kbd></dt>
 <dd><p>Skip removal two regions in hg19 with no coverage. Use this flag when not using hg19 human reference genome.</p>
-<p>Default: True</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
 </dd>
 <dt><kbd>-M, --no-merge-bins</kbd></dt>
 <dd><p>Keep 100kb bins and do not merge to 5Mb size.</p>
-<p>Default: True</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
 </dd>
 <dt><kbd>-s, --window-size</kbd></dt>
 <dd><p>Specify size of large genomic intervals to merge smaller 100kb intervals (or whatever the user specified in bins_file) into. Defaultis 5000000</p>
-<p>Default: 5000000</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">5000000</span></code></p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 30</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">30</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -824,16 +836,16 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat8">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat8" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat7">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat7" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>BED to print GC-corrected DELFI fractions. If “-”, will write to stdout.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>--header-lines</kbd></dt>
 <dd><p>Number of header lines in BED.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
@@ -844,8 +856,7 @@
 <section id="end-motifs">
 <h3>end-motifs<a class="headerlink" href="#end-motifs" title="Link to this heading">#</a></h3>
 <p>Measures frequency of k-mer 5’ end motifs.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
-                         <span class="n">input_file</span> <span class="n">refseq_file</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">refseq_file</span>
 </pre></div>
 </div>
 <section id="positional-arguments_repeat8">
@@ -859,43 +870,43 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat9">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat9" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat8">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat8" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-k</kbd></dt>
 <dd><p>Length of k-mer.</p>
-<p>Default: 4</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">4</span></code></p>
 </dd>
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-max, --max-length</kbd></dt>
 <dd><p>Maximum length for a fragment to be included.</p>
 </dd>
 <dt><kbd>-B, --no-both-strands</kbd></dt>
 <dd><p>Set flag to only consider one strand for end-motifs.</p>
-<p>Default: True</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
 </dd>
 <dt><kbd>-n, --negative-strand</kbd></dt>
 <dd><p>Set flag in conjunction with -B to only consider 5’ end motifs on the negative strand.</p>
-<p>Default: False</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>TSV to print k-mer frequencies. If “-”, will write to stdout.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 20</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">20</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -903,8 +914,7 @@
 <section id="interval-end-motifs">
 <h3>interval-end-motifs<a class="headerlink" href="#interval-end-motifs" title="Link to this heading">#</a></h3>
 <p>Measures frequency of k-mer 5’ end motifs in each region specified in a BED file and writes data into a table.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span>
-                                  <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="n">interval</span><span class="o">-</span><span class="n">end</span><span class="o">-</span><span class="n">motifs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">k</span> <span class="n">K</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                                   <span class="n">input_file</span> <span class="n">refseq_file</span> <span class="n">intervals</span>
 </pre></div>
 </div>
@@ -922,16 +932,16 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat10">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat10" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat9">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat9" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-k</kbd></dt>
 <dd><p>Length of k-mer.</p>
-<p>Default: 4</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">4</span></code></p>
 </dd>
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 <dt><kbd>-max, --max-length</kbd></dt>
 <dd><p>Maximum length for a fragment to be included.</p>
@@ -944,27 +954,27 @@
 </dd>
 <dt><kbd>-B, --single-strand</kbd></dt>
 <dd><p>Set flag to only consider one strand for end-motifs. By default, the positive strand is calculated, but with the -n flag, the 5’ end motifs of the negative strand are considered instead.</p>
-<p>Default: True</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p>
 </dd>
 <dt><kbd>-n, --negative-strand</kbd></dt>
 <dd><p>Set flag in conjunction with -B to only consider 5’ end motifs on the negative strand.</p>
-<p>Default: False</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>Path to TSV or CSV file to write end motif frequencies to.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 20</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">20</span></code></p>
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -980,20 +990,20 @@
 <dl class="option-list">
 <dt><kbd>file_path</kbd></dt>
 <dd><p>Tab-delimited or similar file containing one column for all k-mers a one column for frequency. Reads from stdin by default.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat11">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat11" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat10">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat10" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-s, --sep</kbd></dt>
 <dd><p>Separator used in tabular file.</p>
-<p>Default: “      “</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'</span>&#160;&#160;&#160; <span class="pre">'</span></code></p>
 </dd>
 <dt><kbd>--header</kbd></dt>
 <dd><p>Number of header rows to ignore. Default is 0</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -1009,24 +1019,24 @@
 <dl class="option-list">
 <dt><kbd>file_path</kbd></dt>
 <dd><p>Tab-delimited or similar file containing one column for all k-mers a one column for frequency. Reads from stdin by default.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>file_out</kbd></dt>
 <dd><p>Path to the output BED/BEDGraph file containing MDS for each interval.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat12">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat12" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat11">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat11" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-s, --sep</kbd></dt>
 <dd><p>Separator used in tabular file.</p>
-<p>Default: “      “</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'</span>&#160;&#160;&#160; <span class="pre">'</span></code></p>
 </dd>
 <dt><kbd>--header</kbd></dt>
 <dd><p>Number of header rows to ignore. Default is 0</p>
-<p>Default: 0</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code></p>
 </dd>
 </dl>
 </section>
@@ -1034,8 +1044,8 @@
 <section id="filter-file">
 <h3>filter-file<a class="headerlink" href="#filter-file" title="Link to this heading">#</a></h3>
 <p>Filters a BED/BAM/CRAM file so that all reads/intervals, when applicable,are in mapped pairs, exceed a certain MAPQ, are not flagged for quality, are read1, are not secondary or supplementary alignments, are within/excluding specified intervals, and are on the same reference sequence as the mate.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">file</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WHITELIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
-                          <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">finaletoolkit</span> <span class="nb">filter</span><span class="o">-</span><span class="n">file</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">W</span> <span class="n">WHITELIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">B</span> <span class="n">BLACKLIST_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span> <span class="n">QUALITY_THRESHOLD</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">min</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="nb">max</span> <span class="n">MAX_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">lo</span> <span class="n">MIN_LENGTH</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">hi</span> <span class="n">MAX_LENGTH</span><span class="p">]</span>
+                          <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">WORKERS</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span>
                           <span class="n">input_file</span>
 </pre></div>
 </div>
@@ -1047,8 +1057,8 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat13">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat13" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat12">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat12" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-W, --whitelist-file</kbd></dt>
 <dd><p>Only output alignments overlapping the intervals in this BED file will be included.</p>
@@ -1058,11 +1068,11 @@
 </dd>
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>Output BED/BAM/CRAM file path.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-q, --quality-threshold</kbd></dt>
 <dd><p>Minimum mapping quality threshold.</p>
-<p>Default: 30</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">30</span></code></p>
 </dd>
 <dt><kbd>-min, --min-length</kbd></dt>
 <dd><p>Minimum length for a fragment to be included.</p>
@@ -1078,7 +1088,7 @@
 </dd>
 <dt><kbd>-w, --workers</kbd></dt>
 <dd><p>Number of worker processes.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
@@ -1105,20 +1115,20 @@
 </dd>
 </dl>
 </section>
-<section id="named-arguments_repeat14">
-<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat14" title="Link to this heading">#</a></h4>
+<section id="named-arguments_repeat13">
+<h4>Named Arguments<a class="headerlink" href="#named-arguments_repeat13" title="Link to this heading">#</a></h4>
 <dl class="option-list">
 <dt><kbd>-o, --output-file</kbd></dt>
 <dd><p>A wiggle file containing the aggregate signal over the intervals specified in interval file.</p>
-<p>Default: “-”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">'-'</span></code></p>
 </dd>
 <dt><kbd>-m, --median-window-size</kbd></dt>
 <dd><p>Size of the median filter window used to aggregate scores. Set to 120 if aggregating WPS signals.</p>
-<p>Default: 1</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
 </dd>
 <dt><kbd>-a, --mean</kbd></dt>
 <dd><p>use mean instead</p>
-<p>Default: False</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
 </dd>
 <dt><kbd>-v, --verbose</kbd></dt>
 <dd><p>Enable verbose mode to display detailed processing information.</p>
@@ -1196,76 +1206,76 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments">Named Arguments</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#finaletoolkit.cli.main_cli-main_cli_parser-named-arguments">Named Arguments</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Sub-commands">Sub-commands</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#coverage">coverage</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat1">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#frag-length-bins">frag-length-bins</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat1">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat2">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat1">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#frag-length-intervals">frag-length-intervals</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat2">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat3">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat2">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cleavage-profile">cleavage-profile</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat3">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat4">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat3">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wps">wps</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat4">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat5">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat4">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adjust-wps">adjust-wps</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat5">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat6">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat5">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delfi">delfi</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat6">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat7">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat6">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#delfi-gc-correct">delfi-gc-correct</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat7">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat8">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat7">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#end-motifs">end-motifs</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat8">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat9">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat8">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interval-end-motifs">interval-end-motifs</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat9">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat10">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat9">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mds">mds</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat10">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat11">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat10">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interval-mds">interval-mds</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat11">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat12">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat11">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#filter-file">filter-file</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat12">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat13">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat12">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agg-bw">agg-bw</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#positional-arguments_repeat13">Positional Arguments</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat14">Named Arguments</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#named-arguments_repeat13">Named Arguments</a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gap-bed">gap-bed</a><ul class="nav section-nav flex-column">
@@ -1320,7 +1330,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>
