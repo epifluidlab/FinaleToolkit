@@ -107,12 +107,14 @@ def filter_file(
 
     if input_file.endswith(".gz"):
         suffix = ".gz"
+    elif input_file.endswith(".bgz"):
+        suffix = ".bgz"
     elif input_file.endswith(".bam"):
         suffix = ".bam"
     elif input_file.endswith(".cram"):
         suffix = ".cram"
     else:
-        raise ValueError('Input file should have suffix .bam, .cram, or .gz')      
+        raise ValueError('Input file should have suffix .bam, .cram, .bgz, or .gz')      
 
     # create tempfile to contain filtered output
     if output_file is None:
@@ -195,7 +197,7 @@ def filter_file(
             finally:
                 pysam.set_verbosity(save)
 
-        elif input_file.endswith('.gz'):
+        elif input_file.endswith('.gz') or input_file.endswith('.bgz'):
             with gzip.open(input_file, 'r') as infile, open(temp_1, 'w') as outfile:
                 mapq_column = 0 # 1-index for sanity when comparing with len()
                 for line in infile:
@@ -284,5 +286,5 @@ def filter_file(
                         traceback.print_exc()
                         exit(1)                        
         else:
-            raise ValueError("Input file must be a BAM, CRAM, or BED file.")
+            raise ValueError("Input file must be a BAM, CRAM, or bgzipped BED file.")
     return output_file
