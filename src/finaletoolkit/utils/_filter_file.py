@@ -123,6 +123,7 @@ def filter_file(
         raise ValueError('Output file should share same suffix as input file.')
 
     intersect = "-f 0.500" if intersect_policy == "midpoint" else ""
+    pysam.set_verbosity(pysam.set_verbosity(0))
 
     with tf.TemporaryDirectory() as temp_dir:
         temp_1 = f"{temp_dir}/output1{suffix}"
@@ -130,72 +131,66 @@ def filter_file(
         temp_3 = f"{temp_dir}/output3{suffix}"
         if input_file.endswith(('.bam', '.cram')):
             # create temp dir to store intermediate sorted file
-            try:
-                if whitelist_file is not None:
-                    try:
-                        subprocess.run(
-                            f"bedtools intersect -abam {input_file} -b {whitelist_file} {intersect} > {temp_1} && samtools index {temp_1}", 
-                            shell=True, 
-                            check=True)
-                    except Exception:
-                        traceback.print_exc()
-                        exit(1)
-                else:
-                    subprocess.run(
-                        f"cp {input_file} {temp_1}", shell=True, check=True)
-                if blacklist_file is not None:
-                    try:
-                        subprocess.run(
-                            f"bedtools intersect -abam {temp_1} -b {blacklist_file} -v {intersect} > {temp_2} && samtools index {temp_2}", 
-                            shell=True, 
-                            check=True)
-                    except Exception:
-                        traceback.print_exc()
-                        exit(1)
-                else:
-                    subprocess.run(
-                        f"mv {temp_1} {temp_2}", shell=True, check=True)
-
+            if whitelist_file is not None:
                 try:
                     subprocess.run(
-                        f"samtools view {temp_2} -F 3852 -f 3 -b -h -o {temp_3} -q {quality_threshold} -@ {workers}",
-                        shell=True,
-                        check=True)  
+                        f"bedtools intersect -abam {input_file} -b {whitelist_file} {intersect} > {temp_1} && samtools index {temp_1}", 
+                        shell=True, 
+                        check=True)
+                except Exception as e:
+                    print(e)
+                    traceback.print_exc()
+                    exit(1)
+            else:
+                subprocess.run(
+                    f"cp {input_file} {temp_1}", shell=True, check=True)
+            if blacklist_file is not None:
+                try:
+                    subprocess.run(
+                        f"bedtools intersect -abam {temp_1} -b {blacklist_file} -v {intersect} > {temp_2} && samtools index {temp_2}", 
+                        shell=True, 
+                        check=True)
                 except Exception:
                     traceback.print_exc()
                     exit(1)
+            else:
+                subprocess.run(
+                    f"mv {temp_1} {temp_2}", shell=True, check=True)
 
-                # suppress index file warning
-                save = pysam.set_verbosity(0)
-                
-                # filter for reads on different reference and length
-                with pysam.AlignmentFile(temp_3, 'rb',threads=workers//3) as in_file:
-                    with pysam.AlignmentFile(
-                        output_file, 'wb', template=in_file, threads=workers-workers//3) as out_file:
-                        for read in in_file:
-                            if (
-                                read.reference_name == read.next_reference_name
-                                and (max_length is None
-                                        or read.template_length <= max_length)
-                                and (min_length is None
-                                        or read.template_length >= min_length)
-                            ):
-                                out_file.write(read)
+            try:
+                subprocess.run(
+                    f"samtools view {temp_2} -F 3852 -f 3 -b -h -o {temp_3} -q {quality_threshold} -@ {workers}",
+                    shell=True,
+                    check=True)  
+            except Exception:
+                traceback.print_exc()
+                exit(1)
+            
+            # filter for reads on different reference and length
+            with pysam.AlignmentFile(temp_3, 'rb',threads=workers//3) as in_file:
+                with pysam.AlignmentFile(
+                    output_file, 'wb', template=in_file, threads=workers-workers//3) as out_file:
+                    for read in in_file:
+                        if (
+                            read.reference_name == read.next_reference_name
+                            and (max_length is None
+                                    or read.template_length <= max_length)
+                            and (min_length is None
+                                    or read.template_length >= min_length)
+                        ):
+                            out_file.write(read)
 
-                if output_file != '-':
-                # generate index for output_file
-                    try:
-                        subprocess.run(
-                            f'samtools index {output_file} {output_file}.bai',
-                            shell=True,
-                            check=True
-                        )
-                    except Exception:
-                        traceback.print_exc()
-                        exit(1)
-
-            finally:
-                pysam.set_verbosity(save)
+            if output_file != '-':
+            # generate index for output_file
+                try:
+                    subprocess.run(
+                        f'samtools index {output_file} {output_file}.bai',
+                        shell=True,
+                        check=True
+                    )
+                except Exception:
+                    traceback.print_exc()
+                    exit(1)
 
         elif input_file.endswith('.gz') or input_file.endswith('.bgz'):
             with gzip.open(input_file, 'r') as infile, open(temp_1, 'w') as outfile:
