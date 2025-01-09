@@ -1,7 +1,7 @@
 Frag File Utilities
 ======================================
 
-.. autofunction:: finaletoolkit.utils.filter_bam
+.. autofunction:: finaletoolkit.utils.filter_file
 
 .. autofunction:: finaletoolkit.utils.agg_bw
 
