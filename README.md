@@ -52,7 +52,7 @@ FinaleToolkit has support for the following cell-free DNA fragmentation features
 - Cleavage Profile [![DOI](https://img.shields.io/badge/DOI-10.1073%2Fpnas.2209852119-blue?style=flat-square)](https://doi.org/10.1073/pnas.2209852119)
 
 ### Documentation
-Documentation for FinaleToolkit can be found [here](https://epifluidlab.github.io/finaletoolkit-docs/).
+Documentation for FinaleToolkit can be found [here](https://epifluidlab.github.io/FinaleToolkit/).
 
 ### Wiki/Tutorials
 The wiki and tutorial page for FinaleToolkit can be found [here](https://github.com/epifluidlab/FinaleToolkit/wiki).
