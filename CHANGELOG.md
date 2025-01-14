@@ -7,6 +7,13 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.6] - 2025-1-14
+
+### Fixed
+- More descriptive error message in `multi_wps` when an invalid interval
+with `start > stop` is encountered. Now the chromosome name is mentioned
+to assist users.
+
 ## [0.10.5] - 2025-1-9
 
 ### Changed
