@@ -177,6 +177,11 @@ def multi_wps(
         for line in bed:
             contents = line.split()
             contig = contents[0].strip()
+            if int(contents[1]) > int(contents[2]):
+                raise ValueError(
+                    f"[multi_wps] {contig}:{contents[1]}-{contents[2]} is "
+                    "invalid. Please be sure start coordinate occurs before "
+                    f"stop for all intervals in {site_bed}.")
             midpoint = (int(contents[1]) + int(contents[2])) // 2
 
             start = max(0, midpoint + int(left_of_site))
