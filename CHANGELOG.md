@@ -7,10 +7,26 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.6] - 2025-1-14
+
+### Fixed
+- More descriptive error message in `multi_wps` when an invalid interval
+with `start > stop` is encountered. Now the chromosome name is mentioned
+to assist users.
+
+## [0.10.5] - 2025-1-9
+
+### Changed
+- added `intersect_policy` to `filter_file`
+
+### Fixed
+- blacklist functionality of `filter_file`
+
 ## [0.10.4] - 2025-1-2
 
 ### Changed
-- Changed filter-bam function into filter-file; Now accepts BED and CRAM in addition to BAM
+- Changed `filter-bam` function into `filter-file`; Now accepts BED and CRAM in
+addition to BAM
 - filter-file command can now accept a blacklist file
 
 ## [0.10.3] - 2024-12-21
