@@ -8,9 +8,9 @@ About
 
 FinaleToolkit (FragmentatIoN AnaLysis of cEll-free DNA Toolkit) is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.
 
-- **Website:** https://epifluidlab.github.io/finaletoolkit-docs/
+- **Website:** https://epifluidlab.github.io/FinaleToolkit/
 - **PyPI:** https://pypi.org/project/finaletoolkit/
-- **Documentation:** https://epifluidlab.github.io/finaletoolkit-docs/documentation
+- **Documentation:** https://epifluidlab.github.io/FinaleToolkit/documentation
 - **Wiki:** https://github.com/epifluidlab/FinaleToolkit/wiki
 - **Source code:** https://github.com/epifluidlab/finaletoolkit
 - **Changelog:** https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md

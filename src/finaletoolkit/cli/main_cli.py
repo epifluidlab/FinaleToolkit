@@ -897,6 +897,14 @@ def main_cli_parser():
         help='Maximum length for a fragment to be included.'
         )
     cli_filter_file.add_argument(
+        '-p',
+        '--intersect-policy',
+        choices=['midpoint', 'any'],
+        default='midpoint',
+        type=str,
+        help='Specifies what policy is used to include/exclude fragments'
+        ' in the given interval. See User Guide for more information.')
+    cli_filter_file.add_argument(
         '-lo',
         '--fraction-low',
         type=int,
