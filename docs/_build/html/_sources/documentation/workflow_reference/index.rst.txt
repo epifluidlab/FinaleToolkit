@@ -1,7 +1,7 @@
 Finaletoolkit Workflow
 =======================
 
-This Snakemake workflow automates the extraction of epigenomic features using Finaletoolkit, supporting parallel processing, SLURM, and common genomic file formats. You can find and access the worklow `here <https://github.com/epifluidlab/finaletoolkit_workflow>`_.
+This Snakemake workflow automates the extraction of epigenomic features using Finaletoolkit, supporting parallel processing, SLURM, and common genomic file formats. You can find and access the workflow `here <https://github.com/epifluidlab/finaletoolkit_workflow>`_.
 
 .. toctree::
    :maxdepth: 2
