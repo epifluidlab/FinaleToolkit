@@ -7,6 +7,11 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.7] - 2025-1-22
+
+### Added
+- Snakemake workflow included in FinaleToolkit documentation.
+
 ## [0.10.6] - 2025-1-14
 
 ### Fixed
