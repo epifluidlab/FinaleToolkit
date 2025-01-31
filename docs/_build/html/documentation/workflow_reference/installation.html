@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Workflow &#8212; FinaleToolkit  documentation</title>
+    <title>Installation &#8212; FinaleToolkit  documentation</title>
   
   
   
@@ -41,12 +41,12 @@
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/workflow_reference/index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'documentation/workflow_reference/installation';</script>
     <link rel="icon" href="../../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Key Features" href="key_features.html" />
-    <link rel="prev" title="Genome Utilities" href="../api_reference/genomeutils.html" />
+    <link rel="next" title="Dependencies" href="dependencies.html" />
+    <link rel="prev" title="Key Features" href="key_features.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -162,7 +162,7 @@
 
 
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+  <a class="nav-link nav-internal" href="index.html">
     Workflow
   </a>
 </li>
@@ -269,7 +269,7 @@
 
 
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+  <a class="nav-link nav-internal" href="index.html">
     Workflow
   </a>
 </li>
@@ -302,9 +302,9 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="key_features.html">Key Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dependencies.html">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflow_structure.html">Workflow Structure</a></li>
@@ -357,7 +357,10 @@
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">FinaleToolkit Documentation</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Workflow</span></li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Workflow</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Installation</span></li>
   </ul>
 </nav>
 </div>
@@ -374,24 +377,16 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="workflow">
-<h1>Workflow<a class="headerlink" href="#workflow" title="Link to this heading">#</a></h1>
-<p>This Snakemake workflow automates the extraction of epigenomic features using Finaletoolkit, supporting parallel processing, SLURM, and common genomic file formats. You can find and access the workflow <a class="reference external" href="https://github.com/epifluidlab/finaletoolkit_workflow">here</a>.</p>
-<div class="toctree-wrapper compound">
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="key_features.html">Key Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dependencies.html">Dependencies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="workflow_structure.html">Workflow Structure</a></li>
-<li class="toctree-l1"><a class="reference internal" href="yaml_parameters.html">YAML Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output_file_naming.html">Output File Naming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="finaletoolkit_commands.html">Using Finaletoolkit Commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mappability_filtering.html">Mappability Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="filter_file.html"><code class="docutils literal notranslate"><span class="pre">filter-file</span></code> Command</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes.html">Notes</a></li>
-</ul>
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
+<p>Reference the following command for setup and execution:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/epifluidlab/finaletoolkit_workflow<span class="w"> </span><span class="c1"># Download the repository containing the workflow</span>
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>finaletoolkit_workflow<span class="w"> </span><span class="c1"># Enter the repository folder</span>
+<span class="gp">$ </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml<span class="w"> </span><span class="c1"># Create environment with relevant conda packages</span>
+<span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>finaletoolkit_workflow<span class="w"> </span><span class="c1"># Use environment for finaletoolkit-workflow</span>
+<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>finaletoolkit<span class="w"> </span><span class="c1"># Install finaletoolkit seperately through pip</span>
+<span class="gp">$ </span>snakemake<span class="w"> </span>--configfile<span class="w"> </span>params.yaml<span class="w"> </span>--cores<span class="w"> </span><span class="m">4</span><span class="w"> </span>--jobs<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="c1"># Run with parameters set in params.yaml</span>
+</pre></div>
 </div>
 </section>
 
@@ -406,20 +401,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../api_reference/genomeutils.html"
+       href="key_features.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Genome Utilities</p>
+        <p class="prev-next-title">Key Features</p>
       </div>
     </a>
     <a class="right-next"
-       href="key_features.html"
+       href="dependencies.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Key Features</p>
+        <p class="prev-next-title">Dependencies</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -438,7 +433,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/documentation/workflow_reference/index.rst.txt"
+      <li><a href="../../_sources/documentation/workflow_reference/installation.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

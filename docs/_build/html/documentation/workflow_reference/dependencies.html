@@ -46,7 +46,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Quick Start" href="quick_start.html" />
-    <link rel="prev" title="Key Features" href="key_features.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -304,6 +304,7 @@
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="key_features.html">Key Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Dependencies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflow_structure.html">Workflow Structure</a></li>
@@ -380,9 +381,10 @@
 <h1>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h1>
 <p>This workflow relies on the following tools being installed and accessible by your system PATH. We recommend that you install FinaleToolkit through <code class="docutils literal notranslate"><span class="pre">pip</span></code> and the other packages through <code class="docutils literal notranslate"><span class="pre">conda</span></code> in the Bioconda channel:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">finaletoolkit</span></code>: A command-line tool for epigenomic analysis.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">bedtools</span></code>: A suite of utilities for working with genomic intervals.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">htslib</span></code>: A library that includes <code class="docutils literal notranslate"><span class="pre">bgzip</span></code>, necessary to GZIP uncompressed BED files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">finaletoolkit</span></code>: A command-line tool for epigenomic feature extraction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snakemake</span></code>: A workflow engine that determines which operations (“rules”) to carry out on genomic files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bedtools</span></code>: A suite of utilities for working with and manipulating genomic intervals.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">htslib</span></code>: A library that includes <code class="docutils literal notranslate"><span class="pre">bgzip`</span></code>, necessary to GZIP uncompressed BED files.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">samtools</span></code>: A set of tools for manipulating and analyzing sequencing BAM/CRAM data</p></li>
 </ul>
 </section>
@@ -398,12 +400,12 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="key_features.html"
+       href="installation.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Key Features</p>
+        <p class="prev-next-title">Installation</p>
       </div>
     </a>
     <a class="right-next"
