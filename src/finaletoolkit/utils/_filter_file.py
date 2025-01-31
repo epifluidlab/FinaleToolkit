@@ -32,23 +32,17 @@ def run_subprocess(cmd: str, error_msg: str = "Command failed", verbose: bool = 
             raise
 
 def filter_bed_entries(infile, min_length=None, max_length=None, quality_threshold=30):
-        mapq_column = None
+        def get_mapq_col(length):
+            if len(parts) < 5:
+                raise ValueError("There are not enough columns in the BED file to determine the MAPQ column")
+            return 3 if length==5 else 4
+        
         for line in infile:
             if line.startswith('#'):
                 continue
 
             parts = line.strip().split('\t')
-            if len(parts) < 4:
-                continue
-
-            # Determine MAPQ column if not yet found
-            if mapq_column is None:
-                if parts[3].isnumeric():
-                    mapq_column = 3
-                elif len(parts) >= 5 and parts[4].isnumeric():
-                    mapq_column = 4
-                else:
-                    continue
+            mapq_column = get_mapq_col(len(parts))
 
             try:
                 start = int(parts[1])
@@ -142,8 +136,7 @@ def filter_file(
     # Pass aliases and check for conflicts
     min_length = validate_deprecated_args(fraction_low, min_length, "fraction_low", "min_length")
     max_length = validate_deprecated_args(fraction_high, max_length, "fraction_high", "max_length")
-    print(f"min_length: {min_length}")
-    print(f"max_length: {max_length}")
+    
     suffix = validate_input_file(input_file)
  
     if intersect_policy == "midpoint":
