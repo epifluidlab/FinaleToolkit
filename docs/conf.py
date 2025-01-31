@@ -19,7 +19,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 extensions = [
     'sphinx.ext.autodoc',
     'sphinxarg.ext',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
 ]
 
 # -- Options for HTML output -------------------------------------------------

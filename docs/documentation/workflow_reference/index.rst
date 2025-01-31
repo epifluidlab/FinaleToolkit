@@ -8,6 +8,7 @@ This Snakemake workflow automates the extraction of epigenomic features using Fi
    :caption: Contents:
 
    key_features
+   installation
    dependencies
    quick_start
    workflow_structure
