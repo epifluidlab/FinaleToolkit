@@ -191,7 +191,6 @@ def filter_file(
                             (max_length is None or read.template_length <= max_length) and
                             (min_length is None or read.template_length >= min_length)):
                             out_file.write(read)
-                            out_file.flush()
 
             if output_file != '-':
                 run_subprocess(
