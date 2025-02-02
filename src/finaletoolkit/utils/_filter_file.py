@@ -17,7 +17,7 @@ def validate_deprecated_args(old_arg, new_arg, old_name, new_name):
     return new_arg
 
 def validate_input_file(input_file):
-    valid_suffixes = {".gz", ".bam", ".cram"}
+    valid_suffixes = {".gz", ".bam", ".cram", ".bgz"}
     if not any(input_file.endswith(suffix) for suffix in valid_suffixes):
         raise ValueError(f"Input file should have one of the following suffixes: {', '.join(valid_suffixes)}")
     return next(suffix for suffix in valid_suffixes if input_file.endswith(suffix))
@@ -201,7 +201,7 @@ def filter_file(
                     logger=logger
                 )
 
-        elif input_file.endswith('.gz'):
+        elif input_file.endswith('.gz') or input_file.endswith('.bgz'):
             with gzip.open(input_file, 'rt') as infile, open(temp_1, 'w') as outfile:
                 for line in filter_bed_entries(infile, min_length, max_length, quality_threshold):
                     outfile.write(line)
