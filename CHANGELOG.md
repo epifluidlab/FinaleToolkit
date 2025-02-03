@@ -12,6 +12,10 @@ and this project adheres to
 ### Added
 - Snakemake workflow included in FinaleToolkit documentation.
 
+### Fixed
+- Issue with `filter-file` where the lack of `output_file.flush()` would
+create incorrect outputs.
+
 ## [0.10.6] - 2025-1-14
 
 ### Fixed
