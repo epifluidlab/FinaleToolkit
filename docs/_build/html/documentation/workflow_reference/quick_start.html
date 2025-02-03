@@ -384,18 +384,18 @@
 <li><p><strong>Basic Execution:</strong> Once you’re in the relevant folder with the <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code> present, run the workflow through the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>finaletoolkit_workflow<span class="w"> </span><span class="c1"># Enter the folder with the workflow Snakefile</span>
 
-snakemake<span class="w"> </span>--configfile<span class="w"> </span>params.yaml<span class="w"> </span>--cores<span class="w"> </span>&lt;cores&gt;<span class="w"> </span>--jobs<span class="w"> </span>&lt;jobs&gt;
 <span class="c1"># --cores: Number of CPU cores to use.</span>
 <span class="c1"># --jobs: Maximum number of concurrent jobs (limited by --cores).</span>
+snakemake<span class="w"> </span>--configfile<span class="w"> </span>params.yaml<span class="w"> </span>--cores<span class="w"> </span>&lt;cores&gt;<span class="w"> </span>--jobs<span class="w"> </span>&lt;jobs&gt;
 </pre></div>
 </div>
 </li>
 <li><p><strong>SLURM Execution:</strong> Submit to SLURM to run the workflow through the command below (see <code class="docutils literal notranslate"><span class="pre">slurm_profile/config.yaml</span></code> for default settings).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>finaletoolkit_workflow<span class="w"> </span><span class="c1"># Enter the folder with the workflow Snakefile</span>
 
-snakemake<span class="w">  </span>--profile<span class="w"> </span>slurm_profile<span class="w"> </span>&gt;<span class="w"> </span>snakemake.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">&amp;</span>
 <span class="c1"># Runs the command through params specified in slurm_profile/config.yaml in the background (&amp;),</span>
 <span class="c1"># Redirects all command-related output to snakemake.log</span>
+snakemake<span class="w">  </span>--profile<span class="w"> </span>slurm_profile<span class="w"> </span>&gt;<span class="w"> </span>snakemake.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">&amp;</span>
 </pre></div>
 </div>
 </li>
