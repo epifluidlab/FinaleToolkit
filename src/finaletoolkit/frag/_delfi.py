@@ -118,6 +118,7 @@ def delfi(input_file: str,
         output_file: {output_file}
         window_size: {window_size}
         no_gc_correct: {no_gc_correct}
+        gc_correct: {gc_correct} (overrides no_gc_correct if set)
         remove_nocov: {remove_nocov}
         merge_bins: {merge_bins}
         quality_threshold: {quality_threshold}
