@@ -1,7 +1,7 @@
 Installation
 ------------
 
-Reference the following command for setup and execution:
+Reference the following commands for setup and execution:
 
 .. code-block:: console
 

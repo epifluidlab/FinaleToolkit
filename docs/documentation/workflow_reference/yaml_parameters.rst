@@ -2,9 +2,9 @@ YAML Parameters
 ---------------
 
 **Required:**
-    *   ``input_dir``: Path to the input directory. Defaults to ``input`` if not specified
+    *   ``input_dir``: Path to the input directory. Defaults to ``input`` if not specified.
     *   ``output_dir``: Path to the output directory. Defaults to ``output`` if not specified.
-    *   ``file_format``: ``"bed.gz"``, ``"bam"``, or ``"cram"`` indicating the format of the input files. Defaults to ``bed.gz`` if not specified.
+    *   ``file_format``: ``bed.gz``, ``frag.gz``, ``bam``, or ``cram`` indicating the format of the input files. Defaults to ``bed.gz`` if not specified.
 
 **Optional:**
     *   ``supplement_dir``: Path to supplemental files directory. Defaults to ``supplement`` if not specified.
