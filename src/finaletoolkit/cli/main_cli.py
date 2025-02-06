@@ -560,7 +560,7 @@ def main_cli_parser():
         '-G',
         '--no-gc-correct',
         action='store_false',
-        dest="gc_correct",
+        dest="no_gc_correct",
         help="Skip GC correction.")
     cli_delfi.add_argument(
         '-R',
