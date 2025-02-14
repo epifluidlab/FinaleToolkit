@@ -26,13 +26,13 @@ def multi_wps(
         site_bed: Intervals,
         chrom_sizes: ChromSizes | None = None,
         output_file: str | None = None,
-        window_size: int=120,
-        interval_size: int=5000,
-        min_length: int=120,
-        max_length: int=180,
-        quality_threshold: int=30,
-        workers: int=1,
-        verbose: Union[bool, int]=0,
+        window_size: int = 120,
+        interval_size: int = 5000,
+        min_length: int = 120,
+        max_length: int = 180,
+        quality_threshold: int = 30,
+        workers: int = 1,
+        verbose: Union[bool, int] = 0,
         fraction_low: int | None = None,
         fraction_high: int | None = None,
         ):
@@ -77,7 +77,7 @@ def multi_wps(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
-        
+
     Returns
     -------
     output_file: str
@@ -243,13 +243,13 @@ def multi_wps(
         )
 
         # output
-        if (type(output_file) == str):   # check if output specified
+        if isinstance(output_file, str):   # check if output specified
             if (verbose):
                 stderr.write(
                     f'Output file {output_file} specified. Opening...\n'
                 )
 
-            if output_file.endswith(".bw"): # BigWig
+            if output_file.endswith(".bw"):     # BigWig
                 with pbw.open(output_file, 'w') as bigwig:
                     bigwig.addHeader(header)
                     for interval_score in interval_scores:
@@ -287,9 +287,10 @@ def multi_wps(
                         scores = interval_score['wps']
                         stops = starts + 1
 
-                        lines = ''.join(f'{contig}\t{start}\t{stop}\t{score}\n'
-                                 for contig, start, stop, score
-                                 in zip(contigs, starts, stops, scores))
+                        lines = ''.join(
+                            f'{contig}\t{start}\t{stop}\t{score}\n'
+                            for contig, start, stop, score
+                            in zip(contigs, starts, stops, scores))
 
                         bedgraph.write(lines)
 
