@@ -6,6 +6,7 @@ from multiprocessing.pool import Pool
 from typing import Union
 from sys import stderr, stdin
 import warnings
+from math import floor, ceil
 
 import pysam
 import numpy as np
@@ -182,7 +183,16 @@ def multi_wps(
                     f"[multi_wps] {contig}:{contents[1]}-{contents[2]} is "
                     "invalid. Please be sure start coordinate occurs before "
                     f"stop for all intervals in {site_bed}.")
-            midpoint = (int(contents[1]) + int(contents[2])) // 2
+            strand = contents[5] == '+'
+            if contents[5] != '-' and not strand:
+                if verbose:
+                    stderr.write(
+                        f'Interval {contents[0]}:{contents[1]}-'
+                        f'{contents[2]} does not have a strand. Skipping.')
+                continue
+            midpoint = (floor((int(contents[1]) + int(contents[2])) / 2)
+                        if strand
+                        else ceil((int(contents[1]) + int(contents[2])) / 2))
 
             start = max(0, midpoint + int(left_of_site))
             stop = midpoint + int(right_of_site)
