@@ -8,6 +8,7 @@ import py2bit
 import numpy as np
 import pandas
 from tqdm import tqdm
+import warnings
 
 from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
@@ -38,7 +39,8 @@ def delfi(input_file: str,
           blacklist_file: str=None,
           gap_file: Union[str, GenomeGaps]=None,
           output_file: str=None,
-          gc_correct:bool=True,
+          no_gc_correct: bool=False,
+          gc_correct: bool | None = None,
           remove_nocov:bool=True,
           merge_bins:bool=True,
           window_size: int=5000000,
@@ -78,8 +80,10 @@ def delfi(input_file: str,
         Path string to BED file containing genome blacklist regions.
     output_file: str, optional
         Path to output tsv.
-    gc_correct: bool
-        Perform gc-correction. Default is True.
+    no_gc_correct: bool
+        Skip gc-correction. Default is False.
+    gc_correct: bool, optional
+        Deprecated command to perform gc-correction. Use no_gc_correct instead. 
     remove_nocov: bool
         Remove two windows described by Cristiano et al (2019) as low
         coverage. These windows might not apply to reference genomes
@@ -113,7 +117,8 @@ def delfi(input_file: str,
         blacklist_file: {blacklist_file}
         output_file: {output_file}
         window_size: {window_size}
-        gc_correct: {gc_correct}
+        no_gc_correct: {no_gc_correct}
+        gc_correct: {gc_correct} (overrides no_gc_correct if set)
         remove_nocov: {remove_nocov}
         merge_bins: {merge_bins}
         quality_threshold: {quality_threshold}
@@ -126,6 +131,13 @@ def delfi(input_file: str,
 
     # Read chromosome names and lengths from .genome file
     contigs = chrom_sizes_to_list(chrom_sizes)
+
+    # Flip boolean value of no_gc_correct to use gc_correct in following logic if not set
+    # If set, use the value but give a deprecation warning
+    if gc_correct is None:
+        gc_correct = not no_gc_correct
+    else:
+        warnings.warn("Warning: gc_correct is deprecated and may be removed in future releases. Use no_gc_correct instead")
 
     # Prepare genome gaps using GenomeGaps class
     gaps = None
