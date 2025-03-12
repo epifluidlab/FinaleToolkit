@@ -293,12 +293,13 @@ def adjust_wps(
                         values=values,
                     )
                 except RuntimeError as e:
-                    traceback.print_exception(e)
+                    stderr.write(traceback.format_exc())
                     stderr.write(
                         f'RuntimeError encountered while writing to '
-                        f'{output_file} at interval {contigs[[0]]}:'
+                        f'{output_file} at interval {contigs[0]}:'
                         f'{starts[0]}-{stops[-1]}\n'
                     )
+                    stderr.write('\n')
 
     finally:
         pool.close()
