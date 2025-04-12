@@ -1,12 +1,19 @@
+"""
+Contains the `sort_bed_file` function, which reads a BED format file and
+yields entries sorted by genomic coordinates.
+"""
+
+
 def sort_bed_file(bed_file_path, chrom_sizes_path=None):
     """
-    Reads a BED format file and yields entries sorted by chromosome and start coordinates.
+    Reads a BED format file and yields entries sorted by chromosome and start
+    coordinates.
 
     Args:
         bed_file_path (str): Path to the BED file
-        chrom_sizes_path (str, optional): Path to a chrom.sizes file that defines
-                                         chromosome ordering. If None, uses default
-                                         chromosome sorting logic.
+        chrom_sizes_path (str, optional): Path to a chrom.sizes file that
+        defines chromosome ordering. If None, uses default chromosome sorting
+        logic.
 
     Yields:
         tuple: Parsed BED entry containing all original fields
