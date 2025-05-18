@@ -7,13 +7,18 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.7] - UNRELEASED
+## [0.10.8] - UNRELEASED
 
 ### Changed
 - `finaletoolkit wps` now calculates the center of each interval based
 on its strand. Positive intervals have a midpoint at the floor of the 
 average of the two end coordinates, and negative intervals have a
 midpoint at the ceiling of the average of the two ends of the interval.
+
+### Added
+- `sort_bed_file` utility function that sorts user specified regions.
+This removes the requirement for all bed files to be sorted, and results
+will be sorted by default.
 
 ## [0.10.7] - 2025-1-22
 
