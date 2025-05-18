@@ -10,10 +10,10 @@ def sort_bed_file(bed_file_path, chrom_sizes_path=None):
     coordinates.
 
     Args:
-        bed_file_path (str): Path to the BED file
-        chrom_sizes_path (str, optional): Path to a chrom.sizes file that
-        defines chromosome ordering. If None, uses default chromosome sorting
-        logic.
+        bed_file_path (str or pathlike): Path to the BED file
+        chrom_sizes_path (str or pathlike, optional): Path to a
+        chrom.sizes file that defines chromosome ordering. If None,
+        uses default chromosome sorting logic.
 
     Yields:
         tuple: Parsed BED entry containing all original fields
@@ -22,7 +22,8 @@ def sort_bed_file(bed_file_path, chrom_sizes_path=None):
     chrom_order = {}
     if chrom_sizes_path:
         with open(chrom_sizes_path, 'r') as f:
-            # Create a dictionary with chromosome name as key and its order as value
+            # Create a dictionary with chromosome name as key and its order as
+            # value
             for i, line in enumerate(f):
                 fields = line.strip().split()
                 if fields:
@@ -34,7 +35,8 @@ def sort_bed_file(bed_file_path, chrom_sizes_path=None):
     with open(bed_file_path, 'r') as f:
         for line in f:
             # Skip comment or header lines
-            if (line.startswith('#') or line.startswith('track') or line.startswith('browser')):
+            if (line.startswith('#') or line.startswith('track')
+                or line.startswith('browser')):
                 continue
                 
             # Parse the line
@@ -51,6 +53,10 @@ def sort_bed_file(bed_file_path, chrom_sizes_path=None):
                 except ValueError:
                     # Skip lines with non-integer start/end coordinates
                     continue
+            else:
+                raise ValueError(
+                    "Invalid file format for interval file."
+                )
 
     # Custom sort key function that uses the chrom.sizes order if available
     def sort_key(entry):
@@ -59,10 +65,12 @@ def sort_bed_file(bed_file_path, chrom_sizes_path=None):
         # If we have a chrom_order dictionary, use it for chromosome ordering
         if chrom_order:
             # If the chromosome is in our order dict, use its index
-            # If not, assign a very high value so it comes after all known chromosomes
+            # If not, assign a very high value so it comes after all known
+            # chromosomes
             chrom_val = chrom_order.get(chrom, float('inf'))
         else:
-            # Default sorting logic for chromosomes when no chrom.sizes file is provided
+            # Default sorting logic for chromosomes when no chrom.sizes file
+            # is provided
             if chrom.startswith('chr'):
                 # Handle chrX, chrY, chrM specially
                 if chrom[3:] == 'X':
