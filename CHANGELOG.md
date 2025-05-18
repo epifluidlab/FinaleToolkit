@@ -7,6 +7,14 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.7] - UNRELEASED
+
+### Changed
+- `finaletoolkit wps` now calculates the center of each interval based
+on its strand. Positive intervals have a midpoint at the floor of the 
+average of the two end coordinates, and negative intervals have a
+midpoint at the ceiling of the average of the two ends of the interval.
+
 ## [0.10.7] - 2025-1-22
 
 ### Added

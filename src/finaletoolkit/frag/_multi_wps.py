@@ -6,6 +6,7 @@ from multiprocessing.pool import Pool
 from typing import Union
 from sys import stderr, stdin
 import warnings
+from math import floor, ceil
 
 import pysam
 import numpy as np
@@ -26,13 +27,13 @@ def multi_wps(
         site_bed: Intervals,
         chrom_sizes: ChromSizes | None = None,
         output_file: str | None = None,
-        window_size: int=120,
-        interval_size: int=5000,
-        min_length: int=120,
-        max_length: int=180,
-        quality_threshold: int=30,
-        workers: int=1,
-        verbose: Union[bool, int]=0,
+        window_size: int = 120,
+        interval_size: int = 5000,
+        min_length: int = 120,
+        max_length: int = 180,
+        quality_threshold: int = 30,
+        workers: int = 1,
+        verbose: Union[bool, int] = 0,
         fraction_low: int | None = None,
         fraction_high: int | None = None,
         ):
@@ -77,7 +78,7 @@ def multi_wps(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
-        
+
     Returns
     -------
     output_file: str
@@ -182,7 +183,16 @@ def multi_wps(
                     f"[multi_wps] {contig}:{contents[1]}-{contents[2]} is "
                     "invalid. Please be sure start coordinate occurs before "
                     f"stop for all intervals in {site_bed}.")
-            midpoint = (int(contents[1]) + int(contents[2])) // 2
+            strand = contents[5] == '+'
+            if contents[5] != '-' and not strand:
+                if verbose:
+                    stderr.write(
+                        f'Interval {contents[0]}:{contents[1]}-'
+                        f'{contents[2]} does not have a strand. Skipping.')
+                continue
+            midpoint = (floor((int(contents[1]) + int(contents[2])) / 2)
+                        if strand
+                        else ceil((int(contents[1]) + int(contents[2])) / 2))
 
             start = max(0, midpoint + int(left_of_site))
             stop = midpoint + int(right_of_site)
@@ -243,13 +253,13 @@ def multi_wps(
         )
 
         # output
-        if (type(output_file) == str):   # check if output specified
+        if isinstance(output_file, str):   # check if output specified
             if (verbose):
                 stderr.write(
                     f'Output file {output_file} specified. Opening...\n'
                 )
 
-            if output_file.endswith(".bw"): # BigWig
+            if output_file.endswith(".bw"):     # BigWig
                 with pbw.open(output_file, 'w') as bigwig:
                     bigwig.addHeader(header)
                     for interval_score in interval_scores:
@@ -287,9 +297,10 @@ def multi_wps(
                         scores = interval_score['wps']
                         stops = starts + 1
 
-                        lines = ''.join(f'{contig}\t{start}\t{stop}\t{score}\n'
-                                 for contig, start, stop, score
-                                 in zip(contigs, starts, stops, scores))
+                        lines = ''.join(
+                            f'{contig}\t{start}\t{stop}\t{score}\n'
+                            for contig, start, stop, score
+                            in zip(contigs, starts, stops, scores))
 
                         bedgraph.write(lines)
 
