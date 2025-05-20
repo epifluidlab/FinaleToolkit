@@ -2,9 +2,17 @@
 Contains the `sort_bed_file` function, which reads a BED format file and
 yields entries sorted by genomic coordinates.
 """
+from __future__ import annotations
+from typing import Tuple, Generator
+from typing_extensions import Unpack
+from .typing import Intervals, ChromSizes
 
 
-def sort_bed_file(bed_file_path, chrom_sizes_path=None):
+def sort_bed_file(
+        bed_file_path: Intervals,
+        chrom_sizes_path: ChromSizes | None = None
+        ) -> Generator[
+            Tuple[str, int, int, Unpack[Tuple[str, ...]]], None, None]:
     """
     Reads a BED format file and yields entries sorted by chromosome and start
     coordinates.
@@ -36,7 +44,7 @@ def sort_bed_file(bed_file_path, chrom_sizes_path=None):
         for line in f:
             # Skip comment or header lines
             if (line.startswith('#') or line.startswith('track')
-                or line.startswith('browser')):
+                    or line.startswith('browser')):
                 continue
                 
             # Parse the line
