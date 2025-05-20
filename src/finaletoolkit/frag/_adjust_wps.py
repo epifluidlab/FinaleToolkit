@@ -1,10 +1,8 @@
 from __future__ import annotations
 from sys import stderr
-from typing import Union
 from multiprocessing import Pool
 from time import time
 import traceback
-import gzip
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,6 +10,8 @@ import pyBigWig as pbw
 from scipy.signal import savgol_filter
 
 from finaletoolkit.utils import chrom_sizes_to_list
+from finaletoolkit.utils import sort_bed_file
+
 
 def _median_filter(positions: NDArray, data: NDArray, window_size: int):
     """locally adjusted running median"""
@@ -160,16 +160,16 @@ def adjust_wps(
     interval_file: str,
     output_file: str,
     chrom_sizes: str,
-    interval_size: int=5000,
-    median_window_size: int=1000,
-    savgol_window_size: int=21,
-    savgol_poly_deg: int=2,
-    savgol: bool=True,
-    mean: bool=False,
-    subtract_edges: bool=False,
-    edge_size: int=500,
-    workers: int=1,
-    verbose: Union(bool, int)=False
+    interval_size: int = 5000,
+    median_window_size: int = 1000,
+    savgol_window_size: int = 21,
+    savgol_poly_deg: int = 2,
+    savgol: bool = True,
+    mean: bool = False,
+    subtract_edges: bool = False,
+    edge_size: int = 500,
+    workers: int = 1,
+    verbose: bool | int = False
 ):
     """
     Adjusts raw WPS data in a BigWig by applying a median filter and
@@ -224,46 +224,45 @@ def adjust_wps(
         # amount taken by median filter
         end_decrease = median_window_size//2
         intervals = []
+        """
         with (gzip.open(interval_file, 'rt')
               if interval_file.endswith('.gz')
               else open(interval_file, 'rt')) as file:
             for line in file:
-                # read segment from BED
-                contents = line.split('\t')
-                contig = contents[0].strip()
-                midpoint = (int(contents[1]) + int(contents[2])) // 2
+        """
+        for contig, region_start, region_stop, *_ in sort_bed_file(
+                interval_file, chrom_sizes):
+            midpoint = (region_start + region_stop) // 2
 
-                start = max(0, midpoint + int(left_of_site))
-                stop = midpoint + int(right_of_site)
+            start = max(0, midpoint + int(left_of_site))
+            stop = midpoint + int(right_of_site)
 
-
-                # Checks for overlap with previous interval, accounting
-                # for change in interval size from median filter.
-                # This is needed to avoid duplicate entries in the
-                # BigWig file.
-                if (len(intervals) > 0
+            # Checks for overlap with previous interval, accounting
+            # for change in interval size from median filter.
+            # This is needed to avoid duplicate entries in the
+            # BigWig file.
+            if (len(intervals) > 0
                     and intervals[-1][1] == contig
                     and intervals[-1][3] - end_decrease
-                    > start + end_decrease
-                ):
-                    # if overlap, pop first from list and append the
-                    # union of the intervals to list
-                    start = intervals[-1][2]    # start of first
-                    intervals.pop(-1)   # pop first
+                    > start + end_decrease):
+                # if overlap, pop first from list and append the
+                # union of the intervals to list
+                start = intervals[-1][2]    # start of first
+                intervals.pop(-1)   # pop first
 
-                intervals.append((
-                    input_file,
-                    contig,
-                    int(start),
-                    int(stop),
-                    median_window_size,
-                    savgol_window_size,
-                    savgol_poly_deg,
-                    mean,
-                    subtract_edges,
-                    edge_size,
-                    savgol
-                ))
+            intervals.append((
+                input_file,
+                contig,
+                int(start),
+                int(stop),
+                median_window_size,
+                savgol_window_size,
+                savgol_poly_deg,
+                mean,
+                subtract_edges,
+                edge_size,
+                savgol
+            ))
     else:
         raise ValueError('Invalid filetype for interval_file.')
 
@@ -292,7 +291,7 @@ def adjust_wps(
                         ends=stops,
                         values=values,
                     )
-                except RuntimeError as e:
+                except RuntimeError:
                     stderr.write(traceback.format_exc())
                     stderr.write(
                         f'RuntimeError encountered while writing to '
