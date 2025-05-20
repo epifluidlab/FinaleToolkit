@@ -4,7 +4,10 @@ yields entries sorted by genomic coordinates.
 """
 from __future__ import annotations
 from typing import Tuple, Generator
-from typing_extensions import Unpack
+try:
+    from typing_extensions import Unpack
+except ImportError:
+    from typing import Unpack
 from .typing import Intervals, ChromSizes
 
 
