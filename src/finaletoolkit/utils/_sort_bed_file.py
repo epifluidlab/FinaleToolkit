@@ -121,6 +121,7 @@ def sort_bed_file(
     # Yield the sorted entries, keeping all original fields
     for _, _, _, fields in entries:
         # cast output start and end to ints
-        fields[1] = int(fields[1])
-        fields[2] = int(fields[2])
-        yield fields
+        if len(fields) == 3:
+            yield (fields[0], int(fields[1]), int(fields[2]))
+        else:
+            yield (fields[0], int(fields[1]), int(fields[2]), *fields[3:])
