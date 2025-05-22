@@ -1,0 +1,80 @@
+name: Build and Deploy Sphinx Docs
+
+on:
+  push:
+    branches:
+      - main
+      - documentation-update
+    paths:
+      - 'docs/**'
+      - '!docs/_build/**' # No infinite loop from pushing to docs again
+      - '.github/workflows/build-docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # pushing commits
+  pages: write      #  GH Pages deploy
+  id-token: write   # GH Pages OIDC
+
+concurrency:
+  group: "pages-${{ github.ref }}"
+  cancel-in-progress: false
+
+jobs:
+  build-and-commit-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.11' 
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install . # Install current package for autodoc, etc.
+          
+          # Sphinx and its bits
+          pip install sphinx finaletoolkit pydata_sphinx_theme sphinx-argparse
+          # Consider a docs/requirements.txt for these
+
+      - name: Build Sphinx documentation
+        run: |
+          make -C docs html
+
+      - name: Commit and push built HTML
+        # Run on push, not if the bot is the committer so no loops
+        if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          git add docs/_build/html/
+          
+          # Only commit w/ actual changes
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: Regenerate Sphinx HTML for ${{ github.sha }} [ci skip]"
+            echo "Pushing doc changes..."
+            git push origin ${{ github.ref_name }}
+          else
+            echo "No changes to commit in docs/_build/html."
+          fi
+          
+      #  pages deployment
+      - name: Setup Pages
+        if: github.ref == 'refs/heads/main' # Deploy only from main branch
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact for GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs/_build/html/'
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        id: deployment
+        uses: actions/deploy-pages@v4
