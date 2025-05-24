@@ -25,7 +25,8 @@ from finaletoolkit.utils.utils import (
     frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
     _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
     )
-from finaletoolkit.utils.typing import FragFile
+from finaletoolkit.utils.typing import FragFile, ChromSizes, Intervals
+from finaletoolkit.utils._sort_bed_file import sort_bed_file
 
 
 def cleavage_profile(
@@ -181,8 +182,8 @@ def _cleavage_profile_star(args):
 
 def multi_cleavage_profile(
     input_file: FragFile,
-    interval_file: Union[str, Path],
-    chrom_sizes: Union[str, Path, None] = None,
+    interval_file: Intervals,
+    chrom_sizes: ChromSizes | Nones = None,
     left: int=0,
     right: int=0,
     min_length: int|None=None,
@@ -276,9 +277,6 @@ def multi_cleavage_profile(
         raise ValueError(
             'fraction_high and max_length cannot both be specified')
     
-    if (input_file == '-' and interval_file == '-'):
-        raise ValueError('input_file and site_bed cannot both read from stdin')
-    
     if chrom_sizes is None:
         raise ValueError(
             '--chrom_sizes must be specified'
@@ -295,38 +293,27 @@ def multi_cleavage_profile(
     contigs = []
     starts = []
     stops = []
-    try:
-        if interval_file == '-':
-            bed = stdin
+    
+    # for overlap checking
+    prev_contig = None
+    prev_start = 0
+    prev_stop = 0
+    for contig, raw_start, raw_stop, *_ in sort_bed_file(interval_file, chrom_sizes):
+        # parse file
+        start = max(0, raw_start - left)
+        stop = min(raw_stop + right, chrom_dict[contig])
+
+        # if overlapping:
+        if (prev_contig == contig and start < prev_stop):
+            prev_stop = max(prev_stop, stop)
         else:
-            bed = open(interval_file)
-
-        # for overlap checking
-        prev_contig = None
-        prev_start = 0
-        prev_stop = 0
-        for line in bed:
-            # parse file
-            contents = line.split()
-            contig = contents[0].strip()
-            start, stop = int(contents[1]), int(contents[2])
-            start = max(0, start - left)
-            stop = min(stop + right, chrom_dict[contig])
-
-            # if overlapping:
-            if (prev_contig == contig and start < prev_stop):
-                prev_stop = max(prev_stop, stop)
-            else:
-                contigs.append(prev_contig)
-                starts.append(prev_start)
-                stops.append(prev_stop)
-                prev_contig, prev_start, prev_stop = contig, start, stop
-        contigs.append(prev_contig)
-        starts.append(prev_start)
-        stops.append(prev_stop)
-    finally:
-        if interval_file != '-':
-            bed.close()  
+            contigs.append(prev_contig)
+            starts.append(prev_start)
+            stops.append(prev_stop)
+            prev_contig, prev_start, prev_stop = contig, start, stop
+    contigs.append(prev_contig)
+    starts.append(prev_start)
+    stops.append(prev_stop)
             
     contigs = contigs[1:]
     starts = starts[1:]
