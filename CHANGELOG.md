@@ -18,7 +18,8 @@ midpoint at the ceiling of the average of the two ends of the interval.
 ### Added
 - `sort_bed_file` utility function that sorts user specified regions.
 This removes the requirement for all bed files to be sorted, and results
-will be sorted by default.
+will be sorted by default. This is now used to sort all bed files used
+to specify intervals in FinaleToolkit functions and CLI.
 
 ## [0.10.7] - 2025-1-22
 
