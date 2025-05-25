@@ -1,24 +1,24 @@
 from __future__ import annotations
 import gzip
 import time
-from typing import Union
 from sys import stdout, stderr
 import warnings
+from os import PathLike
 
-import pysam
 import numpy as np
 from numba import jit
 
 from finaletoolkit.utils import frag_array
-from ..utils.typing import ChromSizes
+from ..utils.typing import FragFile
+
 
 @jit(nopython=True)
 def _single_nt_wps(chrom: str,
-                window_start: int,
-                window_stop: int,
-                window_position: int,
-                frag_ends: np.ndarray
-                ) -> tuple:
+                   window_start: int,
+                   window_stop: int,
+                   window_position: int,
+                   frag_ends: np.ndarray
+                   ) -> tuple:
     # count number of totally spanning fragments
     is_spanning = ((frag_ends["start"] < window_start)
                    * (frag_ends["stop"] > window_stop))
@@ -36,7 +36,7 @@ def _single_nt_wps(chrom: str,
     return (chrom, window_position, num_spanning - num_end_in)
 
 
-def wps(input_file: Union[str, pysam.AlignmentFile],
+def wps(input_file: FragFile,
         chrom: str,
         start: int,
         stop: int,
@@ -56,9 +56,10 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     Parameters
     ----------
-    input_file : str or pysam.AlignmentFile
-        BAM, CRAM or tabix file containing paired-end fragment reads or its
-        path. `AlignmentFile` must be opened in read mode.
+    input_file : str or pysam.AlignmentFile or pysam.TabixFile
+        BAM, CRAM or tabix-indexed file containing paired-end fragment
+        reads or its path. `AlignmentFile` or `TabixFile` must be opened
+        in read mode.
     chrom : str
     start : int
     stop : int
@@ -135,10 +136,11 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                            stop=maximum,
                            min_length=min_length,
                            max_length=max_length,
-                           verbose=(verbose>=2))
+                           verbose=(verbose >= 2))
 
     if (verbose):
-        stderr.write("Done reading fragments, preparing for WPS calculation.\n")
+        stderr.write(
+            "Done reading fragments, preparing for WPS calculation.\n")
     # check if no fragments exist on this interval
     if (frag_ends.shape == (0)):
 
@@ -180,12 +182,12 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
 
     # TODO: consider switch-case statements and determine if they
     # shouldn't be used for backwards compatability
-    if (type(output_file) == str):   # check if output specified
+    if (isinstance(output_file, (str, PathLike))):   # cis output specified?
 
         if (verbose):
             stderr.write('Writing to output file.\n')
 
-        if output_file.endswith(".wig.gz"): # zipped wiggle
+        if output_file.endswith(".wig.gz"):  # zipped wiggle
             with gzip.open(output_file, 'wt') as out:
                 # declaration line
                 out.write(
@@ -205,7 +207,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                 for score in scores['wps']:
                     out.write(f'{score}\n')
 
-        elif output_file == '-':    #stdout
+        elif output_file == '-':    # stdout
             stdout.write(
                 f'fixedStep\tchrom={chrom}\tstart={start}\tstep='
                 f'{1}\tspan={stop-start}\n'
