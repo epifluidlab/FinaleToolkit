@@ -22,9 +22,9 @@ will be sorted by default. This is now used to sort all bed files used
 to specify intervals in FinaleToolkit functions and CLI.
 
 ### Removed
-- `finaletoolkit cleavage-profile` and `multi_cleavage_profile` may no
-longer read intervals from stdin if `-` is given as input for the
-relevant flag/arg.
+- `finaletoolkit cleavage-profile`, `multi_cleavage_profile`,
+`finaletoolkit wps`, and `multi_wps` may no longer read intervals from
+stdin if `-` is given as input for the relevant flag/arg.
 
 ## [0.10.7] - 2025-1-22
 

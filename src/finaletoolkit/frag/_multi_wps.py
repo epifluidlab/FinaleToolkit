@@ -4,7 +4,7 @@ from os import PathLike
 import time
 from multiprocessing.pool import Pool
 from typing import Union
-from sys import stderr, stdin
+from sys import stderr
 import warnings
 from math import floor, ceil
 
@@ -14,7 +14,8 @@ import pyBigWig as pbw
 
 from finaletoolkit.frag._wps import wps
 from finaletoolkit.utils.utils import chrom_sizes_to_list
-from ..utils.typing import FragFile, ChromSizes, Intervals
+from finaletoolkit.utils._sort_bed_file import sort_bed_file
+from finaletoolkit.utils.typing import FragFile, ChromSizes, Intervals
 
 
 def _wps_star(args):
@@ -160,62 +161,52 @@ def multi_wps(
     contigs = []
     starts = []
     stops = []
-    try:
-        if site_bed == '-':
-            bed = stdin
-        else:
-            bed = open(site_bed)
 
-        left_of_site = round(-interval_size / 2)
-        right_of_site = round(interval_size / 2)
+    left_of_site = round(-interval_size / 2)
+    right_of_site = round(interval_size / 2)
 
-        assert right_of_site - left_of_site == interval_size
+    assert right_of_site - left_of_site == interval_size
 
-        # for overlap checking
-        prev_contig = None
-        prev_start = 0
-        prev_stop = 0
-        for line in bed:
-            contents = line.split()
-            contig = contents[0].strip()
-            if int(contents[1]) > int(contents[2]):
-                raise ValueError(
-                    f"[multi_wps] {contig}:{contents[1]}-{contents[2]} is "
-                    "invalid. Please be sure start coordinate occurs before "
-                    f"stop for all intervals in {site_bed}.")
-            strand = contents[5] == '+'
-            if contents[5] != '-' and not strand:
-                if verbose:
-                    stderr.write(
-                        f'Interval {contents[0]}:{contents[1]}-'
-                        f'{contents[2]} does not have a strand. Skipping.')
-                continue
-            midpoint = (floor((int(contents[1]) + int(contents[2])) / 2)
-                        if strand
-                        else ceil((int(contents[1]) + int(contents[2])) / 2))
+    # for overlap checking
+    prev_contig = None
+    prev_start = 0
+    prev_stop = 0
+    for contig, start, stop, _, _, strand_val in sort_bed_file(site_bed, chrom_sizes):
+        if start > stop:
+            raise ValueError(
+                f"[multi_wps] {contig}:{start}-{stop} is "
+                "invalid. Please be sure start coordinate occurs before "
+                f"stop for all intervals in {site_bed}.")
+        strand = strand_val == '+'
+        if strand_val != '-' and not strand:
+            if verbose:
+                stderr.write(
+                    f'Interval {contig}:{start}-'
+                    f'{stop} does not have a strand. Skipping.')
+            continue
+        midpoint = (floor((start + stop) / 2)
+                    if strand
+                    else ceil((start + stop) / 2))
 
-            start = max(0, midpoint + int(left_of_site))
-            stop = midpoint + int(right_of_site)
+        start = max(0, midpoint + int(left_of_site))
+        stop = midpoint + int(right_of_site)
 
-            # cut off part of previous interval if overlap
-            if contig == prev_contig and start < prev_stop:
-                prev_stop = start
+        # cut off part of previous interval if overlap
+        if contig == prev_contig and start < prev_stop:
+            prev_stop = start
 
-            if prev_contig is not None:
-                contigs.append(prev_contig)
-                starts.append(prev_start)
-                stops.append(prev_stop)
+        if prev_contig is not None:
+            contigs.append(prev_contig)
+            starts.append(prev_start)
+            stops.append(prev_stop)
 
-            prev_contig = contig
-            prev_start = start
-            prev_stop = stop
-        # appending last interval
-        contigs.append(prev_contig)
-        starts.append(prev_start)
-        stops.append(prev_stop)
-    finally:
-        if site_bed != '-':
-            bed.close()  
+        prev_contig = contig
+        prev_start = start
+        prev_stop = stop
+    # appending last interval
+    contigs.append(prev_contig)
+    starts.append(prev_start)
+    stops.append(prev_stop)
             
     chrom_sizes_dict = dict(header)
     
@@ -237,7 +228,7 @@ def multi_wps(
         count*[min_length],
         count*[max_length],
         count*[quality_threshold],
-        count*[verbose-2 if verbose>2 else 0]
+        count*[verbose-2 if verbose > 2 else 0]
     )
 
     if (verbose):
