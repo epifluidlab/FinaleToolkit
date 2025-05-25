@@ -4,8 +4,9 @@ import pytest
 import pandas as pd
 from finaletoolkit.utils._sort_bed_file import sort_bed_file
 
+
 class TestSortBedFile:
-    
+
     @pytest.fixture
     def temp_bed_file(self):
         """Create a temporary BED file for testing."""
@@ -57,9 +58,9 @@ class TestSortBedFile:
         
         # Check tie-breaking by end coordinate for entries with same chrom and start
         # The three chr1 entries all have start=100, should be ordered by end
-        assert sorted_entries[0][0] == "chr1" and sorted_entries[0][1] == "100" and sorted_entries[0][2] == "150"
-        assert sorted_entries[1][0] == "chr1" and sorted_entries[1][1] == "100" and sorted_entries[1][2] == "200"
-        assert sorted_entries[2][0] == "chr1" and sorted_entries[2][1] == "100" and sorted_entries[2][2] == "300"
+        assert sorted_entries[0][0] == "chr1" and sorted_entries[0][1] == 100 and sorted_entries[0][2] == 150
+        assert sorted_entries[1][0] == "chr1" and sorted_entries[1][1] == 100 and sorted_entries[1][2] == 200
+        assert sorted_entries[2][0] == "chr1" and sorted_entries[2][1] == 100 and sorted_entries[2][2] == 300
     
     def test_chrom_sizes_sorting(self, temp_bed_file, temp_chrom_sizes_file):
         """Test sorting using a custom chrom.sizes file."""
@@ -78,9 +79,9 @@ class TestSortBedFile:
         
         # Check tie-breaking by end coordinate for entries with same chrom and start
         # The three chr1 entries all have start=100, should still be ordered by end
-        assert sorted_entries[2][0] == "chr1" and sorted_entries[2][1] == "100" and sorted_entries[2][2] == "150"
-        assert sorted_entries[3][0] == "chr1" and sorted_entries[3][1] == "100" and sorted_entries[3][2] == "200"
-        assert sorted_entries[4][0] == "chr1" and sorted_entries[4][1] == "100" and sorted_entries[4][2] == "300"
+        assert sorted_entries[2][0] == "chr1" and sorted_entries[2][1] == 100 and sorted_entries[2][2] == 150
+        assert sorted_entries[3][0] == "chr1" and sorted_entries[3][1] == 100 and sorted_entries[3][2] == 200
+        assert sorted_entries[4][0] == "chr1" and sorted_entries[4][1] == 100 and sorted_entries[4][2] == 300
     
     def test_complete_entry_preservation(self, temp_bed_file):
         """Test that all fields from the original BED file are preserved."""
@@ -89,7 +90,7 @@ class TestSortBedFile:
         # Check that a complete entry with all fields is preserved
         sample_entry = next(entry for entry in sorted_entries if entry[3] == "feature1")
         assert len(sample_entry) == 6
-        assert sample_entry == ("chr2", "150", "200", "feature1", "1", "+")
+        assert sample_entry == ("chr2", 150, 200, "feature1", "1", "+")
     
     def test_empty_file(self):
         """Test behavior with an empty file."""
