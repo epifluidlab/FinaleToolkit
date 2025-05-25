@@ -193,7 +193,9 @@ def multi_cleavage_profile(
 ):
     """
     Multithreaded cleavage profile implementation over intervals in a
-    BED file.
+    BED file. Notes that specified intervals are sorted and overlaps are
+    removed to prevent issues when writing to the output file.
+    
     Parameters
     ---------
     input_file: str or pathlike
