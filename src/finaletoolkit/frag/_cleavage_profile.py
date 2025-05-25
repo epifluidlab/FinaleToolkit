@@ -9,9 +9,8 @@ CpG site.
 
 from __future__ import annotations
 from typing import Union
-from pathlib import Path
 from os import PathLike
-from sys import stderr, stdin
+from sys import stderr
 from multiprocessing import Pool
 import gzip
 import time
@@ -22,8 +21,7 @@ import pysam
 import pyBigWig as pbw
 
 from finaletoolkit.utils.utils import (
-    frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
-    _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
+    frag_array, chrom_sizes_to_list, chrom_sizes_to_dict
     )
 from finaletoolkit.utils.typing import FragFile, ChromSizes, Intervals
 from finaletoolkit.utils._sort_bed_file import sort_bed_file
@@ -35,14 +33,14 @@ def cleavage_profile(
     contig: str,
     start: int,
     stop: int,
-    left: int=0,
-    right: int=0,
-    min_length: int|None=None,
-    max_length: int|None=None,
-    quality_threshold: int=30,
-    verbose: Union[bool, int]=0,
-    fraction_low: int|None=None,
-    fraction_high: int|None=None,
+    left: int = 0,
+    right: int = 0,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    quality_threshold: int = 30,
+    verbose: Union[bool, int] = 0,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
 ) -> np.ndarray:
     """
     Cleavage profile calculated over a single interval.
@@ -82,7 +80,6 @@ def cleavage_profile(
         Array of cleavage proportions over given interval.
     """
     if (verbose):
-        start_time = time.time()
         stderr.write(
             f"""
             Calculating cleavage profile
@@ -140,8 +137,8 @@ def cleavage_profile(
 
     # finding depth at sites
     fragwise_overlaps = np.logical_and(
-        np.greater_equal(positions[np.newaxis], frags['start'][:,np.newaxis]),
-        np.less(positions[np.newaxis], frags['stop'][:,np.newaxis])
+        np.greater_equal(positions[np.newaxis], frags['start'][:, np.newaxis]),
+        np.less(positions[np.newaxis], frags['stop'][:, np.newaxis])
     )
     depth = np.sum(fragwise_overlaps, axis=0)
 
@@ -162,7 +159,7 @@ def cleavage_profile(
     non_zero_mask = depth != 0
     proportions[non_zero_mask] = ends[non_zero_mask] / depth[non_zero_mask] * 100
 
-
+    # formatting results as a structured array
     results = np.zeros_like(proportions, dtype=[
         ('contig', 'U16'),
         ('pos', 'i8'),
@@ -171,7 +168,6 @@ def cleavage_profile(
     results['contig'] = contig
     results['pos'] = positions
     results['proportion'] = proportions
-
 
     return results
 
@@ -183,17 +179,17 @@ def _cleavage_profile_star(args):
 def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Intervals,
-    chrom_sizes: ChromSizes | Nones = None,
-    left: int=0,
-    right: int=0,
-    min_length: int|None=None,
-    max_length: int|None=None,
-    quality_threshold: int=30,
-    output_file: str='-',
-    workers: int=1,
-    verbose: Union[bool, int]=0,
-    fraction_low: int|None=None,
-    fraction_high: int|None=None,
+    chrom_sizes: ChromSizes | None = None,
+    left: int = 0,
+    right: int = 0,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    quality_threshold: int = 30,
+    output_file: str = '-',
+    workers: int = 1,
+    verbose: Union[bool, int] = 0,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
 ):
     """
     Multithreaded cleavage profile implementation over intervals in a
@@ -326,15 +322,13 @@ def multi_cleavage_profile(
         references = input_file.references
         lengths = input_file.lengths
         header = list(zip(references, lengths))
-    elif (
-            (isinstance(input_file, str)
-            or isinstance(input_file, PathLike))
-        and
-            (str(input_file).endswith('.sam')
-            or str(input_file).endswith('.bam')
-            or str(input_file).endswith('.cram'))
-    ):
-        with pysam.AlignmentFile(input_file, 'r') as bam:
+    elif ((isinstance(input_file, str)
+           or isinstance(input_file, PathLike))
+          and (str(input_file).endswith('.sam')
+               or str(input_file).endswith('.bam')
+               or str(input_file).endswith('.cram'))
+          ):
+        with pysam.AlignmentFile(str(input_file), 'r') as bam:
             references = bam.references
             lengths = bam.lengths
             header = list(zip(references, lengths))
@@ -381,13 +375,13 @@ def multi_cleavage_profile(
         )
 
         # output
-        if (type(output_file) == str):   # check if output specified
+        if (isinstance(output_file, (str, PathLike))):   # is output specified?
             if (verbose):
                 stderr.write(
                     f'Output file {output_file} specified. Opening...\n'
                 )
 
-            if output_file.endswith(".bw"): # BigWig
+            if output_file.endswith(".bw"):  # BigWig
                 with pbw.open(output_file, 'w') as bigwig:
                     bigwig.addHeader(header)
                     last = "None"
