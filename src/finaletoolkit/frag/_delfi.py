@@ -12,11 +12,13 @@ import warnings
 
 from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
-from finaletoolkit.utils.utils import frag_generator, overlaps, chrom_sizes_to_list
+from finaletoolkit.utils.utils import (
+    frag_generator, overlaps, chrom_sizes_to_list)
+from finaletoolkit.utils.typing import FragFile, Intervals, ChromSizes
 from finaletoolkit.genome.gaps import GenomeGaps, ContigGaps
 
 
-def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
+def trim_coverage(window_data: np.ndarray, trim_percentile: int = 10):
     """
     function to trim lowest 10% of bins by coverage. If a window is
     below the 10th percentile, coverages and gc are set to NaN and
@@ -32,29 +34,29 @@ def trim_coverage(window_data:np.ndarray, trim_percentile:int=10):
     return trimmed
 
 
-def delfi(input_file: str,
-          chrom_sizes: str,
-          bins_file: str,
+def delfi(input_file: FragFile,
+          chrom_sizes: ChromSizes,
+          bins_file: Intervals,
           reference_file: str,
-          blacklist_file: str=None,
-          gap_file: Union[str, GenomeGaps]=None,
-          output_file: str=None,
-          no_gc_correct: bool=False,
-          gc_correct: bool | None = None,
-          remove_nocov:bool=True,
-          merge_bins:bool=True,
-          window_size: int=5000000,
-          quality_threshold: int=30,
-          workers: int=1,
-          verbose: Union[int, bool]=False) -> pandas.DataFrame:
+          blacklist_file: str = None,
+          gap_file: Union[str, GenomeGaps] = None,
+          output_file: str = None,
+          no_gc_correct: bool = False,
+          gc_correct: bool | None  =  None,
+          remove_nocov:bool = True,
+          merge_bins:bool = True,
+          window_size: int = 5000000,
+          quality_threshold: int = 30,
+          workers: int = 1,
+          verbose: Union[int, bool] = False) -> pandas.DataFrame:
     """
     A function that replicates the methodology of Christiano et al
     (2019).
 
     Parameters
     ----------
-    input_file: str
-        Path string pointing to a bam file containing PE
+    input_file: str or pysam AlignmentFile or TabixFile
+        BAM, CRAM, or FRAG (tabix indexed bedgz) file containing PE
         fragment reads.
     chrom_sizes: str
         Path string to a chrom.sizes file containing only autosomal
@@ -141,9 +143,9 @@ def delfi(input_file: str,
 
     # Prepare genome gaps using GenomeGaps class
     gaps = None
-    if (type(gap_file) == str):
+    if (type(gap_file) is str):
         gaps = GenomeGaps(gap_file)
-    elif (type(gap_file) == GenomeGaps):
+    elif (type(gap_file) is GenomeGaps):
         gaps = gap_file
     elif gaps is None:
         pass
@@ -162,7 +164,7 @@ def delfi(input_file: str,
         bins_file,
         names=["contig", "start", "stop"],
         usecols=[0, 1, 2],
-        dtype={"contig":str, "start":np.int32, "stop":np.int32},
+        dtype={"contig": str, "start": np.int32, "stop": np.int32},
         delimiter='\t',
         comment='#',
     )
@@ -207,7 +209,7 @@ def delfi(input_file: str,
             contig_gaps = None
 
         for _, start, stop, *_ in (
-            gapless_bins.loc[gapless_bins.loc[:,'contig']==contig]
+            gapless_bins.loc[gapless_bins.loc[:, 'contig'] == contig]
             .itertuples(index=False, name=None)
         ):
             window_args.append((
@@ -243,7 +245,7 @@ def delfi(input_file: str,
             'num_frags']
     )
     # remove remaining NOARM bins
-    trimmed_windows = window_df.loc[window_df['arm']!='NOARM', :].copy()
+    trimmed_windows = window_df.loc[window_df['arm'] != 'NOARM', :].copy()
 
     if (verbose):
         stderr.write(f'{trimmed_windows.shape[0]} bins remaining...\n')
@@ -252,7 +254,10 @@ def delfi(input_file: str,
     if (verbose):
         stderr.write('Calculating ratio...\n')
 
-    trimmed_windows['ratio'] = np.where(trimmed_windows['long'] == 0, np.nan, trimmed_windows['short'] / trimmed_windows['long']) #handle the case where the 'long' is 0.
+    trimmed_windows['ratio'] = np.where(  # handle no coverage
+        trimmed_windows['long'] == 0,
+        np.nan,
+        trimmed_windows['short'] / trimmed_windows['long'])
 
     # remove nocov windows
     if remove_nocov:
@@ -285,7 +290,7 @@ def delfi(input_file: str,
         stderr.write(f'{final_bins.shape[0]} bins remaining.\n')
 
     if output_file is not None:
-        output_delfi = final_bins.rename(columns={'contig':'#contig'})
+        output_delfi = final_bins.rename(columns={'contig': '#contig'})
         if output_file.endswith('.bed') or output_file.endswith('.tsv'):
             output_delfi.to_csv(output_file, sep='\t', index=False)
         elif output_file.endswith('.csv'):
@@ -304,7 +309,8 @@ def delfi(input_file: str,
                         f'{tab_separated}\n')
         else:
             raise ValueError(
-                'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes allowed.'
+                'Invalid file type! Only .bed, .bed.gz, and .tsv suffixes '
+                'allowed.'
             )
 
     num_frags = sum(window[7] for window in windows)
@@ -323,9 +329,9 @@ def _delfi_single_window(
         contig: str,
         window_start: int,
         window_stop: int,
-        blacklist_file: str=None,
-        quality_threshold: int=30,
-        verbose: Union[int,bool]=False) -> tuple:
+        blacklist_file: str = None,
+        quality_threshold: int = 30,
+        verbose: Union[int,bool] = False) -> tuple:
     """
     Calculates short and long counts for one window.
     """
@@ -341,9 +347,9 @@ def _delfi_single_window(
                 region_start = int(region_start)
                 region_stop = int(region_stop)
                 if (contig == region_contig
-                    and window_start <= region_start
-                    and window_stop >= region_stop ):
-                    blacklist_regions.append((region_start,region_stop))
+                        and window_start <= region_start
+                        and window_stop >= region_stop):
+                    blacklist_regions.append((region_start, region_stop))
 
     short_lengths = []
     long_lengths = []
@@ -356,25 +362,25 @@ def _delfi_single_window(
         in_tcmere = contig_gaps.in_tcmere(window_start, window_stop)
         if in_tcmere:
             return (contig,
-                window_start,
-                window_stop,
-                'NOARM',
-                np.nan,
-                np.nan,
-                np.nan,
-                0)
+                    window_start,
+                    window_stop,
+                    'NOARM',
+                    np.nan,
+                    np.nan,
+                    np.nan,
+                    0)
 
         arm = contig_gaps.get_arm(window_start, window_stop)
         # if in short arm
         if arm == 'NOARM':
             return (contig,
-                window_start,
-                window_stop,
-                'NOARM',
-                np.nan,
-                np.nan,
-                np.nan,
-                0)
+                    window_start,
+                    window_stop,
+                    'NOARM',
+                    np.nan,
+                    np.nan,
+                    np.nan,
+                    0)
     else:
         in_tcmere = False
         arm = contig
@@ -413,8 +419,7 @@ def _delfi_single_window(
             read_in_tcmere = False
 
         if (not blacklisted
-            and not read_in_tcmere
-        ):
+                and not read_in_tcmere):
             # append length of fragment to list
             if (frag_length >= 151):
                 long_lengths.append(abs(frag_length))

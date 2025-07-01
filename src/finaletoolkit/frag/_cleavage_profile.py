@@ -47,8 +47,8 @@ def cleavage_profile(
 
     Parameters
     ---------
-    input_file: str
-        BAM, CRAM, or FRAG file with fragment information.
+    input_file: str or pysam AlignmentFile or TabixFile
+        BAM, CRAM, or FRAG (tabix indexed bedgz) file with fragment information.
     chrom_size: int
         length of contig.
     contig: str

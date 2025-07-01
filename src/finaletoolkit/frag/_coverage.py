@@ -2,21 +2,20 @@ from __future__ import annotations
 import sys
 import time
 from typing import Union
-from pathlib import Path
 from multiprocessing import Pool
 from functools import partial
 
-import pysam
 import gzip
 from tqdm import tqdm
 
 from finaletoolkit.utils.utils import (
     _get_intervals, frag_generator
 )
+from finaletoolkit.utils.typing import FragFile, Intervals
 
 
 def single_coverage(
-    input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
+    input_file: FragFile,
     contig: str | None = None,
     start: int | None = 0,
     stop: int | None = None,
@@ -116,17 +115,17 @@ def _single_coverage_star(partial_coverage, interval):
 
 
 def coverage(
-        input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
-        interval_file: str,
+        input_file: FragFile,
+        interval_file: Intervals,
         output_file: str,
-        scale_factor: float=1.,
-        min_length: int | None=None,
-        max_length: int | None=None,
-        normalize: bool=False,
-        intersect_policy: str="midpoint",
-        quality_threshold: int=30,
-        workers: int=1,
-        verbose: Union[bool, int]=False
+        scale_factor: float = 1.,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        normalize: bool = False,
+        intersect_policy: str = "midpoint",
+        quality_threshold: int = 30,
+        workers: int = 1,
+        verbose: Union[bool, int] = False
     ) -> list[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
@@ -235,7 +234,7 @@ def coverage(
         if normalize:
             total_coverage = total_coverage_results.get()
             if verbose:
-                    tqdm.write(f'Total coverage is {total_coverage}\n')
+                tqdm.write(f'Total coverage is {total_coverage}\n')
             scale_factor /= total_coverage[4]
 
         # Output

@@ -75,7 +75,7 @@ class EndMotifFreqs():
     def freq(self, kmer: str) -> float:
         return self.freq_dict[kmer]
 
-    def to_tsv(self, output_file: str | Path, sep: str='\t'):
+    def to_tsv(self, output_file: str | Path, sep: str = '\t'):
         """Prints k-mer frequencies to a tsv"""
         if isinstance(output_file, str) or isinstance(output_file, Path):
             try:
@@ -125,7 +125,8 @@ class EndMotifFreqs():
         Parameters
         ---------
         file_path : str
-            Path string containing path to file.
+            Path string containing path to file containing motif
+            frequencies.
         sep : str, optional
             Delimiter used in file.
         header : int, optional
@@ -324,7 +325,7 @@ class EndMotifsIntervals():
     def to_tsv(
             self,
             output_file: str | Path,
-            calc_freq: bool=True, sep: str='\t'):
+            calc_freq: bool = True, sep: str = '\t'):
         """
         Writes all intervals and associated frquencies to file. Columns
         are contig, start, stop, name, count, (kmers).
@@ -352,7 +353,7 @@ class EndMotifsIntervals():
                 # write to file
                 kmers = _gen_kmers(self.k, 'ACGT')
                 # header
-                output.write(sep.join(['contig','start','stop','name','count',*kmers]))
+                output.write(sep.join(['contig', 'start', 'stop', 'name', 'count', *kmers]))
                 output.write('\n')
                 # data
                 for interval, freqs in self.intervals:
@@ -365,12 +366,12 @@ class EndMotifsIntervals():
                             str(interval[3]),
                             str(count), 
                             *([str(freq) for freq in freqs.values()]
-                             if not calc_freq
-                             else [f"{(freq/count):.6f}"
-                                   if count!=0
-                                   else "NaN" 
-                                for freq
-                                in freqs.values()])
+                                if not calc_freq
+                                else [f"{(freq/count):.6f}"
+                                      if count != 0
+                                      else "NaN" 
+                                      for freq
+                                      in freqs.values()])
                         ])
                     )
                     output.write('\n')
@@ -421,7 +422,7 @@ class EndMotifsIntervals():
                             str(interval[2]),
                             (freqs[kmer] if not calc_freq
                              else f"{(freqs[kmer]/count):.6f}"
-                                if count!=0
+                                if count != 0
                                 else "NaN"
                             )
                         ])
@@ -435,12 +436,12 @@ class EndMotifsIntervals():
             raise TypeError('output_file must be a string.')
         
     def to_bed(
-            self,
-            kmer: str,
-            output_file: str | Path,
-            calc_freq: bool=True,
-            sep: str='\t'
-        ):
+                self,
+                kmer: str,
+                output_file: str | Path,
+                calc_freq: bool = True,
+                sep: str = '\t'
+                ):
         """
         Take frequency of specified kmer and writes to BED.
         
