@@ -81,8 +81,27 @@ def _single_adjust_wps(
             raise ValueError('Invalid filetype for input_file.')
 
         # scores are read from BigWig into an numpy structured array
+        genomic_range = raw_wps.intervals(contig, start, stop)
+        if genomic_range is None:
+            # There is no coverage for this region.
+            # This may also occur if the bigwig file
+            # was filtered in any way.
+            adjusted_positions = np.zeros((0,), dtype=np.int64)
+            stops = np.zeros((0,), dtype=np.int64)
+            filtered_scores = np.zeros((0,), dtype=np.float64)
+            raw_wps.close()
+            stderr.write(
+                f'No entries in range: {contig}:{start}-{stop}. This interval will be skipped.\n'
+            )
+
+            return (len(adjusted_positions)*[contig],
+                adjusted_positions,
+                stops,
+                filtered_scores)
+
+
         intervals = np.array(
-            list(raw_wps.intervals(contig, start, stop)),
+            list(genomic_range),
             dtype=[
                 ('starts', '<i8'),
                 ('stops', '<i8'),
@@ -144,7 +163,6 @@ def _single_adjust_wps(
         adjusted_positions = np.zeros((0,), dtype=np.int64)
         stops = np.zeros((0,), dtype=np.int64)
         filtered_scores = np.zeros((0,), dtype=np.float64)
-
     finally:
         raw_wps.close()
 
@@ -283,6 +301,7 @@ def adjust_wps(
             output_bw.addHeader(chrom_sizes_to_list(chrom_sizes))
             for scores in processed_scores:
                 contigs, starts, stops, values = scores
+
                 if len(contigs) == 0:
                     continue
                 try:
@@ -296,7 +315,7 @@ def adjust_wps(
                     traceback.print_exception(e)
                     stderr.write(
                         f'RuntimeError encountered while writing to '
-                        f'{output_file} at interval {contigs[[0]]}:'
+                        f'{output_file} at interval {contigs[0]}:'
                         f'{starts[0]}-{stops[-1]}\n'
                     )
 
