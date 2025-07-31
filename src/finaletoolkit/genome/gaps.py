@@ -7,7 +7,7 @@ on the UCSC Genome Browser (Kent et al 2002).
 """
 
 from __future__ import annotations
-from typing import Union, Iterable
+from typing import Union, Iterable, Optional
 import gzip
 import importlib.resources
 from sys import stdout
@@ -263,7 +263,7 @@ class GenomeGaps:
         else:
             return 'NOARM'
 
-    def get_contig_gaps(self, contig: str) -> ContigGaps:
+    def get_contig_gaps(self, contig: str) -> Optional[ContigGaps]:
         """
         Creates a ContigGaps for the specified chromosome
 
@@ -274,12 +274,14 @@ class GenomeGaps:
 
         Returns
         -------
-        ContigGaps
-            Contains centromere and telomere intervals for chromosome
+        ContigGaps or None
+            ContigGaps: Contains centromere and telomere intervals for chromosome
+            None: If there is no centromere information for a contig
         """
         # get centromere and telomeres for contig
         centromere = self.centromeres[self.centromeres['contig'] == contig]
-        centromere_ends = (centromere[0]['start'], centromere[0]['stop'])
+        try: centromere_ends = (centromere[0]['start'], centromere[0]['stop'])
+        except IndexError: return None
         telomeres = self.telomeres[self.telomeres['contig'] == contig]
 
         telomere_ends = []
