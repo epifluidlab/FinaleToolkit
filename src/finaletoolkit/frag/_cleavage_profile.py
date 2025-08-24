@@ -182,7 +182,7 @@ def _cleavage_profile_star(args):
 def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Union[str, Path],
-    chrom_sizes: Union[str, Path, None] = None,
+    chrom_sizes: Union[str, Path, None],
     left: int=0,
     right: int=0,
     min_length: int|None=None,
