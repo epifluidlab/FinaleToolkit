@@ -148,6 +148,9 @@ def multi_wps(
                 'chrom_sizes must be specified for BED/Fragment files'
             )
         header = chrom_sizes_to_list(chrom_sizes)
+        references = [chrom for (chrom, _) in header]
+
+    chrom_sizes_dict = dict(header)
 
     if (verbose > 1):
         stderr.write(f'header is {header}\n')
@@ -182,7 +185,7 @@ def multi_wps(
                     f"[multi_wps] {contig}:{contents[1]}-{contents[2]} is "
                     "invalid. Please be sure start coordinate occurs before "
                     f"stop for all intervals in {site_bed}.")
-            if contig not in chrom_dict:
+            if contig not in references:
                 warnings.warn(f"Skipping site {contig}:{int(contents[1])} from site_bed (chrom not in chrom_sizes)", UserWarning)
                 continue
             midpoint = (int(contents[1]) + int(contents[2])) // 2
@@ -209,8 +212,6 @@ def multi_wps(
     finally:
         if site_bed != '-':
             bed.close()  
-            
-    chrom_sizes_dict = dict(header)
     
     chrom_sizes_intervals = [chrom_sizes_dict[contig] for contig in contigs]
 
