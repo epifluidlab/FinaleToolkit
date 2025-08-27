@@ -182,7 +182,7 @@ def _cleavage_profile_star(args):
 def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Union[str, Path],
-    chrom_sizes: Union[str, Path, None],
+    chrom_sizes: Union[str, Path],
     left: int=0,
     right: int=0,
     min_length: int|None=None,
@@ -281,7 +281,7 @@ def multi_cleavage_profile(
     
     if chrom_sizes is None:
         raise ValueError(
-            '--chrom_sizes must be specified for tabix-indexed files.'
+            'chrom_sizes must be specified.'
         )
     # get chroms
     header = chrom_sizes_to_list(chrom_sizes)
