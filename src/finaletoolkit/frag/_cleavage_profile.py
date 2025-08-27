@@ -309,12 +309,14 @@ def multi_cleavage_profile(
             # parse file
             contents = line.split()
             contig = contents[0].strip()
-            if contig not in chrom_dict:
-                warnings.warn(f"Skipping {contig} (not in chrom_sizes)", UserWarning)
-                continue
             start, stop = int(contents[1]), int(contents[2])
+            if contig not in chrom_dict:
+                warnings.warn(f"Skipping interval {contig}:{start}-{stop} "
+                 f"from interval_file ({contig} not in chrom_sizes)", UserWarning)
+                continue
             start = max(0, start - left)
             stop = min(stop + right, chrom_dict[contig])
+            
 
             # if overlapping:
             if (prev_contig == contig and start < prev_stop):

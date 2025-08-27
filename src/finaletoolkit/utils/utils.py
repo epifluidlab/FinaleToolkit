@@ -269,7 +269,8 @@ def frag_generator(
             else:
                 raise ValueError(
                     f"{input_file} is not an accepted file type. Only "
-                    "CRAM, BAM, and Frag.gz files are accepted.")
+                    "CRAM, BAM, and tabix-indexed gzipped bed-style "
+                    "files are accepted.")
         elif type(input_file) == pysam.AlignmentFile:
             input_file_is_path = False
             is_sam = True
