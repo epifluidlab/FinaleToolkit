@@ -64,6 +64,9 @@ def plot_histogram(
 
 
 def _distribution_from_gen(generator):
+    """
+    Reads fragments from frag_generator and counts them using a dict.
+    """
     value_counts = {}
     for fragment in generator:
         length_of_fragment = fragment[2] - fragment[1]
@@ -107,13 +110,18 @@ def _frag_length_stats(
     quality_threshold: int,
     verbose: Union[bool, int]
 ):
+    """
+    Generates stats for a given interval.
+    """
     frag_gen = frag_generator(input_file, contig, quality_threshold, start,
                               stop, min_length, max_length, intersect_policy,
                               verbose)
     frag_len_dict = _distribution_from_gen(frag_gen)
 
-    if sum(frag_len_dict.values())==0:
-        mean, median, stdev, minimum, maximum = 5*[-1]
+    total_count = sum(frag_len_dict.values())
+
+    if total_count == 0:
+        mean, median, stdev, minimum, maximum, n_short_reads = 6*[-1]
     else:
         mean = (sum(value * count for value, count in frag_len_dict.items())
                 / sum(frag_len_dict.values()))
@@ -123,8 +131,14 @@ def _frag_length_stats(
         stdev = variance ** 0.5
         minimum = min(frag_len_dict.keys())
         maximum = max(frag_len_dict.keys())
+        
+        n_short_reads = 0
+        for length in frag_len_dict.keys():
+            if length <= 150:
+                n_short_reads += frag_len_dict[length]
 
-    return contig, start, stop, name, mean, median, stdev, minimum, maximum
+    return (contig, start, stop, name, mean, median, stdev, minimum, maximum,
+            total_count, n_short_reads)
 
 
 def _frag_length_stats_star(partial_frag_stat, interval):
@@ -462,6 +476,7 @@ def frag_length_intervals(
             _frag_length_stats, input_file=input_file,min_length=min_length,
             max_length=max_length, intersect_policy=intersect_policy,
             quality_threshold=quality_threshold, verbose=verbose)
+
         results = pool.map(partial(_frag_length_stats_star, partial_frag_stat),
                            intervals, chunksize=max(len(intervals)//workers,
                                                     1))
@@ -488,7 +503,8 @@ def frag_length_intervals(
                         'suffix.'
                     )
                 output.write('contig\tstart\tstop\tname\tmean\tmedian\t'
-                             'stdev\tmin\tmax\n')   # type: ignore
+                             'stdev\tmin\tmax\tfragment_coverage'
+                             '\ts150\n')   # type: ignore
                 output.write(
                     '\n'.join(
                         '\t'.join(
