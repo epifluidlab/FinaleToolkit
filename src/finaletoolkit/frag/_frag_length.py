@@ -15,6 +15,7 @@ from matplotlib.ticker import FuncFormatter
 from finaletoolkit.utils.utils import (
     _get_intervals, frag_generator
 )
+from finaletoolkit.utils.typing import FragFile
 
 
 def plot_histogram(
@@ -95,7 +96,7 @@ def _find_median(val_freq_dict):
 
 
 def _frag_length_stats(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: FragFile,
     contig: str,
     start: int,
     stop: int,
@@ -147,9 +148,9 @@ def frag_length(
 
     Parameters
     ----------
-    input_file : str or pysam.AlignmentFile
-        BAM, CRAM, or fragment file containing paired-end fragment reads or
-        its path. `AlignmentFile` must be opened in read mode.
+    input_file : str, AlignmentFile, or TabixFile
+        BAM, CRAM, or tabix-indexed containing paired-end fragment reads or
+        its path. pysam wrappers must be opened in read mode.
     contig : string, optional
         Contig or chromosome to get fragments from
     start : int, optional
@@ -163,7 +164,8 @@ def frag_length(
         in the interval.
         - any: any part of the fragment is in the interval.
     output_file : string, optional
-    quality_threshold : int, optional
+    quality_threshold: int, optional
+        Minimum MAPQ to accept for a fragment to be counted.
     verbose : bool, optional
 
     Returns
@@ -230,7 +232,7 @@ def frag_length(
 
 
 def frag_length_bins(
-    input_file: Union[str, pysam.AlignmentFile],
+    input_file: FragFile,
     contig: str | None = None,
     start: int | None = None,
     stop: int | None = None,
@@ -250,19 +252,40 @@ def frag_length_bins(
 
     Parameters
     ----------
-    input_file : str or AlignmentFile
+    input_file : str, AlignmentFile, or TabixFile
+        BAM, CRAM, or tabix-indexed containing paired-end fragment reads or
+        its path. pysam wrappers must be opened in read mode.
     contig : str, optional
+        If specified, limits calculations to fragments on this
+        chromosome/contig. If not specified, lengths are calculated genomewide.
     start : int, optional
+        Left-most coordinate of interval to fetch from. See intersect_policy.
+        `contig` and `stop` must be specified if a value is given for `start`.
     stop : int, optional
+        Right-most coordinate of interval to fetch from. See intersect_policy.
+        `contig` and `start` must be specified if a value is given for `stop`.
+    min_length: int, optional
+        Specifies shortest fragment length included in array.
+    max_length: int, optional
+        Specifies longest fragment length included in array.
     bin_size : int, optional
+        Specify how wide each bin is. If None, will be calculated
+        automatically.
     output_file : str, optional
-    intersect_policy : str, optional
+        tsv or tsv.gz file to write results to. Writes to stdout if "-".
+    intersect_policy: str {"midpoint", "any"}, optional
         Specifies what policy is used to include fragments in the
         given interval. Default is "midpoint". Policies include:
         - midpoint: the average of end coordinates of a fragment lies
         in the interval.
         - any: any part of the fragment is in the interval.
+    quality_threshold: int, optional
+        Minimum MAPQ to accept for a fragment to be counted.
+    histogram_path: str, optional
+        If specified, a simple histograpm will be generated using matplotlib.
     workers : int, optional
+        Number of worker processes.
+    verbose : bool, optional
 
     Returns
     -------
@@ -383,12 +406,30 @@ def frag_length_intervals(
 
     Parameters
     ----------
-    input_file : str or AlignmentFile
+    input_file : str, AlignmentFile, or TabixFile
+        BAM, CRAM, or tabix-indexed containing paired-end fragment reads or
+        its path. pysam wrappers must be opened in read mode.
     interval_file : str
+        BED format file specifying intervals over which to calculate fragment
+        length statistics for.
     output_file : str, optional
-    quality_threshold : int, optional
+        If specified, will write results in the BED or bed.gz format. Will
+        write to stdout if set to "-".
+    min_length: int, optional
+        Specifies shortest fragment length included in array.
+    max_length: int, optional
+        Specifies longest fragment length included in array.
+    quality_threshold: int, optional
+        Minimum MAPQ to accept for a fragment to be counted.
+    intersect_policy: str {"midpoint", "any"}, optional
+        Specifies what policy is used to include fragments in the
+        given interval. Default is "midpoint". Policies include:
+        - midpoint: the average of end coordinates of a fragment lies
+        in the interval.
+        - any: any part of the fragment is in the interval.
     workers : int, optional
-    verbose : bool or int, optional
+        Number of worker processes.
+    verbose : bool, optional
 
     Returns
     -------
