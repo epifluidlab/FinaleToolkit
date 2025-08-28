@@ -503,7 +503,7 @@ def frag_length_intervals(
                         'suffix.'
                     )
                 output.write('contig\tstart\tstop\tname\tmean\tmedian\t'
-                             'stdev\tmin\tmax\tfragment_coverage'
+                             'stdev\tmin\tmax\count'
                              '\ts150\n')   # type: ignore
                 output.write(
                     '\n'.join(
