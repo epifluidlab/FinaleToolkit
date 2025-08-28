@@ -37,7 +37,7 @@ class BreakpointMotifFreqs():
         self,
         kmer_frequencies: Iterable[tuple[str, float]],
         k: int,
-        quality_threshold: int = MIN_QUALITY,
+        quality_threshold: int = 30,
     ):
         self.freq_dict = dict(kmer_frequencies)
         self.k = k
@@ -191,7 +191,7 @@ class BreakpointMotifsIntervals():
         self,
         intervals: list[tuple[tuple, dict]],
         k: int,
-        quality_threshold: int = MIN_QUALITY,
+        quality_threshold: int = 30,
     ):
         self.intervals = intervals
         self.k = k
@@ -627,9 +627,7 @@ def region_breakpoint_motifs(
                         assert len(reverse_kmer) == k
 
                         if 'N' not in reverse_kmer:
-                            reverse_kmer = refseq.sequence(
-                                contig, int(frag[2]-(k/2)), int(frag[2]+(k/2))
-                            )
+                            rc_reverse_kmer = _reverse_complement(reverse_kmer)
                             breakpoint_motif_counts[rc_reverse_kmer] += 1
                     except RuntimeError:
                         if verbose > 1:
