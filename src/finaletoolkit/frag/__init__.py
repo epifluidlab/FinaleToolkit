@@ -8,3 +8,4 @@ from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
 from finaletoolkit.frag._adjust_wps import adjust_wps
 from finaletoolkit.frag._end_motifs import *
+from finaletoolkit.frag._breakpoint_motifs import *
