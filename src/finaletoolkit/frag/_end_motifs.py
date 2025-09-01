@@ -590,10 +590,10 @@ def region_end_motifs(
     kmer_list = _gen_kmers(k, bases)
     end_motif_counts = dict(zip(kmer_list, 4**k*[0]))
 
-    # TODO: accept other reference file types e.g. FASTA
     # count end motifs
     try:
         refseq = py2bit.open(str(refseq_file), 'r')
+        chroms_dict = refseq.chroms()
         if both_strands:   # both strands of fragment
             for frag in frag_ends:
                 # py2bit uses 0-based for start, 1-based for end
@@ -607,10 +607,20 @@ def region_end_motifs(
                     end_motif_counts[forward_kmer] += 1
                     
                 # reverse end-motif
-                reverse_kmer = refseq.sequence(
-                    contig, int(frag[2]-k), int(frag[2])
-                )
-                assert len(reverse_kmer) == k
+                try:
+                    reverse_kmer = refseq.sequence(
+                        contig, int(frag[2]-k), int(frag[2])
+                    )
+                    assert len(reverse_kmer) == k
+                except RuntimeError:
+                    raise RuntimeError(
+                        "The start value must be less then the end value (and "
+                        f"the end of the chromosome). Fragment is {contig}:"
+                        f"{frag[1]}-{frag[1]+k}. Interval is {contig}:"
+                        f"{start}-{stop}. Chrom length: {chroms_dict[contig]}."
+                        f"Please verify that the 2bit file matches the"
+                        " fragment file."
+                        )
 
                 if 'N' not in reverse_kmer:
                     end_motif_counts[_reverse_complement(reverse_kmer)] += 1
@@ -645,7 +655,6 @@ def region_end_motifs(
                                 f'{int(frag[2]-k)}-{int(frag[2])} failed.'
                                 'Skipping.')
                         continue
-
     finally:
         refseq.close()
 
@@ -783,7 +792,7 @@ def end_motifs(
     intervals = []
     window_size = 1000000
     for chrom, chrom_length in chroms.items():
-        for start in range(0, chrom_length, window_size):
+        for start in range(0, chrom_length-window_size, window_size):
             intervals.append((
                 input_file,
                 chrom,
@@ -802,7 +811,7 @@ def end_motifs(
         intervals.append((
             input_file,
             chrom,
-            chrom_length - chrom_length%window_size,
+            chrom_length - chrom_length % window_size,
             chrom_length,
             refseq_file,
             k,
