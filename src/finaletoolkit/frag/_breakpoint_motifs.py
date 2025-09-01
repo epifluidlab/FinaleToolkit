@@ -518,7 +518,7 @@ def region_breakpoint_motifs(
     output_file: str | None = None,
     quality_threshold: int = 30,
     verbose: bool | int = False,
-) -> dict:
+ ) -> dict:
     """
     Function that reads fragments in the specified region from a BAM,
     CRAM, or tabix indexed fragment file and returns the  breakpoint motif
@@ -673,7 +673,7 @@ def breakpoint_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
-) -> BreakpointMotifFreqs:
+ ) -> BreakpointMotifFreqs:
     """
     Function that reads fragments from a BAM, CRAM, or tabix indexed
     file and returns the 5' k-mer (default is 6-mer) breakpoint motif
@@ -773,7 +773,7 @@ def breakpoint_motifs(
     intervals = []
     window_size = 1000000
     for chrom, chrom_length in chroms.items():
-        for start in range(0, chrom_length, window_size):
+        for start in range(0, chrom_length-window_size, window_size):
             intervals.append((
                 input_file,
                 chrom,
@@ -862,7 +862,7 @@ def interval_breakpoint_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
-) -> BreakpointMotifsIntervals:
+ ) -> BreakpointMotifsIntervals:
     """
     Function that reads fragments from a BAM, CRAM, or tabix indexed
     file and user-specified intervals and returns the 5' k-mer
@@ -1007,7 +1007,7 @@ def _cli_mds(
     file_path: str,
     sep: str = '\t',
     header: int = 0,
-):
+ ):
     """Function for commandline acces to MDS from a tsv file."""
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
@@ -1025,7 +1025,7 @@ def _cli_interval_mds(
     file_out: str,
     sep: str = ',',
     header: int = 0,
-):
+ ):
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
     motifs = BreakpointMotifsIntervals.from_file(
