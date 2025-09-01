@@ -518,8 +518,8 @@ def region_end_motifs(
     stop: int,
     refseq_file: str | Path,
     k: int = 4,
-    fraction_low: int = 10,
-    fraction_high: int = 600,
+    fraction_low: int | None = 50,
+    fraction_high: int | None = None,
     both_strands: bool = True,
     negative_strand: bool = False,
     output_file: str | None = None,
@@ -571,9 +571,17 @@ def region_end_motifs(
     if verbose:
         start_time = time()
         
+    # check for mutually exclusive args
     if both_strands and negative_strand:
         raise ValueError(
             'Cannot have both both_strands and negative_strand.')
+
+    # Check if fraction_low<k, which leads to errors in py2bit
+    if fraction_low < k:
+        warnings.warn(
+            f"fraction_low={fraction_low} < k={k}, which may cause errors. "
+            "Automatically setting fraction_low=k.")
+        fraction_low = k
 
     # iterable of fragments
     frag_ends = frag_generator(
@@ -616,7 +624,7 @@ def region_end_motifs(
                     raise RuntimeError(
                         "The start value must be less then the end value (and "
                         f"the end of the chromosome). Fragment is {contig}:"
-                        f"{frag[1]}-{frag[1]+k}. Interval is {contig}:"
+                        f"{frag[1]}-{frag[2]}. Interval is {contig}:"
                         f"{start}-{stop}. Chrom length: {chroms_dict[contig]}."
                         f"Please verify that the 2bit file matches the"
                         " fragment file."
@@ -681,8 +689,8 @@ def end_motifs(
     input_file: str,
     refseq_file: str | Path,
     k: int = 4,
-    min_length: int = 10,
-    max_length: int = 600,
+    min_length: int | None = 50,
+    max_length: int | None = None,
     both_strands: bool = True,
     negative_strand: bool = False,
     output_file: None | str = None,
@@ -776,6 +784,13 @@ def end_motifs(
                       stacklevel=2)
         raise ValueError(
             'fraction_high and max_length cannot both be specified')
+
+    # Check if min_length<k, which leads to errors in py2bit
+    if min_length is not None and min_length < k:
+        warnings.warn(
+            f"min_length={min_length} < k={k}, which may cause errors. "
+            "Automatically setting min_length=k.")
+        min_length = k
 
     # getting possible kmers
     bases = 'ACGT'
@@ -871,8 +886,8 @@ def interval_end_motifs(
     refseq_file: str | Path,
     intervals: str | Iterable[tuple[str,int,int,str]],
     k: int = 4,
-    min_length: int | None = 10,
-    max_length: int | None = 600,
+    min_length: int | None = 50,
+    max_length: int | None = None,
     both_strands: bool = True,
     negative_strand: bool = False,
     output_file: str | None = None,
@@ -946,8 +961,12 @@ def interval_end_motifs(
         raise ValueError(
             'fraction_high and max_length cannot both be specified')
 
-    bases='ACGT'
-    kmer_list = _gen_kmers(k, bases)
+    # Check if min_length<k, which leads to errors in py2bit
+    if min_length is not None and min_length < k:
+        warnings.warn(
+            f"min_length={min_length} < k={k}, which may cause errors. "
+            "Automatically setting min_length=k.")
+        min_length = k
 
     # generate list of inputs
     if type(intervals) is str:
@@ -1003,9 +1022,9 @@ def interval_end_motifs(
         [(interval, counts)
          for interval, counts
          in zip(intervals_tuples, counts_iter)],
-         k,
-         quality_threshold,
-    )
+        k,
+        quality_threshold,
+     )
 
     if output_file is not None:
         if output_file.endswith('.csv'):
@@ -1038,6 +1057,7 @@ def _cli_mds(
     )
     mds = motifs.motif_diversity_score()
     stdout.write(f'{mds}\n')
+
 
 def _cli_interval_mds(
     file_path: str,

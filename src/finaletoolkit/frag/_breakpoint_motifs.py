@@ -663,8 +663,8 @@ def breakpoint_motifs(
     input_file: str,
     refseq_file: str | Path,
     k: int = 6,
-    min_length: int = 10,
-    max_length: int = 600,
+    min_length: int = 50,
+    max_length: int = None,
     both_strands: bool = True,
     negative_strand: bool = False,
     output_file: None | str = None,
@@ -689,7 +689,7 @@ def breakpoint_motifs(
     k : int, optional
         Length of breakpoint motif kmer. Default is 6.
     min_length: int or None, optional
-        Minimum length of fragments to be included.
+        Minimum length of fragments to be included. Defualt is 50.
     max_length: int or None, optional
         Maximum length of fragments to be included.
     both_strands: bool
@@ -852,8 +852,8 @@ def interval_breakpoint_motifs(
     refseq_file: str | Path,
     intervals: str | Iterable[tuple[str,int,int,str]],
     k: int = 6,
-    min_length: int | None = 10,
-    max_length: int | None = 600,
+    min_length: int | None = 50,
+    max_length: int | None = None,
     both_strands: bool = True,
     negative_strand: bool = False,
     output_file: str | None = None,
@@ -879,6 +879,10 @@ def interval_breakpoint_motifs(
         (chrom, start, stop, name).
     k : int, optional
         Length of breakpoint motif kmer. Default is 6.
+    min_length: int, optional
+        Smallest fragment length accepted. Default is 50
+    max_length: int, optional
+        Longest fragment length accepted.
     both_strands: bool
         Indicate whether to calculate 5' breakpoint motifs on both positive and
         negative strands or not. If False, only 5' ends of the positive

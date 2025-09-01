@@ -654,9 +654,9 @@ def main_cli_parser():
     cli_motifs.add_argument(
         '-min',
         '--min-length',
-        default=0,
+        default=50,
         type=int,
-        help='Minimum length for a fragment to be included.'
+        help='Minimum length for a fragment to be included. Default is 50'
         )
     cli_motifs.add_argument(
         '-max',
@@ -729,9 +729,9 @@ def main_cli_parser():
     cli_interval_motifs.add_argument(
         '-min',
         '--min-length',
-        default=0,
+        default=50,
         type=int,
-        help='Minimum length for a fragment to be included.'
+        help='Minimum length for a fragment to be included. Default is 50.'
         )
     cli_interval_motifs.add_argument(
         '-max',
@@ -813,9 +813,9 @@ def main_cli_parser():
     cli_breakpoint.add_argument(
         '-min',
         '--min-length',
-        default=0,
+        default=50,
         type=int,
-        help='Minimum length for a fragment to be included.'
+        help='Minimum length for a fragment to be included. Default is 50'
         )
     cli_breakpoint.add_argument(
         '-max',
@@ -888,9 +888,9 @@ def main_cli_parser():
     cli_interval_breakpoint.add_argument(
         '-min',
         '--min-length',
-        default=0,
+        default=50,
         type=int,
-        help='Minimum length for a fragment to be included.'
+        help='Minimum length for a fragment to be included. Default is 50.'
         )
     cli_interval_breakpoint.add_argument(
         '-max',
