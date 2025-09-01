@@ -9,7 +9,7 @@ Features
 Fragment Length
 -----------------------
 
-**FinaleToolkit** can calculate the fragment length distribution and summary statistics of cell-free DNA fragments.
+**FinaleToolkit** can calculate the fragment length distribution and summary statistics of cell-free DNA fragments over intervals.
 
 -----------------------
 Fragment Coverage
@@ -34,10 +34,16 @@ DELFI
 DELFI is a metric that was introduced to identify abnormalities in cfDNA from their fragmentation patterns. In the original paper, DELFI was used to categorize patients with cancer and the associated tumor tissues of origin. The associated DELFI score is the ratio between the GC%-corrected short fragment count and the GC%-corrected long fragment count.
 
 -----------------------
-End Motifs
+End-Motifs
 -----------------------
 
 **FinaleToolkit** can calculate the frequency of end-motif k-mers of cell-free DNA fragments. Since end motifs are specific sequences found at the ends of cfDNA fragments resulting from cleavage, they can be used to potentially detect patterns associated with certain conditions or diseases.
+
+-----------------------
+Breakpoint Motifs
+-----------------------
+
+**FinaleToolkit** can calculate the frequency of breakpoint-motif k-mers of cell-free DNA fragments. Like end-motifs, they can be used to potentially detect patterns associated with certain conditions or diseases.
 
 -----------------------------
 Motif Diversity Score (MDS)

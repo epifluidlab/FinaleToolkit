@@ -9,6 +9,7 @@ API
    wps
    delfi
    endmotifs
+   breakpointmotifs
    cleavageprofile
    fragfile
    genomeutils
