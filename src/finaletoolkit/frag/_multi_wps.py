@@ -211,9 +211,16 @@ def multi_wps(
         stops.append(prev_stop)
     finally:
         if site_bed != '-':
-            bed.close()  
-    
-    chrom_sizes_intervals = [chrom_sizes_dict[contig] for contig in contigs]
+            bed.close()
+
+    try:
+        chrom_sizes_intervals = [chrom_sizes_dict[contig] for contig in contigs]
+    except KeyError:
+        raise ValueError(
+            f"Chrom {contig} from {site_bed} is not present in {input_file} or "
+            "chrom.sizes file if applicable). Please ensure that all files use "
+            "the same reference genome and chromosome naming conventions."
+        )
 
     count = len(contigs)
 
