@@ -182,7 +182,7 @@ def _cleavage_profile_star(args):
 def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Union[str, Path],
-    chrom_sizes: Union[str, Path, None] = None,
+    chrom_sizes: Union[str, Path],
     left: int=0,
     right: int=0,
     min_length: int|None=None,
@@ -281,7 +281,7 @@ def multi_cleavage_profile(
     
     if chrom_sizes is None:
         raise ValueError(
-            '--chrom_sizes must be specified'
+            'chrom_sizes must be specified.'
         )
     # get chroms
     header = chrom_sizes_to_list(chrom_sizes)
@@ -310,8 +310,13 @@ def multi_cleavage_profile(
             contents = line.split()
             contig = contents[0].strip()
             start, stop = int(contents[1]), int(contents[2])
+            if contig not in chrom_dict:
+                warnings.warn(f"Skipping interval {contig}:{start}-{stop} "
+                 f"from interval_file ({contig} not in chrom_sizes)", UserWarning)
+                continue
             start = max(0, start - left)
             stop = min(stop + right, chrom_dict[contig])
+            
 
             # if overlapping:
             if (prev_contig == contig and start < prev_stop):
@@ -332,32 +337,6 @@ def multi_cleavage_profile(
     starts = starts[1:]
     stops = stops[1:]
 
-    # reading chrom.sizes file
-    # get chrom sizes from input_file or chrom_sizes
-    
-    if (isinstance(input_file, pysam.AlignmentFile)):
-        references = input_file.references
-        lengths = input_file.lengths
-        header = list(zip(references, lengths))
-    elif (
-            (isinstance(input_file, str)
-            or isinstance(input_file, PathLike))
-        and
-            (str(input_file).endswith('.sam')
-            or str(input_file).endswith('.bam')
-            or str(input_file).endswith('.cram'))
-    ):
-        with pysam.AlignmentFile(input_file, 'r') as bam:
-            references = bam.references
-            lengths = bam.lengths
-            header = list(zip(references, lengths))
-    elif chrom_sizes is not None:
-        header = chrom_sizes_to_list(chrom_sizes)
-    else:
-        raise ValueError(
-            'chrom_sizes must be specified for Tabix-indexed files'
-        )
-        
     size_dict = dict(header)
 
     sizes = [size_dict[contig] for contig in contigs]

@@ -267,8 +267,7 @@ def main_cli_parser():
         help='Path to a BED file containing intervals to calculates cleavage '
         'proportion over.')
     cli_cleavage_profile.add_argument(
-        '-c',
-        '--chrom-sizes',
+        'chrom_sizes',
         help='A .chrom.sizes file containing chromosome names and sizes.')
     cli_cleavage_profile.add_argument(
         '-o',
@@ -655,9 +654,9 @@ def main_cli_parser():
     cli_motifs.add_argument(
         '-min',
         '--min-length',
-        default=0,
+        default=50,
         type=int,
-        help='Minimum length for a fragment to be included.'
+        help='Minimum length for a fragment to be included. Default is 50'
         )
     cli_motifs.add_argument(
         '-max',
@@ -730,9 +729,9 @@ def main_cli_parser():
     cli_interval_motifs.add_argument(
         '-min',
         '--min-length',
-        default=0,
+        default=50,
         type=int,
-        help='Minimum length for a fragment to be included.'
+        help='Minimum length for a fragment to be included. Default is 50.'
         )
     cli_interval_motifs.add_argument(
         '-max',
@@ -793,6 +792,165 @@ def main_cli_parser():
         action='count',
         help='Enable verbose mode to display detailed processing information.')
     cli_interval_motifs.set_defaults(module='finaletoolkit.frag._end_motifs', func='interval_end_motifs')
+
+    # breakpoint-motifs
+    cli_breakpoint = subparsers.add_parser(
+        'breakpoint-motifs',
+        prog='finaletoolkit-breakpoint-motifs',
+        description="Measures frequency of k-mer breakpoint motifs.")
+    cli_breakpoint.add_argument(
+        'input_file',
+        help='Path to a BAM/CRAM/Fragment file containing fragment data.')
+    cli_breakpoint.add_argument(
+        'refseq_file',
+        help='The .2bit file for the associate reference genome sequence used '
+        'during alignment.')
+    cli_breakpoint.add_argument(
+        '-k',
+        default=6,
+        type=int,
+        help='Length of k-mer.')
+    cli_breakpoint.add_argument(
+        '-min',
+        '--min-length',
+        default=50,
+        type=int,
+        help='Minimum length for a fragment to be included. Default is 50'
+        )
+    cli_breakpoint.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_breakpoint.add_argument(
+        '-B',
+        '--no-both-strands',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for breakpoint-motifs."
+    )
+    cli_breakpoint.add_argument(
+        '-n',
+        '--negative-strand',
+        action="store_true",
+        help="Set flag in conjunction with -B to only consider 5' breakpoint motifs "
+        "on the negative strand."
+    )
+    cli_breakpoint.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help='TSV to print k-mer frequencies. If "-", will write to stdout.')
+    cli_breakpoint.add_argument(
+        '-q',
+        '--quality-threshold',
+        default=20,
+        type=int,
+        help='Minimum mapping quality threshold.')
+    cli_breakpoint.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of worker processes.')
+    cli_breakpoint.add_argument(
+        '-v',
+        '--verbose',
+        default=0,
+        action='count',
+        help='Enable verbose mode to display detailed processing information.')
+    cli_breakpoint.set_defaults(module='finaletoolkit.frag._breakpoint_motifs', func='breakpoint_motifs')
+
+    # interval-breakpoint-motifs
+    cli_interval_breakpoint = subparsers.add_parser(
+        'interval-breakpoint-motifs',
+        prog='finaletoolkit-interval-ebreakpointnd-motifs',
+        description="Measures frequency of k-mer 5' breakpoint motifs in each region "
+        "specified in a BED file and writes data into a table.")
+    cli_interval_breakpoint.add_argument(
+        'input_file',
+        help='Path to a BAM/CRAM/Fragment file containing fragment data.')
+    cli_interval_breakpoint.add_argument(
+        'refseq_file',
+        help='The .2bit file for the associate reference genome sequence used '
+        'during alignment.')
+    cli_interval_breakpoint.add_argument(
+        'intervals',
+        help='Path to a BED file containing intervals to retrieve breakpoint motif '
+        'frequencies over.')
+    cli_interval_breakpoint.add_argument(
+        '-k',
+        default=6,
+        type=int,
+        help='Length of k-mer.')
+    cli_interval_breakpoint.add_argument(
+        '-min',
+        '--min-length',
+        default=50,
+        type=int,
+        help='Minimum length for a fragment to be included. Default is 50.'
+        )
+    cli_interval_breakpoint.add_argument(
+        '-max',
+        '--max-length',
+        default=None,
+        type=int,
+        help='Maximum length for a fragment to be included.'
+        )
+    cli_interval_breakpoint.add_argument(
+        '-lo',
+        '--fraction-low',
+        type=int,
+        dest='min_length',
+        help='Deprecated alias for --min-length')
+    cli_interval_breakpoint.add_argument(
+        '-hi',
+        '--fraction-high',
+        type=int,
+        dest='max_length',
+        help='Deprecated alias for --max-length')
+    cli_interval_breakpoint.add_argument(
+        '-B',
+        '--single-strand',
+        action="store_false",
+        dest="both_strands",
+        help="Set flag to only consider one strand for breakpoint-motifs. By default,"
+        " the positive strand is calculated, but with the -n flag, the "
+        "5' breakpoint motifs of the negative strand are considered instead."
+    )
+    cli_interval_breakpoint.add_argument(
+        '-n',
+        '--negative-strand',
+        action="store_true",
+        help="Set flag in conjunction with -B to only consider 5' breakpoint motifs "
+        "on the negative strand."
+    )
+    cli_interval_breakpoint.add_argument(
+        '-o',
+        '--output-file',
+        default='-',
+        help="Path to TSV or CSV file to write breakpoint motif frequencies to.")
+    cli_interval_breakpoint.add_argument(
+        '-q',
+        '--quality-threshold',
+        default=20,
+        type=int,
+        help='Minimum mapping quality threshold.')
+    cli_interval_breakpoint.add_argument(
+        '-w',
+        '--workers',
+        default=1,
+        type=int,
+        help='Number of worker processes.')
+    cli_interval_breakpoint.add_argument(
+        '-v',
+        '--verbose',
+        default=0,
+        action='count',
+        help='Enable verbose mode to display detailed processing information.')
+    cli_interval_breakpoint.set_defaults(module='finaletoolkit.frag._breakpoint_motifs', func='interval_breakpoint_motifs')
 
     # mds
     cli_mds = subparsers.add_parser(

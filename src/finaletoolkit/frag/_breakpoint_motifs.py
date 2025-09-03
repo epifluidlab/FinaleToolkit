@@ -17,16 +17,9 @@ from numpy.typing import NDArray
 from finaletoolkit.utils.utils import frag_generator
 import finaletoolkit.frag as pkg_data
 
-# path to tsv containing f-profiles from Zhou et al (2023)
-FPROFILE_PATH = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
-
-# quality threshold used by Jiang et al (2020)
-MIN_QUALITY: int = 20
-
-
-class EndMotifFreqs():
+class BreakpointMotifFreqs():
     """
-    Class that stores frequencies of end-motif k-mer frequencies and
+    Class that stores frequencies of breakpoint-motif k-mer frequencies and
     contains methods to manipulate this data.
 
     Parameters
@@ -44,7 +37,7 @@ class EndMotifFreqs():
         self,
         kmer_frequencies: Iterable[tuple[str, float]],
         k: int,
-        quality_threshold: int = MIN_QUALITY,
+        quality_threshold: int = 30,
     ):
         self.freq_dict = dict(kmer_frequencies)
         self.k = k
@@ -101,7 +94,7 @@ class EndMotifFreqs():
         """
         Calculates a motif diversity score (MDS) using normalized
         Shannon entropy as described by Jiang et al (2020). This
-        function is generalized for any k instead of just 4-mers.
+        function is generalized for any k instead of just 6-mers.
         """
         num_kmers = 4**self.k
         freq = np.array(self.frequencies())
@@ -118,7 +111,7 @@ class EndMotifFreqs():
             file_path: str | Path,
             quality_threshold: int,
             sep: str='\t',
-            header: int=0,) -> EndMotifFreqs:
+            header: int=0,) -> BreakpointMotifFreqs:
         """
         Reads kmer frequency from a two-column tab-delimited file.
 
@@ -133,7 +126,7 @@ class EndMotifFreqs():
 
         Return
         ------
-        kmer_freqs : EndMotifFreqs
+        kmer_freqs : BreakpointMotifFreqs
         """
         try:
             # open file
@@ -176,9 +169,9 @@ class EndMotifFreqs():
         return cls(freq_list, k, quality_threshold)
 
 
-class EndMotifsIntervals():
+class BreakpointMotifsIntervals():
     """
-    Class that stores frequencies of end-motif k-mers over
+    Class that stores frequencies of breakpoint-motif k-mers over
     user-specified intervals and contains methods to manipulate this
     data.
 
@@ -198,7 +191,7 @@ class EndMotifsIntervals():
         self,
         intervals: list[tuple[tuple, dict]],
         k: int,
-        quality_threshold: int = MIN_QUALITY,
+        quality_threshold: int = 30,
     ):
         self.intervals = intervals
         self.k = k
@@ -216,7 +209,7 @@ class EndMotifsIntervals():
         return self.intervals.__len__()
 
     def __str__(self) -> str:
-        return f'EndMotifsIntervals over {len(self.intervals)} intervals.'
+        return f'BreakpointMotifsIntervals over {len(self.intervals)} intervals.'
     
     @classmethod
     def from_file(
@@ -224,7 +217,7 @@ class EndMotifsIntervals():
             file_path: str,
             quality_threshold: int,
             sep: str = ',',
-            header: int = 0,) -> EndMotifsIntervals:
+            header: int = 0,) -> BreakpointMotifsIntervals:
         """
         Reads kmer frequency from a tab-delimited file. Expected columns
         are contig, start, stop, name, count, (kmers). Because
@@ -242,7 +235,7 @@ class EndMotifsIntervals():
 
         Return
         ------
-        kmer_freqs : EndMotifsIntervals
+        kmer_freqs : BreakpointMotifsIntervals
         """
         try:
             # open file
@@ -291,7 +284,7 @@ class EndMotifsIntervals():
         """
         Calculates a motif diversity score (MDS) for each interval using
         normalized Shannon entropy as described by Jiang et al (2020). This
-        function is generalized for any k instead of just 4-mers.
+        function is generalized for any k instead of just 6-mers.
         """
         num_kmers = 4**self.k
         mds = []
@@ -511,26 +504,25 @@ def _reverse_complement(kmer: str) -> str:
     return complemented
 
 
-def region_end_motifs(
+def region_breakpoint_motifs(
     input_file: str,
     contig: str,
     start: int,
     stop: int,
     refseq_file: str | Path,
-    k: int = 4,
-    fraction_low: int | None = 50,
-    fraction_high: int | None = None,
+    k: int = 6,
+    fraction_low: int = 10,
+    fraction_high: int = 600,
     both_strands: bool = True,
     negative_strand: bool = False,
     output_file: str | None = None,
-    quality_threshold: int = MIN_QUALITY,
+    quality_threshold: int = 30,
     verbose: bool | int = False,
-) -> dict:
+ ) -> dict:
     """
     Function that reads fragments in the specified region from a BAM,
-    CRAM, or tabix indexed fragment file and returns the 5' k-mer (
-    default is 4-mer) end motif counts as a dictionary. This function
-    reproduces the methodology of Zhou et al (2023).
+    CRAM, or tabix indexed fragment file and returns the  breakpoint motif
+    counts as a dictionary.
 
     Parameters
     ----------
@@ -545,7 +537,7 @@ def region_end_motifs(
     refseq_file : str or Path
         2bit file with reference sequence `input_file` was aligned to.
     k : int, optional
-        Length of end motif kmer. Default is 4.
+        Length of breakpoint motif kmer. Default is 6.
     fraction_low: int, optional
         Minimum fragment length.
     fraction_high: int, optional
@@ -564,24 +556,15 @@ def region_end_motifs(
 
     Return
     ------
-    end_motif_freq : dict
+    breakpoint_motif_freq : dict
     """
-    # NOTE: consider renaming to interval_end_motif
 
     if verbose:
         start_time = time()
         
-    # check for mutually exclusive args
     if both_strands and negative_strand:
         raise ValueError(
             'Cannot have both both_strands and negative_strand.')
-
-    # Check if fraction_low<k, which leads to errors in py2bit
-    if fraction_low < k:
-        warnings.warn(
-            f"fraction_low={fraction_low} < k={k}, which may cause errors. "
-            "Automatically setting fraction_low=k.")
-        fraction_low = k
 
     # iterable of fragments
     frag_ends = frag_generator(
@@ -596,66 +579,56 @@ def region_end_motifs(
     # create dict where keys are kmers and values are counts
     bases='ACGT'
     kmer_list = _gen_kmers(k, bases)
-    end_motif_counts = dict(zip(kmer_list, 4**k*[0]))
+    breakpoint_motif_counts = dict(zip(kmer_list, 4**k*[0]))
 
-    # count end motifs
+    # TODO: accept other reference file types e.g. FASTA
+    # count breakpoint motifs
     try:
         refseq = py2bit.open(str(refseq_file), 'r')
-        chroms_dict = refseq.chroms()
         if both_strands:   # both strands of fragment
             for frag in frag_ends:
                 # py2bit uses 0-based for start, 1-based for end
-                # forward end-motif
+                # forward breakpoint-motif
                 forward_kmer = refseq.sequence(
-                    contig, int(frag[1]), int(frag[1]+k)
+                    contig, int(frag[1]-(k/2)), int(frag[1]+(k/2))
                 )
                 assert len(forward_kmer) == k    
 
                 if 'N' not in forward_kmer:
-                    end_motif_counts[forward_kmer] += 1
+                    breakpoint_motif_counts[forward_kmer] += 1
                     
-                # reverse end-motif
-                try:
-                    reverse_kmer = refseq.sequence(
-                        contig, int(frag[2]-k), int(frag[2])
-                    )
-                    assert len(reverse_kmer) == k
-                except RuntimeError:
-                    raise RuntimeError(
-                        "The start value must be less then the end value (and "
-                        f"the end of the chromosome). Fragment is {contig}:"
-                        f"{frag[1]}-{frag[2]}. Interval is {contig}:"
-                        f"{start}-{stop}. Chrom length: {chroms_dict[contig]}."
-                        f"Please verify that the 2bit file matches the"
-                        " fragment file."
-                        )
+                # reverse breakpoint-motif
+                reverse_kmer = refseq.sequence(
+                    contig, int(frag[2]-(k/2)), int(frag[2]+(k/2))
+                )
+                assert len(reverse_kmer) == k
 
                 if 'N' not in reverse_kmer:
-                    end_motif_counts[_reverse_complement(reverse_kmer)] += 1
+                    breakpoint_motif_counts[_reverse_complement(reverse_kmer)] += 1
         else:
             for frag in frag_ends:
-                if frag[4] and not negative_strand: # is on indicated strand
+                if frag[4] and not negative_strand:  # is on indicated strand
                     # py2bit uses 0-based for start, 1-based for end
                     # forward end-motif
                     forward_kmer = refseq.sequence(
-                        contig, int(frag[1]), int(frag[1]+k)
+                        contig, int(frag[1]-(k/2)), int(frag[1]+(k/2))
                     )
                     assert len(forward_kmer) == k    
 
                     if 'N' not in forward_kmer:
-                        end_motif_counts[forward_kmer] += 1
+                        breakpoint_motif_counts[forward_kmer] += 1
                     
                 elif negative_strand:
                     # reverse end-motif
                     try:
                         reverse_kmer = refseq.sequence(
-                            contig, int(frag[2]-k), int(frag[2])
+                            contig, int(frag[2]-(k/2)), int(frag[2]+(k/2))
                         )
                         assert len(reverse_kmer) == k
 
                         if 'N' not in reverse_kmer:
                             rc_reverse_kmer = _reverse_complement(reverse_kmer)
-                            end_motif_counts[rc_reverse_kmer] += 1
+                            breakpoint_motif_counts[rc_reverse_kmer] += 1
                     except RuntimeError:
                         if verbose > 1:
                             stderr.write(
@@ -663,34 +636,35 @@ def region_end_motifs(
                                 f'{int(frag[2]-k)}-{int(frag[2])} failed.'
                                 'Skipping.')
                         continue
+
     finally:
         refseq.close()
 
     if verbose:
         stop_time = time()
         stderr.write(
-            f'region_end_motifs took {stop_time-start_time} seconds to run\n'
+            f'region_breakpoint_motifs took {stop_time-start_time} seconds to run\n'
         )
 
-    return end_motif_counts
+    return breakpoint_motif_counts
 
 
-def _region_end_motifs_star(args) -> NDArray[np.float64]:
-    results_dict = region_end_motifs(*args)
+def _region_breakpoint_motifs_star(args) -> NDArray[np.float64]:
+    results_dict = region_breakpoint_motifs(*args)
     return np.array(list(results_dict.values()), dtype='<f8')
 
 
-def _region_end_motifs_dict_star(args) -> dict:
-    results_dict = region_end_motifs(*args)
+def _region_breakpoint_motifs_dict_star(args) -> dict:
+    results_dict = region_breakpoint_motifs(*args)
     return results_dict
 
 
-def end_motifs(
+def breakpoint_motifs(
     input_file: str,
     refseq_file: str | Path,
-    k: int = 4,
-    min_length: int | None = 50,
-    max_length: int | None = None,
+    k: int = 6,
+    min_length: int = 50,
+    max_length: int = None,
     both_strands: bool = True,
     negative_strand: bool = False,
     output_file: None | str = None,
@@ -699,12 +673,11 @@ def end_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
-) -> EndMotifFreqs:
+ ) -> BreakpointMotifFreqs:
     """
     Function that reads fragments from a BAM, CRAM, or tabix indexed
-    file and returns the 5' k-mer (default is 4-mer) end motif
-    frequencies as a dictionary. Optionally writes data to a tsv. This
-    function reproduces the methodology of Zhou et al (2023).
+    file and returns the 5' k-mer (default is 6-mer) breakpoint motif
+    frequencies as a dictionary. Optionally writes data to a tsv.
 
     Parameters
     ----------
@@ -714,13 +687,13 @@ def end_motifs(
         2bit file with sequence of reference genome input_file is
         aligned to.
     k : int, optional
-        Length of end motif kmer. Default is 4.
+        Length of breakpoint motif kmer. Default is 6.
     min_length: int or None, optional
-        Minimum length of fragments to be included.
+        Minimum length of fragments to be included. Defualt is 50.
     max_length: int or None, optional
         Maximum length of fragments to be included.
     both_strands: bool
-        Indicate whether to calculate 5' end motifs on both positive and
+        Indicate whether to calculate 5' breakpoint motifs on both positive and
         negative strands or not. If False, only 5' ends of the positive
         strand are considered, unless the `negative_strand` option is
         set to True. Default is True. 
@@ -741,7 +714,7 @@ def end_motifs(
         Alias for `max_length`. *Deprecated.*
     Return
     ------
-    end_motif_freq : EndMotifFreqs
+    breakpoint_motif_freq : BreakpointMotifFreqs
     """
     if verbose:
         start_time = time()
@@ -785,13 +758,6 @@ def end_motifs(
         raise ValueError(
             'fraction_high and max_length cannot both be specified')
 
-    # Check if min_length<k, which leads to errors in py2bit
-    if min_length is not None and min_length < k:
-        warnings.warn(
-            f"min_length={min_length} < k={k}, which may cause errors. "
-            "Automatically setting min_length=k.")
-        min_length = k
-
     # getting possible kmers
     bases = 'ACGT'
     kmer_list = _gen_kmers(k, bases)
@@ -826,7 +792,7 @@ def end_motifs(
         intervals.append((
             input_file,
             chrom,
-            chrom_length - chrom_length % window_size,
+            chrom_length - chrom_length%window_size,
             chrom_length,
             refseq_file,
             k,
@@ -846,13 +812,13 @@ def end_motifs(
 
         # uses tqdm loading bar if verbose == True
         counts_iter = pool.imap(
-            _region_end_motifs_star,
+            _region_breakpoint_motifs_star,
             tqdm(intervals, 'Reading 1mb windows', position=0)if verbose else intervals,
             chunksize=min(int(len(intervals)/workers/2+1), 1000)
         )
 
         ccounts = np.zeros((4**k,), np.float64)
-        for count in tqdm(counts_iter, 'Counting end-motifs', len(intervals), position=1) if verbose else counts_iter:
+        for count in tqdm(counts_iter, 'Counting breakpoint-motifs', len(intervals), position=1) if verbose else counts_iter:
             ccounts = ccounts + count
 
     finally:
@@ -860,7 +826,7 @@ def end_motifs(
 
     frequencies = ccounts/np.sum(ccounts)
 
-    results = EndMotifFreqs(
+    results = BreakpointMotifFreqs(
         zip(kmer_list, frequencies),
         k,
         quality_threshold,
@@ -875,17 +841,17 @@ def end_motifs(
     if verbose:
         stop_time = time()
         tqdm.write(
-            f'end_motifs took {stop_time-start_time} seconds to run\n'
+            f'breakpoint_motifs took {stop_time-start_time} seconds to run\n'
         )
 
     return results
 
 
-def interval_end_motifs(
+def interval_breakpoint_motifs(
     input_file: str,
     refseq_file: str | Path,
     intervals: str | Iterable[tuple[str,int,int,str]],
-    k: int = 4,
+    k: int = 6,
     min_length: int | None = 50,
     max_length: int | None = None,
     both_strands: bool = True,
@@ -896,11 +862,11 @@ def interval_end_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
-) -> EndMotifsIntervals:
+ ) -> BreakpointMotifsIntervals:
     """
     Function that reads fragments from a BAM, CRAM, or tabix indexed
     file and user-specified intervals and returns the 5' k-mer
-    (default is 4-mer) end motif. Optionally writes data to a tsv.
+    (default is 6-mer) breakpoint motif. Optionally writes data to a tsv.
 
     Parameters
     ----------
@@ -912,9 +878,13 @@ def interval_end_motifs(
         Path of BED file containing intervals or list of tuples
         (chrom, start, stop, name).
     k : int, optional
-        Length of end motif kmer. Default is 4.
+        Length of breakpoint motif kmer. Default is 6.
+    min_length: int, optional
+        Smallest fragment length accepted. Default is 50
+    max_length: int, optional
+        Longest fragment length accepted.
     both_strands: bool
-        Indicate whether to calculate 5' end motifs on both positive and
+        Indicate whether to calculate 5' breakpoint motifs on both positive and
         negative strands or not. If False, only 5' ends of the positive
         strand are considered, unless the `negative_strand` option is
         set to True. Default is True. 
@@ -931,7 +901,7 @@ def interval_end_motifs(
 
     Return
     ------
-    end_motif_freq : EndMotifIntervals
+    breakpoint_motif_freq : BreakpointMotifIntervals
     """
     if verbose:
         start_time = time()
@@ -961,12 +931,8 @@ def interval_end_motifs(
         raise ValueError(
             'fraction_high and max_length cannot both be specified')
 
-    # Check if min_length<k, which leads to errors in py2bit
-    if min_length is not None and min_length < k:
-        warnings.warn(
-            f"min_length={min_length} < k={k}, which may cause errors. "
-            "Automatically setting min_length=k.")
-        min_length = k
+    bases='ACGT'
+    kmer_list = _gen_kmers(k, bases)
 
     # generate list of inputs
     if type(intervals) is str:
@@ -1008,7 +974,7 @@ def interval_end_motifs(
 
         # uses tqdm loading bar if verbose == True
         counts_iter = pool.imap(
-            _region_end_motifs_dict_star,
+            _region_breakpoint_motifs_dict_star,
             tqdm(
                 mp_intervals,
                 'Reading intervals',
@@ -1018,13 +984,13 @@ def interval_end_motifs(
 
     finally:
         pool.close()
-    results = EndMotifsIntervals(
+    results = BreakpointMotifsIntervals(
         [(interval, counts)
          for interval, counts
          in zip(intervals_tuples, counts_iter)],
-        k,
-        quality_threshold,
-     )
+         k,
+         quality_threshold,
+    )
 
     if output_file is not None:
         if output_file.endswith('.csv'):
@@ -1035,7 +1001,7 @@ def interval_end_motifs(
     if verbose:
         stop_time = time()
         tqdm.write(
-            f'end_motifs took {stop_time-start_time} seconds to run\n'
+            f'breakpoint_motifs took {stop_time-start_time} seconds to run\n'
         )
 
     return results
@@ -1045,11 +1011,11 @@ def _cli_mds(
     file_path: str,
     sep: str = '\t',
     header: int = 0,
-):
+ ):
     """Function for commandline acces to MDS from a tsv file."""
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
-    motifs = EndMotifFreqs.from_file(
+    motifs = BreakpointMotifFreqs.from_file(
         file_path,
         30,
         sep,
@@ -1058,16 +1024,15 @@ def _cli_mds(
     mds = motifs.motif_diversity_score()
     stdout.write(f'{mds}\n')
 
-
 def _cli_interval_mds(
     file_path: str,
     file_out: str,
     sep: str = ',',
     header: int = 0,
-):
+ ):
     # 30 is used as a placeholder for the quality threshold. It is not
     # used to calculate MDS and can be ignored.
-    motifs = EndMotifsIntervals.from_file(
+    motifs = BreakpointMotifsIntervals.from_file(
         file_path,
         30,
         sep,

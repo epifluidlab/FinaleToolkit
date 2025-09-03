@@ -227,11 +227,9 @@ def frag_generator(
     stop : int, optional
         Right-most coordinate of interval to fetch from. See intersect_policy.
     min_length : int, optional
-        Specifies lowest fragment length included in array. Default is
-        120, equivalent to long fraction.
+        Specifies lowest fragment length included in array.
     max_length : int, optional
-        Specifies highest fragment length included in array. Default is
-        120, equivalent to long fraction.
+        Specifies highest fragment length included in array.
     intersect_policy : str, optional
         Specifies what policy is used to include fragments in the
         given interval. Default is "midpoint". Policies include:
@@ -269,7 +267,8 @@ def frag_generator(
             else:
                 raise ValueError(
                     f"{input_file} is not an accepted file type. Only "
-                    "CRAM, BAM, and Frag.gz files are accepted.")
+                    "CRAM, BAM, and tabix-indexed gzipped bed-style "
+                    "files are accepted.")
         elif type(input_file) == pysam.AlignmentFile:
             input_file_is_path = False
             is_sam = True
