@@ -169,9 +169,24 @@ def main_cli_parser():
         help='A .TSV file containing containing fragment lengths binned'
         ' according to the specified bin size.')
     cli_frag_length_bins.add_argument(
+        '-stats',
+        '--summary-stats',
+        action="store_true",
+        help='Include summary statistics at the bottom of the output tsv as '
+        'comment lines (e.g. #max: 100)',
+    )
+    cli_frag_length_bins.add_argument(
+        '-sf',
+        '--short-fraction',
+        default=None,
+        type=int,
+        help='When specified, a short fraction is included in summary '
+        'statistics.',
+    )
+    cli_frag_length_bins.add_argument(
         '--histogram-path',
         default=None,
-        help='Path to store histogram.',
+        help='Path to store histogram if specified.',
     )
     cli_frag_length_bins.add_argument(
         '-q',

@@ -259,6 +259,8 @@ def frag_length_bins(
     output_file: str | None = None,
     intersect_policy: str = "midpoint",
     quality_threshold: int = 30,
+    summary_stats: bool = False,
+    short_fraction: int | None = None,
     histogram_path: str | None = None,
     verbose: Union[bool, int] = False,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -298,6 +300,12 @@ def frag_length_bins(
         - any: any part of the fragment is in the interval.
     quality_threshold: int, optional
         Minimum MAPQ to accept for a fragment to be counted.
+    summary_stats: bool, optional
+        When set to true, summary statistics are appended as comments at the
+        end of the tsv.
+    short_fraction: int, optional
+        If specified, the short fraction will be calculated and included in
+        summary statistics for the tsv and/or histogram.
     histogram_path: str, optional
         If specified, a simple histograpm will be generated using matplotlib.
     workers : int, optional
@@ -320,6 +328,8 @@ def frag_length_bins(
             output_file: {output_file}
             intersect_policy: {intersect_policy}
             quality_threshold: {quality_threshold}
+            summary_stats: {summary_stats}
+            short_fraction: {short_fraction}
             histogram_path: {histogram_path}
             verbose: {verbose}
             \n"""
@@ -340,7 +350,8 @@ def frag_length_bins(
     variance = (sum(count * ((value - mean) ** 2)
                     for value, count in frag_len_dict.items())
                 / sum(frag_len_dict.values()))
-    
+    total_count = sum(frag_len_dict.values())
+
     # get statistics
     stats = []
     stats.append(('mean', mean))
@@ -348,7 +359,16 @@ def frag_length_bins(
     stats.append(('stdev', variance ** 0.5))
     stats.append(('min', min(frag_len_dict.keys())))
     stats.append(('max', max(frag_len_dict.keys())))
-
+    stats.append(('total count', total_count))
+    if short_fraction is not None:  # calculate short fraction if specified
+        short_coverage = 0
+        for frag_length in frag_len_dict.keys():
+            if frag_length <= short_fraction:
+                short_coverage += frag_len_dict[frag_length]
+        stats.append(
+            (f'short fraction (s{short_fraction})',
+             short_coverage/total_count))
+            
     bin_start = min(frag_len_dict.keys())
     bin_stop = max(frag_len_dict.keys())
     n_bins = (bin_stop - bin_start) // bin_size
@@ -363,7 +383,7 @@ def frag_length_bins(
         bin_count = sum(count for length, count in frag_len_dict.items()
                         if bin_lower <= length < bin_upper)
         if bin_count is None:
-            bin_count = 0 
+            bin_count = 0
         counts.append(bin_count)
 
     # write results to output
@@ -383,16 +403,16 @@ def frag_length_bins(
             for bin, count in zip(bins, counts):
                 out.write(f'{bin}\t{bin+bin_size-1}\t{count}\n')
 
-            if histogram_path!=None:
-                plot_histogram(frag_len_dict, num_bins=n_bins,
-                               histogram_path=histogram_path, stats=stats)
+            if summary_stats:
+                for name, value in stats:
+                    out.write(f'#{name}: {value}\n')
 
         finally:
             if out_is_file:
                 out.close()
 
     # generate histogram figure
-    elif histogram_path!=None:
+    if histogram_path is not None:
         plot_histogram(frag_len_dict, num_bins=n_bins,
                        histogram_path=histogram_path, stats=stats)
 
@@ -416,7 +436,7 @@ def frag_length_intervals(
     short_reads: int = 150,
     workers: int = 1,
     verbose: Union[bool, int] = False,
-)->list[tuple[str, int, int, str, float, float, int, int]]:
+ )->list[tuple[str, int, int, str, float, float, int, int]]:
     """
     Takes fragments from BAM file and calculates fragment length
     statistics for each interval in a BED file. If output specified,
