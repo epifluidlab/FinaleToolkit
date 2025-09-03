@@ -106,6 +106,7 @@ def _frag_length_stats(
     name: str,
     min_length: int,
     max_length: int,
+    short_reads: int,
     intersect_policy: str,
     quality_threshold: int,
     verbose: Union[bool, int]
@@ -121,7 +122,7 @@ def _frag_length_stats(
     total_count = sum(frag_len_dict.values())
 
     if total_count == 0:
-        mean, median, stdev, minimum, maximum, n_short_reads = 6*[-1]
+        mean, median, stdev, minimum, maximum, n_short_reads, frac_short_reads = 7*[-1]
     else:
         mean = (sum(value * count for value, count in frag_len_dict.items())
                 / sum(frag_len_dict.values()))
@@ -134,11 +135,13 @@ def _frag_length_stats(
         
         n_short_reads = 0
         for length in frag_len_dict.keys():
-            if length <= 150:
+            if length <= short_reads:
                 n_short_reads += frag_len_dict[length]
+        
+        frac_short_reads = n_short_reads/total_count
 
     return (contig, start, stop, name, mean, median, stdev, minimum, maximum,
-            total_count, n_short_reads)
+            total_count, frac_short_reads)
 
 
 def _frag_length_stats_star(partial_frag_stat, interval):
@@ -410,6 +413,7 @@ def frag_length_intervals(
     max_length: int | None = None,
     quality_threshold: int = 30,
     intersect_policy: str = "midpoint",
+    short_reads: int = 150,
     workers: int = 1,
     verbose: Union[bool, int] = False,
 )->list[tuple[str, int, int, str, float, float, int, int]]:
@@ -441,13 +445,15 @@ def frag_length_intervals(
         - midpoint: the average of end coordinates of a fragment lies
         in the interval.
         - any: any part of the fragment is in the interval.
+    short_reads: int, optional
+        Specifies length cutoff for short read fraction. Default is 150.
     workers : int, optional
         Number of worker processes.
     verbose : bool, optional
 
     Returns
     -------
-    results: list of (contig, start, stop, name, mean, median, stdev, min, max)'
+    results: list of (contig, start, stop, name, mean, median, stdev, min, max, count, fraction of short reads)'
     """
     if verbose:
         stderr.write(
@@ -474,7 +480,7 @@ def frag_length_intervals(
         
         partial_frag_stat = partial(
             _frag_length_stats, input_file=input_file,min_length=min_length,
-            max_length=max_length, intersect_policy=intersect_policy,
+            max_length=max_length, short_reads=short_reads, intersect_policy=intersect_policy,
             quality_threshold=quality_threshold, verbose=verbose)
 
         results = pool.map(partial(_frag_length_stats_star, partial_frag_stat),
@@ -504,7 +510,7 @@ def frag_length_intervals(
                     )
                 output.write('contig\tstart\tstop\tname\tmean\tmedian\t'
                              'stdev\tmin\tmax\tcount'
-                             '\ts150\n')   # type: ignore
+                             f'\ts{short_reads}\n')   # type: ignore
                 output.write(
                     '\n'.join(
                         '\t'.join(

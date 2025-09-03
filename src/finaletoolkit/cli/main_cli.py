@@ -232,6 +232,12 @@ def main_cli_parser():
         '(mean, median, st. dev, min, max) over the intervals specified'
         ' in the interval file.')
     cli_frag_length_intervals.add_argument(
+        '-s',
+        '--short-reads',
+        default=150,
+        type=int,
+        help='Threshold for short read fraction. Default is 150.')
+    cli_frag_length_intervals.add_argument(
         '-q',
         '--quality-threshold',
         default=30,
