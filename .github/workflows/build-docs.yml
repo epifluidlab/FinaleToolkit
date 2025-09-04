@@ -44,7 +44,7 @@ jobs:
       - name: Build Sphinx documentation
         run: |
           cd docs
-          make html
+          make clean html
           touch _build/html/.nojekyll
 
       - name: Upload artifact
