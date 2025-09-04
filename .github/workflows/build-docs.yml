@@ -5,10 +5,7 @@ on:
     branches:
       - main
       - documentation-update
-    paths:
-      - 'docs/**'
-      - '!docs/_build/**' # No infinite loop from pushing to docs again
-      - '.github/workflows/build-docs.yml'
+
   workflow_dispatch:
 
 permissions:
