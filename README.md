@@ -32,9 +32,12 @@ Li J*, Bandaru R*, Liu Y (2024) FinaleToolkit: Accelerating Cell-Free DNA Fragme
 
 
 ## Installation
-You can install the package using `pip`.
+You can install the package using `pip` or bioconda channel via conda (`conda` or `mamba`).
 ```
 $ pip install finaletoolkit
+```
+```
+$ conda install bioconda::finaletoolkit
 ```
 
 ## Usage
