@@ -169,9 +169,24 @@ def main_cli_parser():
         help='A .TSV file containing containing fragment lengths binned'
         ' according to the specified bin size.')
     cli_frag_length_bins.add_argument(
+        '-stats',
+        '--summary-stats',
+        action="store_true",
+        help='Include summary statistics at the bottom of the output tsv as '
+        'comment lines (e.g. #max: 100)',
+    )
+    cli_frag_length_bins.add_argument(
+        '-sf',
+        '--short-fraction',
+        default=None,
+        type=int,
+        help='When specified, a short fraction is included in summary '
+        'statistics.',
+    )
+    cli_frag_length_bins.add_argument(
         '--histogram-path',
         default=None,
-        help='Path to store histogram.',
+        help='Path to store histogram if specified.',
     )
     cli_frag_length_bins.add_argument(
         '-q',
@@ -231,6 +246,12 @@ def main_cli_parser():
         help='A BED file containing fragment length summary statistics '
         '(mean, median, st. dev, min, max) over the intervals specified'
         ' in the interval file.')
+    cli_frag_length_intervals.add_argument(
+        '-s',
+        '--short-reads',
+        default=150,
+        type=int,
+        help='Threshold for short read fraction. Default is 150.')
     cli_frag_length_intervals.add_argument(
         '-q',
         '--quality-threshold',

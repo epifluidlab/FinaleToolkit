@@ -587,44 +587,84 @@ def region_breakpoint_motifs(
         refseq = py2bit.open(str(refseq_file), 'r')
         if both_strands:   # both strands of fragment
             for frag in frag_ends:
+                # check if overlapping with end of chrom
+                if (frag[1]-(k/2)) < 0 or (frag[1]+(k/2)) >= refseq.chroms()[frag[0]]:
+                    warnings.warn(
+                        f"Fragment {frag[0]}:{frag[1]}-{frag[2]} is "
+                        "too close to the end of chromosome. Skipping.")
+                    continue
+
                 # py2bit uses 0-based for start, 1-based for end
                 # forward breakpoint-motif
                 forward_kmer = refseq.sequence(
-                    contig, int(frag[1]-(k/2)), int(frag[1]+(k/2))
+                    contig, (frag[1]-(k//2)), (frag[1]+(k//2))
                 )
-                assert len(forward_kmer) == k    
+                if len(forward_kmer) != k:
+                    warnings.warn(
+                        f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due to length discrepancy with motif"
+                        ". This may be due to the fragment being aligned to the end of a mitochondrial DNA.")
+                    continue
 
                 if 'N' not in forward_kmer:
                     breakpoint_motif_counts[forward_kmer] += 1
                     
                 # reverse breakpoint-motif
                 reverse_kmer = refseq.sequence(
-                    contig, int(frag[2]-(k/2)), int(frag[2]+(k/2))
+                    contig, (frag[2]-(k//2)), (frag[2]+(k//2))
                 )
-                assert len(reverse_kmer) == k
+                contig, (frag[2]-(k//2)), (frag[2]+(k//2))
+                if len(reverse_kmer) != k:
+                    warnings.warn(
+                        f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due "
+                        "to length discrepancy with motif. This may be due to "
+                        "the fragment being aligned to the end of a "
+                        "mitochondrial DNA.")
+                    continue
+
+                if len(reverse_kmer) != k:
+                    f"{contig}:{(frag[2]-(k//2))}-{(frag[2]+(k//2))} : {reverse_kmer}"
 
                 if 'N' not in reverse_kmer:
                     breakpoint_motif_counts[_reverse_complement(reverse_kmer)] += 1
         else:
             for frag in frag_ends:
+                # check if overlapping with end of chrom
+                if (frag[1]-(k//2)) < 0 or (frag[1]+(k//2)) >= refseq.chroms()[frag[0]]:
+                    warnings.warn(
+                        f"Fragment {frag[0]}:{frag[1]}-{frag[2]} is "
+                        "too close to the end of chromosome. Skipping.")
+                    continue
+
                 if frag[4] and not negative_strand:  # is on indicated strand
                     # py2bit uses 0-based for start, 1-based for end
-                    # forward end-motif
+                    # forward breakpoint-motif
                     forward_kmer = refseq.sequence(
-                        contig, int(frag[1]-(k/2)), int(frag[1]+(k/2))
+                        contig, (frag[1]-(k//2)), (frag[1]+(k//2))
                     )
-                    assert len(forward_kmer) == k    
+                    if len(forward_kmer) != k:
+                        warnings.warn(
+                            f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due "
+                             "to length discrepancy with motif. This may be due to "
+                             "the fragment being aligned to the end of a "
+                             "mitochondrial DNA.")
+                        continue
 
                     if 'N' not in forward_kmer:
                         breakpoint_motif_counts[forward_kmer] += 1
                     
                 elif negative_strand:
-                    # reverse end-motif
+                    # reverse breakpoint-motif
                     try:
                         reverse_kmer = refseq.sequence(
-                            contig, int(frag[2]-(k/2)), int(frag[2]+(k/2))
+                            contig, (frag[2]-(k//2)), (frag[2]+(k//2))
                         )
-                        assert len(reverse_kmer) == k
+                        if len(reverse_kmer) != k:
+                            warnings.warn(
+                            f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due "
+                             "to length discrepancy with motif. This may be due to "
+                             "the fragment being aligned to the end of a "
+                             "mitochondrial DNA.")
+                            continue
 
                         if 'N' not in reverse_kmer:
                             rc_reverse_kmer = _reverse_complement(reverse_kmer)
