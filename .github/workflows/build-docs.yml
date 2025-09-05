@@ -5,10 +5,7 @@ on:
     branches:
       - main
       - documentation-update
-    paths:
-      - 'docs/**'
-      - '!docs/_build/**' # No infinite loop from pushing to docs again
-      - '.github/workflows/build-docs.yml'
+
   workflow_dispatch:
 
 permissions:
@@ -43,11 +40,22 @@ jobs:
 
       - name: Build Sphinx documentation
         run: |
-          make -C docs html
+          cd docs
+          make clean html
+          touch _build/html/.nojekyll
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html
-          publish_branch: gh-pages
+          path: docs/_build/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
