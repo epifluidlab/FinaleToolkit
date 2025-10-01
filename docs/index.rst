@@ -33,20 +33,21 @@ Documentation
 Citations
 -----------------
 
-If FinaleToolkit is integral to a scientific publication, please cite it. A paper describing FinaleToolkit has been written. Here is a ready-made BibTeX entry::
+If FinaleToolkit is integral to a scientific publication, please cite it. A peer-reviewed paper describing FinaleToolkit has been written. Here is a ready-made BibTeX entry::
 
-    @article {Li2024.05.29.596414,
-	author = {Li, James W. and Bandaru, Ravi and Liu, Yaping},
-	title = {FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit},
-	elocation-id = {2024.05.29.596414},
-	year = {2024},
-	doi = {10.1101/2024.05.29.596414},
-	publisher = {Cold Spring Harbor Laboratory},
-	abstract = {Cell-free DNA (cfDNA) fragmentation pattern represents a promising non-invasive biomarker for disease diagnosis and prognosis. Numerous fragmentation features, such as end motif and window protection score (WPS), have been characterized in cfDNA genomic sequencing. However, the analytical tools developed in these studies are often not released to the liquid biopsy community or are inefficient for genome-wide analysis in large datasets. To address this gap, we have developed FinaleToolkit, a fast and memory efficient Python package designed to generate comprehensive fragmentation features from large cfDNA genomic sequencing data. For instance, FinaleToolkit can generate genome-wide WPS features from a \~{}100X cfDNA whole-genome sequencing (WGS) dataset in 1.2 hours using 16 CPU cores, offering up to a \~{}50-fold increase in processing speed compared to original implementations in the same dataset. We have benchmarked FinaleToolkit against original studies or implementations where possible, confirming its efficacy. Furthermore, FinaleToolkit enabled the genome-wide analysis of fragmentation patterns over arbitrary genomic intervals, significantly boosting the performance for cancer early detection. FinaleToolkit is open source and thoroughly documented with both command line interface and Python application programming interface (API) to facilitate its widespread adoption and use within the research community: https://github.com/epifluidlab/FinaleToolkitCompeting Interest StatementY.L. owns stocks from Freenome Inc. The remaining authors declare no competing interests.},
-	URL = {https://www.biorxiv.org/content/early/2024/06/02/2024.05.29.596414},
-	eprint = {https://www.biorxiv.org/content/early/2024/06/02/2024.05.29.596414.full.pdf},
-	journal = {bioRxiv}
-    }
+   @article{10.1093/bioadv/vbaf236,
+    author = {Li, James Wenhan and Bandaru, Ravi and Baliga, Kundan and Liu, Yaping},
+    title = {FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit},
+    journal = {Bioinformatics Advances},
+    pages = {vbaf236},
+    year = {2025},
+    month = {09},
+    abstract = {Cell-free DNA (cfDNA) fragmentation pattern represents a promising non-invasive biomarker for disease diagnosis and prognosis. Numerous fragmentation features, such as end motif and window protection score (WPS), have been characterized in cfDNA genomic sequencing. However, the analytical tools developed in these studies are often not released to the liquid biopsy community or are inefficient for genome-wide analysis in large datasets.To address this gap, we have developed FinaleToolkit, a fast and memory-efficient Python package designed to generate comprehensive fragmentation features from large cfDNA genomic sequencing data. For instance, FinaleToolkit can generate genome-wide WPS features from a ∼100X cfDNA whole-genome sequencing (WGS) dataset with over 1 billion fragments in 0.7 hours, offering up to a ∼50-fold increase in processing speed compared to original implementations in the same dataset. We have benchmarked FinaleToolkit against original approaches or implementations where possible, confirming its efficacy. Furthermore, FinaleToolkit enabled the genome-wide analysis of fragmentation patterns over arbitrary genomic intervals, significantly boosting the performance for cancer early detection.FinaleToolkit is open source and thoroughly documented with both command line interface and Python application programming interface (API) to facilitate its widespread adoption and use within the research community: https://github.com/epifluidlab/FinaleToolkit.},
+    issn = {2635-0041},
+    doi = {10.1093/bioadv/vbaf236},
+    url = {https://doi.org/10.1093/bioadv/vbaf236},
+    eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbaf236/64414830/vbaf236.pdf},
+}
 
 
 -----------------
