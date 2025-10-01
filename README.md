@@ -18,8 +18,6 @@
 </ol>
 
 
-
-
 ## About The Project
 FinaleToolkit (**F**ragmentat**I**o**N** **A**na**L**ysis of c**E**ll-free DNA 
 **Toolkit**) is a package and standalone program to extract fragmentation
@@ -28,7 +26,7 @@ features of cell-free DNA from paired-end sequencing data.
 ### Citation
 If you use FinaleToolkit in your research, please consider citing our paper:
 
-Li J*, Bandaru R*, Liu Y (2024) FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit. BioRxiv Preprint [![Static Badge](https://img.shields.io/badge/DOI-10.1101%2F2024.05.29.596414-blue?style=flat-square)](https://doi.org/10.1101/2024.05.29.596414)
+James Wenhan Li, Ravi Bandaru, Kundan Baliga, Yaping Liu, FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit, *Bioinformatics Advances*, 2025;, vbaf236, https://doi.org/10.1093/bioadv/vbaf236
 
 
 ## Installation
