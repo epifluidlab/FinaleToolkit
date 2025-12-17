@@ -499,16 +499,27 @@ def low_quality_read_pairs(read, min_mapq=30):
         True if read is low quality, unmapped, not properly paired.
     """
 
-    return (read.is_unmapped    # 0x4
-            or read.is_secondary    # 0x100
-            or (not read.is_paired) # not 0x1
-            or read.mate_is_unmapped    # 0x8
-            or read.is_duplicate    # 0x400
-            or read.mapping_quality < min_mapq
-            or read.is_qcfail   # 0x200
-            or read.is_supplementary    # 0x800
-            or (not read.is_proper_pair)   # not 0x2
-            or (read.is_reverse and read.mate_is_reverse))   # -G 48
+    if (
+        read.is_unmapped    # 0x4
+        or read.is_secondary    # 0x100
+        or (not read.is_paired) # not 0x1
+        or read.mate_is_unmapped    # 0x8
+        or read.is_duplicate    # 0x400
+        or read.mapping_quality < min_mapq
+        or read.is_qcfail   # 0x200
+        or read.is_supplementary    # 0x800
+        or (not read.is_proper_pair)   # not 0x2
+        or (read.is_reverse and read.mate_is_reverse)   # -G 48
+    ):
+        return True
+    try:
+        if read.has_tag("MQ") and read.get_tag("MQ") < min_mapq:
+            return True
+    except Exception:
+        pass
+
+    return False
+    
 
 
 def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
