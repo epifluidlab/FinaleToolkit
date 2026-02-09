@@ -73,6 +73,10 @@ Fragment (`.frag.gz`) files are block-gzipped BED3+2 files with the following co
 
 We encourage you to use our comprehensive database, FinaleDB, to access relevant fragment files. Learn more about FinaleDB [here](http://finaledb.research.cchmc.org).
 
+### Snakemake workflow
+
+Check out our [Snakemake workflow](https://github.com/epifluidlab/finaletoolkit_workflow)!
+
 ## Contact
 - James Li: lijw21@wfu.edu
 - Ravi Bandaru: ravi.bandaru@northwestern.edu
