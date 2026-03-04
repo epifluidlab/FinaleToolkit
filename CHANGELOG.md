@@ -7,6 +7,67 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Python 3.13 added to GitHub Actions CI test matrix.
+- Snakemake workflow section added to README.
+
+### Fixed
+- `multi_wps` no longer crashes with `ValueError: negative dimensions are not
+  allowed` when BED intervals produce degenerate windows (e.g. when expanded
+  intervals exceed chromosome boundaries or when closely spaced TSS sites
+  trigger overlap-trimming that inverts `start`/`stop`).
+  - `stop` is now clamped to chromosome size when computing expanded windows.
+  - Degenerate intervals (`stop <= start`) produced by overlap-trimming are
+    silently skipped instead of being forwarded to worker processes.
+  - `wps` now checks for `stop <= start` at function entry, emits a
+    `UserWarning`, and returns an empty result rather than crashing.
+
+### Changed
+- `low_quality_read_pairs` in `utils` now also checks the `MQ` (mate mapping
+  quality) BAM tag and marks a read pair as low quality if the mate's mapping
+  quality falls below `min_mapq`.
+
+## [0.11.0] - 2025-09-05
+
+### Added
+- New `breakpoint-motifs` and `interval-breakpoint-motifs` CLI subcommands and
+  corresponding Python API (`finaletoolkit.frag.breakpoint_motifs`) for
+  computing breakpoint motif frequencies from cfDNA fragments.
+- `--summary-stats` flag for `frag-length-bins`: appends summary statistics
+  (mean, median, short fraction, etc.) as comment lines to the output file.
+- `--short-fraction` option for `frag-length-bins` to specify the length
+  threshold used when computing the short-fragment fraction.
+- `--short-reads` option for `frag-length-intervals` to customize the short
+  read length threshold (previously hard-coded).
+- Automated documentation build workflow (`.github/workflows/build-docs.yml`).
+- `frag.gz` (FinaleDB format) accepted wherever `bed.gz` fragment files were
+  previously accepted in `frag_generator`.
+
+### Changed
+- `chrom_sizes` is now a **required** argument for Python API functions and CLI
+  commands that previously accepted it as optional (affects `multi_wps`,
+  `cleavage_profile`, and related subcommands).
+- DELFI GC-correction flag logic made more intuitive: passing `-G` /
+  `--no-gc-correct` now unambiguously disables GC correction.
+- Deprecated DELFI subcommands now appear in verbose logs.
+
+### Fixed
+- `cleavage-profile` now correctly reads chromosome sizes when a `chrom_sizes`
+  file is provided (PR #158).
+- `multi_wps` now issues a `UserWarning` and skips BED intervals whose
+  chromosome is absent from `chrom_sizes`, rather than raising a `KeyError`.
+- Additional error checking for intervals passed to `wps` (e.g. `start >
+  stop` now raises a descriptive error).
+- `end_motifs` no longer duplicates the last interval when parallelizing over
+  chromosomes.
+- `breakpoint_motifs` parallelization race condition fixed.
+- `delfi` and `adjust-wps` now handle chromosomes without centromere
+  annotations (e.g. chrM, chrX, chrY) without crashing (PR #156, @skchronicles).
+- `agg_bigwig` no longer crashes when a BigWig file has no entries over a
+  given genomic range (PR #156, @skchronicles).
+
 ## [0.10.7] - 2025-1-22
 
 ### Added
