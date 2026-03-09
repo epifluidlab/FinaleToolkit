@@ -191,24 +191,26 @@ def multi_wps(
             midpoint = (int(contents[1]) + int(contents[2])) // 2
 
             start = max(0, midpoint + int(left_of_site))
-            stop = midpoint + int(right_of_site)
+            stop = min(midpoint + int(right_of_site), chrom_sizes_dict[contig])
 
             # cut off part of previous interval if overlap
             if contig == prev_contig and start < prev_stop:
                 prev_stop = start
 
             if prev_contig is not None:
-                contigs.append(prev_contig)
-                starts.append(prev_start)
-                stops.append(prev_stop)
+                if prev_stop > prev_start:  # skip degenerate intervals
+                    contigs.append(prev_contig)
+                    starts.append(prev_start)
+                    stops.append(prev_stop)
 
             prev_contig = contig
             prev_start = start
             prev_stop = stop
         # appending last interval
-        contigs.append(prev_contig)
-        starts.append(prev_start)
-        stops.append(prev_stop)
+        if prev_stop > prev_start:  # skip degenerate intervals
+            contigs.append(prev_contig)
+            starts.append(prev_start)
+            stops.append(prev_stop)
     finally:
         if site_bed != '-':
             bed.close()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import time
+import warnings
 from typing import Union
 from sys import stdout, stderr
 from multiprocessing import Pool
@@ -345,12 +346,20 @@ def frag_length_bins(
     
     frag_len_dict = _distribution_from_gen(frag_gen)
 
+    total_count = sum(frag_len_dict.values())
+    if total_count == 0:
+        warnings.warn(
+            "No fragments found in the specified region. Returning empty result.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return np.array([]), np.array([])
+
     mean = (sum(value * count for value, count in frag_len_dict.items())
-            / sum(frag_len_dict.values()))
+            / total_count)
     variance = (sum(count * ((value - mean) ** 2)
                     for value, count in frag_len_dict.items())
-                / sum(frag_len_dict.values()))
-    total_count = sum(frag_len_dict.values())
+                / total_count)
 
     # get statistics
     stats = []

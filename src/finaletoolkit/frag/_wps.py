@@ -122,6 +122,22 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
     start = int(start)
     stop = int(stop)
 
+    if stop <= start:
+        warnings.warn(
+            f"[wps] {chrom}:{start}-{stop} is a degenerate interval "
+            "(stop <= start); skipping.",
+            UserWarning,
+            stacklevel=2,
+        )
+        return np.zeros(
+            0,
+            dtype=[
+                ('contig', 'U16'),
+                ('start', 'i8'),
+                ('wps', 'i8'),
+            ]
+        )
+
     # set minimum and maximum values for fragments. These extend farther
     # than needed
     minimum = max(round(start - max_length), 0)
