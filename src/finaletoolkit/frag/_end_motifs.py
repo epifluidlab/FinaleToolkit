@@ -1,21 +1,22 @@
 from __future__ import annotations
-from collections.abc import Iterator
-from typing import Iterable
-from multiprocessing import Pool
-from time import time
-from sys import stderr, stdout, stdin
-import gzip
-from importlib.resources import files
-from pathlib import Path
-import warnings
 
-from tqdm import tqdm
-import py2bit
+import gzip
+import warnings
+from collections.abc import Iterator
+from importlib.resources import files
+from multiprocessing import Pool
+from pathlib import Path
+from sys import stderr, stdin, stdout
+from time import time
+from typing import Iterable
+
 import numpy as np
 from numpy.typing import NDArray
+from tqdm import tqdm
 
-from finaletoolkit.utils.utils import frag_generator
 import finaletoolkit.frag as pkg_data
+from finaletoolkit.io.reference import ReferenceWrapper
+from finaletoolkit.utils.utils import frag_generator, reverse_complement
 
 # path to tsv containing f-profiles from Zhou et al (2023)
 FPROFILE_PATH = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
@@ -77,11 +78,11 @@ class EndMotifFreqs():
 
     def to_tsv(self, output_file: str | Path, sep: str='\t'):
         """Prints k-mer frequencies to a tsv"""
-        if isinstance(output_file, str) or isinstance(output_file, Path):
+        if isinstance(output_file, (str, Path)):
             try:
                 # open file based on name
                 output_is_file = False
-                if output_file == '-':
+                if str(output_file) == '-':
                     output = stdout
                 else:
                     output_is_file = True
@@ -339,7 +340,7 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if isinstance(output_file, str) or isinstance(output_file, Path):
+        if isinstance(output_file, (str, Path)):
             try:
                 # open file based on name
                 output_is_file = False
@@ -401,7 +402,7 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if isinstance(output_file, str) or isinstance(output_file, Path):
+        if isinstance(output_file, (str, Path)):
             try:
                 # open file based on name
                 output_is_file = False
@@ -433,7 +434,7 @@ class EndMotifsIntervals():
                     output.close()
         else:
             raise TypeError('output_file must be a string.')
-        
+    
     def to_bed(
             self,
             kmer: str,
@@ -454,7 +455,7 @@ class EndMotifsIntervals():
         sep: str, optional
             Separator for table. Tab-separated by default.
         """
-        if isinstance(output_file, str) or isinstance(output_file, Path):
+        if isinstance(output_file, (str, Path)):
             try:
                 # open file based on name
                 output_is_file = False
@@ -490,25 +491,15 @@ class EndMotifsIntervals():
 
 
 def _gen_kmers(k: int, bases: str) -> list:
-        """Function to recursively create a list of k-mers."""
-        if k == 1:
-            return [base for base in bases]
-        else:
-            kmers = []
-            for k_minus_mer in _gen_kmers(k-1, bases):
-                for base in bases:
-                    kmers.append(k_minus_mer+base)
-            return kmers
-
-
-def _reverse_complement(kmer: str) -> str:
-    reversed = kmer[-1::-1]
-    pair_dict = {'A': 'T',
-                 'T': 'A',
-                 'G': 'C',
-                 'C': 'G'}
-    complemented = ''.join(pair_dict[base] for base in reversed)
-    return complemented
+    """Function to recursively create a list of k-mers."""
+    if k == 1:
+        return [base for base in bases]
+    else:
+        kmers = []
+        for k_minus_mer in _gen_kmers(k-1, bases):
+            for base in bases:
+                kmers.append(k_minus_mer+base)
+        return kmers
 
 
 def region_end_motifs(
@@ -543,7 +534,7 @@ def region_end_motifs(
     stop : int
         1-based end coordinate.
     refseq_file : str or Path
-        2bit file with reference sequence `input_file` was aligned to.
+        Reference sequence `input_file` was aligned to.
     k : int, optional
         Length of end motif kmer. Default is 4.
     fraction_low: int, optional
@@ -599,51 +590,45 @@ def region_end_motifs(
     end_motif_counts = dict(zip(kmer_list, 4**k*[0]))
 
     # count end motifs
-    try:
-        refseq = py2bit.open(str(refseq_file), 'r')
-        chroms_dict = refseq.chroms()
+    with ReferenceWrapper(str(refseq_file), use_lock=False) as refseq:
+        chroms_dict = refseq.chroms
         if both_strands:   # both strands of fragment
             for frag in frag_ends:
-                # py2bit uses 0-based for start, 1-based for end
                 # forward end-motif
-                forward_kmer = refseq.sequence(
-                    contig, int(frag[1]), int(frag[1]+k)
-                )
-                assert len(forward_kmer) == k    
-
-                if 'N' not in forward_kmer:
-                    end_motif_counts[forward_kmer] += 1
+                try:
+                    forward_kmer = refseq.sequence(
+                        contig, int(frag[1]), int(frag[1]+k)
+                    )
+                    if len(forward_kmer) == k and 'N' not in forward_kmer:
+                        end_motif_counts[forward_kmer] += 1
+                except ValueError:
+                    continue
                     
                 # reverse end-motif
                 try:
                     reverse_kmer = refseq.sequence(
                         contig, int(frag[2]-k), int(frag[2])
                     )
-                    assert len(reverse_kmer) == k
-                except RuntimeError:
+                    if len(reverse_kmer) == k and 'N' not in reverse_kmer:
+                        end_motif_counts[reverse_complement(reverse_kmer)] += 1
+                except ValueError as e:
                     raise RuntimeError(
-                        "The start value must be less then the end value (and "
-                        f"the end of the chromosome). Fragment is {contig}:"
-                        f"{frag[1]}-{frag[2]}. Interval is {contig}:"
-                        f"{start}-{stop}. Chrom length: {chroms_dict[contig]}."
-                        f"Please verify that the 2bit file matches the"
-                        " fragment file."
-                        )
-
-                if 'N' not in reverse_kmer:
-                    end_motif_counts[_reverse_complement(reverse_kmer)] += 1
+                        f"Error querying sequence at {contig}:{int(frag[2]-k)}-{int(frag[2])}. "
+                        f"Chrom length: {chroms_dict.get(contig, 'unknown')}. "
+                        f"Please verify that the reference file matches the fragment file. "
+                        f"Original error: {e}"
+                    )
         else:
             for frag in frag_ends:
                 if frag[4] and not negative_strand: # is on indicated strand
-                    # py2bit uses 0-based for start, 1-based for end
-                    # forward end-motif
-                    forward_kmer = refseq.sequence(
-                        contig, int(frag[1]), int(frag[1]+k)
-                    )
-                    assert len(forward_kmer) == k    
-
-                    if 'N' not in forward_kmer:
-                        end_motif_counts[forward_kmer] += 1
+                    try:
+                        forward_kmer = refseq.sequence(
+                            contig, int(frag[1]), int(frag[1]+k)
+                        )
+                        if len(forward_kmer) == k and 'N' not in forward_kmer:
+                            end_motif_counts[forward_kmer] += 1
+                    except ValueError:
+                        continue
                     
                 elif negative_strand:
                     # reverse end-motif
@@ -651,20 +636,16 @@ def region_end_motifs(
                         reverse_kmer = refseq.sequence(
                             contig, int(frag[2]-k), int(frag[2])
                         )
-                        assert len(reverse_kmer) == k
-
-                        if 'N' not in reverse_kmer:
-                            rc_reverse_kmer = _reverse_complement(reverse_kmer)
+                        if len(reverse_kmer) == k and 'N' not in reverse_kmer:
+                            rc_reverse_kmer = reverse_complement(reverse_kmer)
                             end_motif_counts[rc_reverse_kmer] += 1
-                    except RuntimeError:
+                    except ValueError:
                         if verbose > 1:
                             stderr.write(
                                 f'Attempt to read interval at {contig}:'
                                 f'{int(frag[2]-k)}-{int(frag[2])} failed.'
                                 'Skipping.')
                         continue
-    finally:
-        refseq.close()
 
     if verbose:
         stop_time = time()
@@ -711,8 +692,7 @@ def end_motifs(
     input_file : str
         BAM, CRAM, or Frag.gz file with paired-end reads.
     refseq_file : str or Path
-        2bit file with sequence of reference genome input_file is
-        aligned to.
+        Reference genome file.
     k : int, optional
         Length of end motif kmer. Default is 4.
     min_length: int or None, optional
@@ -796,12 +776,9 @@ def end_motifs(
     bases = 'ACGT'
     kmer_list = _gen_kmers(k, bases)
 
-    # read chromosomes from py2bit
-    try:
-        refseq = py2bit.open(str(refseq_file), 'r')
-        chroms: dict = refseq.chroms()
-    finally:
-        refseq.close()
+    # read chromosomes from reference
+    with ReferenceWrapper(str(refseq_file), use_lock=False) as refseq:
+        chroms: dict = refseq.chroms
 
     # generate list of inputs
     intervals = []
@@ -907,7 +884,7 @@ def interval_end_motifs(
     input_file : str
         Path of BAM, CRAM, or Frag.gz containing pair-end reads.
     refseq_file : str or Path
-        Path of 2bit file for reference genome that reads are aligned to.
+        Reference genome file.
     intervals : str or tuple
         Path of BED file containing intervals or list of tuples
         (chrom, start, stop, name).

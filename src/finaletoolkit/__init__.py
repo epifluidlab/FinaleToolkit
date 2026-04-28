@@ -6,7 +6,7 @@ cell-free DNA from paired-end sequencing data.
 from .version import __version__
 
 
-__all__ = ["cli", "frag", "genome", "utils"]
+__all__ = ["cli", "frag", "genome", "io", "utils"]
 
 # Delay imports until the submodule is actually accessed.
 def __getattr__(name):

@@ -9,6 +9,11 @@ import argparse
 from sys import stderr
 import importlib
 
+import pysam
+
+from finaletoolkit.io.reference import ReferenceWrapper
+from finaletoolkit.utils.validation import validate_compatible_contigs
+
 from .. import __version__
 
 
@@ -40,6 +45,12 @@ def main_cli_parser():
         'input_file',
         help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
+    cli_coverage.add_argument(
+        "-r",
+        "--reference-file",
+        help="A FASTA or 2-bit file, which is used to support CRAM reading.",
+        required=False
+    )
     cli_coverage.add_argument(
         'interval_file',
         help='Path to a BED file containing intervals to calculate '
@@ -1173,6 +1184,52 @@ def main_cli_parser():
     return parser
 
 
+def _validate_inputs(args):
+    """
+    Validates input files and reference files for chromosome compatibility.
+    """
+    input_file = getattr(args, 'input_file', None)
+    reference_file = getattr(args, 'reference_file', getattr(args, 'refseq_file', None))
+
+    if not input_file:
+        return
+
+    # 1. CRAM check
+    if str(input_file).lower().endswith('.cram') and not reference_file:
+        stderr.write("Error: CRAM files require a reference file (-r/--reference-file).\n")
+        exit(1)
+
+    # 2. Chromosome compatibility check
+    if reference_file and (str(input_file).lower().endswith('.bam') or str(input_file).lower().endswith('.cram')):
+        try:
+
+            # Get input contigs
+            try:
+                with pysam.AlignmentFile(input_file, "r", reference_filename=reference_file) as sam:
+                    input_contigs = dict(zip(sam.references, sam.lengths))
+            except Exception as e:
+                stderr.write(f"Error opening alignment file '{input_file}': {e}\n")
+                exit(1)
+
+            # Get reference contigs using ReferenceWrapper
+            try:
+                with ReferenceWrapper(reference_file) as ref:
+                    ref_contigs = ref.chroms
+            except Exception as e:
+                stderr.write(f"Error opening reference file '{reference_file}': {e}\n")
+                exit(1)
+
+            # Validate
+            validate_compatible_contigs(ref_contigs, input_contigs, validate_sizes=True, throw_on_error=True)
+            
+        except ImportError:
+            # If validation tools are missing for some reason, just skip
+            pass
+        except (ValueError, RuntimeError) as e:
+            stderr.write(f"Validation Error: {e}\n")
+            exit(1)
+
+
 def main_cli():
     """
     Function called when using `finaletoolkit` CLI standalone program.
@@ -1180,6 +1237,7 @@ def main_cli():
     parser = main_cli_parser()
 
     args = parser.parse_args()
+    _validate_inputs(args)
     if hasattr(args, "func"):
         try:
             # lazy loading function
