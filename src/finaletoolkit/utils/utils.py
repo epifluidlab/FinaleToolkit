@@ -642,6 +642,31 @@ def _none_eq(a: int|float|None, b: int|float|None)->bool:
     else:
         return a == b
 
+import itertools
+from typing import Generator
+
+def gen_kmers(k: int, bases: str = 'ACGT') -> list[str]:
+    """
+    Generates all possible k-mers of length k using the given bases.
+    Uses itertools.product for high-performance generation.
+
+    Parameters
+    ----------
+    k : int
+        Length of the k-mers to generate.
+    bases : str, optional
+        String containing the bases to use, by default 'ACGT'.
+
+    Returns
+    -------
+    list[str]
+        A list of all possible k-mer strings.
+    """
+    if k < 0:
+        raise ValueError("k must be non-negative")
+    
+    return [''.join(p) for p in itertools.product(bases, repeat=k)]
+
 @jit(nopython=True)
 def _reverse_complement_numba(kmer_bytes: NDArray[np.uint8]) -> NDArray[np.uint8]:
     """Numba-optimized reverse complement using bytes."""

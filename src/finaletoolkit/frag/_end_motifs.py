@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 import finaletoolkit.frag as pkg_data
 from finaletoolkit.io.reference import ReferenceWrapper
-from finaletoolkit.utils.utils import frag_generator, reverse_complement
+from finaletoolkit.utils.utils import frag_generator, reverse_complement, gen_kmers
 
 # path to tsv containing f-profiles from Zhou et al (2023)
 FPROFILE_PATH = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
@@ -351,7 +351,7 @@ class EndMotifsIntervals():
                     output = open(output_file, 'w')
 
                 # write to file
-                kmers = _gen_kmers(self.k, 'ACGT')
+                kmers = gen_kmers(self.k, 'ACGT')
                 # header
                 output.write(sep.join(['contig','start','stop','name','count',*kmers]))
                 output.write('\n')
@@ -490,16 +490,14 @@ class EndMotifsIntervals():
             raise TypeError('output_file must be a string.')
 
 
-def _gen_kmers(k: int, bases: str) -> list:
-    """Function to recursively create a list of k-mers."""
-    if k == 1:
-        return [base for base in bases]
+def _none_eq(a: int|float|None, b: int|float|None)->bool:
+    """
+    Equals that evaluates True if any argument is None
+    """
+    if a is None or b is None:
+        return True
     else:
-        kmers = []
-        for k_minus_mer in _gen_kmers(k-1, bases):
-            for base in bases:
-                kmers.append(k_minus_mer+base)
-        return kmers
+        return a == b
 
 
 def region_end_motifs(
@@ -586,7 +584,7 @@ def region_end_motifs(
     )
     # create dict where keys are kmers and values are counts
     bases='ACGT'
-    kmer_list = _gen_kmers(k, bases)
+    kmer_list = gen_kmers(k, bases)
     end_motif_counts = dict(zip(kmer_list, 4**k*[0]))
 
     # count end motifs
@@ -774,7 +772,7 @@ def end_motifs(
 
     # getting possible kmers
     bases = 'ACGT'
-    kmer_list = _gen_kmers(k, bases)
+    kmer_list = gen_kmers(k, bases)
 
     # read chromosomes from reference
     with ReferenceWrapper(str(refseq_file), use_lock=False) as refseq:
