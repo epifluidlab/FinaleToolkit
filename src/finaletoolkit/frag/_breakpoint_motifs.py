@@ -13,8 +13,9 @@ import numpy as np
 from numpy.typing import NDArray
 from tqdm import tqdm
 
+from finaletoolkit.io.alignment import AlignmentWrapper, Fragment
 from finaletoolkit.io.reference import ReferenceWrapper
-from finaletoolkit.utils.utils import frag_generator, reverse_complement, gen_kmers
+from finaletoolkit.utils import frag_generator, reverse_complement, gen_kmers
 
 class BreakpointMotifFreqs():
     """
@@ -554,116 +555,114 @@ def region_breakpoint_motifs(
             'Cannot have both both_strands and negative_strand.')
 
     # iterable of fragments
-    frag_ends = frag_generator(
-        input_file,
-        contig,
-        quality_threshold,
-        start,
-        stop,
-        min_length=fraction_low,
-        max_length=fraction_high,
-    )
-    # create dict where keys are kmers and values are counts
-    bases='ACGT'
-    kmer_list = gen_kmers(k, bases)
-    breakpoint_motif_counts = dict(zip(kmer_list, 4**k*[0]))
+    with AlignmentWrapper(
+        input_file, 
+        reference_file=refseq_file, 
+        quality_threshold=quality_threshold
+    ) as wrapper:
+        frag_ends = wrapper.fetch(contig, start, stop)
 
-    # count breakpoint motifs
-    with ReferenceWrapper(str(refseq_file), use_lock=False) as refseq:
-        chroms_dict = refseq.chroms
-        if both_strands:   # both strands of fragment
-            for frag in frag_ends:
-                # check if overlapping with end of chrom
-                if (frag[1]-(k//2)) < 0 or (frag[1]+(k//2)) >= chroms_dict.get(frag[0], 0):
-                    warnings.warn(
-                        f"Fragment {frag[0]}:{frag[1]}-{frag[2]} is "
-                        "too close to the end of chromosome. Skipping.")
-                    continue
+        # create dict where keys are kmers and values are counts
+        bases='ACGT'
+        kmer_list = gen_kmers(k, bases)
+        breakpoint_motif_counts = dict(zip(kmer_list, 4**k*[0]))
 
-                # forward breakpoint-motif
-                try:
-                    forward_kmer = refseq.sequence(
-                        contig, (frag[1]-(k//2)), (frag[1]+(k//2))
-                    )
-                    if len(forward_kmer) != k:
+        # count breakpoint motifs
+        with ReferenceWrapper(str(refseq_file), use_lock=False) as refseq:
+            chroms_dict = refseq.chroms
+            if both_strands:   # both strands of fragment
+                for frag in frag_ends:
+                    # check if overlapping with end of chrom
+                    if (frag.start-(k//2)) < 0 or (frag.start+(k//2)) >= chroms_dict.get(frag.contig, 0):
                         warnings.warn(
-                            f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due to length discrepancy with motif"
-                            ". This may be due to the fragment being aligned to the end of a mitochondrial DNA.")
+                            f"Fragment {frag.contig}:{frag.start}-{frag.stop} is "
+                            "too close to the end of chromosome. Skipping.")
                         continue
 
-                    if 'N' not in forward_kmer:
-                        breakpoint_motif_counts[forward_kmer] += 1
-                except ValueError:
-                    continue
-                    
-                # reverse breakpoint-motif
-                try:
-                    reverse_kmer = refseq.sequence(
-                        contig, (frag[2]-(k//2)), (frag[2]+(k//2))
-                    )
-                    if len(reverse_kmer) != k:
-                        warnings.warn(
-                            f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due "
-                            "to length discrepancy with motif. This may be due to "
-                            "the fragment being aligned to the end of a "
-                            "mitochondrial DNA.")
-                        continue
-
-                    if 'N' not in reverse_kmer:
-                        breakpoint_motif_counts[reverse_complement(reverse_kmer)] += 1
-                except ValueError:
-                    continue
-        else:
-            for frag in frag_ends:
-                # check if overlapping with end of chrom
-                if (frag[1]-(k//2)) < 0 or (frag[1]+(k//2)) >= chroms_dict.get(frag[0], 0):
-                    warnings.warn(
-                        f"Fragment {frag[0]}:{frag[1]}-{frag[2]} is "
-                        "too close to the end of chromosome. Skipping.")
-                    continue
-
-                if frag[4] and not negative_strand:  # is on indicated strand
+                    # forward breakpoint-motif
                     try:
                         forward_kmer = refseq.sequence(
-                            contig, (frag[1]-(k//2)), (frag[1]+(k//2))
+                            contig, (frag.start-(k//2)), (frag.start+(k//2))
                         )
                         if len(forward_kmer) != k:
                             warnings.warn(
-                                f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due "
-                                 "to length discrepancy with motif. This may be due to "
-                                 "the fragment being aligned to the end of a "
-                                 "mitochondrial DNA.")
+                                f"Skipped fragment {contig}:{frag.start}-{frag.stop} due to length discrepancy with motif"
+                                ". This may be due to the fragment being aligned to the end of a mitochondrial DNA.")
                             continue
 
                         if 'N' not in forward_kmer:
                             breakpoint_motif_counts[forward_kmer] += 1
                     except ValueError:
                         continue
-                    
-                elif negative_strand:
+                        
                     # reverse breakpoint-motif
                     try:
                         reverse_kmer = refseq.sequence(
-                            contig, (frag[2]-(k//2)), (frag[2]+(k//2))
+                            contig, (frag.stop-(k//2)), (frag.stop+(k//2))
                         )
                         if len(reverse_kmer) != k:
                             warnings.warn(
-                            f"Skipped fragment {contig}:{frag[1]}-{frag[2]} due "
-                             "to length discrepancy with motif. This may be due to "
-                             "the fragment being aligned to the end of a "
-                             "mitochondrial DNA.")
+                                f"Skipped fragment {contig}:{frag.start}-{frag.stop} due "
+                                "to length discrepancy with motif. This may be due to "
+                                "the fragment being aligned to the end of a "
+                                "mitochondrial DNA.")
                             continue
 
                         if 'N' not in reverse_kmer:
-                            rc_reverse_kmer = reverse_complement(reverse_kmer)
-                            breakpoint_motif_counts[rc_reverse_kmer] += 1
-                    except (RuntimeError, ValueError):
-                        if verbose > 1:
-                            stderr.write(
-                                f'Attempt to read interval at {contig}:'
-                                f'{int(frag[2]-(k//2))}-{int(frag[2]+(k//2))} failed.'
-                                'Skipping.')
+                            breakpoint_motif_counts[reverse_complement(reverse_kmer)] += 1
+                    except ValueError:
                         continue
+            else:
+                for frag in frag_ends:
+                    # check if overlapping with end of chrom
+                    if (frag.start-(k//2)) < 0 or (frag.start+(k//2)) >= chroms_dict.get(frag.contig, 0):
+                        warnings.warn(
+                            f"Fragment {frag.contig}:{frag.start}-{frag.stop} is "
+                            "too close to the end of chromosome. Skipping.")
+                        continue
+
+                    if frag.is_forward and not negative_strand:  # is on indicated strand
+                        try:
+                            forward_kmer = refseq.sequence(
+                                contig, (frag.start-(k//2)), (frag.start+(k//2))
+                            )
+                            if len(forward_kmer) != k:
+                                warnings.warn(
+                                    f"Skipped fragment {contig}:{frag.start}-{frag.stop} due "
+                                     "to length discrepancy with motif. This may be due to "
+                                     "the fragment being aligned to the end of a "
+                                     "mitochondrial DNA.")
+                                continue
+
+                            if 'N' not in forward_kmer:
+                                breakpoint_motif_counts[forward_kmer] += 1
+                        except ValueError:
+                            continue
+                        
+                    elif negative_strand:
+                        # reverse breakpoint-motif
+                        try:
+                            reverse_kmer = refseq.sequence(
+                                contig, (frag.stop-(k//2)), (frag.stop+(k//2))
+                            )
+                            if len(reverse_kmer) != k:
+                                warnings.warn(
+                                    f"Skipped fragment {contig}:{frag.start}-{frag.stop} due "
+                                     "to length discrepancy with motif. This may be due to "
+                                     "the fragment being aligned to the end of a "
+                                     "mitochondrial DNA.")
+                                continue
+
+                            if 'N' not in reverse_kmer:
+                                rc_reverse_kmer = reverse_complement(reverse_kmer)
+                                breakpoint_motif_counts[rc_reverse_kmer] += 1
+                        except (RuntimeError, ValueError):
+                            if verbose > 1:
+                                stderr.write(
+                                    f'Attempt to read interval at {contig}:'
+                                    f'{int(frag.stop-(k//2))}-{int(frag.stop+(k//2))} failed.'
+                                    'Skipping.')
+                            continue
 
     if verbose:
         stop_time = time()

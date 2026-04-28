@@ -1,14 +1,11 @@
 from __future__ import annotations
+from os import PathLike
 from sys import stderr
 from typing import Union
 import time
 import gzip
-from os import PathLike
-
 import numpy as np
 import pyBigWig as pbw
-
-from finaletoolkit.utils.utils import _get_intervals
 
 def agg_bw(
     input_file: Union[str, PathLike],

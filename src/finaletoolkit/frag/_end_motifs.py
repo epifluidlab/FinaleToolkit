@@ -15,8 +15,9 @@ from numpy.typing import NDArray
 from tqdm import tqdm
 
 import finaletoolkit.frag as pkg_data
+from finaletoolkit.io.alignment import AlignmentWrapper, Fragment
 from finaletoolkit.io.reference import ReferenceWrapper
-from finaletoolkit.utils.utils import frag_generator, reverse_complement, gen_kmers
+from finaletoolkit.utils import frag_generator, reverse_complement, gen_kmers
 
 # path to tsv containing f-profiles from Zhou et al (2023)
 FPROFILE_PATH = (files(pkg_data) / 'data' / 'end_motif_f_profiles.tsv')
@@ -573,77 +574,75 @@ def region_end_motifs(
         fraction_low = k
 
     # iterable of fragments
-    frag_ends = frag_generator(
-        input_file,
-        contig,
-        quality_threshold,
-        start,
-        stop,
-        min_length=fraction_low,
-        max_length=fraction_high,
-    )
-    # create dict where keys are kmers and values are counts
-    bases='ACGT'
-    kmer_list = gen_kmers(k, bases)
-    end_motif_counts = dict(zip(kmer_list, 4**k*[0]))
+    with AlignmentWrapper(
+        input_file, 
+        reference_file=refseq_file, 
+        quality_threshold=quality_threshold
+    ) as wrapper:
+        frag_ends = wrapper.fetch(contig, start, stop)
+        
+        # create dict where keys are kmers and values are counts
+        bases='ACGT'
+        kmer_list = gen_kmers(k, bases)
+        end_motif_counts = dict(zip(kmer_list, 4**k*[0]))
 
-    # count end motifs
-    with ReferenceWrapper(str(refseq_file), use_lock=False) as refseq:
-        chroms_dict = refseq.chroms
-        if both_strands:   # both strands of fragment
-            for frag in frag_ends:
-                # forward end-motif
-                try:
-                    forward_kmer = refseq.sequence(
-                        contig, int(frag[1]), int(frag[1]+k)
-                    )
-                    if len(forward_kmer) == k and 'N' not in forward_kmer:
-                        end_motif_counts[forward_kmer] += 1
-                except ValueError:
-                    continue
-                    
-                # reverse end-motif
-                try:
-                    reverse_kmer = refseq.sequence(
-                        contig, int(frag[2]-k), int(frag[2])
-                    )
-                    if len(reverse_kmer) == k and 'N' not in reverse_kmer:
-                        end_motif_counts[reverse_complement(reverse_kmer)] += 1
-                except ValueError as e:
-                    raise RuntimeError(
-                        f"Error querying sequence at {contig}:{int(frag[2]-k)}-{int(frag[2])}. "
-                        f"Chrom length: {chroms_dict.get(contig, 'unknown')}. "
-                        f"Please verify that the reference file matches the fragment file. "
-                        f"Original error: {e}"
-                    )
-        else:
-            for frag in frag_ends:
-                if frag[4] and not negative_strand: # is on indicated strand
+        # count end motifs
+        with ReferenceWrapper(str(refseq_file), use_lock=False) as refseq:
+            chroms_dict = refseq.chroms
+            if both_strands:   # both strands of fragment
+                for frag in frag_ends:
+                    # forward end-motif
                     try:
                         forward_kmer = refseq.sequence(
-                            contig, int(frag[1]), int(frag[1]+k)
+                            contig, int(frag.start), int(frag.start+k)
                         )
                         if len(forward_kmer) == k and 'N' not in forward_kmer:
                             end_motif_counts[forward_kmer] += 1
                     except ValueError:
                         continue
-                    
-                elif negative_strand:
+                        
                     # reverse end-motif
                     try:
                         reverse_kmer = refseq.sequence(
-                            contig, int(frag[2]-k), int(frag[2])
+                            contig, int(frag.stop-k), int(frag.stop)
                         )
                         if len(reverse_kmer) == k and 'N' not in reverse_kmer:
-                            rc_reverse_kmer = reverse_complement(reverse_kmer)
-                            end_motif_counts[rc_reverse_kmer] += 1
-                    except ValueError:
-                        if verbose > 1:
-                            stderr.write(
-                                f'Attempt to read interval at {contig}:'
-                                f'{int(frag[2]-k)}-{int(frag[2])} failed.'
-                                'Skipping.')
-                        continue
+                            end_motif_counts[reverse_complement(reverse_kmer)] += 1
+                    except ValueError as e:
+                        raise RuntimeError(
+                            f"Error querying sequence at {contig}:{int(frag.stop-k)}-{int(frag.stop)}. "
+                            f"Chrom length: {chroms_dict.get(contig, 'unknown')}. "
+                            f"Please verify that the reference file matches the fragment file. "
+                            f"Original error: {e}"
+                        )
+            else:
+                for frag in frag_ends:
+                    if frag.is_forward and not negative_strand: # is on indicated strand
+                        try:
+                            forward_kmer = refseq.sequence(
+                                contig, int(frag.start), int(frag.start+k)
+                            )
+                            if len(forward_kmer) == k and 'N' not in forward_kmer:
+                                end_motif_counts[forward_kmer] += 1
+                        except ValueError:
+                            continue
+                        
+                    elif negative_strand:
+                        # reverse end-motif
+                        try:
+                            reverse_kmer = refseq.sequence(
+                                contig, int(frag.stop-k), int(frag.stop)
+                            )
+                            if len(reverse_kmer) == k and 'N' not in reverse_kmer:
+                                rc_reverse_kmer = reverse_complement(reverse_kmer)
+                                end_motif_counts[rc_reverse_kmer] += 1
+                        except ValueError:
+                            if verbose > 1:
+                                stderr.write(
+                                    f'Attempt to read interval at {contig}:'
+                                    f'{int(frag.stop-k)}-{int(frag.stop)} failed.'
+                                    'Skipping.')
+                            continue
 
     if verbose:
         stop_time = time()
