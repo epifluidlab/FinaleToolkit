@@ -14,7 +14,7 @@ authors = [
 ]
 description = "FinaleToolkit is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 keywords = ["bioinformatics", "cell free DNA", "computational biology",
 "genomics", "epigenomics"]
@@ -32,7 +32,8 @@ dependencies = [
     "py2bit==0.3.3",
     "tqdm==4.67.3",
     "numba==0.63.1",
-    "scipy==1.17.0",
+    "scipy==1.15.3; python_version == '3.10'",
+    "scipy==1.17.0; python_version >= '3.11'",
     "pandas>=2.3.0",
     "statsmodels==0.14.6",
     "loess==2.1.2",
