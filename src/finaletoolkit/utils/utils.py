@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gzip
+import itertools
 import os
 import time
 import warnings
@@ -13,11 +14,14 @@ import pysam
 from numba import jit
 from numpy.typing import NDArray
 
-from finaletoolkit.utils.typing import ChromSizes
+from finaletoolkit.utils.typing import ChromSizes, FragFile, Intervals
 
-from ..io.alignment import AlignmentWrapper, Fragment
+from ..io.alignment import AlignmentWrapper
 from ._comparison import _none_eq, _none_geq, _none_leq
 from ._frag_generator import frag_generator
+from .logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def chrom_sizes_to_list(
@@ -370,9 +374,6 @@ def overlaps(
     return any_overlaps
 
 # None compatible comparison operators
-
-import itertools
-from typing import Generator
 
 def gen_kmers(k: int, bases: str = 'ACGT') -> list[str]:
     """

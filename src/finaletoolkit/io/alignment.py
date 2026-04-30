@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Generator, Optional, Union, Dict, NamedTuple, Any
+from typing import Dict, Generator, NamedTuple, Optional
 import warnings
 
 import pysam
@@ -38,7 +38,7 @@ class AlignmentWrapper:
 
     def __init__(
         self, 
-        path: str | Path, 
+        path: str | Path | pysam.AlignmentFile | pysam.TabixFile,
         reference_file: Optional[str | Path] = None,
         threads: int = 1,
         quality_threshold: int = 30,
@@ -49,8 +49,9 @@ class AlignmentWrapper:
 
         Parameters
         ----------
-        path : str | Path
-            Path to the BAM, CRAM, or Frag.gz file.
+        path : str | Path | pysam.AlignmentFile | pysam.TabixFile
+            Path to the BAM, CRAM, or Frag.gz file, or an already-open
+            pysam alignment or tabix handle.
         reference_file : str | Path, optional
             Path to the reference genome (required for CRAM).
         threads : int, optional
@@ -61,7 +62,7 @@ class AlignmentWrapper:
             If True, only processes read1 from BAM/CRAM files to avoid 
             double-counting fragments. Default is True.
         """
-        self.path = str(path)
+        self.path = str(path) if isinstance(path, (str, Path)) else None
         self.reference_file = str(reference_file) if reference_file else None
         self.threads = threads
         self.quality_threshold = quality_threshold
@@ -71,11 +72,38 @@ class AlignmentWrapper:
         self._is_tabix = False
         self._chroms = None
         self._bed_format = False # Used for tabix files
+        self._owns_handle = False
 
-        if not os.path.exists(self.path):
-            raise FileNotFoundError(f"Alignment file not found: {self.path}")
+        if isinstance(path, pysam.AlignmentFile):
+            self._handle = path
+            self._is_sam = True
+            self._chroms = dict(zip(self._handle.references, self._handle.lengths))
+            return
+        if isinstance(path, pysam.TabixFile):
+            self._handle = path
+            self._is_tabix = True
+            self._chroms = {c: None for c in self._handle.contigs}
+            self._detect_tabix_format(self._handle)
+            return
+
+        if self.path is None or not os.path.exists(self.path):
+            raise FileNotFoundError(f"Alignment file not found: {path}")
 
         self._open_file()
+
+    def _detect_tabix_format(self, tabix_handle: pysam.TabixFile):
+        try:
+            first_line = next(tabix_handle.fetch(parser=pysam.asTuple()))
+            if len(first_line) > 5:
+                self._bed_format = True
+                warnings.warn(
+                    "input_file does not follow Fragmentation file format "
+                    "accepted by FinaleToolkit. Attempting to read as a BED6 "
+                    "file.",
+                    UserWarning
+                )
+        except StopIteration:
+            pass
 
     def _open_file(self):
         """Detects file type and opens the appropriate handle."""
@@ -98,6 +126,7 @@ class AlignmentWrapper:
                 reference_filename=self.reference_file,
                 threads=self.threads
             )
+            self._owns_handle = True
             self._chroms = dict(zip(self._handle.references, self._handle.lengths))
             
         elif lower_path.endswith((".gz", ".bgz")):
@@ -105,23 +134,9 @@ class AlignmentWrapper:
             if os.path.exists(self.path + ".tbi"):
                 self._is_tabix = True
                 self._handle = pysam.TabixFile(self.path)
+                self._owns_handle = True
                 self._chroms = {c: None for c in self._handle.contigs}
-                
-                # Detect BED format vs Fragmentation format (5 vs 6 columns)
-                try:
-                    # Use a separate iterator to detect format without consuming data from fetch
-                    with pysam.TabixFile(self.path) as tmp_tbx:
-                        first_line = next(tmp_tbx.fetch(parser=pysam.asTuple()))
-                        if len(first_line) > 5:
-                            self._bed_format = True
-                            warnings.warn(
-                                "input_file does not follow Fragmentation file format "
-                                "accepted by FinaleToolkit. Attempting to read as a BED6 "
-                                "file.",
-                                UserWarning
-                            )
-                except StopIteration:
-                    pass
+                self._detect_tabix_format(self._handle)
             else:
                 raise FileNotFoundError(f"Compressed file {self.path} missing tabix index (.tbi)")
         else:
@@ -210,7 +225,7 @@ class AlignmentWrapper:
 
     def close(self):
         """Closes the underlying file handle."""
-        if self._handle:
+        if self._handle and self._owns_handle:
             self._handle.close()
             self._handle = None
 
