@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 from sys import stderr
 import importlib
+from inspect import getfullargspec
 
 import pysam
 
@@ -1247,6 +1248,12 @@ def main_cli():
             
             module = importlib.import_module(func_module)
             function = getattr(module, func_name)
+            spec = getfullargspec(function)
+            if spec.varkw is None:
+                funcargs = {
+                    key: value for key, value in funcargs.items()
+                    if key in spec.args or key in spec.kwonlyargs
+                }
 
             function(**funcargs)
         except AttributeError as e:

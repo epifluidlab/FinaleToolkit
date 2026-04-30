@@ -4,8 +4,11 @@ Tests for main_cli and entry points.
 from __future__ import annotations
 from _collections_abc import dict_items
 import os
+from pathlib import Path
 from inspect import getfullargspec
 import importlib
+import subprocess
+import sys
 from typing import Any
 
 import pytest
@@ -120,3 +123,29 @@ class TestCLIEntryPoint:
     def test_gap_bed(self):
         exit_status = os.system('finaletoolkit gap-bed --help')
         assert exit_status == 0
+
+    def test_coverage_smoke(self, request):
+        root = Path(request.config.rootpath)
+        input_file = root / 'tests' / 'data' / '12.3444.b37.frag.gz'
+        interval_file = root / 'tests' / 'data' / 'intervals.bed'
+        result = subprocess.run(
+            [
+                sys.executable,
+                '-m',
+                'finaletoolkit.cli.main_cli',
+                'coverage',
+                str(input_file),
+                str(interval_file),
+                '--normalize',
+                '-o',
+                '-',
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.splitlines() == [
+            '12\t34443118\t34443538\t.\t0.25',
+            '12\t34444968\t34446115\t.\t0.4375',
+        ]
