@@ -48,4 +48,20 @@ def test_overall(request):
     gaps = GenomeGaps.ucsc_hg19()
     
     results = delfi(frag_file, autosomes, bins_file, twobit, blacklist, gaps)
+
+
+def test_overall_fasta_matches_2bit(request):
+    """FASTA-backed DELFI should match the existing 2-bit-backed result."""
+    frag_file = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.6Mb.bam'
+    autosomes = request.path.parent / 'data' / 'delfi' / 'human.hg19.chr1.6Mb.genome'
+    bins_file = request.path.parent / 'data' / 'delfi' / 'hg19.hic.chr1.6Mb.txt'
+    twobit = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.10Mb.2bit'
+    fasta = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.10Mb.fa'
+    blacklist = request.path.parent / 'data' / 'delfi' / 'hg19_darkregion.bed'
+    gaps = GenomeGaps.ucsc_hg19()
+
+    twobit_results = delfi(frag_file, autosomes, bins_file, str(twobit), blacklist, gaps)
+    fasta_results = delfi(frag_file, autosomes, bins_file, str(fasta), blacklist, gaps)
+
+    pd.testing.assert_frame_equal(twobit_results, fasta_results)
     
