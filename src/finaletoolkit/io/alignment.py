@@ -198,7 +198,13 @@ class AlignmentWrapper:
                 )
 
         elif self._is_tabix:
-            for line in self._handle.fetch(contig, start, stop, parser=pysam.asTuple()):
+            for line in self._handle.fetch(
+                contig,
+                start,
+                stop,
+                parser=pysam.asTuple(),
+                multiple_iterators=True,
+            ):
                 try:
                     f_start = int(line[1])
                     f_stop = int(line[2])
