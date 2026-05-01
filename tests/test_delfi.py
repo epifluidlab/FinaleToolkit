@@ -46,6 +46,33 @@ def test_overall(request):
     twobit = str(twobit)
     blacklist = request.path.parent / 'data' / 'delfi' / 'hg19_darkregion.bed'
     gaps = GenomeGaps.ucsc_hg19()
-    
+
     results = delfi(frag_file, autosomes, bins_file, twobit, blacklist, gaps)
-    
+
+
+def test_workers_equivalence(request):
+    """delfi(workers=1) must produce identical output to delfi(workers>1).
+
+    Guards against races or parallel-only state in the worker pool.
+    """
+    frag_file = request.path.parent / 'data' / 'delfi' / 'hg19.chr1.6Mb.bam'
+    autosomes = request.path.parent / 'data' / 'delfi' / 'human.hg19.chr1.6Mb.genome'
+    bins_file = request.path.parent / 'data' / 'delfi' / 'hg19.hic.chr1.6Mb.txt'
+    twobit = str(request.path.parent / 'data' / 'delfi' / 'hg19.chr1.10Mb.2bit')
+    blacklist = request.path.parent / 'data' / 'delfi' / 'hg19_darkregion.bed'
+    gaps = GenomeGaps.ucsc_hg19()
+
+    common = dict(
+        input_file=frag_file, chrom_sizes=autosomes, bins_file=bins_file,
+        reference_file=twobit, blacklist_file=blacklist, gap_file=gaps,
+        no_gc_correct=True, remove_nocov=False, merge_bins=False,
+    )
+    serial = delfi(workers=1, **common)
+    parallel = delfi(workers=4, **common)
+
+    # bit-identical on every column
+    cols = ['contig', 'start', 'stop', 'arm', 'short', 'long', 'gc', 'num_frags']
+    for col in cols:
+        s = serial[col].fillna(-1).reset_index(drop=True)
+        p = parallel[col].fillna(-1).reset_index(drop=True)
+        assert s.equals(p), f"workers=1 vs workers=4 differ on column {col}"
