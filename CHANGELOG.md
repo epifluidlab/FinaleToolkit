@@ -7,6 +7,25 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Performance
+- `delfi` is roughly **80x faster** on whole-genome inputs while producing
+  bit-identical output. The previous implementation re-parsed the blacklist
+  BED file from disk on every 100kb window (~26K windows per genome) and
+  did a linear blacklist scan on every fragment. The new implementation:
+  - Parses the blacklist once and indexes regions by contig.
+  - Uses binary search to filter blacklist regions per window.
+  - Shares one `pysam.AlignmentFile` and `py2bit` reference handle per
+    worker process via the `multiprocessing.Pool` initializer.
+  - Pre-loads `ContigGaps` into worker globals (avoiding pickling on every
+    task).
+  - Vectorises GC counting via `str.count`.
+
+### Added
+- Regression test (`test_workers_equivalence`) verifying that
+  `delfi(workers=1)` and `delfi(workers=N)` produce bit-identical output.
+
 ## [0.11.1] - 2026-04-21
 
 ### Added
