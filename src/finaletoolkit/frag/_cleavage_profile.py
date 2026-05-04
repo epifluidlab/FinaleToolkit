@@ -20,7 +20,7 @@ import warnings
 import numpy as np
 import pyBigWig as pbw
 
-from finaletoolkit.utils.utils import (
+from finaletoolkit.utils import (
     frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
     _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
     )

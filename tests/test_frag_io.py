@@ -7,6 +7,7 @@ all finaletoolkit features.
 
 import numpy as np
 import pytest
+import pysam
 
 from finaletoolkit.utils.utils import frag_generator, frag_array, overlaps
 
@@ -74,6 +75,20 @@ class TestFragGenerator:
         assert in_region, "Some fragments are outside of region"
         
         assert len(frags) == 17, "Incorrect number of frags"
+
+    def test_bam_handle(self, request):
+        """
+        See if frag_generator accepts an already-open BAM handle.
+        """
+        bam_path = request.path.parent / 'data' / '12.3444.b37.bam'
+        with pysam.AlignmentFile(bam_path, "rb") as bam:
+            frags = list(
+                frag_generator(
+                    bam, "12", quality_threshold=0, min_length=0, max_length=9999
+                )
+            )
+
+        assert len(frags) == 17, "Incorrect number of frags from BAM handle"
 
     def test_detailed(self,request):
         """

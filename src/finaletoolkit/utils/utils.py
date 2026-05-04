@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gzip
+import itertools
 import os
 import time
 import warnings
@@ -13,8 +14,12 @@ import pysam
 from numba import jit
 from numpy.typing import NDArray
 
+from finaletoolkit.utils.typing import ChromSizes, FragFile, Intervals
+
+from ..io.alignment import AlignmentWrapper
+from ._comparison import _none_eq, _none_geq, _none_leq
+from ._frag_generator import frag_generator
 from .logging import get_logger
-from .typing import ChromSizes, FragFile, Intervals
 
 logger = get_logger(__name__)
 
@@ -70,52 +75,20 @@ def chrom_sizes_to_dict(
     return chrom_sizes
 
 
-def _merge_overlapping_intervals(intervals):
-    intervals.sort(key=lambda x: x[0])
-    merged = []
-    for interval in intervals:
-        if not merged or interval[0] > merged[-1][1]:
-            merged.append(interval)
-        else:
-            merged[-1] = (merged[-1][0], max(merged[-1][1], interval[1]))
-    return merged
-
-
-def _reduce_overlaps_in_file(interval_file):
-    intervals_dict = {}
-    with open(interval_file, 'r') as file:
-        for line in file:
-            chrom, start, end = line.strip().split('\t')[:3]
-            start, end = int(start), int(end)
-            if chrom not in intervals_dict:
-                intervals_dict[chrom] = []
-            intervals_dict[chrom].append((start, end))
-
-    reduced_intervals = {}
-    for chrom, intervals in intervals_dict.items():
-        reduced_intervals[chrom] = _merge_overlapping_intervals(intervals)
-    return reduced_intervals    
-
-
-def _convert_to_list(reduced_intervals):
-    converted_intervals = {}
-    for chrom, intervals in reduced_intervals.items():
-        converted_intervals[chrom] = [[chrom, start, end] for start, end in intervals]
-    return converted_intervals
-
-
-def _merge_all_intervals(converted_intervals):
-    all_intervals = []
-    for intervals in converted_intervals.values():
-        all_intervals.extend(intervals)
-    return all_intervals
+from ._intervals import (
+    _merge_overlapping_intervals,
+    _reduce_overlaps_in_file,
+    _convert_to_list,
+    _merge_all_intervals,
+)
 
 
 def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
                     output_file: str,
                     contig: str | None = None,
                     quality_threshold: int = 30,
-                    verbose: bool = False):
+                    verbose: bool = False,
+                    reference_file: str | Path | None = None):
     """
     Take paired-end reads from bam_file and write to a BED file.
 
@@ -126,48 +99,34 @@ def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
     contig : str, optional
     quality_threshold : int, optional
     verbose : bool, optional
+    reference_file : str or Path, optional
+        Reference genome file (required for CRAM).
     """
     if (verbose):
         start_time = time.time()
         print('Opening file')
 
-    sam_file = None
     try:
-        # Open file or asign AlignmentFile to sam_file
-        if isinstance(input_file, pysam.AlignmentFile):
-            sam_file = input_file
-        elif isinstance(input_file, (str, Path)):
-            sam_file = pysam.AlignmentFile(str(input_file))
-        else:
-            raise TypeError(
-                ("bam_file should be an AlignmentFile or path string.")
-                )
-
         # Open output file
         if output_file.endswith('.gz'):
             out = gzip.open(output_file, 'wt')
         else:
             out = open(output_file, 'w')
 
-        # iterate through reads and send to BED
-        for read1 in sam_file.fetch(contig=contig):
-            # Only select forward strand and filter out non-paired-end
-            # reads and low-quality reads
-            if (_not_read1_or_low_quality(read1, quality_threshold)):
-                pass
-            else:
-                out.write(
-                    f'{read1.reference_name}\t{read1.reference_start}\t'
-                    f'{read1.reference_start + read1.template_length}\n'
-                    )
+        # Use AlignmentWrapper to handle file-type-specific logic
+        with AlignmentWrapper(
+            input_file, 
+            reference_file=reference_file, 
+            quality_threshold=quality_threshold
+        ) as wrapper:
+            # iterate through fragments and send to BED
+            for frag in wrapper.fetch(contig=contig):
+                out.write(f'{frag.contig}\t{frag.start}\t{frag.stop}\n')
     except Exception as e:
         logger.error("An error occurred during BAM to BED conversion: %s", str(e))
-
     finally:
-        # Close everything when done
-        if isinstance(input_file, (str, Path)) and isinstance(sam_file, pysam.AlignmentFile):
-            sam_file.close()
-        out.close()
+        if 'out' in locals():
+            out.close()
 
     if (verbose):
         end_time = time.time()
@@ -204,211 +163,6 @@ def frags_in_region(frag_array: NDArray,
     in_region = np.logical_and(np.less(starts, stop), np.greater_equal(stops, start))
     filtered_frags = frag_array[in_region]
     return filtered_frags
-
-
-def frag_generator(
-    input_file: FragFile,
-    contig: str | None,
-    quality_threshold: int = 30,
-    start: int | None=None,
-    stop: int | None=None,
-    min_length: int | None = None,
-    max_length: int | None = None,
-    intersect_policy: str = "midpoint",
-    verbose: bool | int = False
-) -> Generator[tuple]:
-    """
-    Reads from BAM, CRAM, Fragment file and returns tuples containing
-    contig (chromosome), start, stop (end), mapq, and strand for each fragment.
-    Optionally may filter for mapq, size, and intersection with a region.
-
-    Parameters
-    ----------
-    input_file : str, pathlike, pysam TabixFile, or  pysam AlignmentFile
-        Fragment coordinates stored as a BAM, CRAM, or tabix-indexed
-        FinaleDB fragment file. Can also be a pysam object of these files.
-    contig : str or None
-        Chromosome to fetch fragments over. May be None for genome-wide.
-    quality_threshold : int, optional
-    start : int, optional
-        Left-most coordinate of interval to fetch from. See intersect_policy.
-    stop : int, optional
-        Right-most coordinate of interval to fetch from. See intersect_policy.
-    min_length : int, optional
-        Specifies lowest fragment length included in array.
-    max_length : int, optional
-        Specifies highest fragment length included in array.
-    intersect_policy : str, optional
-        Specifies what policy is used to include fragments in the
-        given interval. Default is "midpoint". Policies include:
-        - midpoint: the average of end coordinates of a fragment lies
-        in the interval.
-        - any: any part of the fragment is in the interval.
-    verbose : bool, optional
-
-    Returns
-    -------
-    frag_ends : Generator
-        Generator that yields tuples:
-        (contig: str, read_start: int, read_stop: int, mapq: int,
-        read_on_plus: boolean)
-    """
-    try:
-        # check type of input and open if needed
-        input_file_is_path = False
-        is_sam = False
-        if isinstance(input_file, (str, Path)):
-            input_file_is_path = True
-            # check file type
-            if (  # AlignmentFile
-                str(input_file).endswith('.sam')
-                or str(input_file).endswith('.bam')
-                or str(input_file).endswith('.cram')
-            ):
-                is_sam = True
-                sam_file = pysam.AlignmentFile(str(input_file), 'r')
-            elif (  # Tabix indexed file
-                os.path.isfile(str(input_file)+".tbi")
-            ):
-                tbx = pysam.TabixFile(str(input_file), 'r')
-                is_sam = False
-            else:
-                raise ValueError(
-                    f"{input_file} is not an accepted file type. Only "
-                    "CRAM, BAM, and tabix-indexed gzipped bed-style "
-                    "files are accepted.")
-        elif isinstance(input_file, pysam.AlignmentFile):
-            input_file_is_path = False
-            is_sam = True
-            sam_file = input_file
-        elif isinstance(input_file, pysam.TabixFile):
-            input_file_is_path = False
-            is_sam = False
-            tbx = input_file
-        else:
-            raise TypeError(
-                f'{type(input_file)} is invalid type for input_file.'
-            )
-        
-        # setting filter based on intersect policy
-        if intersect_policy == 'midpoint':
-            def check_intersect(r_start, r_stop, f_start, f_stop):
-                return (
-                    (r_start is None or _none_geq(((f_start+f_stop)//2), r_start))
-                    and (r_stop is None or ((f_start+f_stop)//2) < r_stop)
-                )
-        elif intersect_policy == 'any':
-            def check_intersect(r_start, r_stop, f_start, f_stop):
-                return (
-                    (r_start is None or f_stop > r_start)
-                    and (r_stop is None or f_start < r_stop)
-                )
-        else:
-            raise ValueError(f'{intersect_policy} is not a valid policy')
-
-        # Raise exception if start and stop specified but not contig
-        if contig is None and not (start is None and stop is None):
-            if contig is None and start==0 and stop is None:
-                pass
-            else:
-                raise ValueError("contig should be specified if start or stop given.")
-
-        if is_sam: # AlignmentFile
-            for read in sam_file.fetch(contig, start, stop):
-                # Only select read1 and filter out non-paired-end
-                # reads and low-quality reads
-                try:
-                    if (low_quality_read_pairs(read, quality_threshold)
-                        or read.is_read2):
-                        pass
-                    elif (
-                        _none_geq(abs(frag_length := read.template_length), min_length)
-                        and _none_leq(abs(frag_length), max_length)
-                    ):
-                        if read.template_length > 0:
-                            f_start = read.reference_start
-                            f_stop = read.reference_start + read.template_length
-                            if (check_intersect(start, stop, f_start, f_stop)):
-                                assert read.reference_start < read.reference_start + read.template_length, f"forward start {read.reference_start} after stop {read.reference_start + read.template_length} on chrom {read.reference_name} with read_is_forward {read.is_forward}."
-                                yield (
-                                    read.reference_name,
-                                    read.reference_start,
-                                    read.reference_start + read.template_length,
-                                    read.mapping_quality,
-                                    read.is_forward
-                                )
-                        elif read.template_length < 0:
-                            f_start = read.reference_end + read.template_length
-                            f_stop = read.reference_end
-                            if (check_intersect(start, stop, f_start, f_stop)):
-                                assert read.reference_end + read.template_length < read.reference_end, f"reverse start {read.reference_end + read.template_length} after stop {read.reference_end} on chrom {read.reference_name} with read_is_forward {read.is_forward}."
-                                yield (
-                                    read.reference_name,
-                                    read.reference_end + read.template_length,
-                                    read.reference_end,
-                                    read.mapping_quality,
-                                    read.is_forward 
-                                )
-                except TypeError as e:
-                    stderr.writelines(["Type error encountered.\n",
-                                       f"Fragment length: {frag_length}\n",
-                                       f"fraction_low: {min_length}\n",
-                                       f"fraction_high: {max_length}\n",
-                                       "Skipping interval.\n",
-                                       f"Error: {e}\n"])
-
-        else: # Tabix Indexed
-            # check for number of columns
-            first_line = tbx.fetch(parser=pysam.asTuple(),
-                                   multiple_iterators=True).__next__()
-            if len(first_line) > 5:
-                warnings.warn(
-                    "input_file is does not follow Fragmentation file format "
-                    "accepted by FinaleToolkit. Attempting to read as a BED6 "
-                    "file.",
-                    UserWarning
-                    )
-                bed_format = True
-            else:
-                bed_format = False
-            
-            for line in tbx.fetch(
-                contig, start, stop, parser=pysam.asTuple(),
-                multiple_iterators=True
-            ):
-                read_start = int(line[1])
-                read_stop = int(line[2])
-                frag_length = read_stop - read_start
-                if bed_format:
-                    mapq = int(line[4])
-                    read_on_plus = '+' in line[5]
-                    
-                else:
-                    mapq = int(line[3])
-                    read_on_plus = '+' in line[4]
-                    
-                try:
-                    if (_none_geq(frag_length, min_length)
-                        and _none_leq(frag_length, max_length)
-                        and _none_geq(mapq, quality_threshold)
-                        and check_intersect(start, stop, read_start, read_stop)
-                        ):
-                        yield contig, read_start, read_stop, mapq, read_on_plus
-                # HACK: read_length is sometimes None
-                except TypeError as e:
-                    stderr.writelines(["Type error encountered.\n",
-                                       f"Fragment length: {frag_length}\n",
-                                       f"fraction_low: {min_length}\n",
-                                       f"fraction_high: {max_length}\n",
-                                       "Skipping interval.\n",
-                                       f"Error: {e}\n"])
-
-
-    finally:
-        if input_file_is_path and is_sam:
-            sam_file.close()
-        elif input_file_is_path:
-            tbx.close()
 
 
 def frag_array(
@@ -553,33 +307,38 @@ def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
             or not read.is_read1)
 
 
-def _get_intervals(
+def get_intervals(
     interval_file: Intervals
-) -> list[tuple[str, str, int, int, str, str, int]]:
+) -> list[tuple[str, int, int, str]]:
     """
-    Helper function to read intervals from bed file.
-    Returns list of tuples:
-    (input_file, chrom, start, stop, name, intersect_policy,
-    quality_threshold, verbosity)
+    Helper function to read intervals from a BED file.
+
+    Parameters
+    ----------
+    interval_file : str or Path
+        Path to the BED file.
+
+    Returns
+    -------
+    list of tuples
+        Each tuple contains (contig, start, stop, name).
     """
     intervals = []
-    with open(interval_file) as bed:
+    with open(interval_file, 'r') as bed:
         for line in bed:
-            if not line.startswith('#'):
-                if line.strip():  # Check if line is not empty
-                    contig, start, stop, *name = line.split()
-                    start = int(start)
-                    stop = int(stop)
-                    name = name[0] if name else '.'
-                    interval = (
-                        contig,
-                        start,
-                        stop,
-                        name
-                    )
-                    intervals.append(interval)
-                else:
-                    break
+            if line.startswith(('#', 'track', 'browser')) or not line.strip():
+                continue
+            
+            parts = line.strip().split('\t')
+            if len(parts) < 3:
+                continue
+                
+            contig = parts[0]
+            start = int(parts[1])
+            stop = int(parts[2])
+            name = parts[3] if len(parts) > 3 else '.'
+            
+            intervals.append((contig, start, stop, name))
 
     return intervals
     
@@ -615,35 +374,6 @@ def overlaps(
     return any_overlaps
 
 # None compatible comparison operators
-def _none_leq(a: int|float|None, b: int|float|None)->bool:
-    """
-    Less than or equals that evaluates True if any argument is None
-    """
-    if a is None or b is None:
-        return True
-    else:
-        return a <= b
-    
-def _none_geq(a: int|float|None, b: int|float|None)->bool:
-    """
-    Greater than or equals that evaluates True if any argument is None
-    """
-    if a is None or b is None:
-        return True
-    else:
-        return a >= b
-    
-def _none_eq(a: int|float|None, b: int|float|None)->bool:
-    """
-    Equals that evaluates True if any argument is None
-    """
-    if a is None or b is None:
-        return True
-    else:
-        return a == b
-
-import itertools
-from typing import Generator
 
 def gen_kmers(k: int, bases: str = 'ACGT') -> list[str]:
     """

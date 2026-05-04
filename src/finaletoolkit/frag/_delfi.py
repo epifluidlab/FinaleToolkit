@@ -16,7 +16,7 @@ from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
 from finaletoolkit.genome.gaps import ContigGaps, GenomeGaps
 from finaletoolkit.io.reference import ReferenceWrapper
 from finaletoolkit.utils.logging import get_logger
-from finaletoolkit.utils.utils import chrom_sizes_to_list, frag_generator, overlaps
+from finaletoolkit.utils import chrom_sizes_to_list, frag_generator, overlaps
 from finaletoolkit.utils.validation import valid_interval
 
 logger = get_logger(__name__)

@@ -5,6 +5,7 @@ Tests for finaletoolkit.utils
 import os
 import filecmp
 import difflib
+import pysam
 from numpy import array
 from numpy.testing import assert_array_equal    
 

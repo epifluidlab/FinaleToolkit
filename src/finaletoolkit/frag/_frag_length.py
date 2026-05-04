@@ -13,8 +13,8 @@ from tqdm import trange, tqdm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
-from finaletoolkit.utils.utils import (
-    _get_intervals, frag_generator
+from finaletoolkit.utils import (
+    get_intervals, frag_generator
 )
 from finaletoolkit.utils.typing import FragFile
 
@@ -505,7 +505,7 @@ def frag_length_intervals(
         pool = Pool(processes=workers)
         if verbose:
             stderr.write('Reading intervals.\n')
-        intervals = _get_intervals(interval_file)
+        intervals = get_intervals(interval_file)
         
         partial_frag_stat = partial(
             _frag_length_stats, input_file=input_file,min_length=min_length,

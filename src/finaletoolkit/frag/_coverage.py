@@ -10,8 +10,8 @@ import pysam
 import gzip
 from tqdm import tqdm
 
-from finaletoolkit.utils.utils import (
-    _get_intervals, frag_generator
+from finaletoolkit.utils import (
+    get_intervals, frag_generator
 )
 
 
@@ -214,7 +214,7 @@ def coverage(
                  "verbose": verbose}
             )
 
-        intervals = _get_intervals(
+        intervals = get_intervals(
             interval_file)
 
         if verbose:
