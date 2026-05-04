@@ -18,7 +18,6 @@ import time
 import warnings
 
 import numpy as np
-import pysam
 import pyBigWig as pbw
 
 from finaletoolkit.utils.utils import (

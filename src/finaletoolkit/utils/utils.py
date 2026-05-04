@@ -1,18 +1,22 @@
 from __future__ import annotations
-import time
+
 import gzip
-from typing import Generator
-from sys import stderr
-from pathlib import Path
-import warnings
 import os
+import time
+import warnings
+from pathlib import Path
+from sys import stderr
+from typing import Generator
 
 import numpy as np
-from numpy.typing import NDArray
-from numba import jit
 import pysam
+from numba import jit
+from numpy.typing import NDArray
 
-from .typing import FragFile, ChromSizes, Intervals
+from .logging import get_logger
+from .typing import ChromSizes, FragFile, Intervals
+
+logger = get_logger(__name__)
 
 
 def chrom_sizes_to_list(
@@ -130,10 +134,10 @@ def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
     sam_file = None
     try:
         # Open file or asign AlignmentFile to sam_file
-        if (type(input_file) == pysam.AlignmentFile):
+        if isinstance(input_file, pysam.AlignmentFile):
             sam_file = input_file
-        elif (type(input_file) == str):
-            sam_file = pysam.AlignmentFile(input_file)
+        elif isinstance(input_file, (str, Path)):
+            sam_file = pysam.AlignmentFile(str(input_file))
         else:
             raise TypeError(
                 ("bam_file should be an AlignmentFile or path string.")
@@ -157,11 +161,11 @@ def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
                     f'{read1.reference_start + read1.template_length}\n'
                     )
     except Exception as e:
-        print("An error occurred:", str(e))
+        logger.error("An error occurred during BAM to BED conversion: %s", str(e))
 
     finally:
         # Close everything when done
-        if (type(input_file) == str and type(sam_file) == pysam.AlignmentFile):
+        if isinstance(input_file, (str, Path)) and isinstance(sam_file, pysam.AlignmentFile):
             sam_file.close()
         out.close()
 
@@ -174,7 +178,7 @@ def frag_bam_to_bed(input_file: str | pysam.AlignmentFile,
 @jit(nopython=True)
 def frags_in_region(frag_array: NDArray,
                     start: int,
-                    stop: int) -> NDArray[np.int64]:
+                    stop: int) -> NDArray:
     """
     Takes an array of coordinates for ends of fragments and returns an
     array of fragments with coverage in the specified region. That is, a
@@ -183,17 +187,21 @@ def frags_in_region(frag_array: NDArray,
     Parameters
     ----------
     frag_array : ndarray
-    minimum : int
-    maximum : int
+        Structured numpy array with 'start' and 'stop' fields.
+    start : int
+        Left-most coordinate of the region.
+    stop : int
+        Right-most coordinate of the region.
 
     Returns
     -------
     filtered_frags : ndarray
+        The subset of fragments that overlap the region.
     """
     # Changed the code a bit to make it compatible with numba and not raise an error 
     starts = frag_array['start']
     stops = frag_array['stop']
-    in_region = np.logical_and(np.less(starts,stop), np.greater_equal(stops,start))
+    in_region = np.logical_and(np.less(starts, stop), np.greater_equal(stops, start))
     filtered_frags = frag_array[in_region]
     return filtered_frags
 
@@ -249,7 +257,7 @@ def frag_generator(
         # check type of input and open if needed
         input_file_is_path = False
         is_sam = False
-        if isinstance(input_file, str) or isinstance(input_file, Path):
+        if isinstance(input_file, (str, Path)):
             input_file_is_path = True
             # check file type
             if (  # AlignmentFile
@@ -269,11 +277,11 @@ def frag_generator(
                     f"{input_file} is not an accepted file type. Only "
                     "CRAM, BAM, and tabix-indexed gzipped bed-style "
                     "files are accepted.")
-        elif type(input_file) == pysam.AlignmentFile:
+        elif isinstance(input_file, pysam.AlignmentFile):
             input_file_is_path = False
             is_sam = True
             sam_file = input_file
-        elif type(input_file) == pysam.TabixFile:
+        elif isinstance(input_file, pysam.TabixFile):
             input_file_is_path = False
             is_sam = False
             tbx = input_file
@@ -281,19 +289,20 @@ def frag_generator(
             raise TypeError(
                 f'{type(input_file)} is invalid type for input_file.'
             )
-            exit(1)
         
         # setting filter based on intersect policy
         if intersect_policy == 'midpoint':
-            check_intersect = lambda r_start, r_stop, f_start, f_stop : (
-                (r_start is None or _none_geq(((f_start+f_stop)//2), r_start))
-                and (r_stop is None or ((f_start+f_stop)//2) < r_stop)
-            )
+            def check_intersect(r_start, r_stop, f_start, f_stop):
+                return (
+                    (r_start is None or _none_geq(((f_start+f_stop)//2), r_start))
+                    and (r_stop is None or ((f_start+f_stop)//2) < r_stop)
+                )
         elif intersect_policy == 'any':
-            check_intersect = lambda r_start, r_stop, f_start, f_stop : (
-                (r_start is None or f_stop > r_start)
-                and (r_stop is None or f_start < r_stop)
-            )
+            def check_intersect(r_start, r_stop, f_start, f_stop):
+                return (
+                    (r_start is None or f_stop > r_start)
+                    and (r_stop is None or f_start < r_stop)
+                )
         else:
             raise ValueError(f'{intersect_policy} is not a valid policy')
 
@@ -521,7 +530,6 @@ def low_quality_read_pairs(read, min_mapq=30):
     return False
     
 
-
 def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int=30):
     """
     Return `True` if the sequenced read described in `read` is not read1
@@ -633,3 +641,53 @@ def _none_eq(a: int|float|None, b: int|float|None)->bool:
         return True
     else:
         return a == b
+
+import itertools
+from typing import Generator
+
+def gen_kmers(k: int, bases: str = 'ACGT') -> list[str]:
+    """
+    Generates all possible k-mers of length k using the given bases.
+    Uses itertools.product for high-performance generation.
+
+    Parameters
+    ----------
+    k : int
+        Length of the k-mers to generate.
+    bases : str, optional
+        String containing the bases to use, by default 'ACGT'.
+
+    Returns
+    -------
+    list[str]
+        A list of all possible k-mer strings.
+    """
+    if k < 0:
+        raise ValueError("k must be non-negative")
+    
+    return [''.join(p) for p in itertools.product(bases, repeat=k)]
+
+@jit(nopython=True)
+def _reverse_complement_numba(kmer_bytes: NDArray[np.uint8]) -> NDArray[np.uint8]:
+    """Numba-optimized reverse complement using bytes."""
+    n = len(kmer_bytes)
+    res = np.empty(n, dtype=np.uint8)
+    for i in range(n):
+        b = kmer_bytes[n - 1 - i]
+        if b == 65 or b == 97: # A or a
+            res[i] = 84 # T
+        elif b == 84 or b == 116: # T or t
+            res[i] = 65 # A
+        elif b == 67 or b == 99: # C or c
+            res[i] = 71 # G
+        elif b == 71 or b == 103: # G or g
+            res[i] = 67 # C
+        else:
+            res[i] = b # Keep as is (e.g. N)
+    return res
+
+def reverse_complement(kmer: str) -> str:
+    """Reverse complement a k-mer string using Numba optimization."""
+    kmer_bytes = np.frombuffer(kmer.encode('ascii'), dtype=np.uint8)
+    rc_bytes = _reverse_complement_numba(kmer_bytes)
+    return rc_bytes.tobytes().decode('ascii')
