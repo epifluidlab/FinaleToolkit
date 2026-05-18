@@ -128,6 +128,11 @@ def main_cli_parser():
         'input_file',
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_frag_length_bins.add_argument(
+        '-r',
+        '--reference-file',
+        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        required=False)
+    cli_frag_length_bins.add_argument(
         '-c',
         '--contig',
         type=str,
@@ -226,6 +231,11 @@ def main_cli_parser():
         help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
     cli_frag_length_intervals.add_argument(
+        '-r',
+        '--reference-file',
+        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        required=False)
+    cli_frag_length_intervals.add_argument(
         'interval_file',
         help='Path to a BED file containing intervals to retrieve '
         'fragment length summary statistics over.')
@@ -295,6 +305,10 @@ def main_cli_parser():
     cli_cleavage_profile.add_argument(
         'input_file',
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
+    cli_cleavage_profile.add_argument(
+        '--reference-file',
+        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        required=False)
     cli_cleavage_profile.add_argument(
         'interval_file',
         help='Path to a BED file containing intervals to calculates cleavage '
@@ -382,6 +396,11 @@ def main_cli_parser():
         'input_file',
         help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
+    cli_wps.add_argument(
+        '-r',
+        '--reference-file',
+        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        required=False)
     cli_wps.add_argument(
         'site_bed',
         help='Path to a BED file containing sites to calculate WPS '

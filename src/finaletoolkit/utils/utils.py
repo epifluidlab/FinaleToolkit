@@ -174,7 +174,8 @@ def frag_array(
     min_length: int | None = None,
     max_length: int | None = None,
     intersect_policy: str="midpoint",
-    verbose: bool=False
+    verbose: bool=False,
+    reference_file: str | Path | None = None,
     ) -> NDArray:
     """
     Reads from BAM, CRAM, or fragment file and returns a three column matrix
@@ -226,7 +227,8 @@ def frag_array(
             min_length,
             max_length,
             intersect_policy,
-            verbose
+            verbose,
+            reference_file=reference_file,
         )
     ]
     if verbose:

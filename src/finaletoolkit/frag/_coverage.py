@@ -25,7 +25,8 @@ def single_coverage(
     max_length: int | None = None,
     intersect_policy: str = "midpoint",
     quality_threshold: int = 30,
-    verbose: bool | int = False
+    verbose: bool | int = False,
+    reference_file: str | Path | None = None,
 ) -> tuple[str | None, int | None, int | None, str, float]:
     """
     Return estimated fragment coverage over specified `contig` and
@@ -92,7 +93,9 @@ def single_coverage(
         stop=stop,
         min_length=min_length,
         max_length=max_length,
-        intersect_policy=intersect_policy)
+        intersect_policy=intersect_policy,
+        reference_file=reference_file,
+    )
 
     # Iterating on each frag in file in
     # specified contig/chromosome
@@ -126,7 +129,8 @@ def coverage(
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         workers: int=1,
-        verbose: Union[bool, int]=False
+        verbose: Union[bool, int]=False,
+        reference_file: str | Path | None=None,
     ) -> list[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
@@ -211,7 +215,8 @@ def coverage(
                  "max_length": max_length,
                  "intersect_policy": intersect_policy,
                  "quality_threshold": quality_threshold,
-                 "verbose": verbose}
+                 "verbose": verbose,
+                 "reference_file": reference_file}
             )
 
         intervals = get_intervals(
@@ -223,7 +228,8 @@ def coverage(
         partial_single_coverage = partial(
             single_coverage, input_file=input_file, min_length=min_length,
             max_length=max_length, intersect_policy=intersect_policy,
-            quality_threshold=quality_threshold, verbose=max(0, verbose-1))
+            quality_threshold=quality_threshold, verbose=max(0, verbose-1),
+            reference_file=reference_file)
         coverages = pool.imap(
             partial(_single_coverage_star, partial_single_coverage), intervals,
             chunksize=max(len(intervals)//workers, 1))

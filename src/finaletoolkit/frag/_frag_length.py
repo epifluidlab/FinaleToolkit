@@ -2,6 +2,7 @@ from __future__ import annotations
 import time
 import warnings
 from typing import Union
+from pathlib import Path
 from sys import stdout, stderr
 from multiprocessing import Pool
 import gzip
@@ -110,14 +111,15 @@ def _frag_length_stats(
     short_reads: int,
     intersect_policy: str,
     quality_threshold: int,
-    verbose: Union[bool, int]
+    verbose: Union[bool, int],
+    reference_file: str | Path | None = None,
 ):
     """
     Generates stats for a given interval.
     """
     frag_gen = frag_generator(input_file, contig, quality_threshold, start,
                               stop, min_length, max_length, intersect_policy,
-                              verbose)
+                              verbose, reference_file=reference_file)
     frag_len_dict = _distribution_from_gen(frag_gen)
 
     total_count = sum(frag_len_dict.values())
@@ -158,7 +160,8 @@ def frag_length(
     intersect_policy: str = "midpoint",
     output_file: str | None = None,
     quality_threshold: int = 30,
-    verbose: bool = False
+    verbose: bool = False,
+    reference_file: str | Path | None = None,
 ) -> np.ndarray:
     """
     Return `np.ndarray` containing lengths of fragments in `input_file`
@@ -208,6 +211,7 @@ def frag_length(
         max_length=1000000000,   #TODO: allow to have None
         intersect_policy=intersect_policy,
         verbose=verbose,
+        reference_file=reference_file,
     )
 
     for contig, frag_start, frag_stop, _, _ in frag_gen:
@@ -264,6 +268,7 @@ def frag_length_bins(
     short_fraction: int | None = None,
     histogram_path: str | None = None,
     verbose: Union[bool, int] = False,
+    reference_file: str | Path | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Takes input_file, computes frag lengths of fragments and returns
@@ -342,8 +347,8 @@ def frag_length_bins(
 
     frag_gen = frag_generator(
         input_file, contig, quality_threshold, start, stop, min_length,
-        max_length, intersect_policy, verbose)
-    
+        max_length, intersect_policy, verbose, reference_file=reference_file)
+
     frag_len_dict = _distribution_from_gen(frag_gen)
 
     total_count = sum(frag_len_dict.values())
@@ -445,7 +450,8 @@ def frag_length_intervals(
     short_reads: int = 150,
     workers: int = 1,
     verbose: Union[bool, int] = False,
- )->list[tuple[str, int, int, str, float, float, int, int]]:
+    reference_file: str | Path | None = None,
+) -> list[tuple[str, int, int, str, float, float, int, int]]:
     """
     Takes fragments from BAM file and calculates fragment length
     statistics for each interval in a BED file. If output specified,
@@ -508,9 +514,11 @@ def frag_length_intervals(
         intervals = get_intervals(interval_file)
         
         partial_frag_stat = partial(
-            _frag_length_stats, input_file=input_file,min_length=min_length,
-            max_length=max_length, short_reads=short_reads, intersect_policy=intersect_policy,
-            quality_threshold=quality_threshold, verbose=verbose)
+            _frag_length_stats, input_file=input_file, min_length=min_length,
+            max_length=max_length, short_reads=short_reads,
+            intersect_policy=intersect_policy,
+            quality_threshold=quality_threshold, verbose=verbose,
+            reference_file=reference_file)
 
         results = pool.map(partial(_frag_length_stats_star, partial_frag_stat),
                            intervals, chunksize=max(len(intervals)//workers,

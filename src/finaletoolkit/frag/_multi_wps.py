@@ -1,6 +1,7 @@
 from __future__ import annotations
 import gzip
 from os import PathLike
+from pathlib import Path
 import time
 from multiprocessing.pool import Pool
 from typing import Union
@@ -35,6 +36,7 @@ def multi_wps(
         verbose: Union[bool, int]=0,
         fraction_low: int | None = None,
         fraction_high: int | None = None,
+        reference_file: str | Path | None = None,
         ):
     """
     Function that aggregates WPS over sites in BED file according to the
@@ -240,7 +242,10 @@ def multi_wps(
         count*[min_length],
         count*[max_length],
         count*[quality_threshold],
-        count*[verbose-2 if verbose>2 else 0]
+        count*[verbose-2 if verbose>2 else 0],
+        count*[fraction_low],
+        count*[fraction_high],
+        count*[reference_file],
     )
 
     if (verbose):

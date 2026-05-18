@@ -41,6 +41,7 @@ def cleavage_profile(
     verbose: Union[bool, int]=0,
     fraction_low: int|None=None,
     fraction_high: int|None=None,
+    reference_file: str | Path | None = None,
 ) -> np.ndarray:
     """
     Cleavage profile calculated over a single interval.
@@ -131,7 +132,8 @@ def cleavage_profile(
         stop=adj_stop,
         min_length=min_length,
         max_length=max_length,
-        intersect_policy="any"
+        intersect_policy="any",
+        reference_file=reference_file,
     )
 
     positions = np.arange(adj_start, adj_stop)
@@ -192,6 +194,7 @@ def multi_cleavage_profile(
     verbose: Union[bool, int]=0,
     fraction_low: int|None=None,
     fraction_high: int|None=None,
+    reference_file: str | Path | None = None,
 ):
     """
     Multithreaded cleavage profile implementation over intervals in a
@@ -356,7 +359,10 @@ def multi_cleavage_profile(
         count*[min_length],
         count*[max_length],
         count*[quality_threshold],
-        count*[max(verbose-1, 0)]
+        count*[max(verbose-1, 0)],
+        count*[fraction_low],
+        count*[fraction_high],
+        count*[reference_file],
     )
 
     if (verbose):
