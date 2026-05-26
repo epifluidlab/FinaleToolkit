@@ -49,7 +49,7 @@ def main_cli_parser():
     cli_coverage.add_argument(
         "-r",
         "--reference-file",
-        help="A FASTA or 2-bit file, which is used to support CRAM reading.",
+        help="Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.",
         required=False
     )
     cli_coverage.add_argument(
@@ -130,7 +130,7 @@ def main_cli_parser():
     cli_frag_length_bins.add_argument(
         '-r',
         '--reference-file',
-        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
         required=False)
     cli_frag_length_bins.add_argument(
         '-c',
@@ -233,7 +233,7 @@ def main_cli_parser():
     cli_frag_length_intervals.add_argument(
         '-r',
         '--reference-file',
-        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
         required=False)
     cli_frag_length_intervals.add_argument(
         'interval_file',
@@ -307,7 +307,7 @@ def main_cli_parser():
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_cleavage_profile.add_argument(
         '--reference-file',
-        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
         required=False)
     cli_cleavage_profile.add_argument(
         'interval_file',
@@ -399,7 +399,7 @@ def main_cli_parser():
     cli_wps.add_argument(
         '-r',
         '--reference-file',
-        help='A FASTA or 2-bit file, which is used to support CRAM reading.',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
         required=False)
     cli_wps.add_argument(
         'site_bed',

@@ -61,8 +61,8 @@ def single_coverage(
     verbose : bool, optional
         Prints messages to stderr. Default is false.
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
-        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------
@@ -176,8 +176,8 @@ def coverage(
         of memory.
     verbose : int or bool, optional
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
-        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------

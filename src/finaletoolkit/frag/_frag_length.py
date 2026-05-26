@@ -189,8 +189,8 @@ def frag_length(
         Minimum MAPQ to accept for a fragment to be counted.
     verbose : bool, optional
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
-        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------
@@ -321,8 +321,8 @@ def frag_length_bins(
         Number of worker processes.
     verbose : bool, optional
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
-        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------
@@ -492,8 +492,8 @@ def frag_length_intervals(
         Number of worker processes.
     verbose : bool, optional
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
-        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------
