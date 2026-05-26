@@ -22,8 +22,11 @@ and this project adheres to
   when a FASTA file is opened without a pre-built index.
 - `.fna` and `.fna.gz` extensions recognised as FASTA by `ReferenceWrapper`.
 - Integration test suite `tests/test_cram.py` verifying CRAM produces
-  identical results to BAM for `coverage`, `frag_length_bins`, `wps`, and
-  `delfi`.
+  identical results to BAM for `single_coverage`, `frag_length_bins`, `wps`,
+  and `delfi`.
+- Smoke tests in `tests/test_cram.py` verifying CRAM input runs without error
+  for `coverage`, `frag_length`, `frag_length_intervals`, `multi_wps`,
+  `cleavage_profile`, and `multi_cleavage_profile`.
 
 ### Changed
 - CLI help text for `delfi`, `end-motifs`, `interval-end-motifs`,
