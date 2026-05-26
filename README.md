@@ -78,7 +78,7 @@ We encourage you to use our comprehensive database, FinaleDB, to access relevant
 Check out our [Snakemake workflow](https://github.com/epifluidlab/finaletoolkit_workflow)!
 
 ## Contact
-- James Li: lijw21@wfu.edu
+- James Li: james.li3@northwestern.edu
 - Ravi Bandaru: ravi.bandaru@northwestern.edu
 - Yaping Liu: yaping@northwestern.edu
 
