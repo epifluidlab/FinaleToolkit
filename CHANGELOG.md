@@ -43,6 +43,12 @@ and this project adheres to
 - `delfi` docstring clarifies that when `input_file` is a CRAM file,
   `reference_file` must be a FASTA (not .2bit), as htslib requires FASTA for
   CRAM decoding.
+- `multi_wps` (and therefore `wps` CLI) no longer silently drops chromosomes
+  from BigWig output when the input BED file is sorted in a different
+  chromosome order than the BAM header (e.g. alphabetical vs. numeric). The
+  interval list is now sorted by BAM-header chromosome order before writing,
+  preventing the `RuntimeError` that previously caused silent data loss for
+  chr2–chr9, chrX, chrY and similar chromosomes.
 
 ## [0.11.1] - 2026-04-21
 

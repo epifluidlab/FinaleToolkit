@@ -220,6 +220,19 @@ def multi_wps(
         if site_bed != '-':
             bed.close()
 
+    # BigWig requires entries in the same chromosome order as the header.
+    # BED files sorted alphabetically (chr1, chr10...chr2) produce out-of-order
+    # writes that pyBigWig silently drops via the RuntimeError handler below.
+    if header and contigs:
+        _chrom_order = {chrom: idx for idx, (chrom, _) in enumerate(header)}
+        _sort_indices = sorted(
+            range(len(contigs)),
+            key=lambda i: (_chrom_order.get(contigs[i], len(header)), starts[i])
+        )
+        contigs = [contigs[i] for i in _sort_indices]
+        starts = [starts[i] for i in _sort_indices]
+        stops = [stops[i] for i in _sort_indices]
+
     try:
         chrom_sizes_intervals = [chrom_sizes_dict[contig] for contig in contigs]
     except KeyError:
