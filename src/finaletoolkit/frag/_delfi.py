@@ -69,7 +69,10 @@ def delfi(input_file: str,
         Path string to a BED file containing 100kb bins for reference
         genome of choice.
     reference_file: str
-        Path string to reference genome file.
+        Path string to reference genome file (.2bit or FASTA). Used for
+        GC-content correction. When `input_file` is a CRAM file, this
+        must be a FASTA file (not .2bit) because htslib requires FASTA
+        for CRAM decoding.
     gap_file: str or GenomeGaps
         Specifies locations of telomeres and centromeres for reference 
         genome. There are three options:
@@ -391,7 +394,9 @@ def _delfi_single_window(
         window_start,
         window_stop,
         min_length=100,
-        max_length=220):
+        max_length=220,
+        reference_file=reference_file,
+    ):
 
         frag_length = frag_stop - frag_start
 

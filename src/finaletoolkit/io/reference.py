@@ -51,7 +51,7 @@ class ReferenceWrapper:
         if self.reference_path.endswith((".2bit", ".tb2")):
             self._is_2bit = True
             self._open_2bit()
-        elif self.reference_path.endswith((".fa", ".fasta", ".fa.gz", ".fasta.gz")):
+        elif self.reference_path.endswith((".fa", ".fasta", ".fna", ".fa.gz", ".fasta.gz", ".fna.gz")):
             self._is_fasta = True
             self._open_fasta()
         else:
@@ -69,10 +69,15 @@ class ReferenceWrapper:
             raise
 
     def _open_fasta(self):
+        fai_path = self.reference_path + ".fai"
+        if not os.path.exists(fai_path):
+            logger.info(
+                f"FASTA index not found for {self.reference_path}. "
+                "Creating index with pysam.faidx()..."
+            )
+            pysam.faidx(self.reference_path)
         try:
-            # pysam.FastaFile is generally efficient for random access if indexed (.fai)
             self._handle = pysam.FastaFile(self.reference_path)
-            # pysam.FastaFile.references returns list of contigs, lengths returns list of lengths
             self._chroms = dict(zip(self._handle.references, self._handle.lengths))
         except Exception as e:
             logger.error(f"Failed to open FASTA file {self.reference_path}: {e}")
