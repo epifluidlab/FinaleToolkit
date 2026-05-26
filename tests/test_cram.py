@@ -14,7 +14,13 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from finaletoolkit.frag import single_coverage, frag_length_bins, wps, delfi
+from finaletoolkit.frag import (
+    single_coverage, coverage,
+    frag_length, frag_length_bins, frag_length_intervals,
+    wps, multi_wps,
+    cleavage_profile, delfi,
+)
+from finaletoolkit.frag._cleavage_profile import multi_cleavage_profile
 from finaletoolkit.genome.gaps import GenomeGaps
 
 
@@ -100,3 +106,89 @@ class TestDelfiCRAM:
         cram_result = delfi(cram_file, autosomes, bins_file, fasta, blacklist, gaps)
 
         pd.testing.assert_frame_equal(bam_result, cram_result)
+
+
+# ---------------------------------------------------------------------------
+# Smoke tests — verify each function runs without error when given CRAM input
+# ---------------------------------------------------------------------------
+
+CHROM_SIZES = DATA / "human.hg19.chr1.6Mb.genome"
+REGION = ("chr1", 1_000_000, 2_000_000)
+
+
+class TestCoverageCRAMRuns:
+    def test_cram_runs(self, cram_file, tmp_path):
+        intervals = tmp_path / "intervals.bed"
+        intervals.write_text("chr1\t1000000\t2000000\t.\n")
+        output = tmp_path / "coverage.bed"
+        results = coverage(
+            cram_file, str(intervals), str(output),
+            quality_threshold=0,
+            reference_file=FASTA,
+        )
+        assert len(results) > 0
+
+
+class TestFragLengthCRAMRuns:
+    def test_cram_runs(self, cram_file):
+        contig, start, stop = REGION
+        lengths = frag_length(
+            cram_file, contig=contig, start=start, stop=stop,
+            quality_threshold=0,
+            reference_file=FASTA,
+        )
+        assert lengths is not None
+
+
+class TestFragLengthIntervalsCRAMRuns:
+    def test_cram_runs(self, cram_file, tmp_path):
+        intervals = tmp_path / "intervals.bed"
+        intervals.write_text("chr1\t1000000\t2000000\t.\n")
+        results = frag_length_intervals(
+            cram_file, str(intervals),
+            quality_threshold=0,
+            reference_file=FASTA,
+        )
+        assert results is not None
+
+
+class TestMultiWpsCRAMRuns:
+    def test_cram_runs(self, cram_file, tmp_path):
+        site_bed = tmp_path / "sites.bed"
+        site_bed.write_text("chr1\t1000000\t1005000\n")
+        output = tmp_path / "wps.bed.gz"
+        multi_wps(
+            cram_file, str(site_bed),
+            chrom_sizes=CHROM_SIZES,
+            output_file=str(output),
+            quality_threshold=0,
+            reference_file=FASTA,
+        )
+        assert output.exists()
+
+
+class TestCleavageProfileCRAMRuns:
+    def test_cram_runs(self, cram_file):
+        contig, start, stop = REGION
+        chrom_size = 6_000_000
+        results = cleavage_profile(
+            cram_file, chrom_size, contig, start, stop,
+            quality_threshold=0,
+            reference_file=FASTA,
+        )
+        assert results is not None
+
+
+class TestMultiCleavageProfileCRAMRuns:
+    def test_cram_runs(self, cram_file, tmp_path):
+        intervals = tmp_path / "intervals.bed"
+        intervals.write_text("chr1\t1000000\t1005000\n")
+        output = tmp_path / "cleavage.bed.gz"
+        multi_cleavage_profile(
+            cram_file, str(intervals),
+            chrom_sizes=str(CHROM_SIZES),
+            output_file=str(output),
+            quality_threshold=0,
+            reference_file=FASTA,
+        )
+        assert output.exists()
