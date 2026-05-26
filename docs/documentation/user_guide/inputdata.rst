@@ -21,11 +21,21 @@ CRAM
 
 A compressed read alignment map file is another binary file standard. It
 is a binary file that is smaller than a BAM file, but still contains all of the
-same information. 
+same information.
 
 **FinaleToolkit** requires that CRAM files be CRAI indexed. Therefore, you
 should have an associated ``.cram.crai`` file in the same directory of your
 input data.
+
+.. note::
+
+   CRAM files require a reference genome to decode reads. When supplying a
+   CRAM file as input, you must also provide a FASTA reference file (e.g.
+   ``--reference-file /path/to/reference.fa``) to any **FinaleToolkit**
+   subcommand. The FASTA file must be the same reference used during alignment
+   and must be accompanied by a ``.fai`` index (created automatically by
+   **FinaleToolkit** if not present). A ``.2bit`` file cannot be used as the
+   reference when reading CRAM files.
 
 Fragment File
 ^^^^^^^^^^^^^^^^

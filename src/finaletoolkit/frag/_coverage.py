@@ -25,7 +25,8 @@ def single_coverage(
     max_length: int | None = None,
     intersect_policy: str = "midpoint",
     quality_threshold: int = 30,
-    verbose: bool | int = False
+    verbose: bool | int = False,
+    reference_file: str | Path | None = None,
 ) -> tuple[str | None, int | None, int | None, str, float]:
     """
     Return estimated fragment coverage over specified `contig` and
@@ -59,6 +60,10 @@ def single_coverage(
         Minimum MAPQ to filter for. Default is 30.
     verbose : bool, optional
         Prints messages to stderr. Default is false.
+    reference_file : str or Path, optional
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
+
     Returns
     -------
     (contig, start, stop, name, coverage) : tuple[str, int, int, str, float]
@@ -92,7 +97,9 @@ def single_coverage(
         stop=stop,
         min_length=min_length,
         max_length=max_length,
-        intersect_policy=intersect_policy)
+        intersect_policy=intersect_policy,
+        reference_file=reference_file,
+    )
 
     # Iterating on each frag in file in
     # specified contig/chromosome
@@ -126,7 +133,8 @@ def coverage(
         intersect_policy: str="midpoint",
         quality_threshold: int=30,
         workers: int=1,
-        verbose: Union[bool, int]=False
+        verbose: Union[bool, int]=False,
+        reference_file: str | Path | None=None,
     ) -> list[tuple[str, int, int, str, float]]:
     """
     Return estimated fragment coverage over intervals specified in
@@ -167,6 +175,9 @@ def coverage(
         Number of subprocesses to spawn. Increases speed at the expense
         of memory.
     verbose : int or bool, optional
+    reference_file : str or Path, optional
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------
@@ -211,7 +222,8 @@ def coverage(
                  "max_length": max_length,
                  "intersect_policy": intersect_policy,
                  "quality_threshold": quality_threshold,
-                 "verbose": verbose}
+                 "verbose": verbose,
+                 "reference_file": reference_file}
             )
 
         intervals = get_intervals(
@@ -223,7 +235,8 @@ def coverage(
         partial_single_coverage = partial(
             single_coverage, input_file=input_file, min_length=min_length,
             max_length=max_length, intersect_policy=intersect_policy,
-            quality_threshold=quality_threshold, verbose=max(0, verbose-1))
+            quality_threshold=quality_threshold, verbose=max(0, verbose-1),
+            reference_file=reference_file)
         coverages = pool.imap(
             partial(_single_coverage_star, partial_single_coverage), intervals,
             chunksize=max(len(intervals)//workers, 1))

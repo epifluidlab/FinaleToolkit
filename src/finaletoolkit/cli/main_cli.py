@@ -49,7 +49,7 @@ def main_cli_parser():
     cli_coverage.add_argument(
         "-r",
         "--reference-file",
-        help="A FASTA or 2-bit file, which is used to support CRAM reading.",
+        help="Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.",
         required=False
     )
     cli_coverage.add_argument(
@@ -127,6 +127,11 @@ def main_cli_parser():
     cli_frag_length_bins.add_argument(
         'input_file',
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
+    cli_frag_length_bins.add_argument(
+        '-r',
+        '--reference-file',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
+        required=False)
     cli_frag_length_bins.add_argument(
         '-c',
         '--contig',
@@ -226,6 +231,11 @@ def main_cli_parser():
         help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
     cli_frag_length_intervals.add_argument(
+        '-r',
+        '--reference-file',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
+        required=False)
+    cli_frag_length_intervals.add_argument(
         'interval_file',
         help='Path to a BED file containing intervals to retrieve '
         'fragment length summary statistics over.')
@@ -295,6 +305,10 @@ def main_cli_parser():
     cli_cleavage_profile.add_argument(
         'input_file',
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
+    cli_cleavage_profile.add_argument(
+        '--reference-file',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
+        required=False)
     cli_cleavage_profile.add_argument(
         'interval_file',
         help='Path to a BED file containing intervals to calculates cleavage '
@@ -382,6 +396,11 @@ def main_cli_parser():
         'input_file',
         help='Path to a BAM/CRAM/Fragment file containing fragment '
         'data.')
+    cli_wps.add_argument(
+        '-r',
+        '--reference-file',
+        help='Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required for CRAM input.',
+        required=False)
     cli_wps.add_argument(
         'site_bed',
         help='Path to a BED file containing sites to calculate WPS '
@@ -562,8 +581,8 @@ def main_cli_parser():
         "You want to replicate the original scripts.")
     cli_delfi.add_argument(
         'reference_file',
-        help="The .2bit file for the associate reference genome sequence used "
-        "during alignment.")
+        help="A .2bit or FASTA (.fa, .fasta, .fna) file for the reference "
+        "genome sequence used during alignment.")
     cli_delfi.add_argument(
         'bins_file',
         help="A BED file containing bins over which to calculate DELFI. To "
@@ -677,8 +696,8 @@ def main_cli_parser():
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_motifs.add_argument(
         'refseq_file',
-        help='The .2bit file for the associate reference genome sequence used '
-        'during alignment.')
+        help='A .2bit or FASTA (.fa, .fasta, .fna) file for the reference '
+        'genome sequence used during alignment.')
     cli_motifs.add_argument(
         '-k',
         default=4,
@@ -748,8 +767,8 @@ def main_cli_parser():
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_interval_motifs.add_argument(
         'refseq_file',
-        help='The .2bit file for the associate reference genome sequence used '
-        'during alignment.')
+        help='A .2bit or FASTA (.fa, .fasta, .fna) file for the reference '
+        'genome sequence used during alignment.')
     cli_interval_motifs.add_argument(
         'intervals',
         help='Path to a BED file containing intervals to retrieve end motif '
@@ -836,8 +855,8 @@ def main_cli_parser():
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_breakpoint.add_argument(
         'refseq_file',
-        help='The .2bit file for the associate reference genome sequence used '
-        'during alignment.')
+        help='A .2bit or FASTA (.fa, .fasta, .fna) file for the reference '
+        'genome sequence used during alignment.')
     cli_breakpoint.add_argument(
         '-k',
         default=6,
@@ -907,8 +926,8 @@ def main_cli_parser():
         help='Path to a BAM/CRAM/Fragment file containing fragment data.')
     cli_interval_breakpoint.add_argument(
         'refseq_file',
-        help='The .2bit file for the associate reference genome sequence used '
-        'during alignment.')
+        help='A .2bit or FASTA (.fa, .fasta, .fna) file for the reference '
+        'genome sequence used during alignment.')
     cli_interval_breakpoint.add_argument(
         'intervals',
         help='Path to a BED file containing intervals to retrieve breakpoint motif '

@@ -2,6 +2,7 @@ from __future__ import annotations
 import gzip
 import time
 from typing import Union
+from pathlib import Path
 from sys import stdout, stderr
 import warnings
 
@@ -49,6 +50,7 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         verbose: bool | int = 0,
         fraction_low: int | None = None,
         fraction_high: int | None = None,
+        reference_file: str | Path | None = None,
         ) -> np.ndarray:
     """
     Return (raw) Windowed Protection Scores as specified in Snyder et al
@@ -81,6 +83,9 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
         Deprecated alias for `min_length`
     fraction_high : int, optional
         Deprecated alias for `max_length`
+    reference_file : str or Path, optional
+        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
+        when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------
@@ -151,7 +156,8 @@ def wps(input_file: Union[str, pysam.AlignmentFile],
                            stop=maximum,
                            min_length=min_length,
                            max_length=max_length,
-                           verbose=(verbose>=2))
+                           verbose=(verbose>=2),
+                           reference_file=reference_file)
 
     if (verbose):
         stderr.write("Done reading fragments, preparing for WPS calculation.\n")

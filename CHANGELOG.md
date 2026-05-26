@@ -7,6 +7,43 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- CRAM support threaded through all `frag` modules: `coverage`, `frag_length`,
+  `frag_length_bins`, `frag_length_intervals`, `wps`, `multi_wps`,
+  `cleavage_profile`, and `multi_cleavage_profile` now accept a
+  `reference_file` parameter (FASTA only) required for decoding CRAM input.
+- `--reference-file` CLI flag added to `frag-length-bins`,
+  `frag-length-intervals`, and `wps` subcommands.
+- `--reference-file` CLI flag added to `cleavage-profile` subcommand (no `-r`
+  short form, as `-r` was already taken by `--right`).
+- `ReferenceWrapper` auto-creates a missing `.fai` index (via `pysam.faidx`)
+  when a FASTA file is opened without a pre-built index.
+- `.fna` and `.fna.gz` extensions recognised as FASTA by `ReferenceWrapper`.
+- Integration test suite `tests/test_cram.py` verifying CRAM produces
+  identical results to BAM for `single_coverage`, `frag_length_bins`, `wps`,
+  and `delfi`.
+- Smoke tests in `tests/test_cram.py` verifying CRAM input runs without error
+  for `coverage`, `frag_length`, `frag_length_intervals`, `multi_wps`,
+  `cleavage_profile`, and `multi_cleavage_profile`.
+
+### Changed
+- CLI help text for `delfi`, `end-motifs`, `interval-end-motifs`,
+  `breakpoint-motifs`, and `interval-breakpoint-motifs` updated: the
+  `reference_file` argument description now reads "A .2bit or FASTA
+  (.fa, .fasta, .fna) file" instead of "The .2bit file".
+- `multi_wps` now correctly forwards `fraction_low` and `fraction_high` to
+  worker processes (these were silently dropped before).
+
+### Fixed
+- CRAM files can now be used with all analysis subcommands; previously
+  `frag_generator` was never passed the reference file needed for CRAM
+  decoding.
+- `delfi` docstring clarifies that when `input_file` is a CRAM file,
+  `reference_file` must be a FASTA (not .2bit), as htslib requires FASTA for
+  CRAM decoding.
+
 ## [0.11.1] - 2026-04-21
 
 ### Added
