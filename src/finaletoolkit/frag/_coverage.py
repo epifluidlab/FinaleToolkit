@@ -60,6 +60,10 @@ def single_coverage(
         Minimum MAPQ to filter for. Default is 30.
     verbose : bool, optional
         Prints messages to stderr. Default is false.
+    reference_file : str or Path, optional
+        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
+        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
+
     Returns
     -------
     (contig, start, stop, name, coverage) : tuple[str, int, int, str, float]
@@ -171,6 +175,9 @@ def coverage(
         Number of subprocesses to spawn. Increases speed at the expense
         of memory.
     verbose : int or bool, optional
+    reference_file : str or Path, optional
+        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
+        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
 
     Returns
     -------

@@ -79,7 +79,10 @@ def multi_wps(
         Deprecated alias for min_length
     fraction_high : int, optional
         Deprecated alias for max_length
-        
+    reference_file : str or Path, optional
+        Path to a FASTA (.fa, .fasta, .fna) or .2bit reference genome file.
+        Required when `input_file` is a CRAM file; ignored for BAM/frag files.
+
     Returns
     -------
     output_file: str
