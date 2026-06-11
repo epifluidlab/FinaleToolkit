@@ -7,6 +7,31 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- `delfi` is substantially faster on whole-genome inputs (~80x on a
+  56-core chr1+chr2 hg38 benchmark) while producing identical output. The
+  previous implementation reopened the alignment and reference files and
+  re-parsed the blacklist BED on every 100kb window (~26K windows per
+  genome). The new implementation:
+  - Parses the blacklist once, indexes it by contig as sorted arrays, and
+    filters per window with binary search instead of a per-fragment linear
+    scan.
+  - Opens one shared `AlignmentWrapper` (BAM/CRAM/`frag.gz`) and one
+    `ReferenceWrapper` (.2bit/FASTA) per worker process via the
+    `multiprocessing.Pool` initializer, reused for every window, instead of
+    reopening them per window.
+  - Pre-loads per-contig `ContigGaps` into worker globals instead of
+    pickling them into every task.
+  - Counts GC bases with `str.count` instead of a per-base Python loop.
+
+### Added
+- Tests for `delfi`: `test_workers_equivalence` (single- vs multi-worker
+  output is bit-identical) and `test_fragfile_input` (tabix-indexed
+  `.frag.gz`/`.bed.gz` fragment input is read correctly, is invariant to
+  worker count, and matches between the two tabix layouts).
+
 ## [0.12.0] - 2026-05-28
 
 ### Added
