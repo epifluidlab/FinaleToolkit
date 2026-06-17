@@ -5,25 +5,40 @@ Installation
 -----------------------
 Prerequisites
 -----------------------
-The only prerequisite for installing **FinaleToolkit** is a Python version that is greater than ``3.8``.
+**FinaleToolkit** requires Python ``3.10`` or newer. Some subcommands
+(``filter-file``) additionally require ``samtools``, ``bedtools``, ``bgzip``,
+and ``tabix`` on your ``PATH``.
 
 ----------------------
 Installation
 ----------------------
-**FinaleToolkit** can be installed with with ``pip``.
+**FinaleToolkit** is installed with ``pip``. Using a dedicated ``conda``
+environment is recommended::
 
-Using ``pip``::
-
+    conda create -n finaletoolkit python=3.11 -y
+    conda activate finaletoolkit
     pip install finaletoolkit
 
-Also when using ``pip``, it’s good practice to use a virtual environment, like a ``conda`` environment.
+To install from a source checkout (for development, editable install)::
+
+    pip install -e .
+
+Verify the installation::
+
+    finaletoolkit --version
 
 ------------------
 Errors
 ------------------
 
-If any errors arise during the installation, please fill out a detailed issue in the GitHub repository.
+If any errors arise during installation, please open a detailed issue in the
+GitHub repository.
 
-If you are getting an ``ImportError`` on Mac when running **FinaleToolkit**, please run the following command in the terminal::
+If you are getting an ``ImportError`` on Mac when running **FinaleToolkit**,
+run the following command in the terminal::
 
     $ brew install curl
+
+If you see a NumPy ``_ARRAY_API not found`` warning, a package in your Python
+*user site* (``~/.local``) was compiled against an incompatible NumPy. Run with
+``PYTHONNOUSERSITE=1`` or remove the offending package from ``~/.local``.

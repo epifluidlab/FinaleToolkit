@@ -27,8 +27,7 @@ Documentation
    documentation/user_guide/index
    documentation/cli_reference/index
    documentation/api_reference/index
-   documentation/workflow_reference/index
-   
+
 -----------------
 Citations
 -----------------
@@ -47,7 +46,7 @@ If FinaleToolkit is integral to a scientific publication, please cite it. A peer
     doi = {10.1093/bioadv/vbaf236},
     url = {https://doi.org/10.1093/bioadv/vbaf236},
     eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbaf236/64414830/vbaf236.pdf},
-}
+   }
 
 
 -----------------

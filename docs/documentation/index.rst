@@ -9,4 +9,3 @@ Refer to the following sections:
    user_guide/index
    cli_reference/index
    api_reference/index
-   workflow_reference/index

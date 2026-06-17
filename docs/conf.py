@@ -1,32 +1,56 @@
 # Configuration file for the Sphinx documentation builder.
 #
-# For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import sys
 
-project = 'FinaleToolkit'
-copyright = '2024, EpiFluidLab'
-author = 'EpiFluidLab'
+# Make the package importable for autodoc even when it is not installed
+# (src layout). When installed in the build environment this is redundant but
+# harmless.
+sys.path.insert(0, os.path.abspath("../src"))
+
+# -- Project information -----------------------------------------------------
+
+project = "FinaleToolkit"
+copyright = "2026, EpiFluidLab"
+author = "EpiFluidLab"
 
 # -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinxarg.ext',
-    'sphinx.ext.napoleon',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinxarg.ext",
 ]
 
+# NumPy-style docstrings.
+napoleon_numpy_docstring = True
+napoleon_google_docstring = False
+
+# Autodoc: keep source order, show type hints in the description.
+autodoc_member_order = "bysource"
+autodoc_typehints = "description"
+
+# Note: autodoc imports the package, so the build environment must have the
+# runtime dependencies (numpy, pysam, numba, ...) installed. They are not
+# mocked because numba's @jit decorators need the real library to import.
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+}
+
 # -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
-html_static_path = ['_static']
+html_static_path = ["_static"]
 html_logo = "_static/finaletoolkit_logo_rounded.png"
 html_favicon = "_static/favicon.ico"
 html_theme_options = {
@@ -35,4 +59,3 @@ html_theme_options = {
         "image_dark": "_static/finaletoolkit_logo_rounded.png",
     }
 }
-

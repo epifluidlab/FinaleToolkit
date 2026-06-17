@@ -1,86 +1,123 @@
-# <img alt="dna with letters FT" src="https://github.com/epifluidlab/FinaleToolkit/blob/b99b38e22a3b07ee9b7e0fa44a488a1eb5442efe/docs/_static/finaletoolkit_logo_rounded.png?raw=true" height="60"> ‎ ‎ ‎FinaleToolkit
-<summary><h3>Table of Contents</h2></summary>
-<ol>
-  <li><a href="#about-the-project">About The Project</a></li>
-  <li><a href="#installation">Installation</a></li>
-  <li>
-    <a href="#usage">Usage</a>
-    <ul>
-      <li><a href="#functionality">Functionality</a></li>
-      <li><a href="#documentation">Documentation</a></li>
-      <li><a href="#wikitutorials">Wiki/Tutorials</a></li>
-      <li><a href="#compatible-file-formats">Compatible File Formats</a></li>
-      <li><a href="#using-fragment-files">Using Fragment Files</a></li>
-    </ul>
-  </li>
-  <li><a href="#contact">Contact</a></li>
-  <li><a href="#license">License</a></li>
-</ol>
+# FinaleToolkit (rewrite)
 
+**FinaleToolkit** (FragmentatIoN AnaLysis of cEll-free DNA Toolkit) is a package
+and standalone program to extract fragmentation features of cell-free DNA from
+paired-end sequencing data.
 
-## About The Project
-FinaleToolkit (**F**ragmentat**I**o**N** **A**na**L**ysis of c**E**ll-free DNA 
-**Toolkit**) is a package and standalone program to extract fragmentation
-features of cell-free DNA from paired-end sequencing data.
+This is a full refactor of the original
+[FinaleToolkit](https://github.com/epifluidlab/FinaleToolkit). The **Python API
+and numeric behavior are preserved** (the original test suite passes unchanged),
+while the code is modernized: a single import namespace, type hints, named
+return types, an informative exception hierarchy, vectorized/streaming hot
+paths, and a clear I/O / compute / CLI separation with shared helpers.
 
-### Citation
-If you use FinaleToolkit in your research, please consider citing our paper:
-
-James Wenhan Li, Ravi Bandaru, Kundan Baliga, Yaping Liu, FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit, *Bioinformatics Advances*, 2025;, vbaf236, https://doi.org/10.1093/bioadv/vbaf236
-
+The **CLI subcommands are unchanged, but the flag names were redesigned** for
+consistency (a clean break from the original — see `CHANGELOG.md` for the full
+old→new flag mapping).
 
 ## Installation
-You can install the package using `conda`.
-```
-$ conda install -c bioconda -c conda-forge finaletoolkit
-```
-You can also install the package using `pip`.
-```
-$ pip install finaletoolkit
+
+```bash
+pip install .
+# or, for development:
+pip install -e .
 ```
 
-## Usage
+Requires Python ≥ 3.10. Key dependencies: numpy, pysam, pyBigWig, py2bit, numba,
+scipy, pandas, statsmodels, loess, matplotlib, tqdm.
 
-### Functionality
+## Python API
 
-FinaleToolkit has support for the following cell-free DNA fragmentation features:
+Everything is reachable from the top-level namespace — no need to know internal
+submodule paths:
 
-- Fragment Length
-- Coverage
-- End Motifs [![DOI](https://img.shields.io/badge/DOI-10.1158%2F2159--8290.CD--19--0622-blue?style=flat-square&label=DOI)](https://doi.org/10.1158/2159-8290.cd-19-0622)
-- Motif Diversity Score [![DOI](https://img.shields.io/badge/DOI-10.1158%2F2159--8290.CD--19--0622-blue?style=flat-square)](https://doi.org/10.1158/2159-8290.CD-19-0622)
-- Windowed Protection Score [![DOI](https://img.shields.io/badge/DOI-110.1016%2Fj.cell.2015.11.050-blue?style=flat-square)](https://doi.org/10.1016/j.cell.2015.11.050)
-- DELFI [![DOI](https://img.shields.io/badge/DOI-10.1038%2Fs41586--019--1272--6-blue?style=flat-square&link=https%3A%2F%2Fdoi.org%2F10.1038%252Fs41586-019-1272-6)](https://doi.org/10.1038%2Fs41586-019-1272-6)
-- Cleavage Profile [![DOI](https://img.shields.io/badge/DOI-10.1073%2Fpnas.2209852119-blue?style=flat-square)](https://doi.org/10.1073/pnas.2209852119)
+```python
+import finaletoolkit as ftk
 
-### Documentation
-Documentation for FinaleToolkit can be found [here](https://epifluidlab.github.io/FinaleToolkit/).
+# Coverage over intervals (returns NamedTuples that still unpack like the old tuples)
+results = ftk.coverage("sample.bam", "intervals.bed", output_file=None)
+for r in results:
+    print(r.contig, r.start, r.stop, r.coverage)   # named access
+    chrom, start, stop, name, cov = r               # tuple unpacking still works
 
-### Wiki/Tutorials
-The wiki and tutorial page for FinaleToolkit can be found [here](https://github.com/epifluidlab/FinaleToolkit/wiki).
+# Windowed protection score
+scores = ftk.wps("sample.bam", "chr12", 34443000, 34448000, chrom_size=133851895)
 
-### Compatible File Formats
+# End motifs + motif diversity score
+motifs = ftk.end_motifs("sample.bam", "hg38.2bit", k=4)
+print(motifs.motif_diversity_score())
 
-FinaleToolkit is compatible with almost any paired-end sequence data:
+# DELFI, cleavage profile, fragment lengths, breakpoint motifs, genome gaps ...
+df = ftk.delfi("sample.bam", "autosomes.chrom.sizes", "bins.bed", "hg19.2bit", gap_file="hg19")
+gaps = ftk.GenomeGaps.hg38()
+```
 
-- Binary Alignment Map (`.bam`) files with an associated index file (`.bam.bai`).
-- Compressed Reference-oriented Alignment Map (`.cram`) files.
-- Fragment (`.frag.gz`) files with an associated tabix index file (`.frag.gz.tbi`).
+The original import paths continue to work unchanged:
 
-### Using Fragment Files
+```python
+from finaletoolkit.frag import wps, multi_wps, delfi, end_motifs, EndMotifFreqs
+from finaletoolkit.utils import frag_generator, frag_array, agg_bw, filter_file
+from finaletoolkit.genome import GenomeGaps, ContigGaps
+from finaletoolkit.io import ReferenceWrapper, AlignmentWrapper, Fragment
+```
 
-Fragment (`.frag.gz`) files are block-gzipped BED3+2 files with the following columns: `chrom` , `start` , `stop` , `mapq` , `strand`.
+## Command-line interface
 
-We encourage you to use our comprehensive database, FinaleDB, to access relevant fragment files. Learn more about FinaleDB [here](http://finaledb.research.cchmc.org).
+```bash
+finaletoolkit --help
+finaletoolkit coverage sample.bam intervals.bed -o coverage.bed
+finaletoolkit wps sample.bam tss.bed --chrom-sizes hg38.chrom.sizes -o wps.bw -t 8
+finaletoolkit end-motifs sample.bam hg38.2bit -k 4 -o motifs.tsv
+finaletoolkit delfi sample.bam autosomes.chrom.sizes hg19.2bit bins.bed -g hg19 -o delfi.tsv
+```
 
-### Snakemake workflow
+Every subcommand has `--help` with an example invocation. The flag scheme is
+consistent across all subcommands:
 
-Check out our [Snakemake workflow](https://github.com/epifluidlab/finaletoolkit_workflow)!
+| Concept | Flag |
+|---|---|
+| Output path | `-o, --output` |
+| Reference (optional, for CRAM) | `-r, --reference` |
+| Minimum mapping quality | `-q, --min-mapq` |
+| Fragment length bounds | `--min-length`, `--max-length` |
+| Worker processes | `-t, --threads` |
+| Verbosity (repeatable) | `-v, --verbose` |
+| k-mer length | `-k, --kmer-length` |
+| Strand selection (motifs) | `--strand {both,forward,reverse}` |
+| Boolean on/off options | `--x` / `--no-x` (e.g. `--savgol`/`--no-savgol`) |
 
-## Contact
-- James Li: james.li3@northwestern.edu
-- Ravi Bandaru: ravi.bandaru@northwestern.edu
-- Yaping Liu: yaping@northwestern.edu
+> **Note:** the command-line flag names are a clean break from the original
+> FinaleToolkit. The **Python API is unchanged** — only CLI spellings changed.
+> See `CHANGELOG.md` for the full old→new flag mapping.
+
+### Subcommands
+
+`coverage`, `frag-length-bins`, `frag-length-intervals`, `cleavage-profile`,
+`wps`, `adjust-wps`, `delfi`, `delfi-gc-correct`, `end-motifs`,
+`interval-end-motifs`, `breakpoint-motifs`, `interval-breakpoint-motifs`, `mds`,
+`interval-mds`, `filter-file`, `agg-bw`, `gap-bed`.
+
+## Supported input formats
+
+- **Alignments:** indexed BAM and CRAM. CRAM requires a reference
+  (`-r/--reference` on the CLI, or the `reference_file` argument in the API).
+- **Fragments:** tabix-indexed FinaleDB `.frag.gz` (and BED6 `.bed.gz`, read
+  with a warning).
+- **Reference:** `.2bit` and FASTA (`.fa`/`.fasta`/`.fna`, optionally `.gz`;
+  a `.fai` index is created automatically when missing).
+
+## Package layout
+
+```
+finaletoolkit/
+├── io/        # ReferenceWrapper, AlignmentWrapper/Fragment, output helpers
+├── frag/      # feature extractors (frag length, coverage, WPS, cleavage, DELFI, motifs)
+├── genome/    # GenomeGaps / ContigGaps + bundled UCSC gap tracks
+├── utils/     # fragment streaming, intervals, k-mers, filtering, aggregation, parallelism
+├── cli/       # argparse front-end (commands/ builders + dispatch)
+└── exceptions.py  # FinaleToolkitError hierarchy
+```
 
 ## License
-This project falls under an MIT license. See the included `LICENSE` file for details.
+
+MIT (see `LICENSE`).
