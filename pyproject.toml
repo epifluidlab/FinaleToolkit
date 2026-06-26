@@ -45,6 +45,7 @@ dependencies = [
     "statsmodels==0.14.6",
     "loess==2.1.2",
     "matplotlib==3.10.8",
+    "rich-click>=1.8",
 ]
 dynamic = ["version"]
 
@@ -64,7 +65,7 @@ Wiki = "https://github.com/epifluidlab/FinaleToolkit/wiki"
 
 [dependency-groups]
 test = ["pytest", "pytest-cov"]
-docs = ["sphinx", "sphinx-argparse", "pydata-sphinx-theme"]
+docs = ["sphinx", "sphinx-click", "sphinx-design"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

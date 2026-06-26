@@ -2,60 +2,76 @@
 Tests for main_cli and entry points.
 """
 from __future__ import annotations
-from _collections_abc import dict_items
 import os
 from pathlib import Path
 from inspect import getfullargspec
 import importlib
 import subprocess
 import sys
-from typing import Any
 
 import pytest
 
-from finaletoolkit.cli.main_cli import main_cli_parser
+from finaletoolkit.cli.commands import COMMAND_TARGETS, COMMANDS
 
-IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
-
-parser = main_cli_parser()
-subcommands: dict = parser._subparsers._actions[2]._name_parser_map # type: ignore
+# name -> Click command object, for introspecting declared parameters.
+_COMMANDS_BY_NAME = {command.name: command for command in COMMANDS}
 
 class TestCLIArgs:
     """
     Test if provided commandline flags match args in associated function.
     """
-    @pytest.mark.parametrize("name,subparser", subcommands.items())
-    def test_lazy_import(self, name: dict_items | Any, subparser: dict_items | Any):
-        # getting module and func
-        module = subparser._defaults['module'] # type: ignore
-        func = subparser._defaults['func'] # type: ignore
-        
+    @pytest.mark.parametrize("name,target", COMMAND_TARGETS.items())
+    def test_lazy_import(self, name: str, target: tuple[str, str]):
+        # the (module, func) the subcommand dispatches to
+        module_path, func = target
+
         # try to see module spec
-        module = importlib.import_module(module)
+        module = importlib.import_module(module_path)
         function = getattr(module, func)
         assert callable(function), f'The {func} is not a callable in {module}.'
-    
-    @pytest.mark.skip(reason="Currently does not work with the lazy loading implementation")
-    @pytest.mark.skipif(
-        IN_GITHUB_ACTIONS,
-        reason="Test doesn't always work in Github Actions.")
-    @pytest.mark.parametrize("name,subparser", subcommands.items())
-    def test_cli_args(self, name: dict_items | Any, subparser: dict_items | Any):
-        # find args and associated func for each subparser
-        # get args for CLI
-        cli_args = [action.dest for action in subparser._actions[1:]] # type: ignore
 
-        # get args for func
-        func = subparser._defaults['func'] # type: ignore
-        func_args = getfullargspec(func).args
+    # Function arguments intentionally not exposed as CLI flags:
+    # fraction_low/fraction_high are deprecated aliases of the length filters,
+    # and gc_correct is the deprecated alias of delfi's --no-gc-correct.
+    _UNEXPOSED_ARGS = {"fraction_low", "fraction_high", "gc_correct"}
 
-        # check cli args are subset of func args
+    @pytest.mark.parametrize("name,target", COMMAND_TARGETS.items())
+    def test_cli_args(self, name: str, target: tuple[str, str]):
+        """Every CLI flag maps to a real function argument, and every function
+        argument is exposed as a flag (modulo the deprecated/internal ones).
+
+        Guards against a misrouted Click ``dest`` silently passing the wrong
+        value, or a feature parameter being dropped from the CLI.  Commands
+        whose target is a ``_cli_*`` wrapper (mds, regional-mds, gap-bed) are
+        CLI-specific shims, not 1:1 with a feature function, so they are only
+        checked for importability (see ``test_lazy_import``).
+        """
+        module_path, func_name = target
+        func = getattr(importlib.import_module(module_path), func_name)
+
+        if func_name.startswith("_cli_"):
+            assert callable(func), f"{name} target {func_name} is not callable"
+            return
+
+        # Click parameter names equal the function argument names; --strand
+        # expands to both_strands/negative_strand at dispatch time.
+        command = _COMMANDS_BY_NAME[name]
+        cli_args = [param.name for param in command.params]
+        if "strand" in cli_args:
+            cli_args.remove("strand")
+            cli_args += ["both_strands", "negative_strand"]
+
+        spec = getfullargspec(func)
+        func_args = set(spec.args) | set(spec.kwonlyargs)
+
+        # forward: no CLI flag may reference a non-existent function argument
         for arg in cli_args:
-            assert arg in func_args, f"CLI arg {arg} of {name} not in {func}"
-            
-        # check func args are subset of cli args
+            assert arg in func_args, f"CLI arg {arg!r} of {name} not in {func}"
+
+        # reverse: no function argument may be silently dropped from the CLI
         for arg in func_args:
-            assert arg in cli_args or arg == 'fraction_low' or arg == 'fraction_high', f"API arg {arg} of {func} not in {name}"
+            assert arg in cli_args or arg in self._UNEXPOSED_ARGS, (
+                f"API arg {arg!r} of {func} not exposed by {name}")
 
 
 class TestCLIEntryPoint:
@@ -92,10 +108,6 @@ class TestCLIEntryPoint:
         exit_status = os.system('finaletoolkit delfi --help')
         assert exit_status == 0
 
-    def test_delfi_gc_correct(self):
-        exit_status = os.system('finaletoolkit delfi-gc-correct --help')
-        assert exit_status == 0
-
     def test_end_motif(self):
         exit_status = os.system('finaletoolkit end-motifs --help')
         assert exit_status == 0
@@ -108,8 +120,8 @@ class TestCLIEntryPoint:
         exit_status = os.system('finaletoolkit interval-end-motifs --help')
         assert exit_status == 0
 
-    def test_interval_mds(self):
-        exit_status = os.system('finaletoolkit interval-mds --help')
+    def test_regional_mds(self):
+        exit_status = os.system('finaletoolkit regional-mds --help')
         assert exit_status == 0
 
     def test_filter_file(self):

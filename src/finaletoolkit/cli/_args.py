@@ -1,230 +1,206 @@
 """
-Reusable argument groups for the FinaleToolkit CLI.
+Reusable Click options/arguments for the FinaleToolkit CLI.
 
-This is a redesigned, consistent flag scheme (a clean break from the original
-mixed naming). Conventions applied uniformly across every subcommand:
+Each helper returns a Click decorator so the per-command definitions in
+:mod:`finaletoolkit.cli.commands` stay short and the flag scheme stays uniform
+across every subcommand:
 
-* ``-o/--output``        output path (was ``--output-file``)
-* ``-r/--reference``     optional reference genome (was ``--reference-file``)
-* ``-q/--min-mapq``      minimum mapping quality (was ``-q/--quality-threshold``)
-* ``--min-length`` / ``--max-length``   fragment-length bounds (no more
-  ``-min``/``-max``/``-lo``/``-hi``/``--fraction-*``)
-* ``-t/--threads``       worker processes (was ``-w/--workers``)
-* ``-v/--verbose``       counting verbosity (was a mix of store_true/count)
-* ``-k/--kmer-length``   k-mer length (was bare ``-k``)
-* ``--strand {both,forward,reverse}``  strand selection for motif commands
-  (replaces the confusing ``--single-strand``/``--negative-strand`` toggle)
+* ``-o/--output``        output path        (param ``output_file``)
+* ``-r/--reference``     optional reference (param ``reference_file``)
+* ``-q/--min-mapq``      minimum MAPQ       (param ``quality_threshold``)
+* ``--min-length`` / ``--max-length``       fragment-length bounds
+* ``-t/--threads``       worker processes   (param ``workers``)
+* ``-v/--verbose``       counting verbosity (param ``verbose``)
+* ``-k/--kmer-length``   k-mer length       (param ``k``)
+* ``--strand {both,forward,reverse}``       strand selection for motif commands
 
-Boolean on/off options use :class:`argparse.BooleanOptionalAction` so the
-``--x``/``--no-x`` pair shows a sensible default, instead of a lone negated flag
-whose ``store_false`` ``dest`` rendered a misleading ``Default: True``.
-
-Each flag keeps the ``dest`` that matches its Python function parameter, so the
-Python API is unchanged — only the command-line spelling changed.
+The first string after the flag spellings is the *parameter name*, which is
+deliberately kept equal to the implementing function's argument.  Only the
+command-line spelling is new; the Python API is unchanged.
 """
 from __future__ import annotations
 
-import argparse
+import rich_click as click
 
 __all__ = [
-    "add_input_file",
-    "add_reference_option",
-    "add_output",
-    "add_min_mapq",
-    "add_min_length",
-    "add_max_length",
-    "add_intersect_policy",
-    "add_threads",
-    "add_verbose",
-    "add_kmer",
-    "add_strand",
-    "add_bool_flag",
+    "input_argument",
+    "reference_option",
+    "output_option",
+    "min_mapq_option",
+    "min_length_option",
+    "max_length_option",
+    "intersect_policy_option",
+    "threads_option",
+    "verbose_option",
+    "kmer_option",
+    "strand_option",
+    "bool_flag",
 ]
 
 _INPUT_HELP = "Path to a BAM/CRAM/Fragment file containing fragment data."
 _REFERENCE_HELP = (
-    "Path to a FASTA (.fa, .fasta, .fna) reference genome file. "
-    "Required for CRAM input."
+    "FASTA (.fa, .fasta, .fna) reference genome. Required for CRAM input."
 )
 
 
-def add_input_file(parser: argparse.ArgumentParser, help: str = _INPUT_HELP) -> None:
-    """Add the positional ``input_file`` argument."""
-    parser.add_argument("input_file", metavar="INPUT", help=help)
+def input_argument(metavar: str = "INPUT"):
+    """Positional ``input_file`` (param ``input_file``)."""
+    return click.argument("input_file", metavar=metavar)
 
 
-def add_reference_option(parser: argparse.ArgumentParser) -> None:
-    """Add the optional ``-r/--reference`` argument (dest ``reference_file``)."""
-    parser.add_argument(
+def reference_option():
+    """Optional ``-r/--reference`` (param ``reference_file``)."""
+    return click.option(
         "-r",
         "--reference",
-        dest="reference_file",
+        "reference_file",
         metavar="FASTA",
-        required=False,
+        default=None,
         help=_REFERENCE_HELP,
     )
 
 
-def add_output(parser: argparse.ArgumentParser, help: str, default: str = "-") -> None:
-    """Add the ``-o/--output`` argument (dest ``output_file``)."""
-    parser.add_argument(
+def output_option(help: str, default: str = "-"):
+    """``-o/--output`` (param ``output_file``).
+
+    The shared ``-`` convention (write to stdout) is appended to every output
+    help string so it is documented consistently across commands.
+    """
+    return click.option(
         "-o",
         "--output",
-        dest="output_file",
+        "output_file",
         metavar="PATH",
         default=default,
-        help=help,
+        show_default=True,
+        help=f"{help} Pass '-' to write to standard output (stdout).",
     )
 
 
-def add_min_mapq(parser: argparse.ArgumentParser, default: int = 30) -> None:
-    """Add ``-q/--min-mapq`` (dest ``quality_threshold``)."""
-    parser.add_argument(
+def min_mapq_option(default: int = 30):
+    """``-q/--min-mapq`` (param ``quality_threshold``)."""
+    return click.option(
         "-q",
         "--min-mapq",
-        dest="quality_threshold",
+        "quality_threshold",
         metavar="MAPQ",
         default=default,
+        show_default=True,
         type=int,
         help="Minimum mapping quality (MAPQ) for a fragment to be included.",
     )
 
 
-def add_min_length(parser: argparse.ArgumentParser, default, help: str) -> None:
-    """Add ``--min-length`` (dest ``min_length``)."""
-    parser.add_argument(
-        "--min-length", dest="min_length", metavar="BP", default=default, type=int,
+def min_length_option(default, help: str):
+    """``--min-length`` (param ``min_length``)."""
+    return click.option(
+        "--min-length",
+        "min_length",
+        metavar="BP",
+        default=default,
+        show_default=default is not None,
+        type=int,
         help=help,
     )
 
 
-def add_max_length(parser: argparse.ArgumentParser, default, help: str) -> None:
-    """Add ``--max-length`` (dest ``max_length``)."""
-    parser.add_argument(
-        "--max-length", dest="max_length", metavar="BP", default=default, type=int,
+def max_length_option(default, help: str):
+    """``--max-length`` (param ``max_length``)."""
+    return click.option(
+        "--max-length",
+        "max_length",
+        metavar="BP",
+        default=default,
+        show_default=default is not None,
+        type=int,
         help=help,
     )
 
 
-def add_intersect_policy(parser: argparse.ArgumentParser) -> None:
-    """Add ``-p/--intersect-policy`` (choices midpoint/any)."""
-    parser.add_argument(
+def intersect_policy_option():
+    """``-p/--intersect-policy`` (param ``intersect_policy``)."""
+    return click.option(
         "-p",
         "--intersect-policy",
-        choices=["midpoint", "any"],
+        "intersect_policy",
+        type=click.Choice(["midpoint", "any"]),
         default="midpoint",
-        type=str,
-        help="How a fragment is counted as inside an interval: 'midpoint' (the "
-        "fragment midpoint lies in the interval) or 'any' (any overlap). "
-        "See the User Guide for details.",
+        show_default=True,
+        help="How a fragment counts as inside an interval: 'midpoint' (the "
+        "fragment midpoint lies in the interval) or 'any' (any overlap).",
     )
 
 
-def add_threads(parser: argparse.ArgumentParser, default: int = 1) -> None:
-    """Add ``-t/--threads`` (dest ``workers``)."""
-    parser.add_argument(
+def threads_option(default: int = 1):
+    """``-t/--threads`` (param ``workers``)."""
+    return click.option(
         "-t",
         "--threads",
-        dest="workers",
+        "workers",
         metavar="N",
         default=default,
+        show_default=True,
         type=int,
         help="Number of worker processes to use.",
     )
 
 
-def add_verbose(parser: argparse.ArgumentParser) -> None:
-    """Add the counting ``-v/--verbose`` argument."""
-    parser.add_argument(
+def verbose_option():
+    """``-v/--verbose`` counting flag (param ``verbose``)."""
+    return click.option(
         "-v",
         "--verbose",
-        action="count",
+        "verbose",
+        count=True,
         default=0,
-        help="Increase verbosity (repeatable, e.g. -vv) for detailed processing "
-        "information.",
+        metavar="",
+        help="Increase verbosity (repeatable, e.g. -vv) for detailed output.",
     )
 
 
-def add_kmer(parser: argparse.ArgumentParser, default: int) -> None:
-    """Add ``-k/--kmer-length`` (dest ``k``)."""
-    parser.add_argument(
+def kmer_option(default: int):
+    """``-k/--kmer-length`` (param ``k``)."""
+    return click.option(
         "-k",
         "--kmer-length",
-        dest="k",
+        "k",
         metavar="K",
         default=default,
+        show_default=True,
         type=int,
         help="Length of the k-mer motif.",
     )
 
 
-class _StrandAction(argparse.Action):
-    """Translate ``--strand {both,forward,reverse}`` into the two function args.
+def strand_option(feature: str):
+    """``--strand {both,forward,reverse}`` selector for motif commands.
 
-    The motif functions take ``both_strands`` and ``negative_strand`` booleans;
-    exposing those directly on the CLI as a ``store_false`` toggle produced a
-    confusing ``Default: True``.  This action maps a single, explicit choice
-    onto both destinations instead.
+    Expanded into ``both_strands``/``negative_strand`` at dispatch time (see
+    :func:`finaletoolkit.cli._dispatch._translate_strand`).
     """
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, "both_strands", values == "both")
-        setattr(namespace, "negative_strand", values == "reverse")
-
-
-def add_strand(parser: argparse.ArgumentParser, feature: str) -> None:
-    """Add the ``--strand {both,forward,reverse}`` selector.
-
-    Parameters
-    ----------
-    parser : argparse.ArgumentParser
-        The subparser to extend.
-    feature : str
-        Wording for help text, e.g. ``"end"`` or ``"breakpoint"``.
-    """
-    parser.add_argument(
+    return click.option(
         "--strand",
-        choices=["both", "forward", "reverse"],
+        "strand",
+        type=click.Choice(["both", "forward", "reverse"]),
         default="both",
-        action=_StrandAction,
-        help=f"Which fragment strand(s) to use for {feature} motifs: 'both' "
-        "(default), 'forward' (5' ends of the positive strand only), or "
-        "'reverse' (5' ends of the negative strand only).",
+        show_default=True,
+        help=f"Fragment strand(s) for {feature} motifs: 'both', 'forward' (5' "
+        "ends of the positive strand only), or 'reverse' (negative strand only).",
     )
-    # Defaults for the destinations the action writes to (i.e. 'both').
-    parser.set_defaults(both_strands=True, negative_strand=False)
 
 
-def add_bool_flag(
-    parser: argparse.ArgumentParser,
-    name: str,
-    dest: str,
-    default: bool,
-    help: str,
-) -> None:
-    """Add a ``--name`` / ``--no-name`` boolean flag.
+def bool_flag(name: str, param: str, default: bool, help: str):
+    """A ``--name/--no-name`` boolean flag (param ``param``).
 
-    Uses :class:`argparse.BooleanOptionalAction` so the default is reported
-    against the positive form (``--name``) and reads naturally, rather than the
-    confusing ``Default: True`` produced by a lone ``store_false`` flag.
-
-    Parameters
-    ----------
-    parser : argparse.ArgumentParser
-        The subparser to extend.
-    name : str
-        The positive flag name without leading dashes (e.g. ``"savgol"``).
-    dest : str
-        The destination (must match the function parameter name).
-    default : bool
-        Default value.
-    help : str
-        Help text describing the positive behavior.
+    The default is stated in the help text ("On by default" / "Off by default")
+    rather than shown as a bare ``True``/``False``, which is clearer in both the
+    terminal and the generated docs.
     """
-    parser.add_argument(
-        f"--{name}",
-        dest=dest,
+    state = "On" if default else "Off"
+    return click.option(
+        f"--{name}/--no-{name}",
+        param,
         default=default,
-        action=argparse.BooleanOptionalAction,
-        help=help,
+        show_default=False,
+        help=f"{help} {state} by default.",
     )
