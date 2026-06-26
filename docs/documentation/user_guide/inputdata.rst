@@ -1,72 +1,103 @@
-
 Input Data
-=========================================
+==========
 
-**FinaleToolkit** is compatible with almost any paired-end sequence data.
+FinaleToolkit works with almost any paired-end sequencing data, in three input
+formats. Each one must be indexed so the engine can stream fragments
+efficiently.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 28 20
+
+   * - Format
+     - Extension
+     - Required index
+     - Reference needed?
+   * - BAM
+     - ``.bam``
+     - ``.bam.bai``
+     - No
+   * - CRAM
+     - ``.cram``
+     - ``.cram.crai``
+     - Yes (FASTA)
+   * - Fragment
+     - ``.frag.gz`` or ``.frag.tsv.bgz``
+     - ``.tbi`` (Tabix)
+     - No
 
 BAM
-^^^^^^^^^^^
+---
 
-A binary alignment file (BAM) that stores the results of sequence alignment.
-It contains information about the alignment of each read to the reference
-genome, as well as information about the read itself. This file format is not
-human-readable but relatively space-efficient when compared to its plaintext
-counterpart, the sequence alignment map (SAM) file format.
-
-**FinaleToolkit** requires that BAM files be BAI indexed. Therefore, you should
-have an associated ``.bam.bai`` file in the same directory of your input data.
-
-CRAM
-^^^^^^^^^^^
-
-A compressed read alignment map file is another binary file standard. It
-is a binary file that is smaller than a BAM file, but still contains all of the
-same information.
-
-**FinaleToolkit** requires that CRAM files be CRAI indexed. Therefore, you
-should have an associated ``.cram.crai`` file in the same directory of your
-input data.
+A Binary Alignment Map stores sequence-alignment results: where each read maps
+to the reference, plus information about the read itself. It is not
+human-readable, but it is space-efficient compared to its plaintext
+counterpart, SAM.
 
 .. note::
 
-   CRAM files require a reference genome to decode reads. When supplying a
-   CRAM file as input, you must also provide a FASTA reference file (e.g.
-   ``--reference-file /path/to/reference.fa``) to any **FinaleToolkit**
-   subcommand. The FASTA file must be the same reference used during alignment
-   and must be accompanied by a ``.fai`` index (created automatically by
-   **FinaleToolkit** if not present). A ``.2bit`` file cannot be used as the
-   reference when reading CRAM files.
+   BAM input must be BAI-indexed. Keep the ``.bam.bai`` file alongside the
+   ``.bam``.
 
-Fragment File
-^^^^^^^^^^^^^^^^
+CRAM
+----
 
-A fragment file (``.frag.gz`` or ``frag.tsv.bgz``) file that is derived from
-information in a BAM file. A fragment file is a block-gzipped BED3+2 file
-(similar to a tab-separated value file) that contains the following columns
-(with one row entry for each fragment): ```chrom``, ``start``, ``stop``,
-``mapq``, and ``strand``.
+CRAM is a reference-based binary alignment format. It is smaller than BAM while
+carrying the same information.
 
-Here, ``mapq`` is the mapping quality of the fragment, and ``strand`` is the
-strand of the fragment. The ``strand`` column can be either ``+`` or ``-``.
+.. note::
 
-**FinaleToolkit** requires that fragment files be Tabix indexed. Therefore,
-you should have an associated ``.tbi`` file in the same directory of
-your input data.
+   CRAM input must be CRAI-indexed. Keep the ``.cram.crai`` file alongside the
+   ``.cram``.
 
-For your reference, here is an example fragment file::
+.. admonition:: CRAM requires a reference FASTA
+   :class: important
 
-        #chrom    start    stop    mapq    strand
-        chr1    10000    10050    60    +
-        chr1    10050    10100    60    -
-        chr1    10100    10150    60    +
-        chr1    10150    10200    60    -
-        chr1    10200    10250    60    +
-        chr1    10250    10300    60    -
-        chr1    10300    10350    60    +
-        chr1    10350    10400    60    -
-        chr1    10400    10450    60    +
-        chr1    10450    10500    60    -
+   Because CRAM encodes reads relative to the reference, you must pass the same
+   FASTA reference used during alignment to any subcommand::
 
-We encourage you to use our comprehensive database, **FinaleDB**, to access
-relevant fragment files. Learn more about **FinaleDB**
-`here <http://finaledb.research.cchmc.org>`_ .
+      $ finaletoolkit coverage sample.cram intervals.bed -r reference.fa -o cov.bed
+
+   The FASTA needs a ``.fai`` index, which FinaleToolkit creates automatically
+   if it is missing. A ``.2bit`` file cannot be used as the reference when
+   reading CRAM.
+
+Fragment file
+-------------
+
+A Fragment file (``.frag.gz`` or ``.frag.tsv.bgz``) is derived from a BAM file.
+It is a block-gzipped BED3+2 file with one row per fragment and these columns:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 18 18 18
+
+   * - ``chrom``
+     - ``start``
+     - ``stop``
+     - ``mapq``
+     - ``strand``
+   * - contig
+     - 0-based start
+     - end
+     - mapping quality
+     - ``+`` or ``-``
+
+.. note::
+
+   Fragment files must be Tabix-indexed. Keep the ``.tbi`` file alongside the
+   data.
+
+Example::
+
+    #chrom  start   stop    mapq    strand
+    chr1    10000   10050   60      +
+    chr1    10050   10100   60      -
+    chr1    10100   10150   60      +
+    chr1    10150   10200   60      -
+    chr1    10200   10250   60      +
+
+.. tip::
+
+   Our FinaleDB database hosts ready-to-use fragment files. Learn more at
+   `finaledb.research.cchmc.org <http://finaledb.research.cchmc.org>`_.

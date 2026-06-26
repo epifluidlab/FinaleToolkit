@@ -9,7 +9,6 @@ Coverage
 .. autofunction:: finaletoolkit.frag.single_coverage
 
 .. autoclass:: finaletoolkit.frag.CoverageResult
-   :members:
 
 Fragment length
 ---------------
@@ -21,4 +20,3 @@ Fragment length
 .. autofunction:: finaletoolkit.frag.frag_length_intervals
 
 .. autoclass:: finaletoolkit.frag.FragLengthStats
-   :members:

@@ -26,8 +26,23 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    "sphinxarg.ext",
+    "sphinx_click",      # CLI reference generated from the Click command group
+    "sphinx_design",     # tab-sets for side-by-side CLI / Python examples
 ]
+
+# Each command documents its positional arguments at the top of its own help
+# text, so sphinx-click's separate "Arguments" section (which only repeats
+# "Required argument" for each one) is redundant. Suppress it by making the
+# argument formatter yield nothing; sphinx-click then omits the rubric too.
+import sphinx_click.ext as _sphinx_click_ext  # noqa: E402
+
+
+def _suppress_click_arguments(ctx):
+    return
+    yield  # pragma: no cover - makes this an (empty) generator
+
+
+_sphinx_click_ext._format_arguments = _suppress_click_arguments
 
 # NumPy-style docstrings.
 napoleon_numpy_docstring = True
@@ -49,13 +64,16 @@ intersphinx_mapping = {
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = "pydata_sphinx_theme"
+# Custom, compact in-tree theme (inherits Sphinx's `basic` theme).
+html_theme = "finaletoolkit"
+html_theme_path = ["_theme"]
 html_static_path = ["_static"]
 html_logo = "_static/finaletoolkit_logo_rounded.png"
 html_favicon = "_static/favicon.ico"
-html_theme_options = {
-    "logo": {
-        "text": "FinaleToolkit",
-        "image_dark": "_static/finaletoolkit_logo_rounded.png",
-    }
+html_title = "FinaleToolkit Docs"
+html_show_sourcelink = False
+
+# Left sidebar: global navigation + search (templates come from `basic`).
+html_sidebars = {
+    "**": ["globaltoc.html", "searchbox.html"],
 }

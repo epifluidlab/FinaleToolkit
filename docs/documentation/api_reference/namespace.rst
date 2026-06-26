@@ -10,7 +10,7 @@ the internal submodule layout::
     motifs = ftk.end_motifs("sample.bam", "hg38.2bit", k=4)
     gaps = ftk.GenomeGaps.hg38()
 
-The legacy import paths remain valid, so existing code keeps working::
+You can also import each feature from its submodule::
 
     from finaletoolkit.frag import wps, multi_wps, delfi
     from finaletoolkit.utils import frag_generator, agg_bw, filter_file
@@ -28,7 +28,7 @@ Fragmentation features
 - ``end_motifs``, ``region_end_motifs``, ``interval_end_motifs``
 - ``breakpoint_motifs``, ``region_breakpoint_motifs``,
   ``interval_breakpoint_motifs``
-- ``end_motif`` / ``breakpoint_motif`` (aliases of the plural functions)
+- ``end_motif`` / ``breakpoint_motif``
 
 Result and container types
 --------------------------
