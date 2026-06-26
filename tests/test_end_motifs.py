@@ -165,11 +165,11 @@ class TestInvervalEndMotifs:
         pass
 
     
-class TestCLIIntervalMDS:
-    def test_interval_mds(self, request, tmp_path):
+class TestCLIRegionalMDS:
+    def test_regional_mds(self, request, tmp_path):
         src_tsv = request.path.parent / 'data' / 'end_motifs' / 'end_motifs_intervals_dif.tsv'
-        dest = tmp_path / "interval_mds.tsv"
-        os.system(f'finaletoolkit interval-mds {src_tsv} {dest}')
+        dest = tmp_path / "regional_mds.tsv"
+        os.system(f'finaletoolkit regional-mds {src_tsv} {dest}')
         with open(dest) as file:
             line = file.readline()
             chrom, start, stop, name, mds = line.split() 

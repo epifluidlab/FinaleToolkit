@@ -390,9 +390,9 @@ def _cli_mds(file_path: str, sep: str = "\t", header: int = 0) -> None:
     stdout.write(f"{motifs.motif_diversity_score()}\n")
 
 
-def _cli_interval_mds(
+def _cli_regional_mds(
     file_path: str, file_out: str, sep: str = ",", header: int = 0
 ) -> None:
-    """CLI: write per-interval MDS to ``file_out``."""
+    """CLI: write the regional MDS (rMDS) of each region to ``file_out``."""
     motifs = EndMotifsIntervals.from_file(file_path, 30, sep, header)
     motifs.mds_bed(file_out)

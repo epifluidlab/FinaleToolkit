@@ -26,8 +26,21 @@ __all__ = ["coverage", "single_coverage", "CoverageResult"]
 class CoverageResult(NamedTuple):
     """Coverage over a single interval.
 
-    Unpacks/indexes exactly like the original 5-tuple
-    ``(contig, start, stop, name, coverage)`` while also exposing named fields.
+    A named tuple: it unpacks and indexes like
+    ``(contig, start, stop, name, coverage)`` and also exposes named fields.
+
+    Attributes
+    ----------
+    contig : str or None
+        Interval contig.
+    start : int or None
+        0-based start coordinate.
+    stop : int or None
+        Stop coordinate.
+    name : str
+        Interval name.
+    coverage : float
+        Coverage value over the interval.
     """
 
     contig: str | None

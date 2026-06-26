@@ -306,26 +306,26 @@ class _MotifsIntervals:
         )
 
     def motif_diversity_score(self) -> list[tuple[tuple, float]]:
-        """Per-interval motif diversity score (any ``k``)."""
+        """Regional motif diversity score (rMDS) for each region (any ``k``)."""
         mds = []
         for interval, kmers in self.intervals:
             counts = np.array(list(kmers.values()))
             total = np.sum(counts)
             try:
-                interval_mds = _normalized_shannon_mds(counts / total, self.k)
+                region_mds = _normalized_shannon_mds(counts / total, self.k)
             except RuntimeWarning:
-                interval_mds = np.nan
-            mds.append((interval, interval_mds))
+                region_mds = np.nan
+            mds.append((interval, region_mds))
         return mds
 
     def mds_bed(self, output_file: str | Path, sep: str = "\t") -> None:
-        """Write per-interval MDS to a BED/bedgraph file."""
+        """Write the regional MDS (rMDS) of each region to a BED/bedgraph file."""
         mds = self.motif_diversity_score()
         with open(output_file, "w") as out:
-            for interval, interval_mds in mds:
+            for interval, region_mds in mds:
                 contig, start, stop, name = interval
                 row = sep.join(
-                    [contig, str(start), str(stop), name, str(interval_mds)]
+                    [contig, str(start), str(stop), name, str(region_mds)]
                 )
                 out.write(f"{row}\n")
 

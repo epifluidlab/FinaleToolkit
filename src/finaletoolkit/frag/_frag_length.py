@@ -30,11 +30,36 @@ __all__ = [
 
 
 class FragLengthStats(NamedTuple):
-    """Per-interval fragment-length summary statistics.
+    """Fragment-length summary statistics over one interval.
 
-    A drop-in replacement for the original 11-tuple: it unpacks and indexes
-    identically while also exposing named fields.  Missing-data intervals use
-    ``-1`` for every numeric field, as in the original implementation.
+    A named tuple: it unpacks and indexes like a plain tuple and also exposes
+    named fields. Intervals with no fragments report ``-1`` for every numeric
+    field.
+
+    Attributes
+    ----------
+    contig : str
+        Interval contig.
+    start : int
+        0-based start coordinate.
+    stop : int
+        Stop coordinate.
+    name : str
+        Interval name.
+    mean : float
+        Mean fragment length.
+    median : float
+        Median fragment length.
+    stdev : float
+        Standard deviation of the fragment lengths.
+    minimum : int
+        Shortest fragment length.
+    maximum : int
+        Longest fragment length.
+    count : int
+        Number of fragments in the interval.
+    frac_short_reads : float
+        Fraction of fragments below the short-read length threshold.
     """
 
     contig: str
