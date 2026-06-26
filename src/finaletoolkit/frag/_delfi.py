@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import time
 import warnings
+from collections import defaultdict
 from multiprocessing.pool import Pool
-from pathlib import Path
 from sys import stderr, stdout
 from typing import Union
 
@@ -17,9 +17,10 @@ from tqdm import tqdm
 
 from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
 from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
-from finaletoolkit.genome.gaps import ContigGaps, GenomeGaps
+from finaletoolkit.genome.gaps import GenomeGaps
+from finaletoolkit.io.alignment import AlignmentWrapper
 from finaletoolkit.io.reference import ReferenceWrapper
-from finaletoolkit.utils import chrom_sizes_to_list, frag_generator, overlaps
+from finaletoolkit.utils import chrom_sizes_to_list, overlaps
 from finaletoolkit.utils.logging import get_logger
 from finaletoolkit.utils.validation import valid_interval
 
@@ -42,6 +43,87 @@ def trim_coverage(window_data: np.ndarray, trim_percentile: int = 10):
     trimmed["gc"][in_percentile] = np.nan
     trimmed["num_frags"][in_percentile] = 0
     return trimmed
+
+
+# ---------------------------------------------------------------------------
+# Worker-process state, set once per worker via the Pool initializer so files
+# are opened and inputs parsed once per worker instead of once per window. The
+# previous implementation reopened the alignment and reference files and
+# re-parsed the blacklist BED for every 100kb window (~26K windows per whole
+# genome), which dominated runtime.
+#
+# This worker-pool optimization (~80x faster, identical output) was
+# contributed by D.H.K. (Duco) Gaillard (@DucoG) in upstream PR #172
+# (epifluidlab/FinaleToolkit#172) and ported onto this implementation.
+# ---------------------------------------------------------------------------
+_WORKER_ALIGNMENT = None  # AlignmentWrapper (BAM/CRAM/frag.gz)
+_WORKER_REF = None  # ReferenceWrapper (.2bit/FASTA)
+_WORKER_BLACKLIST = None  # dict[contig] -> (sorted_starts, stops)
+_WORKER_CONTIG_GAPS = None  # dict[contig] -> ContigGaps
+
+
+def _delfi_pool_initializer(
+    input_file, reference_file, quality_threshold,
+    blacklist_by_contig, contig_gaps_by_contig,
+):
+    """Open shared handles and stash preparsed inputs in worker globals."""
+    global _WORKER_ALIGNMENT, _WORKER_REF
+    global _WORKER_BLACKLIST, _WORKER_CONTIG_GAPS
+    # AlignmentWrapper transparently handles BAM, CRAM, and tabix-indexed
+    # frag.gz/bed.gz input, mirroring frag_generator's input handling.
+    _WORKER_ALIGNMENT = AlignmentWrapper(
+        input_file,
+        reference_file=reference_file,
+        quality_threshold=quality_threshold,
+    )
+    # Each worker is single-threaded, so the reference needs no lock.
+    _WORKER_REF = ReferenceWrapper(reference_file, use_lock=False)
+    _WORKER_BLACKLIST = blacklist_by_contig
+    _WORKER_CONTIG_GAPS = contig_gaps_by_contig
+
+
+def _load_blacklist_indexed(blacklist_file):
+    """Parse the blacklist BED once and index it by contig.
+
+    Returns a dict mapping each contig to a pair of sorted, position-aligned
+    numpy arrays ``(starts, stops)``. Built once in the parent process and
+    shared with every worker, replacing the per-window re-read and linear scan.
+    """
+    if blacklist_file is None:
+        return {}
+    by_contig = defaultdict(list)
+    with open(blacklist_file) as blacklist:
+        for line in blacklist:
+            parts = line.split()
+            if len(parts) < 3:
+                continue
+            by_contig[parts[0]].append((int(parts[1]), int(parts[2])))
+    out = {}
+    for contig, regions in by_contig.items():
+        regions.sort()
+        starts = np.array([r[0] for r in regions], dtype=np.int64)
+        stops = np.array([r[1] for r in regions], dtype=np.int64)
+        out[contig] = (starts, stops)
+    return out
+
+
+def _blacklist_in_window(contig, window_start, window_stop):
+    """Blacklist regions fully contained in ``[window_start, window_stop]``.
+
+    Equivalent to the original ``window_start <= region_start and
+    window_stop >= region_stop`` filter, but uses binary search over the
+    contig's sorted start positions instead of scanning the whole file.
+    """
+    if not _WORKER_BLACKLIST or contig not in _WORKER_BLACKLIST:
+        return ()
+    starts, stops = _WORKER_BLACKLIST[contig]
+    lo = np.searchsorted(starts, window_start, side="left")
+    if lo >= len(starts):
+        return ()
+    sub_starts = starts[lo:]
+    sub_stops = stops[lo:]
+    keep = sub_stops <= window_stop
+    return tuple(zip(sub_starts[keep].tolist(), sub_stops[keep].tolist()))
 
 
 def delfi(
@@ -176,9 +258,16 @@ def delfi(
     if verbose:
         stderr.write("Preparing to generate short and long coverages.\n")
 
+    # Pre-parse shared, read-only inputs once. These are handed to each worker
+    # via the Pool initializer rather than pickled into every task.
+    blacklist_by_contig = _load_blacklist_indexed(blacklist_file)
+    contig_gaps_by_contig = {}
+    if gaps is not None:
+        for contig, _size in contigs:
+            contig_gaps_by_contig[contig] = gaps.get_contig_gaps(contig)
+
     window_args = []
     for contig, size in contigs:
-        contig_gaps = gaps.get_contig_gaps(contig) if gaps is not None else None
         for _, start, stop, *_ in (
             gapless_bins.loc[gapless_bins.loc[:, "contig"] == contig].itertuples(
                 index=False, name=None
@@ -186,14 +275,9 @@ def delfi(
         ):
             window_args.append(
                 (
-                    input_file,
-                    reference_file,
-                    contig_gaps,
                     contig,
                     start,
                     stop,
-                    blacklist_file,
-                    quality_threshold,
                     verbose - 1 if verbose > 1 else 0,
                 )
             )
@@ -202,7 +286,17 @@ def delfi(
         stderr.write(f"{len(window_args)} windows created.\n")
         stderr.write("Calculating fragment lengths...\n")
 
-    with Pool(workers) as pool:
+    with Pool(
+        workers,
+        initializer=_delfi_pool_initializer,
+        initargs=(
+            input_file,
+            reference_file,
+            quality_threshold,
+            blacklist_by_contig,
+            contig_gaps_by_contig,
+        ),
+    ) as pool:
         windows = pool.starmap(_delfi_single_window, tqdm(window_args), 50)
 
     if verbose:
@@ -308,30 +402,22 @@ def _write_delfi(final_bins: pandas.DataFrame, output_file: str) -> None:
 
 
 def _delfi_single_window(
-    input_file: str,
-    reference_file: str | Path,
-    contig_gaps: ContigGaps,
     contig: str,
     window_start: int,
     window_stop: int,
-    blacklist_file: str = None,
-    quality_threshold: int = 30,
     verbose: Union[int, bool] = False,
 ) -> tuple:
-    """Compute short/long counts and GC content for one window."""
-    blacklist_regions = []
-    if blacklist_file is not None:
-        with open(blacklist_file) as blacklist:
-            for line in blacklist:
-                region_contig, region_start, region_stop, *_ = line.split()
-                region_start = int(region_start)
-                region_stop = int(region_stop)
-                if (
-                    contig == region_contig
-                    and window_start <= region_start
-                    and window_stop >= region_stop
-                ):
-                    blacklist_regions.append((region_start, region_stop))
+    """Compute short/long counts and GC content for one window.
+
+    Reads the alignment, reference, blacklist, and gap inputs from the
+    worker-process globals set by ``_delfi_pool_initializer`` so that no file
+    is reopened and no input re-parsed per window.
+    """
+    contig_gaps = (
+        _WORKER_CONTIG_GAPS.get(contig)
+        if _WORKER_CONTIG_GAPS is not None
+        else None
+    )
 
     # Skip windows in centromeres/telomeres or short arms.
     if contig_gaps is not None:
@@ -343,25 +429,28 @@ def _delfi_single_window(
     else:
         arm = contig
 
+    blacklist_regions = _blacklist_in_window(contig, window_start, window_stop)
+
     short_lengths = 0
     long_lengths = 0
     num_frags = 0
 
-    for _, frag_start, frag_stop, _, _ in frag_generator(
-        input_file,
-        contig,
-        quality_threshold,
-        window_start,
-        window_stop,
-        min_length=100,
-        max_length=220,
-        reference_file=reference_file,
-    ):
+    # Iterate over each fragment in the window using the shared alignment
+    # handle. AlignmentWrapper.fetch applies the same quality / read-pair
+    # filtering as frag_generator; we replicate frag_generator's length window
+    # (100-220) and its default "midpoint" intersect policy here so output is
+    # unchanged.
+    for frag in _WORKER_ALIGNMENT.fetch(contig, window_start, window_stop):
+        frag_start = frag.start
+        frag_stop = frag.stop
         frag_length = frag_stop - frag_start
-        assert frag_length > 0, (
-            f"Frag length of {frag_length} found at"
-            f"{contig}:{frag_start}-{frag_stop}."
-        )
+
+        if frag_length < 100 or frag_length > 220:
+            continue
+
+        midpoint = (frag_start + frag_stop) // 2
+        if midpoint < window_start or midpoint >= window_stop:
+            continue
 
         blacklisted = False
         for region in blacklist_regions:
@@ -382,18 +471,18 @@ def _delfi_single_window(
                 short_lengths += 1
             num_frags += 1
 
-    # GC content of the window from the reference (vectorized base counting).
-    with ReferenceWrapper(reference_file, use_lock=False) as ref_seq:
-        if not valid_interval(
-            ref_seq.chroms, contig, window_start, window_stop, throw_on_error=False
-        ):
-            logger.warning(
-                f"Invalid interval {contig}:{window_start}-{window_stop} for "
-                "reference. Skipping GC calculation."
-            )
-            ref_bases = ""
-        else:
-            ref_bases = ref_seq.sequence(contig, window_start, window_stop)
+    # GC content of the window from the shared reference handle (vectorized
+    # base counting). ref_bases is upper-cased by ReferenceWrapper.
+    if not valid_interval(
+        _WORKER_REF.chroms, contig, window_start, window_stop, throw_on_error=False
+    ):
+        logger.warning(
+            f"Invalid interval {contig}:{window_start}-{window_stop} for "
+            "reference. Skipping GC calculation."
+        )
+        ref_bases = ""
+    else:
+        ref_bases = _WORKER_REF.sequence(contig, window_start, window_stop)
 
     num_gc = ref_bases.count("G") + ref_bases.count("C")
 
