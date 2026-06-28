@@ -1,62 +1,90 @@
-
 Features
-=========================================
+========
 
-**FinaleToolkit** has support for the following cell-free DNA fragmentomic features:
+FinaleToolkit computes the established cell-free DNA fragmentomic features
+below. Each one is available both as a ``finaletoolkit`` subcommand and as a
+Python function. See the :doc:`../cli_reference/index` and
+:doc:`../api_reference/index` for exact signatures.
 
+Fragment length
+---------------
 
------------------------
-Fragment Length
------------------------
+Fragment-length distributions and per-interval summary statistics across cfDNA
+fragments.
 
-**FinaleToolkit** can calculate the fragment length distribution and summary statistics of cell-free DNA fragments over intervals.
+:Commands: ``frag-length-bins``, ``frag-length-intervals``
 
------------------------
-Fragment Coverage
------------------------
+Fragment coverage
+-----------------
 
-**FinaleToolkit** can calculate fragment coverage (the number of reads mapped to a specific region of the genome). This coverage can be normalized by the total number of reads in the sample, or simply the raw value.
+The number of fragments mapped to a region, reported either raw or normalized
+by the sample's total coverage.
 
----------------------------------
+:Commands: ``coverage``
+
 Windowed Protection Score (WPS)
----------------------------------
+-------------------------------
 
-**FinaleToolkit** can calculate the Windowed Protection Score (WPS), which is a metric designed by *Snyder et al. 2016*.
+WPS (*Snyder et al. 2016*) quantifies nucleosome protection. For a window
+(typically 120 bp) centered on a position, it counts the fragments that fully
+span the window and subtracts the fragments that have an endpoint inside it.
+The score tracks nucleosome positioning and features such as transcription
+start sites and DNase I hypersensitive sites.
 
-It is used to quantify the level of protection or coverage of DNA fragments across a specific genomic region. It's calculated by assessing the number of DNA fragments that fully span a defined window (typically 120 base pairs) centered around a particular genomic coordinate, and then subtracting the number of fragments with an endpoint falling within the same window. This score is correlated with the location of nucleosomes and other genomic features, including transcriptional start sites (TSS) and DNase I hypersensitive sites (DHSs).
+:Commands: ``wps``, ``adjust-wps``
 
------------------------
 DELFI
------------------------
+-----
 
-**FinaleToolkit** can calculate DELFI, which is a metric designed by *Cristiano et al. 2019*. 
+DELFI (*Cristiano et al. 2019*) detects fragmentation abnormalities in cfDNA.
+The score is the ratio of GC-corrected short fragment counts to GC-corrected
+long fragment counts. In the original study it was used to categorize cancer
+and the associated tissue of origin.
 
-DELFI is a metric that was introduced to identify abnormalities in cfDNA from their fragmentation patterns. In the original paper, DELFI was used to categorize patients with cancer and the associated tumor tissues of origin. The associated DELFI score is the ratio between the GC%-corrected short fragment count and the GC%-corrected long fragment count.
+:Commands: ``delfi``
 
------------------------
-End-Motifs
------------------------
+End and breakpoint motifs
+-------------------------
 
-**FinaleToolkit** can calculate the frequency of end-motif k-mers of cell-free DNA fragments. Since end motifs are specific sequences found at the ends of cfDNA fragments resulting from cleavage, they can be used to potentially detect patterns associated with certain conditions or diseases.
+Frequencies of k-mer motifs at fragment ends (the cleavage sites) and at
+breakpoints. Because these sequences arise from how cfDNA is cut, they can
+reflect condition-specific cleavage activity.
 
------------------------
-Breakpoint Motifs
------------------------
+:Commands: ``end-motifs``, ``interval-end-motifs``, ``breakpoint-motifs``,
+   ``interval-breakpoint-motifs``
 
-**FinaleToolkit** can calculate the frequency of breakpoint-motif k-mers of cell-free DNA fragments. Like end-motifs, they can be used to potentially detect patterns associated with certain conditions or diseases.
-
------------------------------
 Motif Diversity Score (MDS)
------------------------------
+---------------------------
 
-**FinaleToolkit** can calculate the Motif Diversity Score (MDS), which is a metric designed by *Jiang et al. 2020*.
+MDS (*Jiang et al. 2020*) is the normalized Shannon entropy of the end-motif
+k-mer distribution, summarizing end-motif diversity in a single number. The
+regional Motif Diversity Score (rMDS) computes that same entropy per genomic
+region (*Bandaru et al. 2026*).
 
-The MDS is a metric that quantifies the diversity of cfDNA end motifs. It is the normalized Shannon entropy of the categorical distribution of all possible end-motif k-mers.
+:Commands: ``mds`` (whole sample), ``regional-mds`` (per region)
 
------------------------
-Cleavage Profile
------------------------
+Cleavage profile
+----------------
 
-**FinaleToolkit** can calculate the Cleavage Proportion, which is a metric designed by *Zhou et al. 2022*.
+Cleavage proportion (*Zhou et al. 2022*). At each nucleotide, it is the
+fraction of the overlapping fragment ends that fall on that position. The
+authors report a relationship to DNA methylation, particularly at CpG sites.
 
-The cleavage proportion is, by definition, the number of fragment ends that fall within a nucleotide location over the total number of fragment ends that overlap that nucleotide location. According to the authors, this metric shows a relationship to DNA methylation, specifically methylation at CpG sites.
+:Commands: ``cleavage-profile``
+
+Intersect policy
+----------------
+
+When a feature pulls fragments over an interval ``[start, stop)``, the
+``intersect_policy`` argument (CLI: ``-p/--intersect-policy``) decides which
+fragments count:
+
+``midpoint`` (default)
+   Include a fragment only if its midpoint falls inside the interval. Avoids
+   double-counting fragments that straddle a boundary.
+
+``any``
+   Include a fragment if it overlaps the interval at all, even by one base pair.
+
+Use ``midpoint`` for binned, genome-wide features; use ``any`` when you care
+about every fragment that touches a region.

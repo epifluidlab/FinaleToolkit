@@ -1,30 +1,33 @@
-"""Cleavage Profiler
+"""Cleavage Profiler.
 
-This module is used to find the cleavage profile as described in Zhou
-et al 2022 (https://doi.org/10.1073/pnas.2209852119). Cleavage profile
-describes the proportion of fragment ends at a site over the depth at
-the site (cleavage proportion) calculated over a 5+/- nt window around a
-CpG site.
+Computes the cleavage profile of Zhou et al. (2022,
+https://doi.org/10.1073/pnas.2209852119): the proportion of fragment ends at
+each position over the depth at that position (as a percentage).
 """
-
 from __future__ import annotations
-from typing import Union
-from pathlib import Path
-from os import PathLike
-from sys import stderr, stdin
-from multiprocessing import Pool
+
 import gzip
 import time
 import warnings
+from multiprocessing import Pool
+from pathlib import Path
+from sys import stderr, stdin
+from typing import Union
 
 import numpy as np
 import pyBigWig as pbw
 
 from finaletoolkit.utils import (
-    frag_array, chrom_sizes_to_list, _reduce_overlaps_in_file,
-    _convert_to_list, _merge_all_intervals, chrom_sizes_to_dict
-    )
+    chrom_sizes_to_dict,
+    chrom_sizes_to_list,
+    frag_array,
+)
 from finaletoolkit.utils.typing import FragFile
+
+__all__ = ["cleavage_profile", "multi_cleavage_profile"]
+
+# Structured dtype for per-position cleavage proportions.
+_CLEAVAGE_DTYPE = [("contig", "U16"), ("pos", "i8"), ("proportion", "f8")]
 
 
 def cleavage_profile(
@@ -33,57 +36,51 @@ def cleavage_profile(
     contig: str,
     start: int,
     stop: int,
-    left: int=0,
-    right: int=0,
-    min_length: int|None=None,
-    max_length: int|None=None,
-    quality_threshold: int=30,
-    verbose: Union[bool, int]=0,
-    fraction_low: int|None=None,
-    fraction_high: int|None=None,
+    left: int = 0,
+    right: int = 0,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    quality_threshold: int = 30,
+    verbose: Union[bool, int] = 0,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
     reference_file: str | Path | None = None,
 ) -> np.ndarray:
-    """
-    Cleavage profile calculated over a single interval.
+    """Compute the cleavage profile over a single interval.
 
     Parameters
-    ---------
-    input_file: str
-        BAM, CRAM, or FRAG file with fragment information.
-    chrom_size: int
-        length of contig.
-    contig: str
-        Chromosome or contig
-    start: int
-        0-based start coordinate
-    stop: int
-        1-based end coordinate
-    left: int
-        Amount to subtract from start coordinate. Useful if only given
-        coordinates of CpG.
-    right: int
-        Amount to add to stop coordinate.
-    min_length: int
-        Minimum fragment size to include
-    max_length: int
-        Maximum fragment size to include
-    quality_threshold: int
-        Minimum MAPQ
-    verbose: bool or in
-    fraction_low : int, optional
-        Deprecated alias for min_length
-    fraction_high : int, optional
-        Deprecated alias for max_length
+    ----------
+    input_file : str or pysam handle
+        BAM/CRAM/fragment input.
+    chrom_size : int
+        Length of ``contig``.
+    contig : str
+        Contig name.
+    start : int
+        0-based start coordinate.
+    stop : int
+        1-based stop coordinate.
+    left, right : int, optional
+        Amounts to expand the interval on each side (useful when only CpG
+        coordinates are given).
+    min_length, max_length : int, optional
+        Fragment-length filter.
+    quality_threshold : int, optional
+        Minimum mapping quality (default 30).
+    verbose : bool or int, optional
+        Print progress/timing.
+    fraction_low, fraction_high : int, optional
+        Deprecated aliases for ``min_length``/``max_length``.
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
-        when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Reference genome (required for CRAM).
 
-    Return
-    ------
-    cleavage_proportions: NDArray
-        Array of cleavage proportions over given interval.
+    Returns
+    -------
+    numpy.ndarray
+        Structured array with fields ``('contig', 'pos', 'proportion')`` where
+        ``proportion`` is a percentage in ``[0, 100]``.
     """
-    if (verbose):
+    if verbose:
         start_time = time.time()
         stderr.write(
             f"""
@@ -99,33 +96,39 @@ def cleavage_profile(
             """
         )
 
-    # Pass aliases and check for conflicts
+    # Resolve deprecated aliases (both spellings together is an error).
     if fraction_low is not None and min_length is None:
         min_length = fraction_low
-        warnings.warn("fraction_low is deprecated. Use min_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
+        warnings.warn(
+            "fraction_low is deprecated. Use min_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
     elif fraction_low is not None and min_length is not None:
-        warnings.warn("fraction_low is deprecated. Use min_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
-        raise ValueError(
-            'fraction_low and min_length cannot both be specified')
+        warnings.warn(
+            "fraction_low is deprecated. Use min_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        raise ValueError("fraction_low and min_length cannot both be specified")
 
     if fraction_high is not None and max_length is None:
         max_length = fraction_high
-        warnings.warn("fraction_high is deprecated. Use max_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
+        warnings.warn(
+            "fraction_high is deprecated. Use max_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
     elif fraction_high is not None and max_length is not None:
-        warnings.warn("fraction_high is deprecated. Use max_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
-        raise ValueError(
-            'fraction_high and max_length cannot both be specified')
+        warnings.warn(
+            "fraction_high is deprecated. Use max_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        raise ValueError("fraction_high and max_length cannot both be specified")
 
-    adj_start = max(start-left, 0)
-    adj_stop = min(stop+right, chrom_size)
+    adj_start = max(start - left, 0)
+    adj_stop = min(stop + right, chrom_size)
 
     frags = frag_array(
         input_file=input_file,
@@ -141,23 +144,22 @@ def cleavage_profile(
 
     positions = np.arange(adj_start, adj_stop)
 
-    # finding depth at sites
+    # Depth: number of fragments covering each position.
     fragwise_overlaps = np.logical_and(
-        np.greater_equal(positions[np.newaxis], frags['start'][:,np.newaxis]),
-        np.less(positions[np.newaxis], frags['stop'][:,np.newaxis])
+        np.greater_equal(positions[np.newaxis], frags["start"][:, np.newaxis]),
+        np.less(positions[np.newaxis], frags["stop"][:, np.newaxis]),
     )
     depth = np.sum(fragwise_overlaps, axis=0)
 
-    # finding ends
+    # Fragment ends: forward fragments end at their start (+ strand),
+    # reverse fragments end at their stop (- strand).
     forward_ends = np.logical_and(
-        np.equal(
-            positions[np.newaxis], frags['start'][:, np.newaxis]
-        ), frags['strand'][:, np.newaxis]
+        np.equal(positions[np.newaxis], frags["start"][:, np.newaxis]),
+        frags["strand"][:, np.newaxis],
     )
     reverse_ends = np.logical_and(
-        np.equal(
-            positions[np.newaxis], frags['stop'][:, np.newaxis]
-        ), np.logical_not(frags['strand'][:, np.newaxis])
+        np.equal(positions[np.newaxis], frags["stop"][:, np.newaxis]),
+        np.logical_not(frags["strand"][:, np.newaxis]),
     )
     ends = np.sum(np.logical_or(forward_ends, reverse_ends), axis=0)
 
@@ -165,16 +167,15 @@ def cleavage_profile(
     non_zero_mask = depth != 0
     proportions[non_zero_mask] = ends[non_zero_mask] / depth[non_zero_mask] * 100
 
+    results = np.zeros_like(proportions, dtype=_CLEAVAGE_DTYPE)
+    results["contig"] = contig
+    results["pos"] = positions
+    results["proportion"] = proportions
 
-    results = np.zeros_like(proportions, dtype=[
-        ('contig', 'U16'),
-        ('pos', 'i8'),
-        ('proportion', 'f8'),
-    ])
-    results['contig'] = contig
-    results['pos'] = positions
-    results['proportion'] = proportions
-
+    if verbose:
+        stderr.write(
+            f"cleavage_profile took {time.time() - start_time} s to complete\n"
+        )
 
     return results
 
@@ -187,61 +188,51 @@ def multi_cleavage_profile(
     input_file: FragFile,
     interval_file: Union[str, Path],
     chrom_sizes: Union[str, Path],
-    left: int=0,
-    right: int=0,
-    min_length: int|None=None,
-    max_length: int|None=None,
-    quality_threshold: int=30,
-    output_file: str='-',
-    workers: int=1,
-    verbose: Union[bool, int]=0,
-    fraction_low: int|None=None,
-    fraction_high: int|None=None,
+    left: int = 0,
+    right: int = 0,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    quality_threshold: int = 30,
+    output_file: str = "-",
+    workers: int = 1,
+    verbose: Union[bool, int] = 0,
+    fraction_low: int | None = None,
+    fraction_high: int | None = None,
     reference_file: str | Path | None = None,
-):
-    """
-    Multithreaded cleavage profile implementation over intervals in a
-    BED file.
+) -> str:
+    """Compute cleavage profiles over intervals in a (sorted) BED file.
+
     Parameters
-    ---------
-    input_file: str or pathlike
-        BAM, CRAM, or FRAG file with fragment information.
-    interval_file: str or pathlike
-        Sorted BED file containing intervals.
-    chrom_sizes: str or pathlike
-        Tab-delimited file with name and lengths of each contig. Required
-        if input_file is a tabix-indexed frag file.
-    left: int
-        Amount to subtract from start coordinate. Useful if only given
-        coordinates of CpG.
-    right: int
-        Amount to add to stop coordinate.
-    min_length: int
-        Minimum fragment size to include
-    max_length: int
-        Maximum fragment size to include
-    quality_threshold: int
-        Minimum MAPQ
-    output_file: str or Pathlike
-        Bigwig or bedgraph file to write results to.
-    workers: int, default = 1
-        Number of processes to spawn
-    verbose: bool or int
-    fraction_low : int, optional
-        Deprecated alias for min_length
-    fraction_high : int, optional
-        Deprecated alias for max_length
+    ----------
+    input_file : str or path
+        BAM/CRAM/fragment input.
+    interval_file : str or path
+        Sorted BED of intervals (``"-"`` reads stdin).
+    chrom_sizes : str or path
+        ``.chrom.sizes`` file (required).
+    left, right : int, optional
+        Interval expansion applied before merging overlaps.
+    min_length, max_length : int, optional
+        Fragment-length filter.
+    quality_threshold : int, optional
+        Minimum mapping quality (default 30).
+    output_file : str, optional
+        ``.bw`` or ``.bed.gz``/`.bedgraph.gz` path (default ``"-"``).
+    workers : int, optional
+        Worker-process count (default 1).
+    verbose : bool or int, optional
+        Print progress/timing.
+    fraction_low, fraction_high : int, optional
+        Deprecated aliases for ``min_length``/``max_length``.
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
-        when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Reference genome (required for CRAM).
 
     Returns
     -------
-    output_file: str
-        location results are stored.
+    str
+        The output path.
     """
-
-    if (verbose):
+    if verbose:
         start_time = time.time()
         stderr.write(
             f"""
@@ -259,75 +250,146 @@ def multi_cleavage_profile(
             verbose: {verbose}
             """
         )
-    # Pass aliases and check for conflicts
+
+    # Resolve deprecated aliases (both spellings together is an error).
     if fraction_low is not None and min_length is None:
         min_length = fraction_low
-        warnings.warn("fraction_low is deprecated. Use min_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
+        warnings.warn(
+            "fraction_low is deprecated. Use min_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
     elif fraction_low is not None and min_length is not None:
-        warnings.warn("fraction_low is deprecated. Use min_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
-        raise ValueError(
-            'fraction_low and min_length cannot both be specified')
+        warnings.warn(
+            "fraction_low is deprecated. Use min_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        raise ValueError("fraction_low and min_length cannot both be specified")
 
     if fraction_high is not None and max_length is None:
         max_length = fraction_high
-        warnings.warn("fraction_high is deprecated. Use max_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
-    elif fraction_high is not None and max_length is not None:
-        warnings.warn("fraction_high is deprecated. Use max_length instead.",
-                      category=DeprecationWarning,
-                      stacklevel=2)
-        raise ValueError(
-            'fraction_high and max_length cannot both be specified')
-    
-    if (input_file == '-' and interval_file == '-'):
-        raise ValueError('input_file and site_bed cannot both read from stdin')
-    
-    if chrom_sizes is None:
-        raise ValueError(
-            'chrom_sizes must be specified.'
+        warnings.warn(
+            "fraction_high is deprecated. Use max_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
         )
-    # get chroms
+    elif fraction_high is not None and max_length is not None:
+        warnings.warn(
+            "fraction_high is deprecated. Use max_length instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        raise ValueError("fraction_high and max_length cannot both be specified")
+
+    if input_file == "-" and interval_file == "-":
+        raise ValueError("input_file and site_bed cannot both read from stdin")
+
+    if chrom_sizes is None:
+        raise ValueError("chrom_sizes must be specified.")
+
     header = chrom_sizes_to_list(chrom_sizes)
     chrom_dict = chrom_sizes_to_dict(chrom_sizes)
 
-    if (verbose > 1):
-        stderr.write(f'chrom sizes {header}\n')
-    
-    # reading intervals from bed and removing overlaps
-    # NOTE: assumes that bed file is sorted.
-    contigs = []
-    starts = []
-    stops = []
-    try:
-        if interval_file == '-':
-            bed = stdin
-        else:
-            bed = open(interval_file)
+    if verbose > 1:
+        stderr.write(f"chrom sizes {header}\n")
 
-        # for overlap checking
+    contigs, starts, stops = _read_intervals(
+        interval_file, left, right, chrom_dict
+    )
+
+    size_dict = dict(header)
+    sizes = [size_dict[contig] for contig in contigs]
+    count = len(contigs)
+
+    if verbose:
+        stderr.write("Zipping inputs\n")
+
+    interval_list = zip(
+        count * [input_file],
+        sizes,
+        contigs,
+        starts,
+        stops,
+        count * [0],  # left/right precomputed to avoid double-padding
+        count * [0],
+        count * [min_length],
+        count * [max_length],
+        count * [quality_threshold],
+        count * [max(verbose - 1, 0)],
+        count * [fraction_low],
+        count * [fraction_high],
+        count * [reference_file],
+    )
+
+    if verbose:
+        stderr.write("Calculating cleavage profile...\n")
+
+    pool = Pool(workers, maxtasksperchild=500)
+    try:
+        interval_scores = pool.imap(
+            _cleavage_profile_star, interval_list, chunksize=100
+        )
+
+        if isinstance(output_file, str):
+            if verbose:
+                stderr.write(f"Output file {output_file} specified. Opening...\n")
+            if output_file.endswith(".bw"):
+                _write_bigwig(output_file, header, interval_scores)
+            elif (
+                output_file.endswith(".bed.gz")
+                or output_file.endswith("bedgraph.gz")
+                or output_file == "-"
+            ):
+                _write_bedgraph_gz(output_file, interval_scores)
+            else:
+                raise ValueError(
+                    "output_file can only have suffix .bw, .bedgraph.gz, or "
+                    ".bed.gz."
+                )
+        elif output_file is not None:
+            raise TypeError(
+                f'output_file is unsupported type "{type(input_file)}". '
+                "output_file should be a string specifying the path of the "
+                "file to output scores to."
+            )
+    finally:
+        pool.close()
+
+    if verbose:
+        end_time = time.time()
+        stderr.write(
+            f"cleavage profile took {end_time - start_time} s to complete\n"
+        )
+    return output_file
+
+
+def _read_intervals(interval_file, left, right, chrom_dict):
+    """Parse a sorted BED into merged, expanded intervals."""
+    contigs: list[str] = []
+    starts: list[int] = []
+    stops: list[int] = []
+
+    bed = stdin if interval_file == "-" else open(interval_file)
+    try:
         prev_contig = None
         prev_start = 0
         prev_stop = 0
         for line in bed:
-            # parse file
             contents = line.split()
             contig = contents[0].strip()
             start, stop = int(contents[1]), int(contents[2])
             if contig not in chrom_dict:
-                warnings.warn(f"Skipping interval {contig}:{start}-{stop} "
-                 f"from interval_file ({contig} not in chrom_sizes)", UserWarning)
+                warnings.warn(
+                    f"Skipping interval {contig}:{start}-{stop} from "
+                    f"interval_file ({contig} not in chrom_sizes)",
+                    UserWarning,
+                )
                 continue
             start = max(0, start - left)
             stop = min(stop + right, chrom_dict[contig])
-            
 
-            # if overlapping:
-            if (prev_contig == contig and start < prev_stop):
+            if prev_contig == contig and start < prev_stop:
                 prev_stop = max(prev_stop, stop)
             else:
                 contigs.append(prev_contig)
@@ -338,130 +400,57 @@ def multi_cleavage_profile(
         starts.append(prev_start)
         stops.append(prev_stop)
     finally:
-        if interval_file != '-':
-            bed.close()  
-            
-    contigs = contigs[1:]
-    starts = starts[1:]
-    stops = stops[1:]
+        if interval_file != "-":
+            bed.close()
 
-    size_dict = dict(header)
+    # Drop the initial placeholder entry from the prev_* priming.
+    return contigs[1:], starts[1:], stops[1:]
 
-    sizes = [size_dict[contig] for contig in contigs]
-    
-    count = len(contigs)
 
-    if (verbose):
-        stderr.write('Zipping inputs\n')
+def _write_bigwig(output_file, header, interval_scores) -> None:
+    """Write per-position cleavage proportions to a bigWig file."""
+    with pbw.open(output_file, "w") as bigwig:
+        bigwig.addHeader(header)
+        last = "None"
+        for interval_score in interval_scores:
+            contigs = interval_score["contig"]
+            starts = interval_score["pos"]
+            scores = interval_score["proportion"]
 
-    interval_list = zip(
-        count*[input_file],
-        sizes,
-        contigs,
-        starts,
-        stops,
-        count*[0],  # left and right precomputed to avoid overlaps
-        count*[0],
-        count*[min_length],
-        count*[max_length],
-        count*[quality_threshold],
-        count*[max(verbose-1, 0)],
-        count*[fraction_low],
-        count*[fraction_high],
-        count*[reference_file],
-    )
-
-    if (verbose):
-        stderr.write('Calculating cleavage profile...\n')
-
-    try:
-        pool = Pool(workers, maxtasksperchild=500)
-        # chunksize limited for memory
-        interval_scores = pool.imap(
-            _cleavage_profile_star,
-            interval_list,
-            chunksize=100
-        )
-
-        # output
-        if (type(output_file) == str):   # check if output specified
-            if (verbose):
+            if contigs.shape == (0,):
+                continue
+            try:
+                bigwig.addEntries(
+                    contigs[0],
+                    starts[0],
+                    values=scores.astype(np.float64),
+                    step=1,
+                    span=1,
+                )
+            except RuntimeError as e:
+                stderr.write(f"{contigs[0]}:{starts[0]}-{starts[-1] + 1}\n")
                 stderr.write(
-                    f'Output file {output_file} specified. Opening...\n'
+                    "invalid or out of order interval encountered. "
+                    "Skipping to next.\n"
                 )
+                stderr.write(f"captured error:\n{e}\n")
+                stderr.write(f"current output:\n{interval_score}\n")
+                stderr.write(f"last output:\n{last}\n")
+                continue
+            last = interval_score
 
-            if output_file.endswith(".bw"): # BigWig
-                with pbw.open(output_file, 'w') as bigwig:
-                    bigwig.addHeader(header)
-                    last = "None"
-                    for interval_score in interval_scores:
-                        
-                        contigs = interval_score['contig']
-                        starts = interval_score['pos']
-                        scores = interval_score['proportion']
 
-                        # skip empty intervals
-                        if contigs.shape == (0,):
-                            continue
+def _write_bedgraph_gz(output_file, interval_scores) -> None:
+    """Write per-position cleavage proportions to a gzip-compressed bedGraph."""
+    with gzip.open(output_file, "wt") as bedgraph:
+        for interval_score in interval_scores:
+            contigs = interval_score["contig"]
+            starts = interval_score["pos"]
+            scores = interval_score["proportion"]
+            stops = starts + 1
 
-                        try:
-
-                            bigwig.addEntries(
-                                contigs[0],
-                                starts[0],
-                                values=scores.astype(np.float64),
-                                step=1,
-                                span=1
-                            )
-                        except RuntimeError as e:
-                            stderr.write(
-                                f'{contigs[0]}:{starts[0]}-{starts[-1]+1}\n'
-                            )
-                            stderr.write(
-                                'invalid or out of order interval '
-                                'encountered. Skipping to next.\n'
-                            )
-                            stderr.write(
-                                f"captured error:\n{e}\n")
-                            stderr.write(
-                                f"current output:\n{interval_score}\n")
-                            stderr.write(
-                                f"last output:\n{last}\n")
-                            continue
-                        last = interval_score
-            elif (output_file.endswith('.bed.gz')
-                  or output_file.endswith('bedgraph.gz')
-                  or output_file == "-"):
-                with gzip.open(output_file, 'wt') as bedgraph:
-                    for interval_score in interval_scores:
-                        contigs = interval_score['contig']
-                        starts = interval_score['pos']
-                        scores = interval_score['proportion']
-                        stops = starts + 1
-
-                        lines = ''.join(f'{contig}\t{start}\t{stop}\t{score}\n'
-                                 for contig, start, stop, score
-                                 in zip(contigs, starts, stops, scores))
-
-                        bedgraph.write(lines)
-
-            else:   # unaccepted file type
-                raise ValueError(
-                    'output_file can only have suffix .bw, .bedgraph.gz, or .bed.gz.'
-                    )
-
-        elif (output_file is not None):
-            raise TypeError(
-                f'output_file is unsupported type "{type(input_file)}". '
-                'output_file should be a string specifying the path of the '
-                'file to output scores to.'
-                )
-    finally:
-        pool.close()
-
-    if (verbose):
-        end_time = time.time()
-        stderr.write(
-            f'cleavage profile took {end_time - start_time} s to complete\n'
-        )
-    return output_file
+            lines = "".join(
+                f"{contig}\t{start}\t{stop}\t{score}\n"
+                for contig, start, stop, score in zip(contigs, starts, stops, scores)
+            )
+            bedgraph.write(lines)

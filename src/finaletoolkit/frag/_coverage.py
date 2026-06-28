@@ -1,18 +1,53 @@
+"""
+Fragment coverage over intervals.
+
+Coverage is estimated by counting fragments (by the configured intersect
+policy) that fall in each interval, optionally scaled and/or normalized by the
+genome-wide fragment count.
+"""
 from __future__ import annotations
+
+import gzip
 import sys
 import time
-from typing import Union
-from pathlib import Path
-from multiprocessing import Pool
 from functools import partial
+from multiprocessing import Pool
+from pathlib import Path
+from typing import NamedTuple, Union
 
 import pysam
-import gzip
 from tqdm import tqdm
 
-from finaletoolkit.utils import (
-    get_intervals, frag_generator
-)
+from finaletoolkit.utils import frag_generator, get_intervals
+
+__all__ = ["coverage", "single_coverage", "CoverageResult"]
+
+
+class CoverageResult(NamedTuple):
+    """Coverage over a single interval.
+
+    A named tuple: it unpacks and indexes like
+    ``(contig, start, stop, name, coverage)`` and also exposes named fields.
+
+    Attributes
+    ----------
+    contig : str or None
+        Interval contig.
+    start : int or None
+        0-based start coordinate.
+    stop : int or None
+        Stop coordinate.
+    name : str
+        Interval name.
+    coverage : float
+        Coverage value over the interval.
+    """
+
+    contig: str | None
+    start: int | None
+    stop: int | None
+    name: str
+    coverage: float
 
 
 def single_coverage(
@@ -20,54 +55,47 @@ def single_coverage(
     contig: str | None = None,
     start: int | None = 0,
     stop: int | None = None,
-    name: str | None = '.',
+    name: str | None = ".",
     min_length: int | None = None,
     max_length: int | None = None,
     intersect_policy: str = "midpoint",
     quality_threshold: int = 30,
     verbose: bool | int = False,
     reference_file: str | Path | None = None,
-) -> tuple[str | None, int | None, int | None, str, float]:
-    """
-    Return estimated fragment coverage over specified `contig` and
-    region of`input_file`. Uses an algorithm where the midpoints of
-    fragments are calculated and coverage is tabulated from the
-    midpoints that fall into the specified region. Not suitable for
-    fragments of size approaching region size.
+) -> CoverageResult:
+    """Estimate fragment coverage over a single region.
+
+    Counts fragments (per ``intersect_policy``) falling in
+    ``contig:[start, stop)``.  Not suitable when fragment sizes approach the
+    region size.
 
     Parameters
     ----------
-    input_file : str or pysam.AlignmentFile
-        BAM, CRAM, or Frag.gz file containing paired-end fragment
-        reads or its path. `AlignmentFile` must be opened in read mode.
-    contig : string, optional
-        Default is None.
+    input_file : str or pysam handle
+        BAM/CRAM/fragment input.
+    contig : str, optional
+        Contig name.
     start : int, optional
-        0-based start coordinate to get coverage from. Default is 0.
+        0-based start (default 0).
     stop : int, optional
-        1-based stop coordinate to get coverage from. Default is None
-        and goes to end of chromosome/contig.
+        1-based stop (default: end of contig).
     name : str, optional
-        Name of interval. Default is '.'. '.' is used if `None` is
-        supplied.
-    intersect_policy: str, optional
-        Specifies how to determine whether fragments are in interval.
-        'midpoint' (default) calculates the central coordinate of each
-        fragment and only selects the fragment if the midpoint is in the
-        interval. 'any' includes fragments with any overlap with the
-        interval.
+        Interval name (``'.'`` if ``None``).
+    min_length, max_length : int, optional
+        Fragment-length filter.
+    intersect_policy : {"midpoint", "any"}, optional
+        Region-membership policy (default ``"midpoint"``).
     quality_threshold : int, optional
-        Minimum MAPQ to filter for. Default is 30.
-    verbose : bool, optional
-        Prints messages to stderr. Default is false.
+        Minimum mapping quality (default 30).
+    verbose : bool or int, optional
+        Print timing information.
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
-        when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Reference genome (required for CRAM).
 
     Returns
     -------
-    (contig, start, stop, name, coverage) : tuple[str, int, int, str, float]
-        Fragment coverage over contig and region.
+    CoverageResult
+        ``(contig, start, stop, name, coverage)``.
     """
     if verbose:
         start_time = time.time()
@@ -86,9 +114,7 @@ def single_coverage(
             """
         )
 
-    # initializing variable for coverage tuple outside of with statement
     coverage = 0
-
     frags = frag_generator(
         input_file=input_file,
         contig=contig,
@@ -100,92 +126,71 @@ def single_coverage(
         intersect_policy=intersect_policy,
         reference_file=reference_file,
     )
-
-    # Iterating on each frag in file in
-    # specified contig/chromosome
-    for frag in frags:
+    for _ in frags:
         coverage += 1
-        
+
     if verbose:
         end_time = time.time()
-        tqdm.write(
-            f'single_coverage took {end_time - start_time} s to complete\n'
-        )
-    
-    adjusted_name = '.' if name is None else name
+        tqdm.write(f"single_coverage took {end_time - start_time} s to complete\n")
 
-    return contig, start, stop, adjusted_name, coverage
+    adjusted_name = "." if name is None else name
+    return CoverageResult(contig, start, stop, adjusted_name, coverage)
 
 
-def _single_coverage_star(partial_coverage, interval):
+def _single_coverage_star(partial_coverage, interval) -> CoverageResult:
     contig, start, stop, name = interval
     return partial_coverage(contig=contig, start=start, stop=stop, name=name)
 
 
 def coverage(
-        input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
-        interval_file: str,
-        output_file: str,
-        scale_factor: float=1.,
-        min_length: int | None=None,
-        max_length: int | None=None,
-        normalize: bool=False,
-        intersect_policy: str="midpoint",
-        quality_threshold: int=30,
-        workers: int=1,
-        verbose: Union[bool, int]=False,
-        reference_file: str | Path | None=None,
-    ) -> list[tuple[str, int, int, str, float]]:
-    """
-    Return estimated fragment coverage over intervals specified in
-    `intervals`. Fragments are read from `input_file` which may be
-    a BAM, CRAM, or fragment file. Uses an algorithm where the
-    midpoints of fragments are calculated and coverage is tabulated from
-    the midpoints that fall into the specified region. Not suitable for
-    fragments of size approaching interval size.
+    input_file: Union[str, pysam.TabixFile, pysam.AlignmentFile, Path],
+    interval_file: str,
+    output_file: str,
+    scale_factor: float = 1.0,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    normalize: bool = False,
+    intersect_policy: str = "midpoint",
+    quality_threshold: int = 30,
+    workers: int = 1,
+    verbose: Union[bool, int] = False,
+    reference_file: str | Path | None = None,
+) -> list[CoverageResult]:
+    """Estimate fragment coverage over every interval in a BED file.
 
     Parameters
     ----------
-    input_file : str or pysam.AlignmentFile
-        SAM, BAM, CRAM, or Frag.gz file containing paired-end fragment 
-        reads or its path. `AlignmentFile` must be opened in read mode.
+    input_file : str or pysam handle
+        BAM/CRAM/fragment input.
     interval_file : str
-        BED4 file containing intervals over which to generate coverage
-        statistics.
-    output_file : string, optional
-        Path for bed file to print coverages to. If output_file = `-`,
-        results will be printed to stdout.
-    scale_factor : int, optional
-        Amount to multiply coverages by. Default is 1.
-    min_length: int or None, optional
-        Minimum length of fragments to be included.
-    max_length: int or None, optional
-        Maximum length of fragments to be included.
-    normalize : bool
-        When set to True, divide by total coverage
-    intersect_policy: str, optional
-        Specifies how to determine whether fragments are in interval.
-        'midpoint' (default) calculates the central coordinate of each
-        fragment and only selects the fragment if the midpoint is in the
-        interval. 'any' includes fragments with any overlap with the
-        interval.
+        BED4 file of intervals.
+    output_file : str
+        Output BED/`.bedgraph`/`.bed.gz` path, or ``"-"`` for stdout.  ``None``
+        suppresses file output and only returns results.
+    scale_factor : float, optional
+        Multiplier applied to coverage values (default 1.0).
+    min_length, max_length : int, optional
+        Fragment-length filter.
+    normalize : bool, optional
+        Divide ``scale_factor`` by the genome-wide coverage before scaling.
+    intersect_policy : {"midpoint", "any"}, optional
+        Region-membership policy (default ``"midpoint"``).
     quality_threshold : int, optional
-        Minimum MAPQ. Default is 30.
+        Minimum mapping quality (default 30).
     workers : int, optional
-        Number of subprocesses to spawn. Increases speed at the expense
-        of memory.
-    verbose : int or bool, optional
+        Worker-process count (default 1).
+    verbose : bool or int, optional
+        Print timing/config information.
     reference_file : str or Path, optional
-        Path to a FASTA (.fa, .fasta, .fna) reference genome file. Required
-        when `input_file` is a CRAM file; ignored for BAM/frag files.
+        Reference genome (required for CRAM).
 
     Returns
     -------
-    coverages : Iterable[tuple[str, int, int, str, float]]
-        Fragment coverages over intervals.
+    list of CoverageResult
+        Scaled coverage for each interval.
     """
-    returnVal = []
-    if (verbose):
+    return_val: list[CoverageResult] = []
+    if verbose:
         start_time = time.time()
         tqdm.write(
             f"""
@@ -202,110 +207,99 @@ def coverage(
             verbose: {verbose} \n
             """
         )
+        tqdm.write("Creating process pool\n")
 
-    if verbose:
-        tqdm.write('Creating process pool\n')
+    pool = Pool(processes=workers)
     try:
-        pool = Pool(processes=workers, )
-        if verbose:
-            tqdm.write('Calculating total coverage for file,\n')
-
-        if verbose:
-            tqdm.write('reading intervals\n')
-
+        # Kick off the genome-wide total coverage asynchronously if normalizing.
         if normalize:
-            # queue in pool
             total_coverage_results = pool.apply_async(
                 single_coverage,
-                (input_file, None, 0, None, '.'),
-                {"min_length": min_length,
-                 "max_length": max_length,
-                 "intersect_policy": intersect_policy,
-                 "quality_threshold": quality_threshold,
-                 "verbose": verbose,
-                 "reference_file": reference_file}
+                (input_file, None, 0, None, "."),
+                {
+                    "min_length": min_length,
+                    "max_length": max_length,
+                    "intersect_policy": intersect_policy,
+                    "quality_threshold": quality_threshold,
+                    "verbose": verbose,
+                    "reference_file": reference_file,
+                },
             )
 
-        intervals = get_intervals(
-            interval_file)
+        intervals = get_intervals(interval_file)
 
         if verbose:
-            tqdm.write('calculating coverage\n')
+            tqdm.write("calculating coverage\n")
 
         partial_single_coverage = partial(
-            single_coverage, input_file=input_file, min_length=min_length,
-            max_length=max_length, intersect_policy=intersect_policy,
-            quality_threshold=quality_threshold, verbose=max(0, verbose-1),
-            reference_file=reference_file)
+            single_coverage,
+            input_file=input_file,
+            min_length=min_length,
+            max_length=max_length,
+            intersect_policy=intersect_policy,
+            quality_threshold=quality_threshold,
+            verbose=max(0, verbose - 1),
+            reference_file=reference_file,
+        )
         coverages = pool.imap(
-            partial(_single_coverage_star, partial_single_coverage), intervals,
-            chunksize=max(len(intervals)//workers, 1))
+            partial(_single_coverage_star, partial_single_coverage),
+            intervals,
+            chunksize=max(len(intervals) // workers, 1),
+        )
 
-        if verbose:
-            tqdm.write('Retrieving total coverage for file\n')
-
-        # normalize
         if normalize:
             total_coverage = total_coverage_results.get()
             if verbose:
-                    tqdm.write(f'Total coverage is {total_coverage}\n')
+                tqdm.write(f"Total coverage is {total_coverage}\n")
             scale_factor /= total_coverage[4]
 
-        # Output
         output_is_file = False
-
-        if output_file != None:
+        if output_file is not None:
             if verbose:
-                tqdm.write('Writing results to output\n')
+                tqdm.write("Writing results to output\n")
             try:
-                # handle output types
-                if (output_file.endswith('.bed')
-                    or output_file.endswith('.bedgraph')):
+                if output_file.endswith(".bed") or output_file.endswith(".bedgraph"):
                     output_is_file = True
-                    output = open(output_file, 'w')
-                elif output_file.endswith('.bed.gz'):
-                    output = gzip.open(output_file, 'wt')  # text writing
+                    output = open(output_file, "w")
+                elif output_file.endswith(".bed.gz"):
+                    output = gzip.open(output_file, "wt")
                     output_is_file = True
-                elif output_file == '-':
+                elif output_file == "-":
                     output = sys.stdout
                 else:
                     raise ValueError(
-                        'output_file should have .bed or .bed.gz as suffix')
-            
-                # print to files
+                        "output_file should have .bed or .bed.gz as suffix"
+                    )
+
                 if output_file.endswith(".bedgraph"):
-                    for contig, start, stop, name, coverage in coverages:
+                    for contig, start, stop, name, cov in coverages:
                         output.write(
-                            f'{contig}\t{start}\t{stop}\t'
-                            f'{coverage * scale_factor}\n'
+                            f"{contig}\t{start}\t{stop}\t{cov * scale_factor}\n"
                         )
-                        returnVal.append(
-                            (contig, start, stop, name,
-                             coverage * scale_factor))
+                        return_val.append(
+                            CoverageResult(contig, start, stop, name, cov * scale_factor)
+                        )
                 else:
-                    for contig, start, stop, name, coverage in coverages:
+                    for contig, start, stop, name, cov in coverages:
                         output.write(
-                            f'{contig}\t{start}\t{stop}\t'
-                            f'{name}\t'
-                            f'{coverage * scale_factor}\n'
+                            f"{contig}\t{start}\t{stop}\t{name}\t"
+                            f"{cov * scale_factor}\n"
                         )
-                        returnVal.append(
-                            (contig, start, stop, name,
-                             coverage * scale_factor))
+                        return_val.append(
+                            CoverageResult(contig, start, stop, name, cov * scale_factor)
+                        )
             finally:
                 if output_is_file:
                     output.close()
         else:
-            returnVal = [(contig, start, stop, name, coverage * scale_factor)
-                         for (contig, start, stop, name, coverage)
-                         in coverages]
+            return_val = [
+                CoverageResult(contig, start, stop, name, cov * scale_factor)
+                for (contig, start, stop, name, cov) in coverages
+            ]
     finally:
         pool.close()
 
     if verbose:
         end_time = time.time()
-        tqdm.write(
-            f'coverage took {end_time - start_time} s to complete\n'
-        )
-    return returnVal
-
+        tqdm.write(f"coverage took {end_time - start_time} s to complete\n")
+    return return_val

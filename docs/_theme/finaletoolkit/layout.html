@@ -1,0 +1,64 @@
+{%- extends "basic/layout.html" %}
+
+{#- The landing page has no heading title; show just the site name in the tab,
+    instead of the first section heading. -#}
+{%- block htmltitle %}
+  {%- if pagename == root_doc %}
+  <title>{{ docstitle|e }}</title>
+  {%- else %}
+  {{ super() }}
+  {%- endif %}
+{%- endblock %}
+
+{#- Set the theme before first paint to avoid a flash. -#}
+{%- block extrahead %}
+  {{ super() }}
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("ftk-theme");
+        var t = stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+{%- endblock %}
+
+{#- Compact sticky top bar replaces the relbars. -#}
+{%- block header %}
+  <header class="ftk-topbar">
+    <a class="ftk-brand" href="{{ pathto(root_doc) }}">
+      {%- if logo_url %}<img class="ftk-logo" src="{{ logo_url }}" alt="" />{%- endif %}
+      <span>{{ project|e }}</span>
+    </a>
+    <nav class="ftk-topnav">
+      <a href="https://github.com/epifluidlab/finaletoolkit">GitHub</a>
+      <a href="https://pypi.org/project/finaletoolkit/">PyPI</a>
+      <button type="button" id="ftk-theme-toggle" aria-label="Toggle light and dark theme" title="Toggle theme">◑</button>
+    </nav>
+  </header>
+{%- endblock %}
+
+{#- Tag the landing page so its sections can be separated with dividers. -#}
+{%- block body_tag %}<body class="{% if pagename == root_doc %}ftk-home{% endif %}">{% endblock %}
+
+{%- block relbar1 %}{%- endblock %}
+{%- block relbar2 %}{%- endblock %}
+
+{#- The top bar already shows the logo; drop the basic theme's sidebar logo. -#}
+{%- block sidebarlogo %}{%- endblock %}
+
+{%- block footer %}
+  {{ super() }}
+  <script>
+    (function () {
+      var btn = document.getElementById("ftk-theme-toggle");
+      if (!btn) return;
+      btn.addEventListener("click", function () {
+        var next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        try { localStorage.setItem("ftk-theme", next); } catch (e) {}
+      });
+    })();
+  </script>
+{%- endblock %}

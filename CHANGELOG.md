@@ -7,6 +7,140 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-06-26
+
+A full refactor and modernization of FinaleToolkit. The **Python API and numeric
+behavior are preserved** — the test suite passes (80 passed, 27 skipped; CRAM
+tests run where `samtools` is available). The internals, command line, and
+documentation were modernized.
+
+### Added
+
+- **Single import namespace.** Every public feature/class is reachable directly
+  from `finaletoolkit` (e.g. `finaletoolkit.coverage`, `finaletoolkit.wps`,
+  `finaletoolkit.GenomeGaps`) via lazy attribute resolution. The subpackage
+  paths (`finaletoolkit.frag`, `.utils`, `.genome`, `.io`) still work. Singular
+  aliases `end_motif`/`breakpoint_motif` are also exposed.
+- **Named return types.** `coverage`/`single_coverage` return `CoverageResult`
+  and `frag_length_intervals` returns `FragLengthStats` — `NamedTuple`s that
+  index and unpack like plain tuples while adding documented named fields.
+- **Exception hierarchy** (`finaletoolkit.exceptions`): `FinaleToolkitError`
+  with `InvalidInputError`, `UnsupportedFormatError`, `MissingReferenceError`,
+  `MissingIndexError`, `ContigNotFoundError`, `ContigMismatchError`,
+  `OutOfBoundsError`. Each subclasses the built-in it replaces
+  (`ValueError`/`FileNotFoundError`/`IndexError`), so existing `except` handlers
+  still catch them.
+- **Click command line, rendered with rich-click.** Every subcommand's `--help`
+  shows panels grouping related options, an example invocation, and uniform
+  metavars (`INPUT`, `REGIONS`, `REFERENCE`, `CHROM_SIZES`, ...). Accent colors
+  are chosen to stay legible on both dark and light terminals. Pass `-o -` to
+  write any output to standard output (stdout).
+- **Type hints and NumPy-style docstrings** on every public function/class.
+- Shared helpers eliminate copy-paste: `frag/_motif_common.py` (motif classes,
+  MDS, drivers), `utils/_parallel.py` (pool + tqdm), `io/writers.py`,
+  `cli/_args.py` (reusable Click options), `cli/_dispatch.py` (lazy dispatch).
+
+### Changed
+
+- **Command line reimplemented on Click + rich-click** (previously argparse).
+  The flag names were redesigned for consistency — the one intentional break
+  from the previous CLI. The **Python API is unchanged**: each flag keeps the
+  parameter name matching its function argument, so only command-line spellings
+  changed.
+
+  | Concept | Old CLI flag(s) | New CLI flag |
+  |---|---|---|
+  | Output path | `-o/--output-file` | `-o/--output` (`-` = stdout) |
+  | Optional reference | `-r/--reference-file` | `-r/--reference` |
+  | Minimum mapping quality | `-q/--quality-threshold` | `-q/--min-mapq` |
+  | Min/max fragment length | `-min/--min-length`, `-max/--max-length` | `--min-length`, `--max-length` |
+  | Deprecated length aliases | `-lo/--fraction_low`, `-hi/--fraction-high` | **removed** |
+  | Worker processes | `-w/--workers` | `-t/--threads` |
+  | Verbosity | mixed `store_true`/`count` | `-v/--verbose` (counting) |
+  | k-mer length | `-k` (no long form) | `-k/--kmer-length` |
+  | Strand toggle (motifs) | `-B/--no-both-strands`, `-B/--single-strand` | `--strand {both,forward,reverse}` |
+  | `coverage` scale factor | `-s/--scale-factor` | `--scale-factor` |
+  | `frag-length-bins` short stat | `-sf/--short-fraction` | `--short-threshold` |
+  | `frag-length-bins` summary | `-stats/--summary-stats` | `--summary-stats` |
+  | `frag-length-bins` histogram | `--histogram-path` | `--histogram` |
+  | `frag-length-intervals` short cutoff | `-s/--short-reads` | `--short-threshold` |
+  | `cleavage-profile` left/right pad | `-l/--left`, `-r/--right` | `--pad-left`, `--pad-right` |
+  | `wps` chrom.sizes | `-c/--chrom-sizes` | `--chrom-sizes` |
+  | `adjust-wps` interval size | `-i/--interval_size` | `-i/--interval-size` |
+  | `adjust-wps` savgol toggle | `-S/--exclude-savgol` | `--savgol/--no-savgol` |
+  | `delfi` merge size | `-s/--window-size` | `--merge-size` |
+  | `delfi` blacklist | `-b/--blacklist-file` | `-b/--blacklist` |
+  | `filter-file` whitelist/blacklist | `-W/--whitelist-file`, `-B/--blacklist-file` | `-w/--whitelist`, `-b/--blacklist` |
+  | `agg-bw` mean | `-a/--mean` | `--mean` |
+
+  The overloaded short flags were the driver: `-s` previously meant five
+  different things and `-r` meant two; each short flag now has one meaning.
+  Boolean options use Click's `--x/--no-x` pairs (e.g. `--savgol/--no-savgol`)
+  with the default stated in the help text, and subcommands disable prefix
+  matching so `--savgol` is never ambiguous with `--savgol-window-size`.
+- **`interval-mds` renamed to `regional-mds`** — the regional Motif Diversity
+  Score (rMDS), per Bandaru et al., *Journal of Clinical Investigation* 2026
+  ([196284](https://www.jci.org/articles/view/196284)). The implementing
+  function is `_cli_regional_mds`.
+- **Documentation rebuilt** on a custom, compact in-tree Sphinx theme
+  (Northwestern-purple accents, Inter typography, light/dark). The CLI reference
+  is generated from the live Click commands (sphinx-click), the API reference
+  from docstrings (autodoc), and the user guide was restructured. CI
+  (`build-docs.yml`, `.readthedocs.yaml`) installs the package and the docs
+  toolchain.
+
+### Removed
+
+- The deprecated `delfi-gc-correct` CLI command. GC correction is performed by
+  `delfi` automatically (`delfi --no-gc-correct` opts out). The Python function
+  `finaletoolkit.frag.delfi_gc_correct` is unchanged and still available.
+
+### Performance (identical outputs, lower cost)
+
+- **DELFI** worker pool is ~80x faster on whole-genome inputs while producing
+  bit-identical output: the blacklist BED is parsed once and filtered per window
+  with binary search (instead of being re-read and linearly scanned for every
+  100kb window), and one alignment handle and one reference handle are opened
+  per worker via the `Pool` initializer and reused for every window. Per-contig
+  `ContigGaps` are preloaded into worker globals rather than pickled into every
+  task. Contributed by D.H.K. (Duco) Gaillard
+  ([@DucoG](https://github.com/DucoG)) in
+  [#172](https://github.com/epifluidlab/FinaleToolkit/pull/172); guarded by new
+  `test_workers_equivalence` and `test_fragfile_input` tests.
+- **DELFI** GC content is counted with `str.count` instead of a per-base Python
+  loop, and short/long fragments are tallied with counters.
+- **`frag_length_bins`** binning is vectorized with `np.add.at`.
+- **`adjust-wps`** running median/mean use `sliding_window_view`.
+- Streaming fragment access and bounded memory are preserved throughout.
+
+### Fixed
+
+- `genome.GenomeGaps.in_tcmere`: removed a stray `print` that fired for chr17,
+  and fixed the telomere-overlap branch (it previously evaluated overlap against
+  an empty array and was always `False`).
+- `frag._delfi_gc_correct.cli_delfi_gc_correct` and `frag._delfi.delfi` stdout
+  (`-`) output: rows are stringified before `"\t".join(...)` (previously joined
+  raw tuple values and raised `TypeError`).
+- `frag._delfi_merge_bins.delfi_merge_bins`: the `gc_corrected` argument is
+  honored, so merging works when GC correction is disabled.
+- `MotifsIntervals.from_file`: `.gz` inputs are opened in read mode (previously
+  opened with `"wt"`, truncating the file). The walrus-operator count check in
+  `MotifFreqs.from_file` reports the real count.
+- `MotifFreqs.from_file`/`MotifsIntervals.from_file`: a missing/unreadable input
+  no longer raises a masking `UnboundLocalError`; the real `FileNotFoundError`
+  propagates.
+- `adjust-wps --edge-size` and `delfi --window-size` declare `type=int`.
+
+### Preserved (compatibility-critical quirks)
+
+- `genome.ContigGaps.in_tcmere`/`in_gap` keep the `all()`-over-telomeres
+  semantics that the bundled DELFI reference outputs were generated with.
+- The two hard-coded hg19 no-coverage bin indices (`8779`, `13664`) removed by
+  DELFI when `remove_nocov=True`.
+- `multi_wps` reorders intervals into BAM-header contig order before writing
+  (the 0.12.0 fix for silently-dropped chromosomes) and forwards
+  `fraction_low`/`fraction_high` to workers.
+
 ## [0.12.0] - 2026-05-28
 
 ### Added
@@ -311,7 +445,6 @@ information when calculating end motifs on forward-strand only.
 ### Changed
 - frag_generator now accepts fragment coordinates in bed.gz files
 
-
 ## [0.7.5] - 2024-10-10
 
 ### Fixed
@@ -459,7 +592,6 @@ are specified without `contig`
 - Removed unused dependencies `click`, `pybedtools`, and `cython
 - Remove some unused imports from module files
 
-
 ## [0.5.2] - 2024-05-08
 
 ### Fixed
@@ -471,7 +603,6 @@ values.
 - Most end-motif related Python functions accept Path instances as inputs for
 files.
 - Unit and function tests, especially for end-motif related functions.
-
 
 ## [0.5.1] - 2024-05-03
 

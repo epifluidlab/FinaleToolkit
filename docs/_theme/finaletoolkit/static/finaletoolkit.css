@@ -1,0 +1,491 @@
+/* ==========================================================================
+   FinaleToolkit: a custom, compact Sphinx theme (inherits `basic`).
+   Sans-serif (Inter), purple accents from epifluidlab.github.io, dense layout,
+   light + dark. No serif, no boxy cards.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+/* -- Tokens ---------------------------------------------------------------- */
+:root {
+  --ftk-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --ftk-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --ftk-purple: #4e2a84;
+  --ftk-purple-link: #5b338a;
+  --ftk-purple-soft: #f0edf8;
+
+  --ftk-bg: #ffffff;
+  --ftk-bg-soft: #f7f6fa;
+  --ftk-fg: #1f2330;
+  --ftk-fg-muted: #5d6173;
+  --ftk-border: #e7e4ee;
+  --ftk-accent: var(--ftk-purple);
+  --ftk-link: var(--ftk-purple-link);
+  --ftk-code-bg: #f4f2f8;
+}
+
+html[data-theme="dark"] {
+  --ftk-purple: #b6acd1;
+  --ftk-purple-link: #c2b4e0;
+  --ftk-purple-soft: #241a38;
+
+  --ftk-bg: #16131f;
+  --ftk-bg-soft: #1c1830;
+  --ftk-fg: #e6e2f0;
+  --ftk-fg-muted: #a39fb5;
+  --ftk-border: #2c2740;
+  --ftk-accent: #b6acd1;
+  --ftk-link: #c2b4e0;
+  --ftk-code-bg: #1c1830;
+}
+
+/* -- Base ------------------------------------------------------------------ */
+html { font-size: 15px; }
+body {
+  margin: 0;
+  font-family: var(--ftk-font);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ftk-fg);
+  background: var(--ftk-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--ftk-link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+
+/* -- Top bar --------------------------------------------------------------- */
+.ftk-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 46px;
+  padding: 0 1rem;
+  background: color-mix(in srgb, var(--ftk-bg) 88%, transparent);
+  backdrop-filter: saturate(160%) blur(8px);
+  border-bottom: 1px solid var(--ftk-border);
+}
+.ftk-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--ftk-fg);
+}
+.ftk-brand:hover { text-decoration: none; }
+.ftk-logo { height: 24px; width: auto; }
+.ftk-topnav { display: flex; align-items: center; gap: 1rem; font-size: 0.86rem; }
+.ftk-topnav a { color: var(--ftk-fg-muted); }
+.ftk-topnav a:hover { color: var(--ftk-accent); text-decoration: none; }
+#ftk-theme-toggle {
+  border: 1px solid var(--ftk-border);
+  background: var(--ftk-bg-soft);
+  color: var(--ftk-fg-muted);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+#ftk-theme-toggle:hover { color: var(--ftk-accent); border-color: var(--ftk-accent); }
+
+/* -- Layout: flex content + left sidebar ----------------------------------- */
+div.document {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+div.documentwrapper { flex: 1 1 auto; min-width: 0; float: none; width: auto; margin: 0; }
+div.bodywrapper { margin: 0; border: 0; }
+div.body {
+  max-width: 760px;
+  padding: 1.6rem 0 2.5rem;
+  min-width: 0;
+}
+div.clearer { display: none; }
+
+/* Sidebar (basic theme renders it as div.sphinxsidebar) */
+div.sphinxsidebar {
+  order: -1;
+  flex: 0 0 218px;
+  float: none;
+  width: 218px;
+  margin: 0;
+  position: sticky;
+  top: 46px;
+  max-height: calc(100vh - 46px);
+  overflow-y: auto;
+  padding: 1.4rem 0.5rem 2rem 0;
+  font-size: 0.86rem;
+  border-right: 1px solid var(--ftk-border);
+}
+div.sphinxsidebarwrapper { padding: 0; }
+div.sphinxsidebar h3, div.sphinxsidebar h4,
+div.sphinxsidebar p.caption {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--ftk-fg-muted);
+  margin: 1rem 0 0.4rem;
+}
+div.sphinxsidebar p.caption .caption-text { color: var(--ftk-fg-muted); }
+div.sphinxsidebar ul { list-style: none; margin: 0; padding: 0 0 0 0.2rem; }
+div.sphinxsidebar ul ul { padding-left: 0.7rem; }
+div.sphinxsidebar li { margin: 0.12rem 0; }
+div.sphinxsidebar a { color: var(--ftk-fg-muted); }
+div.sphinxsidebar a:hover { color: var(--ftk-accent); text-decoration: none; }
+div.sphinxsidebar a.current,
+div.sphinxsidebar li.current > a {
+  color: var(--ftk-accent);
+  font-weight: 600;
+}
+div.sphinxsidebar input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--ftk-border);
+  border-radius: 6px;
+  background: var(--ftk-bg-soft);
+  color: var(--ftk-fg);
+  font-size: 0.85rem;
+}
+div.sphinxsidebar input[type="submit"] { display: none; }
+
+/* -- Typography (compact) -------------------------------------------------- */
+div.body h1, div.body h2, div.body h3, div.body h4 {
+  font-family: var(--ftk-font);
+  font-weight: 650;
+  color: var(--ftk-fg);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+div.body h1 { font-size: 1.55rem; margin: 0 0 0.6rem; }
+div.body h2 {
+  font-size: 1.02rem;
+  font-weight: 650;
+  margin: 1.15rem 0 0.45rem;
+  padding-bottom: 0.18rem;
+  border-bottom: 1px solid var(--ftk-border);
+}
+div.body h3 { font-size: 0.95rem; margin: 0.9rem 0 0.3rem; }
+div.body h4 { font-size: 0.88rem; margin: 0.75rem 0 0.25rem; }
+div.body p { margin: 0.55rem 0; }
+div.body ul, div.body ol { margin: 0.5rem 0; padding-left: 1.3rem; }
+div.body li { margin: 0.2rem 0; }
+/* Permalink markers: hidden until you hover the heading. */
+a.headerlink {
+  color: var(--ftk-border);
+  padding-left: 0.3rem;
+  visibility: hidden;
+}
+h1:hover > a.headerlink,
+h2:hover > a.headerlink,
+h3:hover > a.headerlink,
+h4:hover > a.headerlink,
+dt:hover > a.headerlink { visibility: visible; }
+a.headerlink:hover { color: var(--ftk-accent); text-decoration: none; }
+
+/* The top bar carries the logo; never show the basic theme's sidebar logo. */
+div.sphinxsidebar p.logo,
+div.sphinxsidebar img.logo { display: none; }
+
+/* -- Code ------------------------------------------------------------------ */
+code, tt, pre { font-family: var(--ftk-mono); }
+code.literal, code.docutils {
+  background: var(--ftk-code-bg);
+  border-radius: 4px;
+  padding: 0.06em 0.34em;
+  font-size: 0.85em;
+  color: var(--ftk-purple-link);
+}
+div.highlight { background: var(--ftk-code-bg); border-radius: 7px; }
+div.highlight pre, pre {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  padding: 0.75rem 0.9rem;
+  overflow-x: auto;
+  border: 1px solid var(--ftk-border);
+  border-radius: 7px;
+  background: var(--ftk-code-bg);
+}
+.highlight .gp { color: var(--ftk-fg-muted); }  /* shell prompt */
+
+/* Dark-mode code tokens (Pygments `friendly` is tuned for light). */
+html[data-theme="dark"] .highlight pre { color: #e3def0; }
+html[data-theme="dark"] .highlight .k,
+html[data-theme="dark"] .highlight .kn,
+html[data-theme="dark"] .highlight .kd,
+html[data-theme="dark"] .highlight .kc { color: #cbb4ff; }
+html[data-theme="dark"] .highlight .s,
+html[data-theme="dark"] .highlight .s1,
+html[data-theme="dark"] .highlight .s2,
+html[data-theme="dark"] .highlight .sb,
+html[data-theme="dark"] .highlight .se { color: #9ce6b0; }
+html[data-theme="dark"] .highlight .c,
+html[data-theme="dark"] .highlight .c1,
+html[data-theme="dark"] .highlight .cm { color: #8b87a8; font-style: italic; }
+html[data-theme="dark"] .highlight .mi,
+html[data-theme="dark"] .highlight .mf,
+html[data-theme="dark"] .highlight .m { color: #ffcb83; }
+html[data-theme="dark"] .highlight .nb,
+html[data-theme="dark"] .highlight .bp,
+html[data-theme="dark"] .highlight .nf,
+html[data-theme="dark"] .highlight .fm { color: #83c7ff; }
+html[data-theme="dark"] .highlight .nc,
+html[data-theme="dark"] .highlight .nn { color: #ffd9a8; }
+html[data-theme="dark"] .highlight .o,
+html[data-theme="dark"] .highlight .ow,
+html[data-theme="dark"] .highlight .p { color: #d7d2e6; }
+
+/* -- Tables ---------------------------------------------------------------- */
+table.docutils {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 0.8rem 0;
+}
+table.docutils th, table.docutils td {
+  border: 1px solid var(--ftk-border);
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+}
+table.docutils thead th {
+  background: var(--ftk-purple-soft);
+  border-bottom: 2px solid var(--ftk-accent);
+  color: var(--ftk-fg);
+}
+
+/* -- Admonitions (flat, no heavy box) -------------------------------------- */
+div.admonition, div.topic {
+  margin: 0.9rem 0;
+  padding: 0.5rem 0.85rem;
+  background: var(--ftk-bg-soft);
+  border: 1px solid var(--ftk-border);
+  border-left: 3px solid var(--ftk-accent);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.92rem;
+}
+div.admonition p.admonition-title {
+  font-weight: 650;
+  color: var(--ftk-accent);
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+}
+div.admonition p:last-child { margin-bottom: 0; }
+
+/* -- Field lists (e.g. :Commands:) ----------------------------------------- */
+dl.field-list > dt { color: var(--ftk-fg-muted); font-weight: 600; }
+
+/* -- CLI reference: compact sphinx-click option lists ---------------------- */
+dl.std.option, dl.option { margin: 0 0 0.4rem; }
+/* Option signatures render as inline "chips" that hug their content rather
+   than full-width bars. */
+dl.std.option > dt, dl.option > dt {
+  display: inline-block;
+  margin: 0.55rem 0 0.15rem;
+  padding: 0.14rem 0.55rem;
+  background: var(--ftk-code-bg);
+  border: 1px solid var(--ftk-border);
+  border-radius: 6px;
+  font-family: var(--ftk-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+dl.std.option > dt .sig-name,
+dl.option > dt .sig-name { color: var(--ftk-purple-link); }
+dl.std.option > dd, dl.option > dd { margin: 0.1rem 0 0.55rem; }
+dl.std.option > dd > p, dl.option > dd > p { margin: 0.1rem 0; }
+
+/* Command headers read like commands (monospace, accent) and a divider
+   separates each subcommand from the previous one. */
+section[id^="finaletoolkit-"] > h3 {
+  font-family: var(--ftk-mono);
+  font-size: 1.05rem;
+  color: var(--ftk-purple-link);
+  margin-top: 2.2rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--ftk-border);
+}
+
+/* "Usage" / "Options" become small eyebrow labels. */
+section[id^="finaletoolkit"] p.rubric {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--ftk-fg-muted);
+  margin: 1.1rem 0 0.35rem;
+}
+
+/* The positional-argument block (from each command's help) becomes an aligned,
+   terminal-style box. */
+section[id^="finaletoolkit"] .line-block {
+  margin: 0.5rem 0 0.2rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--ftk-bg-soft);
+  border-left: 3px solid var(--ftk-purple-300);
+  border-radius: 0 6px 6px 0;
+  overflow-x: auto;
+}
+section[id^="finaletoolkit"] .line-block .line {
+  font-family: var(--ftk-mono);
+  font-size: 0.8rem;
+  white-space: pre;
+  color: var(--ftk-fg-muted);
+}
+
+/* The "Example:" epilog (the last paragraph of each subcommand) renders as a
+   code-style line rather than plain prose. */
+section[id^="finaletoolkit-"] > p:last-child {
+  font-family: var(--ftk-mono);
+  font-size: 0.8rem;
+  background: var(--ftk-code-bg);
+  border: 1px solid var(--ftk-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Per-option "Default:" / "Options:" become compact inline rows instead of a
+   stacked, three-line field list. */
+dl.std.option dl.field-list.simple,
+dl.option dl.field-list.simple {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0 0.5rem;
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+}
+dl.std.option dl.field-list.simple > dt,
+dl.option dl.field-list.simple > dt {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ftk-fg-muted);
+}
+dl.std.option dl.field-list.simple > dd,
+dl.option dl.field-list.simple > dd { margin: 0; }
+dl.std.option dl.field-list.simple > dd > p,
+dl.option dl.field-list.simple > dd > p { margin: 0; }
+
+/* -- API autodoc signatures ------------------------------------------------ */
+dl.py > dt {
+  background: var(--ftk-bg-soft);
+  border-left: 3px solid var(--ftk-accent);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0 5px 5px 0;
+  font-family: var(--ftk-mono);
+  font-size: 0.86rem;
+}
+dl.py dd { margin-left: 0.6rem; }
+
+/* -- Footer ---------------------------------------------------------------- */
+div.footer {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+  color: var(--ftk-fg-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--ftk-border);
+}
+div.footer a { color: var(--ftk-fg-muted); }
+
+/* -- Landing hero ---------------------------------------------------------- */
+.ftk-hero { margin: 0 0 1.4rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--ftk-border); }
+.ftk-hero h1 { font-size: 2.1rem; font-weight: 700; margin: 0 0 0.35rem; color: var(--ftk-purple); }
+.ftk-hero .ftk-tagline { font-size: 1.05rem; color: var(--ftk-fg-muted); max-width: 60ch; margin: 0; }
+
+/* -- Landing: feature list (compact rows, command chips) ------------------- */
+.ftk-features { margin: 0.6rem 0 0.4rem; }
+.ftk-feature {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 0.6rem 1rem;
+  align-items: baseline;
+  padding: 0.45rem 0.2rem;
+  border-top: 1px solid var(--ftk-border);
+}
+.ftk-feature:last-child { border-bottom: 1px solid var(--ftk-border); }
+.ftk-feature-name { font-weight: 600; color: var(--ftk-fg); font-size: 0.92rem; }
+.ftk-cmds { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.ftk-cmd {
+  font-family: var(--ftk-mono);
+  font-size: 0.76rem;
+  background: var(--ftk-code-bg);
+  color: var(--ftk-purple-link);
+  padding: 0.08rem 0.42rem;
+  border-radius: 4px;
+}
+@media (max-width: 600px) {
+  .ftk-feature { grid-template-columns: 1fr; gap: 0.25rem; }
+}
+
+/* -- Landing: pill links --------------------------------------------------- */
+.ftk-links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.6rem 0; }
+.ftk-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.75rem;
+  border: 1px solid var(--ftk-border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--ftk-fg-muted);
+}
+.ftk-links a:hover {
+  border-color: var(--ftk-accent);
+  color: var(--ftk-accent);
+  background: var(--ftk-purple-soft);
+  text-decoration: none;
+}
+
+/* -- Landing: citation callout (left accent, not a box) -------------------- */
+.ftk-cite {
+  margin: 0.6rem 0;
+  padding: 0.55rem 0 0.55rem 0.85rem;
+  border-left: 3px solid var(--ftk-accent);
+}
+.ftk-cite-title { font-weight: 600; color: var(--ftk-fg); }
+.ftk-cite-meta { color: var(--ftk-fg-muted); font-size: 0.86rem; margin: 0.15rem 0 0.35rem; }
+.ftk-cite-actions a {
+  font-size: 0.82rem;
+  font-family: var(--ftk-mono);
+  margin-right: 0.9rem;
+}
+
+/* Landing: a divider and extra breathing room above every section, so the
+   sections read as clearly separated blocks. */
+body.ftk-home section > h1 {
+  margin-top: 2.4rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--ftk-border);
+}
+
+/* sphinx-design tab panels draw both an overline and an underline; drop the
+   trailing underline so it doesn't double up with the section divider. */
+div.body .sd-tab-content {
+  box-shadow: 0 -0.0625rem var(--sd-color-tabs-overline);
+}
+
+/* -- Responsive ------------------------------------------------------------ */
+@media (max-width: 800px) {
+  div.document { flex-direction: column; gap: 0; }
+  div.sphinxsidebar {
+    position: static;
+    width: auto;
+    flex: none;
+    max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--ftk-border);
+  }
+  div.body { max-width: none; padding-top: 1rem; }
+}

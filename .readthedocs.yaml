@@ -16,5 +16,9 @@ sphinx:
 
 python:
    install:
+   # Install the package (and its runtime deps) so autodoc can import
+   # finaletoolkit, then the Sphinx toolchain.
+   - method: pip
+     path: .
    - requirements: docs/requirements.txt
         

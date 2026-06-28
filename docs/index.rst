@@ -1,70 +1,118 @@
+.. raw:: html
 
-FinaleToolkit
-=========================================
+   <div class="ftk-hero">
+     <h1>FinaleToolkit</h1>
+     <p class="ftk-tagline">
+       Extract cell-free DNA fragmentation features from whole-genome
+       sequencing, through one command line and Python API.
+     </p>
+   </div>
 
--------
-About
--------
+**FinaleToolkit** (*FragmentatIoN AnaLysis of cEll-free DNA Toolkit*) computes
+established cfDNA fragmentomic features (coverage, fragment length, WPS, DELFI,
+motifs, MDS, cleavage profiles) on a fast, streaming engine.
 
-FinaleToolkit (FragmentatIoN AnaLysis of cEll-free DNA Toolkit) is a package and standalone program to extract fragmentation features of cell-free DNA from paired-end sequencing data.
+.. tab-set::
 
-- **Website:** https://epifluidlab.github.io/FinaleToolkit/
-- **PyPI:** https://pypi.org/project/finaletoolkit/
-- **Documentation:** https://epifluidlab.github.io/FinaleToolkit/documentation
-- **Wiki:** https://github.com/epifluidlab/FinaleToolkit/wiki
-- **Source code:** https://github.com/epifluidlab/finaletoolkit
-- **Changelog:** https://github.com/epifluidlab/FinaleToolkit/blob/main/CHANGELOG.md
-- **Bug reports:** https://github.com/epifluidlab/finaletoolkit/issues
+   .. tab-item:: Command line
 
+      .. code-block:: console
 
-------------------
-Documentation
-------------------
+         $ finaletoolkit coverage sample.bam intervals.bed -o coverage.bed
+         $ finaletoolkit wps sample.bam tss.bed --chrom-sizes hg38.chrom.sizes -o wps.bw -t 8
+         $ finaletoolkit end-motifs sample.bam hg38.2bit -k 4 -o motifs.tsv
+
+   .. tab-item:: Python
+
+      .. code-block:: python
+
+         import finaletoolkit as ftk
+
+         cov = ftk.coverage("sample.bam", "intervals.bed", output_file=None)
+         motifs = ftk.end_motifs("sample.bam", "hg38.2bit", k=4)
+         mds = motifs.motif_diversity_score()
+
+Features
+--------
+
+.. raw:: html
+
+   <div class="ftk-features">
+     <div class="ftk-feature">
+       <div class="ftk-feature-name">Fragment length</div>
+       <div class="ftk-cmds"><span class="ftk-cmd">frag-length-bins</span><span class="ftk-cmd">frag-length-intervals</span></div>
+     </div>
+     <div class="ftk-feature">
+       <div class="ftk-feature-name">Coverage</div>
+       <div class="ftk-cmds"><span class="ftk-cmd">coverage</span></div>
+     </div>
+     <div class="ftk-feature">
+       <div class="ftk-feature-name">Windowed Protection Score</div>
+       <div class="ftk-cmds"><span class="ftk-cmd">wps</span><span class="ftk-cmd">adjust-wps</span></div>
+     </div>
+     <div class="ftk-feature">
+       <div class="ftk-feature-name">DELFI</div>
+       <div class="ftk-cmds"><span class="ftk-cmd">delfi</span></div>
+     </div>
+     <div class="ftk-feature">
+       <div class="ftk-feature-name">End &amp; breakpoint motifs</div>
+       <div class="ftk-cmds"><span class="ftk-cmd">end-motifs</span><span class="ftk-cmd">breakpoint-motifs</span></div>
+     </div>
+     <div class="ftk-feature">
+       <div class="ftk-feature-name">Motif Diversity Score</div>
+       <div class="ftk-cmds"><span class="ftk-cmd">mds</span><span class="ftk-cmd">regional-mds</span></div>
+     </div>
+     <div class="ftk-feature">
+       <div class="ftk-feature-name">Cleavage profile</div>
+       <div class="ftk-cmds"><span class="ftk-cmd">cleavage-profile</span></div>
+     </div>
+   </div>
+
+Links
+-----
+
+.. raw:: html
+
+   <div class="ftk-links">
+     <a href="https://github.com/epifluidlab/finaletoolkit">GitHub</a>
+     <a href="https://github.com/epifluidlab/finaletoolkit_workflow">Workflow</a>
+     <a href="https://pypi.org/project/finaletoolkit/">PyPI</a>
+     <a href="http://finaledb.research.cchmc.org">FinaleDB</a>
+     <a href="https://github.com/epifluidlab/FinaleToolkit/wiki">Wiki</a>
+     <a href="https://github.com/epifluidlab/finaletoolkit/issues">Issues</a>
+   </div>
+
+Citation
+--------
+
+.. raw:: html
+
+   <div class="ftk-cite">
+     <div class="ftk-cite-title">FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit</div>
+     <div class="ftk-cite-meta">Li, Bandaru, Baliga &amp; Liu &middot; Bioinformatics Advances, 2025</div>
+     <div class="ftk-cite-actions">
+       <a href="https://doi.org/10.1093/bioadv/vbaf236">doi:10.1093/bioadv/vbaf236</a>
+     </div>
+   </div>
+
 .. toctree::
-   :maxdepth: 2
-   
-   documentation/index
-   documentation/user_guide/index
+   :hidden:
+   :caption: User Guide
+
+   documentation/user_guide/installation
+   documentation/user_guide/quickstart
+   documentation/user_guide/inputdata
+   documentation/user_guide/features
+
+.. toctree::
+   :hidden:
+   :caption: Reference
+
    documentation/cli_reference/index
    documentation/api_reference/index
-   documentation/workflow_reference/index
-   
------------------
-Citations
------------------
 
-If FinaleToolkit is integral to a scientific publication, please cite it. A peer-reviewed paper describing FinaleToolkit has been written. Here is a ready-made BibTeX entry::
+.. toctree::
+   :hidden:
+   :caption: Workflow
 
-   @article{10.1093/bioadv/vbaf236,
-    author = {Li, James Wenhan and Bandaru, Ravi and Baliga, Kundan and Liu, Yaping},
-    title = {FinaleToolkit: Accelerating Cell-Free DNA Fragmentation Analysis with a High-Speed Computational Toolkit},
-    journal = {Bioinformatics Advances},
-    pages = {vbaf236},
-    year = {2025},
-    month = {09},
-    abstract = {Cell-free DNA (cfDNA) fragmentation pattern represents a promising non-invasive biomarker for disease diagnosis and prognosis. Numerous fragmentation features, such as end motif and window protection score (WPS), have been characterized in cfDNA genomic sequencing. However, the analytical tools developed in these studies are often not released to the liquid biopsy community or are inefficient for genome-wide analysis in large datasets.To address this gap, we have developed FinaleToolkit, a fast and memory-efficient Python package designed to generate comprehensive fragmentation features from large cfDNA genomic sequencing data. For instance, FinaleToolkit can generate genome-wide WPS features from a ∼100X cfDNA whole-genome sequencing (WGS) dataset with over 1 billion fragments in 0.7 hours, offering up to a ∼50-fold increase in processing speed compared to original implementations in the same dataset. We have benchmarked FinaleToolkit against original approaches or implementations where possible, confirming its efficacy. Furthermore, FinaleToolkit enabled the genome-wide analysis of fragmentation patterns over arbitrary genomic intervals, significantly boosting the performance for cancer early detection.FinaleToolkit is open source and thoroughly documented with both command line interface and Python application programming interface (API) to facilitate its widespread adoption and use within the research community: https://github.com/epifluidlab/FinaleToolkit.},
-    issn = {2635-0041},
-    doi = {10.1093/bioadv/vbaf236},
-    url = {https://doi.org/10.1093/bioadv/vbaf236},
-    eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/10.1093/bioadv/vbaf236/64414830/vbaf236.pdf},
-}
-
-
------------------
-Contact
------------------
-
-| **James Wenhan Li**
-| Email: lijw21@wfu.edu
-
-| **Ravi Bandaru**
-| Email: ravi.bandaru@northwestern.edu
-
-| **Yaping Liu**
-| Email: yaping@northwestern.edu
-
------------------
-License
------------------
-
-Please refer to the `MIT license <https://github.com/epifluidlab/FinaleToolkit/blob/main/LICENSE>`_.
+   documentation/workflow/index
