@@ -14,6 +14,8 @@ import warnings
 
 import pysam
 
+from finaletoolkit.exceptions import MissingReferenceError
+
 __all__ = ["filter_file"]
 
 _VALID_SUFFIXES = (".gz", ".bam", ".cram", ".bgz")
@@ -110,6 +112,7 @@ def filter_file(
     verbose: bool = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
+    reference_file: str | None = None,
 ) -> str:
     """Create a filtered copy of a BAM/CRAM or tabix BED fragment file.
 
@@ -140,6 +143,8 @@ def filter_file(
         Print configuration and enable logging.
     fraction_low, fraction_high : int, optional
         Deprecated aliases for ``min_length``/``max_length``.
+    reference_file : str, optional
+        FASTA reference genome. Required when ``input_file`` is CRAM.
 
     Returns
     -------
@@ -160,6 +165,7 @@ def filter_file(
         quality_threshold: {quality_threshold}
         workers: {workers}
         verbose: {verbose}
+        reference_file: {reference_file}
         """
         )
         logging.basicConfig(level=logging.INFO)
@@ -172,6 +178,11 @@ def filter_file(
     )
 
     suffix = validate_input_file(input_file)
+
+    if suffix == ".cram" and not reference_file:
+        raise MissingReferenceError(
+            "reference_file is required when input_file is a CRAM file."
+        )
 
     if intersect_policy == "midpoint":
         intersect_param = "-f 0.500"
@@ -189,6 +200,8 @@ def filter_file(
         if input_file.endswith((".bam", ".cram")):
             _filter_alignment(
                 input_file,
+                suffix,
+                reference_file,
                 whitelist_file,
                 blacklist_file,
                 output_file,
@@ -203,6 +216,7 @@ def filter_file(
                 temp_1,
                 temp_2,
                 temp_3,
+                temp_dir,
             )
         elif input_file.endswith((".gz", ".bgz")):
             _filter_bed(
@@ -226,6 +240,8 @@ def filter_file(
 
 def _filter_alignment(
     input_file,
+    suffix,
+    reference_file,
     whitelist_file,
     blacklist_file,
     output_file,
@@ -240,18 +256,34 @@ def _filter_alignment(
     temp_1,
     temp_2,
     temp_3,
+    temp_dir,
 ) -> None:
     """Filter a BAM/CRAM via bedtools/samtools and a length pass."""
+    if suffix == ".cram":
+        # bedtools/samtools resolve a CRAM's reference themselves only via
+        # REF_PATH/REF_CACHE, which isn't reliable across clusters. Convert to
+        # BAM up front so every step below is reference-independent.
+        working_file = f"{temp_dir}/input_converted.bam"
+        run_subprocess(
+            f"samtools view -b -T {reference_file} {input_file} "
+            f"-o {working_file} -@ {workers} && samtools index {working_file}",
+            error_msg="CRAM to BAM conversion failed",
+            verbose=verbose,
+            logger=logger,
+        )
+    else:
+        working_file = input_file
+
     if whitelist_file:
         run_subprocess(
-            f"bedtools intersect -abam {input_file} -b {whitelist_file} "
+            f"bedtools intersect -abam {working_file} -b {whitelist_file} "
             f"{intersect_param} > {temp_1} && samtools index {temp_1}",
             error_msg="Whitelist filtering failed",
             verbose=verbose,
             logger=logger,
         )
     else:
-        run_subprocess(f"cp {input_file} {temp_1}", verbose=verbose, logger=logger)
+        run_subprocess(f"cp {working_file} {temp_1}", verbose=verbose, logger=logger)
 
     if blacklist_file:
         intersect_param = "-f 0.500" if intersect_policy == "midpoint" else ""
@@ -275,9 +307,13 @@ def _filter_alignment(
 
     # Length filter (template length, same reference for both mates).
     pysam.set_verbosity(0)
+    write_mode = "wc" if suffix == ".cram" else "wb"
     with pysam.AlignmentFile(temp_3, "rb", threads=workers // 3) as in_file:
+        write_kwargs = {"template": in_file, "threads": workers - workers // 3}
+        if write_mode == "wc":
+            write_kwargs["reference_filename"] = reference_file
         with pysam.AlignmentFile(
-            output_file, "wb", template=in_file, threads=workers - workers // 3
+            output_file, write_mode, **write_kwargs
         ) as out_file:
             for read in in_file:
                 if (
