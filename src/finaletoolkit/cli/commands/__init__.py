@@ -634,6 +634,7 @@ def regional_mds(**params):
 # --------------------------------------------------------------------------- #
 @click.command("filter-file", epilog=_ex("finaletoolkit filter-file sample.bam -q 30 --min-length 100 -o filtered.bam"))
 @click.argument("input_file", metavar="INPUT")
+@reference_option()
 @click.option(
     "-w",
     "--whitelist",

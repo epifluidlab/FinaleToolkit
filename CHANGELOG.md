@@ -7,6 +7,17 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- `filter-file`/`filter_file` now accepts a `-r`/`--reference` (`reference_file`)
+  option. Previously CRAM input to `filter-file` always failed with "CRAM
+  files require a reference file", since the CLI's CRAM validation is shared
+  across every subcommand but `filter-file` had no way to satisfy it. CRAM
+  input is converted internally to BAM for processing and the filtered
+  output is written back out as CRAM (using the given reference) when the
+  input was CRAM.
+
 ## [1.0.0] - 2026-06-26
 
 A full refactor and modernization of FinaleToolkit. The **Python API and numeric

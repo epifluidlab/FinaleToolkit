@@ -128,6 +128,20 @@ class TestCLIEntryPoint:
         exit_status = os.system('finaletoolkit filter-file --help')
         assert exit_status == 0
 
+    def test_filter_file_cram_requires_reference(self):
+        from finaletoolkit.exceptions import MissingReferenceError
+        from finaletoolkit.utils import filter_file
+        with pytest.raises(MissingReferenceError):
+            filter_file('input.cram', output_file='out.cram')
+
+    def test_filter_file_cram_cli_requires_reference(self):
+        # No -r/--reference given for a .cram input should fail fast, before
+        # ever shelling out to samtools/bedtools.
+        exit_status = os.system(
+            'finaletoolkit filter-file input.cram -o out.cram 2>/dev/null'
+        )
+        assert exit_status != 0
+
     def test_agg_bw(self):
         exit_status = os.system('finaletoolkit agg-bw --help')
         assert exit_status == 0

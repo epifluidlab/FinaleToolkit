@@ -22,6 +22,7 @@ from finaletoolkit.frag import (
 )
 from finaletoolkit.frag._cleavage_profile import multi_cleavage_profile
 from finaletoolkit.genome.gaps import GenomeGaps
+from finaletoolkit.utils import filter_file
 
 
 pytestmark = pytest.mark.skipif(
@@ -177,6 +178,31 @@ class TestCleavageProfileCRAMRuns:
             reference_file=FASTA,
         )
         assert results is not None
+
+
+class TestFilterFileCRAMRuns:
+    def test_cram_matches_bam(self, cram_file, tmp_path):
+        import pysam
+
+        bam_out = tmp_path / "filtered.bam"
+        cram_out = tmp_path / "filtered.cram"
+
+        filter_file(str(BAM), output_file=str(bam_out), quality_threshold=0)
+        filter_file(
+            str(cram_file), output_file=str(cram_out), quality_threshold=0,
+            reference_file=str(FASTA),
+        )
+
+        with pysam.AlignmentFile(str(bam_out)) as f:
+            bam_count = sum(1 for _ in f)
+        with pysam.AlignmentFile(
+            str(cram_out), reference_filename=str(FASTA)
+        ) as f:
+            assert f.is_cram
+            cram_count = sum(1 for _ in f)
+
+        assert bam_count == cram_count
+        assert bam_count > 0
 
 
 class TestMultiCleavageProfileCRAMRuns:
