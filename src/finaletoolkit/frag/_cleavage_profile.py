@@ -30,6 +30,66 @@ __all__ = ["cleavage_profile", "multi_cleavage_profile"]
 _CLEAVAGE_DTYPE = [("contig", "U16"), ("pos", "i8"), ("proportion", "f8")]
 
 
+def _coverage_and_ends(
+    frag_starts: np.ndarray,
+    frag_stops: np.ndarray,
+    frag_strands: np.ndarray,
+    adj_start: int,
+    adj_stop: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Per-position fragment depth and fragment-end counts over an interval.
+
+    Equivalent to broadcasting each fragment against each position (an
+    ``(n_fragments, n_positions)`` boolean matrix) but computed with a
+    coverage difference array instead, so memory is ``O(n_positions)``
+    rather than ``O(n_fragments * n_positions)``.
+
+    Parameters
+    ----------
+    frag_starts, frag_stops : numpy.ndarray
+        Fragment start/stop coordinates (half-open, ``[start, stop)``).
+    frag_strands : numpy.ndarray
+        Boolean array, ``True`` for ``+`` strand fragments.
+    adj_start, adj_stop : int
+        Half-open interval of positions to compute over.
+
+    Returns
+    -------
+    depth : numpy.ndarray
+        Number of fragments covering each position, shape
+        ``(adj_stop - adj_start,)``.
+    ends : numpy.ndarray
+        Number of fragment ends (start of + strand fragments, stop of -
+        strand fragments) at each position, same shape as ``depth``.
+    """
+    n = adj_stop - adj_start
+
+    raw_start_idx = frag_starts - adj_start
+    raw_stop_idx = frag_stops - adj_start
+
+    # Depth via a coverage difference array: +1 where a fragment starts,
+    # -1 where it stops, then a cumulative sum. Indices are clipped to
+    # [0, n] since fragments may extend beyond the interval (frag_array is
+    # called with intersect_policy="any").
+    depth_diff = np.zeros(n + 1, dtype=np.int64)
+    np.add.at(depth_diff, np.clip(raw_start_idx, 0, n), 1)
+    np.add.at(depth_diff, np.clip(raw_stop_idx, 0, n), -1)
+    depth = np.cumsum(depth_diff[:-1])
+
+    # Fragment ends: forward fragments end at their start (+ strand),
+    # reverse fragments end at their stop (- strand). Unlike depth, an
+    # end that falls outside the interval must be dropped rather than
+    # clipped to the boundary.
+    forward_mask = frag_strands
+    fwd_idx = raw_start_idx[forward_mask]
+    fwd_idx = fwd_idx[(fwd_idx >= 0) & (fwd_idx < n)]
+    rev_idx = raw_stop_idx[~forward_mask]
+    rev_idx = rev_idx[(rev_idx >= 0) & (rev_idx < n)]
+    ends = np.bincount(fwd_idx, minlength=n) + np.bincount(rev_idx, minlength=n)
+
+    return depth, ends
+
+
 def cleavage_profile(
     input_file: FragFile,
     chrom_size: int,
@@ -143,25 +203,9 @@ def cleavage_profile(
     )
 
     positions = np.arange(adj_start, adj_stop)
-
-    # Depth: number of fragments covering each position.
-    fragwise_overlaps = np.logical_and(
-        np.greater_equal(positions[np.newaxis], frags["start"][:, np.newaxis]),
-        np.less(positions[np.newaxis], frags["stop"][:, np.newaxis]),
+    depth, ends = _coverage_and_ends(
+        frags["start"], frags["stop"], frags["strand"], adj_start, adj_stop
     )
-    depth = np.sum(fragwise_overlaps, axis=0)
-
-    # Fragment ends: forward fragments end at their start (+ strand),
-    # reverse fragments end at their stop (- strand).
-    forward_ends = np.logical_and(
-        np.equal(positions[np.newaxis], frags["start"][:, np.newaxis]),
-        frags["strand"][:, np.newaxis],
-    )
-    reverse_ends = np.logical_and(
-        np.equal(positions[np.newaxis], frags["stop"][:, np.newaxis]),
-        np.logical_not(frags["strand"][:, np.newaxis]),
-    )
-    ends = np.sum(np.logical_or(forward_ends, reverse_ends), axis=0)
 
     proportions = np.zeros_like(depth, dtype=np.float64)
     non_zero_mask = depth != 0
