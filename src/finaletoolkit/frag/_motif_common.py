@@ -35,24 +35,63 @@ _WINDOW_SIZE = 1_000_000
 __all__ = ["FPROFILE_PATH", "MIN_QUALITY"]
 
 
-def _normalized_shannon_mds(counts: np.ndarray, k: int) -> float:
+def _normalized_shannon_mds(
+    counts: np.ndarray,
+    k: int,
+    miller_madow: bool = False,
+    n: float | None = None,
+) -> float:
     """Normalized-Shannon-entropy motif diversity score (Jiang et al., 2020).
 
     Generalized to any ``k``.  Zero-frequency motifs contribute nothing.
+
+    Parameters
+    ----------
+    counts : numpy.ndarray
+        Motif *frequencies* (normalized to sum to 1).
+    k : int
+        K-mer length; the entropy is normalized by ``log(4**k)``.
+    miller_madow : bool, optional
+        Apply the Miller-Madow bias correction (default ``False``).  The
+        plug-in entropy estimator is biased downward by roughly
+        ``(m - 1) / (2N)`` nats, where ``m`` is the number of occupied bins
+        and ``N`` the number of observations; Miller-Madow adds that term
+        back.  ``m`` is taken to be the number of motifs with non-zero
+        frequency.
+    n : float, optional
+        Number of observations (fragment ends) the frequencies were
+        estimated from.  Required when ``miller_madow`` is ``True``.
+
+    Returns
+    -------
+    float
+        The motif diversity score, or ``nan`` if the frequencies are
+        undefined.  Note that for very small ``n`` the corrected score can
+        exceed 1; it is deliberately not clipped so that the estimator's
+        behavior stays visible.
     """
     num_kmers = 4**k
     freq = np.asarray(counts, dtype=np.float64)
-    return float(
-        -np.sum(
-            freq
-            * np.log(
-                freq,
-                out=np.zeros_like(freq, dtype=np.float64),
-                where=(freq != 0),
-            )
-            / np.log(num_kmers)
+    entropy = -np.sum(
+        freq
+        * np.log(
+            freq,
+            out=np.zeros_like(freq, dtype=np.float64),
+            where=(freq != 0),
         )
     )
+
+    if miller_madow:
+        if n is None:
+            raise ValueError(
+                "n is required when miller_madow is True."
+            )
+        if not n > 0:
+            return float("nan")
+        occupied = int(np.count_nonzero(np.nan_to_num(freq)))
+        entropy = entropy + (occupied - 1) / (2 * n)
+
+    return float(entropy / np.log(num_kmers))
 
 
 def resolve_motif_aliases(
@@ -235,13 +274,35 @@ class _MotifsIntervals:
         intervals: list[tuple[tuple, dict]],
         k: int,
         quality_threshold: int = MIN_QUALITY,
+        total_counts: list[float] | None = None,
     ) -> None:
+        """
+        Parameters
+        ----------
+        intervals : list of tuple
+            ``((contig, start, stop, name), {kmer: value})`` pairs.
+        k : int
+            K-mer length.
+        quality_threshold : int, optional
+            Stored on the instance.
+        total_counts : list of float, optional
+            Per-interval observation count ``N``, aligned with ``intervals``.
+            Only needed when the stored values are normalized frequencies
+            rather than raw counts, which is the case when reading back a
+            table written with ``calc_freq=True``.  When omitted, ``N`` is
+            taken to be the sum of each interval's values.
+        """
         self.intervals = intervals
         self.k = k
         self.quality_threshold = quality_threshold
+        self.total_counts = total_counts
         if not all(len(freqs) == 4**k for _, freqs in intervals):
             raise ValueError(
                 "bins contains results for kmer with length not equal to k."
+            )
+        if total_counts is not None and len(total_counts) != len(intervals):
+            raise ValueError(
+                "total_counts must have one entry per interval."
             )
 
     def __iter__(self) -> Iterator:
@@ -283,6 +344,7 @@ class _MotifsIntervals:
                 file.readline()
 
             intervals = []
+            total_counts = []
             lines = file.readlines()
             _, _, _, _, _, *kmers = lines[0].split(sep)
             k = round(np.log(len(kmers)) / np.log(4))
@@ -294,10 +356,13 @@ class _MotifsIntervals:
                 float_freqs = [float(freq) for freq in freqs]
                 dict_freqs = dict(zip(kmers, float_freqs))
                 intervals.append(((contig, start, stop, name), dict_freqs))
+                # Retained so the Miller-Madow correction knows N even when
+                # the table stores frequencies rather than raw counts.
+                total_counts.append(float(count))
         finally:
             if is_file and file is not None:
                 file.close()
-        return cls(intervals, k, quality_threshold)
+        return cls(intervals, k, quality_threshold, total_counts)
 
     def freq(self, kmer: str) -> dict[tuple[str, int, int], float]:
         """Map each interval to its frequency for a single k-mer."""
@@ -305,22 +370,45 @@ class _MotifsIntervals:
             (*interval, freq[kmer]) for interval, freq in self.intervals
         )
 
-    def motif_diversity_score(self) -> list[tuple[tuple, float]]:
-        """Regional motif diversity score (rMDS) for each region (any ``k``)."""
+    def motif_diversity_score(
+        self, miller_madow: bool = False
+    ) -> list[tuple[tuple, float]]:
+        """Regional motif diversity score (rMDS) for each region (any ``k``).
+
+        Parameters
+        ----------
+        miller_madow : bool, optional
+            Apply the Miller-Madow bias correction (default ``False``).  The
+            plug-in entropy estimator underestimates diversity in regions with
+            few fragments; the correction adds back ``(m - 1) / (2N)`` nats,
+            where ``m`` is the number of observed motifs and ``N`` the
+            region's fragment-end count.  Because the correction shrinks as
+            ``N`` grows, it mostly affects sparse regions.
+        """
         mds = []
-        for interval, kmers in self.intervals:
+        for index, (interval, kmers) in enumerate(self.intervals):
             counts = np.array(list(kmers.values()))
             total = np.sum(counts)
-            try:
-                region_mds = _normalized_shannon_mds(counts / total, self.k)
-            except RuntimeWarning:
-                region_mds = np.nan
+            n = (
+                self.total_counts[index]
+                if self.total_counts is not None
+                else total
+            )
+            with np.errstate(invalid="ignore", divide="ignore"):
+                region_mds = _normalized_shannon_mds(
+                    counts / total, self.k, miller_madow, n
+                )
             mds.append((interval, region_mds))
         return mds
 
-    def mds_bed(self, output_file: str | Path, sep: str = "\t") -> None:
+    def mds_bed(
+        self,
+        output_file: str | Path,
+        sep: str = "\t",
+        miller_madow: bool = False,
+    ) -> None:
         """Write the regional MDS (rMDS) of each region to a BED/bedgraph file."""
-        mds = self.motif_diversity_score()
+        mds = self.motif_diversity_score(miller_madow)
         with open(output_file, "w") as out:
             for interval, region_mds in mds:
                 contig, start, stop, name = interval

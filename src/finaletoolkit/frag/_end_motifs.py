@@ -391,8 +391,12 @@ def _cli_mds(file_path: str, sep: str = "\t", header: int = 0) -> None:
 
 
 def _cli_regional_mds(
-    file_path: str, file_out: str, sep: str = ",", header: int = 0
+    file_path: str,
+    file_out: str,
+    sep: str = ",",
+    header: int = 0,
+    miller_madow: bool = False,
 ) -> None:
     """CLI: write the regional MDS (rMDS) of each region to ``file_out``."""
     motifs = EndMotifsIntervals.from_file(file_path, 30, sep, header)
-    motifs.mds_bed(file_out)
+    motifs.mds_bed(file_out, miller_madow=miller_madow)

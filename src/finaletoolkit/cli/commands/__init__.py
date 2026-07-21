@@ -618,6 +618,15 @@ def mds(**params):
     type=int,
     help="Number of header rows to ignore.",
 )
+@click.option(
+    "--miller-madow",
+    "miller_madow",
+    is_flag=True,
+    default=False,
+    help="Apply the Miller-Madow bias correction to each region's rMDS. "
+    "Counteracts the downward bias of the plug-in entropy estimator in "
+    "regions with few fragments.",
+)
 def regional_mds(**params):
     """Regional Motif Diversity Score (rMDS) for each region (Bandaru et al. 2026).
 
