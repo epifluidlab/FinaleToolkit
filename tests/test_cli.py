@@ -204,9 +204,12 @@ class TestCLIEntryPointsInProcess:
 
     def test_no_args_shows_help(self):
         # A bare `finaletoolkit` invocation (Click's default no-subcommand
-        # behavior for groups is `no_args_is_help`): prints help, exit 0.
+        # behavior for groups is `no_args_is_help`): prints help rather than
+        # hanging or crashing. The exact exit code for this case isn't
+        # stable across Click versions -- Click 8.1 returns 0, Click >=8.2
+        # returns 2 -- so only the visible behavior (help shown) is checked.
         result = CliRunner().invoke(main_cli, [])
-        assert result.exit_code == 0, result.output
+        assert result.exit_code in (0, 2), result.output
         assert "Usage" in result.output
 
     def test_unknown_subcommand_fails_cleanly(self):
