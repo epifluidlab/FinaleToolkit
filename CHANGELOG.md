@@ -9,6 +9,14 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+- The package version is now derived from git tags via `setuptools-scm`
+  instead of a hand-edited version string: `1.0.0` exactly on a tag,
+  `1.0.1.dev6` six commits past one. No action needed for normal installs;
+  contributors on an editable install (`pip install -e .`) should re-run
+  that command after pulling new commits if they want `finaletoolkit
+  --version` to reflect the latest commit.
+
 ### Fixed
 - `filter-file`/`filter_file` now accepts a `-r`/`--reference` (`reference_file`)
   option. Previously CRAM input to `filter-file` always failed with "CRAM

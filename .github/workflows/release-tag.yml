@@ -1,0 +1,67 @@
+name: Tag and publish release
+
+# Fires when a "release-vX.Y.Z" PR (opened by release-prepare.yml) is merged:
+# tags the merge commit, creates a GitHub Release from the CHANGELOG section
+# for that version, then directly invokes python-publish.yml to build and
+# publish to PyPI.
+#
+# Directly invoking python-publish.yml (rather than relying on the
+# `release: published` event it also listens for) is deliberate: the GitHub
+# Release below is created with the default GITHUB_TOKEN, and GitHub does
+# not let a GITHUB_TOKEN-authored event trigger further workflow runs, to
+# prevent recursive triggers. `release: published` would never fire here.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  tag:
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Extract version and release notes
+        id: version
+        run: |
+          set -e
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          VERSION="${BRANCH#release-v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          python3 scripts/prepare_release.py extract "$VERSION" > release_notes.md
+
+      - name: Create tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes-file release_notes.md
+
+  publish:
+    needs: tag
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/python-publish.yml
+    with:
+      version: ${{ needs.tag.outputs.version }}

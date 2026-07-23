@@ -1,0 +1,35 @@
+name: Changelog check
+
+# Fails a PR that changes src/finaletoolkit/ without also updating
+# CHANGELOG.md. Add the "skip-changelog" label (test-only changes, internal
+# refactors with no user-visible effect, etc.) to bypass -- adding/removing
+# the label re-triggers this check via the labeled/unlabeled event types.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require a CHANGELOG.md entry when src/finaletoolkit changes
+        run: |
+          changed=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}")
+          echo "Changed files:"
+          echo "$changed"
+          if echo "$changed" | grep -q '^src/finaletoolkit/'; then
+            if ! echo "$changed" | grep -qx 'CHANGELOG.md'; then
+              echo "::error::This PR changes src/finaletoolkit/ but doesn't update CHANGELOG.md. Add an entry under [Unreleased], or add the 'skip-changelog' label if this change has no user-visible effect (e.g. test-only or internal refactor)."
+              exit 1
+            fi
+          fi
+          echo "OK"
