@@ -1,1 +1,11 @@
 graft src/finaletoolkit
+
+# setuptools-scm's sdist file finder includes every git-tracked file by
+# default (docs/, .github/, and the large binary fixtures under
+# tests/data/), ballooning the sdist from ~100KB to tens of MB. Prune them
+# back out to restore the prior, intentional scope: package source plus the
+# test *.py files (auto-discovered by setuptools), without test data,
+# CI config, or doc sources.
+prune tests/data
+prune docs
+prune .github

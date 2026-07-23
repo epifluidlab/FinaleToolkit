@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 dist
 *.egg-info
+src/finaletoolkit/_version.py
 pip-wheel-metadata
 .vscode
 **/.DS_Store

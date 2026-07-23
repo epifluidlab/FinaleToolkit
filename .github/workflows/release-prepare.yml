@@ -1,0 +1,54 @@
+name: Prepare release
+
+# Manually triggered: a maintainer decides it's time to cut a release and
+# supplies the version number. This workflow only prepares the CHANGELOG and
+# opens a PR for review -- nothing is tagged or published until that PR is
+# reviewed and merged (see release-tag.yml, triggered on merge).
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version to release, e.g. "1.1.0" (no leading "v")'
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update CHANGELOG.md
+        run: python3 scripts/prepare_release.py bump "${{ inputs.version }}"
+
+      - name: Open release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          VERSION="${{ inputs.version }}"
+          BRANCH="release-v${VERSION}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add CHANGELOG.md
+          git commit -m "Release v${VERSION}"
+          git push -u origin "$BRANCH"
+
+          # Idempotent: succeeds whether or not the label already exists.
+          gh label create release --color "0E8A16" \
+            --description "Merging tags the release and publishes to PyPI" \
+            --force
+
+          gh pr create \
+            --base main \
+            --title "Release v${VERSION}" \
+            --label release \
+            --body "Automated release preparation for v${VERSION}. Review the CHANGELOG.md changes, then merge to tag \`v${VERSION}\`, create the GitHub Release, and publish to PyPI (see .github/workflows/release-tag.yml)."

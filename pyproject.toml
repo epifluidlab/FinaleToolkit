@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=64.0", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -11,6 +11,17 @@ where = ["src"]
 [tool.setuptools.package-data]
 "finaletoolkit.frag" = ["data/*.tsv"]
 "finaletoolkit.genome" = ["data/*.gz"]
+
+[tool.setuptools_scm]
+# Derives the package version from git tags/commit distance instead of a
+# hardcoded string. On a tag: "1.0.0". Ahead of a tag: "1.0.1.dev4" (4
+# commits past v1.0.0, guessing the next patch). `local_scheme` is set to
+# drop the "+g<hash>" suffix setuptools_scm normally appends when not
+# exactly on a tag, since PyPI rejects uploads whose version has a local
+# segment -- CI needs a clean version string to publish dev builds.
+version_file = "src/finaletoolkit/_version.py"
+local_scheme = "no-local-version"
+fallback_version = "0.0.0.dev0+unknown"
 
 [project]
 name = "FinaleToolkit"
@@ -48,9 +59,6 @@ dependencies = [
     "rich-click>=1.8",
 ]
 dynamic = ["version"]
-
-[tool.setuptools.dynamic]
-version = {attr = "finaletoolkit.__version__"}
 
 [project.scripts]
 finaletoolkit = "finaletoolkit.cli.main_cli:main_cli"

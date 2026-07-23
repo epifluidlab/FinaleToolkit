@@ -16,6 +16,7 @@
   - [Compatible File Formats](#compatible-file-formats)
   - [Using Fragment Files](#using-fragment-files)
   - [Snakemake Workflow](#snakemake-workflow)
+- [Contributing](#contributing)
 - [Contact](#contact)
 - [License](#license)
 
@@ -94,6 +95,12 @@ fragment files. Learn more about FinaleDB [here](http://finaledb.research.cchmc.
 
 Check out our
 [Snakemake workflow](https://github.com/epifluidlab/finaletoolkit_workflow)!
+
+## Contributing
+
+PRs that change `src/finaletoolkit/` should add a `CHANGELOG.md` entry under
+`[Unreleased]`. See [RELEASING.md](RELEASING.md) for that convention and for
+how releases are cut.
 
 ## Contact
 
