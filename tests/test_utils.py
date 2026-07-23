@@ -67,3 +67,79 @@ class TestUtils:
         assert low_quality_read_pairs(next(read))
         assert low_quality_read_pairs(next(read))
         assert not low_quality_read_pairs(next(read))
+
+
+class TestNoneToleranceComparisons:
+    """_none_leq/_none_geq/_none_eq: a None operand means "unbounded"."""
+
+    def test_none_leq(self):
+        assert _none_leq(1, 2)
+        assert not _none_leq(2, 1)
+        assert _none_leq(None, 2)
+        assert _none_leq(1, None)
+        assert _none_leq(None, None)
+
+    def test_none_geq(self):
+        assert _none_geq(2, 1)
+        assert not _none_geq(1, 2)
+        assert _none_geq(None, 2)
+        assert _none_geq(1, None)
+        assert _none_geq(None, None)
+
+    def test_none_eq(self):
+        assert _none_eq(3, 3)
+        assert not _none_eq(3, 4)
+        assert _none_eq(None, 3)
+        assert _none_eq(3, None)
+        assert _none_eq(None, None)
+
+
+class TestMergeIntervals:
+    """_merge_overlapping_intervals and friends, used to collapse a BED file's
+    intervals per contig before further processing."""
+
+    def test_merge_overlapping_intervals(self):
+        intervals = [(10, 20), (15, 25), (30, 40), (100, 200)]
+        assert _merge_overlapping_intervals(intervals) == [
+            (10, 25), (30, 40), (100, 200)
+        ]
+
+    def test_merge_overlapping_intervals_no_overlap(self):
+        intervals = [(30, 40), (10, 20)]
+        assert _merge_overlapping_intervals(intervals) == [(10, 20), (30, 40)]
+
+    def test_merge_overlapping_intervals_containment(self):
+        # A fully-contained interval shouldn't shrink the merged span.
+        assert _merge_overlapping_intervals([(10, 100), (20, 30)]) == [(10, 100)]
+
+    def test_merge_overlapping_intervals_empty(self):
+        assert _merge_overlapping_intervals([]) == []
+
+    def test_reduce_overlaps_in_file(self, tmp_path):
+        bed = tmp_path / "intervals.bed"
+        bed.write_text(
+            "1\t10\t20\n"
+            "1\t15\t25\n"
+            "2\t5\t8\n"
+        )
+        assert _reduce_overlaps_in_file(str(bed)) == {
+            "1": [(10, 25)],
+            "2": [(5, 8)],
+        }
+
+    def test_convert_to_list(self):
+        reduced = {"1": [(10, 20), (30, 40)]}
+        assert _convert_to_list(reduced) == {
+            "1": [["1", 10, 20], ["1", 30, 40]]
+        }
+
+    def test_merge_all_intervals(self):
+        converted = {
+            "1": [["1", 10, 20]],
+            "2": [["2", 5, 8], ["2", 50, 60]],
+        }
+        result = _merge_all_intervals(converted)
+        assert result == [["1", 10, 20], ["2", 5, 8], ["2", 50, 60]]
+
+    def test_merge_all_intervals_empty(self):
+        assert _merge_all_intervals({}) == []

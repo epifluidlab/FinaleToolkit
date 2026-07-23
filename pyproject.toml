@@ -81,6 +81,10 @@ filterwarnings = [
     "ignore::DeprecationWarning",
 ]
 
+[tool.coverage.run]
+source = ["finaletoolkit"]
+omit = ["*/finaletoolkit/_version.py"]
+
 [tool.ruff]
 line-length = 88
 target-version = "py310"
