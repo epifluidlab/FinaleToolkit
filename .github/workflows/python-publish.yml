@@ -11,21 +11,14 @@ name: Upload Python Package
 on:
   release:
     types: [published]
-  # Also invocable directly as a reusable workflow (see release-tag.yml).
-  # release-tag.yml creates the GitHub Release itself using the default
-  # GITHUB_TOKEN, and GitHub does not let a GITHUB_TOKEN-authored event
-  # trigger further workflow runs (to prevent recursive triggers) -- so
-  # `release: published` alone would never fire in that path. Calling this
-  # workflow directly sidesteps that limitation.
-  workflow_call:
+  # Manual escape hatch: retry publishing an existing tag if the automated
+  # release: published path failed (e.g. a Trusted Publisher mismatch) or
+  # to publish a release that predates this workflow.
+  workflow_dispatch:
     inputs:
-      version:
-        description: >-
-          Version being published, e.g. "1.1.0" (no leading "v"). Only
-          used for the PyPI project URL shown in the deployment;
-          publishing itself does not depend on it.
-        required: false
-        type: string
+      tag:
+        description: 'Existing git tag to build and publish, e.g. "v1.1.0"'
+        required: true
 
 permissions:
   contents: read
@@ -38,6 +31,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # full history + tags, needed by setuptools-scm to derive the version
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
 
       - uses: actions/setup-python@v5
         with:
@@ -72,7 +66,7 @@ jobs:
       #
       # ALTERNATIVE: if your GitHub Release name is the PyPI project version string
       # ALTERNATIVE: exactly, uncomment the following line instead:
-      url: https://pypi.org/project/FinaleToolkit/${{ github.event.release.name || inputs.version }}
+      url: https://pypi.org/project/FinaleToolkit/${{ github.event.release.name || inputs.tag }}
 
     steps:
       - name: Retrieve release distributions

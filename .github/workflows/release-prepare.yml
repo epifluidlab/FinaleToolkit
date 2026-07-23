@@ -4,6 +4,13 @@ name: Prepare release
 # supplies the version number. This workflow only prepares the CHANGELOG and
 # opens a PR for review -- nothing is tagged or published until that PR is
 # reviewed and merged (see release-tag.yml, triggered on merge).
+#
+# Pushes the branch and opens the PR with RELEASE_TOKEN rather than the
+# default GITHUB_TOKEN. This isn't just for consistency with release-tag.yml
+# -- GitHub does not run pull_request-triggered workflows (changelog-check,
+# the test matrix, ...) on a PR opened by GITHUB_TOKEN, so without this the
+# release PR would show no checks at all. See RELEASING.md for how to
+# create and store RELEASE_TOKEN.
 
 on:
   workflow_dispatch:
@@ -13,8 +20,7 @@ on:
         required: true
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   prepare:
@@ -29,9 +35,13 @@ jobs:
 
       - name: Open release PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -e
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::The RELEASE_TOKEN secret is not set. See RELEASING.md for how to create it -- the default GITHUB_TOKEN would open the PR but with no CI checks running on it."
+            exit 1
+          fi
           VERSION="${{ inputs.version }}"
           BRANCH="release-v${VERSION}"
 
@@ -40,7 +50,7 @@ jobs:
           git checkout -b "$BRANCH"
           git add CHANGELOG.md
           git commit -m "Release v${VERSION}"
-          git push -u origin "$BRANCH"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" -u "$BRANCH"
 
           # Idempotent: succeeds whether or not the label already exists.
           gh label create release --color "0E8A16" \
