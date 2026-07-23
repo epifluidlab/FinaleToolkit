@@ -9,6 +9,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-23
+
 ### Changed
 - The package version is now derived from git tags via `setuptools-scm`
   instead of a hand-edited version string: `1.0.0` exactly on a tag,
