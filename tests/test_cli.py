@@ -10,8 +10,10 @@ import subprocess
 import sys
 
 import pytest
+from click.testing import CliRunner
 
 from finaletoolkit.cli.commands import COMMAND_TARGETS, COMMANDS
+from finaletoolkit.cli.main_cli import main_cli
 
 # name -> Click command object, for introspecting declared parameters.
 _COMMANDS_BY_NAME = {command.name: command for command in COMMANDS}
@@ -175,3 +177,45 @@ class TestCLIEntryPoint:
             '12\t34443118\t34443538\t.\t0.25',
             '12\t34444968\t34446115\t.\t0.4375',
         ]
+
+
+class TestCLIEntryPointsInProcess:
+    """Invoke every registered subcommand's entry point via Click's
+    ``CliRunner`` instead of shelling out.
+
+    ``TestCLIEntryPoint`` above exercises the *installed* ``finaletoolkit``
+    console script through ``os.system``/``subprocess``, which is a real
+    end-to-end check of the packaging entry point, but runs in a separate
+    process invisible to coverage instrumentation and only covers a subset
+    of commands. This class runs in-process (so ``main_cli`` and each
+    subcommand's Click wiring show up in coverage) and parametrizes over
+    every command in ``COMMANDS``, including ``breakpoint-motifs`` and
+    ``interval-breakpoint-motifs`` which aren't covered above.
+    """
+
+    def test_top_level_help(self):
+        result = CliRunner().invoke(main_cli, ["--help"])
+        assert result.exit_code == 0, result.output
+
+    def test_version(self):
+        result = CliRunner().invoke(main_cli, ["--version"])
+        assert result.exit_code == 0, result.output
+        assert "FinaleToolkit" in result.output
+
+    def test_no_args_shows_help(self):
+        # A bare `finaletoolkit` invocation (Click's default no-subcommand
+        # behavior for groups is `no_args_is_help`): prints help, exit 0.
+        result = CliRunner().invoke(main_cli, [])
+        assert result.exit_code == 0, result.output
+        assert "Usage" in result.output
+
+    def test_unknown_subcommand_fails_cleanly(self):
+        result = CliRunner().invoke(main_cli, ["not-a-real-subcommand"])
+        assert result.exit_code != 0
+        assert "No such command" in result.output
+
+    @pytest.mark.parametrize("name", [command.name for command in COMMANDS])
+    def test_subcommand_help(self, name: str):
+        result = CliRunner().invoke(main_cli, [name, "--help"])
+        assert result.exit_code == 0, result.output
+        assert "Usage" in result.output
