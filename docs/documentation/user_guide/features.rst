@@ -59,9 +59,14 @@ Motif Diversity Score (MDS)
 MDS (*Jiang et al. 2020*) is the normalized Shannon entropy of the end-motif
 k-mer distribution, summarizing end-motif diversity in a single number. The
 regional Motif Diversity Score (rMDS) computes that same entropy per genomic
-region (*Bandaru et al. 2026*).
+region (*Bandaru et al. 2026*). Because the underlying plug-in entropy
+estimator is biased downward in regions with few fragments, ``regional-mds``
+accepts an optional ``--miller-madow`` flag that applies a Miller-Madow bias
+correction, making rMDS values comparable across regions of differing depth.
+It is off by default, so existing output is unchanged unless requested.
 
-:Commands: ``mds`` (whole sample), ``regional-mds`` (per region)
+:Commands: ``mds`` (whole sample), ``regional-mds`` (per region, optionally
+   bias-corrected with ``--miller-madow``)
 
 Cleavage profile
 ----------------
