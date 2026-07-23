@@ -9,6 +9,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-23
+
+### Added
+- `--miller-madow` option for `regional-mds` (and `miller_madow=True` on
+  `EndMotifsIntervals`/`BreakpointMotifsIntervals`'s `motif_diversity_score`/
+  `mds_bed`) applies a Miller-Madow bias correction to rMDS, counteracting
+  the downward bias of the plug-in Shannon entropy estimator in regions
+  with few fragments. Off by default; existing rMDS output is unchanged.
+
 ### Changed
 - The package version is now derived from git tags via `setuptools-scm`
   instead of a hand-edited version string: `1.0.0` exactly on a tag,
@@ -25,6 +34,12 @@ and this project adheres to
   input is converted internally to BAM for processing and the filtered
   output is written back out as CRAM (using the given reference) when the
   input was CRAM.
+- `cleavage_profile`/`multi_cleavage_profile` no longer risk an out-of-memory
+  crash on large intervals. The per-position depth/end-count calculation
+  built an `(n_fragments, n_positions)` boolean matrix, which could reach
+  hundreds of gigabytes for a single interval (e.g. tiled BED bins that get
+  merged into one large region); it's now computed with an O(positions)
+  coverage-difference array instead, with identical output.
 
 ## [1.0.0] - 2026-06-26
 
