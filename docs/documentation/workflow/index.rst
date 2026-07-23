@@ -179,7 +179,11 @@ Each command's options below carry the FinaleToolkit flag they map to. Optional
 (``--strand``: ``both``, ``forward``, or ``reverse``), ``*_mapq`` (``-q``),
 ``*_workers`` (``-t``).
 
-**mds** / **regional-mds**: ``*_sep`` (``-s``), ``*_header`` (``--header``).
+**mds**: ``mds_sep`` (``-s``), ``mds_header`` (``--header``).
+
+**regional-mds**: ``regional_mds_sep`` (``-s``), ``regional_mds_header``
+(``--header``), ``regional_mds_miller_madow`` (``--miller-madow``;
+Miller-Madow bias correction, off by default).
 
 **wps**: ``wps_site_bed`` (positional REGIONS), ``wps_reference`` (``-r``),
 ``wps_chrom_sizes`` (``--chrom-sizes``), ``wps_interval_size`` (``-i``),
