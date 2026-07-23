@@ -1,15 +1,32 @@
-name: Tag and publish release
+name: Tag release
 
 # Fires when a "release-vX.Y.Z" PR (opened by release-prepare.yml) is merged:
-# tags the merge commit, creates a GitHub Release from the CHANGELOG section
-# for that version, then directly invokes python-publish.yml to build and
-# publish to PyPI.
+# tags the merge commit and creates a GitHub Release from the CHANGELOG
+# section for that version. That Release's `published` event is what
+# triggers python-publish.yml to build and publish to PyPI.
 #
-# Directly invoking python-publish.yml (rather than relying on the
-# `release: published` event it also listens for) is deliberate: the GitHub
-# Release below is created with the default GITHUB_TOKEN, and GitHub does
-# not let a GITHUB_TOKEN-authored event trigger further workflow runs, to
-# prevent recursive triggers. `release: published` would never fire here.
+# The release must be created with a real user/PAT token (RELEASE_TOKEN),
+# not the default GITHUB_TOKEN. Two independent problems rule GITHUB_TOKEN
+# out here:
+#
+#   1. GitHub does not let a GITHUB_TOKEN-authored event trigger further
+#      workflow runs (anti-recursion), so `release: published` would never
+#      fire and python-publish.yml would simply never run.
+#
+#   2. Calling python-publish.yml directly as a reusable workflow (uses:
+#      ./.github/workflows/python-publish.yml) to route around problem 1
+#      was tried and does not work either: PyPI's Trusted Publisher is
+#      registered for the exact file "python-publish.yml", but a workflow
+#      called this way has its OIDC identity (the certificate's Build
+#      Config URI) reported as the *calling* workflow -- this file -- not
+#      the reusable one, so PyPI rejects the upload as coming from an
+#      unrecognized publisher.
+#
+# A PAT/user-token-authored release event sidesteps both: it's a normal
+# `release: published` event like a maintainer clicking "Draft a new
+# release" by hand, so python-publish.yml runs as itself, with its own,
+# already-correctly-registered identity. See RELEASING.md for how to
+# create and store RELEASE_TOKEN.
 
 on:
   pull_request:
@@ -24,10 +41,6 @@ jobs:
       github.event.pull_request.merged == true &&
       startsWith(github.event.pull_request.head.ref, 'release-v')
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,23 +58,18 @@ jobs:
 
       - name: Create tag and GitHub Release
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -e
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::The RELEASE_TOKEN secret is not set. See RELEASING.md for how to create it -- the default GITHUB_TOKEN cannot be used here (it would silently fail to trigger the PyPI publish)."
+            exit 1
+          fi
           VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag "v${VERSION}"
-          git push origin "v${VERSION}"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "v${VERSION}"
           gh release create "v${VERSION}" \
             --title "v${VERSION}" \
             --notes-file release_notes.md
-
-  publish:
-    needs: tag
-    permissions:
-      id-token: write
-      contents: read
-    uses: ./.github/workflows/python-publish.yml
-    with:
-      version: ${{ needs.tag.outputs.version }}
