@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history + tags, needed by setuptools-scm to derive the version
 
       - name: Set up Python
         uses: actions/setup-python@v5

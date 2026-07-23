@@ -21,6 +21,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history + tags, needed by setuptools-scm to derive the version
 
       - uses: actions/setup-python@v5
         with:
