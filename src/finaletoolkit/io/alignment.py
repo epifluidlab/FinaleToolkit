@@ -57,16 +57,30 @@ class Fragment(NamedTuple):
 # samtools-style flag filtering applied to BAM/CRAM reads (equivalent to
 # ``-F 3852 -f 3``): drop unmapped/secondary/duplicate/qcfail/supplementary
 # reads and keep only properly-paired reads.
-def _read_is_low_quality(read: "pysam.AlignedSegment", quality_threshold: int) -> bool:
-    return (
+#
+# With ``single_end=True`` the three pairing checks are skipped, since
+# single-end libraries (long-read platforms such as Oxford Nanopore and
+# PacBio) have no mate and would otherwise be rejected in full. The
+# remaining checks are pairing-independent and still apply.
+def _read_is_low_quality(
+    read: "pysam.AlignedSegment",
+    quality_threshold: int,
+    single_end: bool = False,
+) -> bool:
+    if (
         read.is_unmapped
         or read.is_secondary
-        or not read.is_paired
-        or read.mate_is_unmapped
         or read.is_duplicate
         or read.mapping_quality < quality_threshold
         or read.is_qcfail
         or read.is_supplementary
+    ):
+        return True
+    if single_end:
+        return False
+    return (
+        not read.is_paired
+        or read.mate_is_unmapped
         or not read.is_proper_pair
     )
 
@@ -91,6 +105,14 @@ class AlignmentWrapper:
     read1_only : bool, optional
         If ``True`` (default), only read1 is used from BAM/CRAM to avoid
         double-counting fragments.  Has no effect on tabix files.
+    single_end : bool, optional
+        If ``True``, treat BAM/CRAM input as a single-end library: skip the
+        pairing filters and take each fragment's span from the read's own
+        alignment (``reference_start``/``reference_end``) rather than from
+        the template length.  Required for long-read data (Oxford Nanopore,
+        PacBio), where reads are unpaired and ``TLEN`` is 0.  Implies
+        ``read1_only=False``, since there is no read1/read2 distinction.
+        Has no effect on tabix files, which carry no pairing information.
 
     Raises
     ------
@@ -107,12 +129,16 @@ class AlignmentWrapper:
         threads: int = 1,
         quality_threshold: int = 30,
         read1_only: bool = True,
+        single_end: bool = False,
     ) -> None:
         self.path = str(path) if isinstance(path, (str, Path)) else None
         self.reference_file = str(reference_file) if reference_file else None
         self.threads = threads
         self.quality_threshold = quality_threshold
-        self.read1_only = read1_only
+        self.single_end = single_end
+        # There is no read1/read2 split in a single-end library, so the
+        # de-duplication that read1_only performs would drop every read.
+        self.read1_only = read1_only and not single_end
         self._handle = None
         self._is_sam = False
         self._is_tabix = False
@@ -242,22 +268,33 @@ class AlignmentWrapper:
     def _fetch_sam(self, contig, start, stop) -> Generator[Fragment, None, None]:
         read1_only = self.read1_only
         quality_threshold = self.quality_threshold
+        single_end = self.single_end
         for read in self._handle.fetch(contig, start, stop):
-            if _read_is_low_quality(read, quality_threshold):
+            if _read_is_low_quality(read, quality_threshold, single_end):
                 continue
             if read1_only and read.is_read2:
                 continue
 
-            # Reconstruct the fragment span from the template length.
-            tlen = read.template_length
-            if tlen > 0:
+            if single_end:
+                # No mate, so TLEN is 0 and carries no span. The fragment is
+                # the read's own aligned span; reference_end already accounts
+                # for the CIGAR, so deletions and reference skips are
+                # included and soft-clipped bases are not.
                 f_start = read.reference_start
-                f_stop = read.reference_start + tlen
-            elif tlen < 0:
-                f_start = read.reference_end + tlen
                 f_stop = read.reference_end
+                if f_start is None or f_stop is None or f_stop <= f_start:
+                    continue
             else:
-                continue
+                # Reconstruct the fragment span from the template length.
+                tlen = read.template_length
+                if tlen > 0:
+                    f_start = read.reference_start
+                    f_stop = read.reference_start + tlen
+                elif tlen < 0:
+                    f_start = read.reference_end + tlen
+                    f_stop = read.reference_end
+                else:
+                    continue
 
             yield Fragment(
                 contig=read.reference_name,

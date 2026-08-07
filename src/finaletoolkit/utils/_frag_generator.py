@@ -66,6 +66,7 @@ def frag_generator(
     intersect_policy: str = "midpoint",
     verbose: bool | int = False,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> Generator[FragTuple, None, None]:
     """Stream fragments from a BAM/CRAM/fragment file with optional filtering.
 
@@ -88,6 +89,11 @@ def frag_generator(
         Unused placeholder kept for signature compatibility.
     reference_file : str or Path, optional
         Reference genome (required for CRAM).
+    single_end : bool, optional
+        Treat BAM/CRAM input as a single-end library, taking each fragment's
+        span from the read's own alignment instead of the template length.
+        Needed for long-read data (Oxford Nanopore, PacBio).  Default
+        ``False``.
 
     Yields
     ------
@@ -113,6 +119,7 @@ def frag_generator(
         input_file,
         reference_file=reference_file,
         quality_threshold=quality_threshold,
+        single_end=single_end,
     ) as wrapper:
         for frag in wrapper.fetch(contig, start, stop):
             try:

@@ -194,6 +194,7 @@ def frag_array(
     intersect_policy: str = "midpoint",
     verbose: bool = False,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> NDArray:
     """Read fragments into a structured ``(start, stop, strand)`` array.
 
@@ -215,6 +216,9 @@ def frag_array(
         Print progress to stderr.
     reference_file : str or Path, optional
         Reference genome (required for CRAM).
+    single_end : bool, optional
+        Treat BAM/CRAM input as a single-end library (default ``False``).
+        See :func:`finaletoolkit.utils.frag_generator`.
 
     Returns
     -------
@@ -239,6 +243,7 @@ def frag_array(
             intersect_policy,
             verbose,
             reference_file=reference_file,
+            single_end=single_end,
         )
     ]
 
@@ -258,7 +263,11 @@ def frag_array(
 # -- read-level quality filtering -------------------------------------------
 
 
-def low_quality_read_pairs(read: pysam.AlignedSegment, min_mapq: int = 30) -> bool:
+def low_quality_read_pairs(
+    read: pysam.AlignedSegment,
+    min_mapq: int = 30,
+    single_end: bool = False,
+) -> bool:
     """Return ``True`` if ``read`` is not a clean, properly-paired alignment.
 
     Equivalent to samtools ``-F 3852 -f 3`` plus a ``-G 48`` style same-strand
@@ -271,6 +280,10 @@ def low_quality_read_pairs(read: pysam.AlignedSegment, min_mapq: int = 30) -> bo
         The read to inspect.
     min_mapq : int, optional
         Minimum Phred mapping quality (default 30).
+    single_end : bool, optional
+        If ``True``, skip every pairing-related check (and the ``MQ`` mate
+        mapping-quality check) so that reads from an unpaired library are
+        not rejected outright.  Default ``False``.
 
     Returns
     -------
@@ -280,12 +293,21 @@ def low_quality_read_pairs(read: pysam.AlignedSegment, min_mapq: int = 30) -> bo
     if (
         read.is_unmapped  # 0x4
         or read.is_secondary  # 0x100
-        or (not read.is_paired)  # not 0x1
-        or read.mate_is_unmapped  # 0x8
         or read.is_duplicate  # 0x400
         or read.mapping_quality < min_mapq
         or read.is_qcfail  # 0x200
         or read.is_supplementary  # 0x800
+    ):
+        return True
+
+    # Everything below concerns the mate, which a single-end read does not
+    # have. The MQ tag likewise carries the *mate's* mapping quality.
+    if single_end:
+        return False
+
+    if (
+        (not read.is_paired)  # not 0x1
+        or read.mate_is_unmapped  # 0x8
         or (not read.is_proper_pair)  # not 0x2
         or (read.is_reverse and read.mate_is_reverse)  # -G 48
     ):
@@ -299,9 +321,20 @@ def low_quality_read_pairs(read: pysam.AlignedSegment, min_mapq: int = 30) -> bo
     return False
 
 
-def _not_read1_or_low_quality(read: pysam.AlignedSegment, min_mapq: int = 30) -> bool:
-    """Return ``True`` if ``read`` is not read1 or fails the quality filter."""
-    return low_quality_read_pairs(read, min_mapq=min_mapq) or not read.is_read1
+def _not_read1_or_low_quality(
+    read: pysam.AlignedSegment,
+    min_mapq: int = 30,
+    single_end: bool = False,
+) -> bool:
+    """Return ``True`` if ``read`` is not read1 or fails the quality filter.
+
+    With ``single_end=True`` the read1 requirement is dropped: an unpaired
+    read has neither the 0x40 nor 0x80 flag, so ``is_read1`` is ``False`` and
+    the check would otherwise reject the entire library.
+    """
+    if low_quality_read_pairs(read, min_mapq=min_mapq, single_end=single_end):
+        return True
+    return not (single_end or read.is_read1)
 
 
 # -- interval / overlap helpers ---------------------------------------------
