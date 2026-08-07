@@ -1,0 +1,39 @@
+# Paths excluded from the Docker build context -- the daemon never receives
+# them. The Dockerfile only COPYs pyproject.toml, MANIFEST.in, README.md,
+# LICENSE and src/, so this is about keeping builds fast, not correctness.
+
+# ~200MB of history. setuptools-scm would normally read the version from it;
+# docker/build.sh passes the version in as a build arg instead.
+.git
+.gitignore
+.github
+
+# ~91MB of BAM/CRAM/2bit fixtures. Mounted at run time by the "test" stage
+# rather than baked into the image.
+tests
+
+# Not needed to build or run the package.
+docs
+scripts
+.readthedocs.yaml
+CHANGELOG.md
+RELEASING.md
+
+# Build and test artifacts.
+build
+dist
+*.egg-info
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.ruff_cache
+.coverage*
+
+# Local editor / OS cruft.
+.vscode
+.claude
+**/.DS_Store
+
+# Written by setuptools-scm during the build. A stale copy from a local
+# editable install would otherwise be copied in and shadow the real version.
+src/finaletoolkit/_version.py
