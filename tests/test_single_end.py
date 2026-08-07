@@ -9,9 +9,26 @@ template-length span reconstruction.
 
 import pysam
 import pytest
+from click.testing import CliRunner
 
+from finaletoolkit.cli.commands import COMMANDS
+from finaletoolkit.cli.main_cli import main_cli
 from finaletoolkit.io.alignment import AlignmentWrapper
 from finaletoolkit.utils import frag_array, frag_generator, low_quality_read_pairs
+
+# Commands that accept long-read input.  delfi and wps are deliberately absent:
+# both are defined around nucleosome-length fragments (delfi hard-filters to
+# 100-220bp internally) and would produce meaningless output on long reads.
+EXPECTED_SINGLE_END_COMMANDS = {
+    "coverage",
+    "frag-length-bins",
+    "frag-length-intervals",
+    "cleavage-profile",
+    "end-motifs",
+    "interval-end-motifs",
+    "breakpoint-motifs",
+    "interval-breakpoint-motifs",
+}
 
 CONTIG = "chr1"
 CONTIG_LENGTH = 249250621
@@ -185,3 +202,81 @@ class TestPairedEndUnchanged:
         wrapper = AlignmentWrapper(str(bam), single_end=True)
         assert wrapper.read1_only is False
         wrapper.close()
+
+
+class TestCliSurface:
+    """--single-end is exposed on exactly the long-read-meaningful commands."""
+
+    def test_expected_commands_have_the_flag(self):
+        actual = {
+            command.name
+            for command in COMMANDS
+            if any(param.name == "single_end" for param in command.params)
+        }
+        assert actual == EXPECTED_SINGLE_END_COMMANDS
+
+    @pytest.mark.parametrize("name", sorted(EXPECTED_SINGLE_END_COMMANDS))
+    def test_flag_documented_in_help(self, name):
+        result = CliRunner().invoke(main_cli, [name, "--help"])
+        assert result.exit_code == 0
+        assert "--single-end" in result.output
+
+    @pytest.mark.parametrize("name", ["wps", "delfi"])
+    def test_nucleosome_commands_reject_the_flag(self, name):
+        """delfi and wps must not silently accept a flag they cannot honour."""
+        result = CliRunner().invoke(main_cli, [name, "--single-end"])
+        assert result.exit_code != 0
+        assert "no such option" in result.output.lower()
+
+
+class TestCliEndToEnd:
+    def test_frag_length_bins_needs_the_flag(self, single_end_bam, tmp_path):
+        runner = CliRunner()
+        without = tmp_path / "without.tsv"
+        result = runner.invoke(
+            main_cli,
+            ["frag-length-bins", single_end_bam, "-o", str(without)],
+        )
+        assert result.exit_code == 0
+        assert not without.exists(), "no fragments should mean no output file"
+
+        with_flag = tmp_path / "with.tsv"
+        result = runner.invoke(
+            main_cli,
+            [
+                "frag-length-bins",
+                single_end_bam,
+                "--single-end",
+                "--max-length",
+                "200000",
+                "--bin-size",
+                "1000",
+                "-o",
+                str(with_flag),
+            ],
+        )
+        assert result.exit_code == 0, result.output
+        rows = with_flag.read_text().splitlines()
+        assert rows[0] == "min\tmax\tcount"
+        assert sum(int(row.split("\t")[2]) for row in rows[1:]) == 3
+
+    def test_coverage_counts_long_reads(self, single_end_bam, tmp_path):
+        intervals = tmp_path / "intervals.bed"
+        intervals.write_text(f"{CONTIG}\t0\t3000000\tregion\n")
+        out = tmp_path / "cov.bed"
+        result = CliRunner().invoke(
+            main_cli,
+            [
+                "coverage",
+                single_end_bam,
+                str(intervals),
+                "--single-end",
+                "--max-length",
+                "200000",
+                "-o",
+                str(out),
+            ],
+        )
+        assert result.exit_code == 0, result.output
+        # Coverage is scaled by --scale-factor, so the value is a float.
+        assert float(out.read_text().split("\t")[4]) == 3.0

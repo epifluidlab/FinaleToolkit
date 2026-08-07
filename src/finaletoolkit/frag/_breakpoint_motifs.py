@@ -64,6 +64,7 @@ def region_breakpoint_motifs(
     output_file: str | None = None,
     quality_threshold: int = 30,
     verbose: bool | int = False,
+    single_end: bool = False,
 ) -> dict:
     """Count breakpoint-motif k-mers for fragments in a region.
 
@@ -115,6 +116,7 @@ def region_breakpoint_motifs(
         input_file,
         reference_file=refseq_file,
         quality_threshold=quality_threshold,
+        single_end=single_end,
     ) as wrapper:
         frag_ends = wrapper.fetch(contig, start, stop)
 
@@ -215,6 +217,7 @@ def breakpoint_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
+    single_end: bool = False,
 ) -> BreakpointMotifFreqs:
     """Compute genome-wide breakpoint-motif frequencies.
 
@@ -269,6 +272,7 @@ def breakpoint_motifs(
         negative_strand,
         quality_threshold,
         verbose,
+        single_end,
     )
 
     results = aggregate_genome_motifs(
@@ -309,6 +313,7 @@ def interval_breakpoint_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
+    single_end: bool = False,
 ) -> BreakpointMotifsIntervals:
     """Compute interval-stratified breakpoint-motif frequencies.
 
@@ -366,6 +371,7 @@ def interval_breakpoint_motifs(
         workers,
         verbose,
         "Reading intervals",
+        single_end,
     )
 
     write_motif_freqs(results, output_file)

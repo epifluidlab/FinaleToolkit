@@ -25,6 +25,7 @@ from .._args import (
     min_mapq_option,
     output_option,
     reference_option,
+    single_end_option,
     strand_option,
     threads_option,
     verbose_option,
@@ -117,6 +118,7 @@ def _ex(text: str) -> str:
 @min_mapq_option(30)
 @threads_option()
 @verbose_option()
+@single_end_option()
 def coverage(**params):
     """Fragmentation coverage over BED intervals from a BAM/CRAM/Fragment file.
 
@@ -190,6 +192,7 @@ def coverage(**params):
 )
 @min_mapq_option(30)
 @verbose_option()
+@single_end_option()
 def frag_length_bins(**params):
     """Fragment lengths grouped into bins from a BAM/CRAM/Fragment file.
 
@@ -222,6 +225,7 @@ def frag_length_bins(**params):
 @min_mapq_option(30)
 @threads_option()
 @verbose_option()
+@single_end_option()
 def frag_length_intervals(**params):
     """Fragment-length summary statistics over BED intervals.
 
@@ -266,6 +270,7 @@ def frag_length_intervals(**params):
 )
 @threads_option()
 @verbose_option()
+@single_end_option()
 def cleavage_profile(**params):
     """Cleavage proportion over BED intervals from a BAM/CRAM/Fragment file.
 
@@ -493,6 +498,7 @@ def delfi(**params):
 @min_mapq_option(20)
 @threads_option()
 @verbose_option()
+@single_end_option()
 def end_motifs(**params):
     """Frequency of k-mer 5' end motifs.
 
@@ -515,6 +521,7 @@ def end_motifs(**params):
 @min_mapq_option(20)
 @threads_option()
 @verbose_option()
+@single_end_option()
 def interval_end_motifs(**params):
     """Frequency of k-mer 5' end motifs in each region of a BED file.
 
@@ -537,6 +544,7 @@ def interval_end_motifs(**params):
 @min_mapq_option(20)
 @threads_option()
 @verbose_option()
+@single_end_option()
 def breakpoint_motifs(**params):
     """Frequency of k-mer breakpoint motifs.
 
@@ -559,6 +567,7 @@ def breakpoint_motifs(**params):
 @min_mapq_option(20)
 @threads_option()
 @verbose_option()
+@single_end_option()
 def interval_breakpoint_motifs(**params):
     """Frequency of k-mer breakpoint motifs in each region of a BED file.
 

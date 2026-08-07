@@ -11,6 +11,7 @@ across every subcommand:
 * ``--min-length`` / ``--max-length``       fragment-length bounds
 * ``-t/--threads``       worker processes   (param ``workers``)
 * ``-v/--verbose``       counting verbosity (param ``verbose``)
+* ``--single-end``       unpaired/long-read input (param ``single_end``)
 * ``-k/--kmer-length``   k-mer length       (param ``k``)
 * ``--strand {both,forward,reverse}``       strand selection for motif commands
 
@@ -32,6 +33,7 @@ __all__ = [
     "intersect_policy_option",
     "threads_option",
     "verbose_option",
+    "single_end_option",
     "kmer_option",
     "strand_option",
     "bool_flag",
@@ -186,6 +188,23 @@ def strand_option(feature: str):
         show_default=True,
         help=f"Fragment strand(s) for {feature} motifs: 'both', 'forward' (5' "
         "ends of the positive strand only), or 'reverse' (negative strand only).",
+    )
+
+
+def single_end_option():
+    """``--single-end`` (param ``single_end``)."""
+    return click.option(
+        "--single-end",
+        "single_end",
+        is_flag=True,
+        default=False,
+        help=(
+            "Treat BAM/CRAM input as a single-end library, taking each "
+            "fragment's span from the read's own alignment instead of the "
+            "template length. Required for long-read data (Oxford Nanopore, "
+            "PacBio), whose reads are unpaired and carry TLEN=0. Ignored for "
+            "fragment files, which have no pairing information."
+        ),
     )
 
 

@@ -105,6 +105,7 @@ def cleavage_profile(
     fraction_low: int | None = None,
     fraction_high: int | None = None,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> np.ndarray:
     """Compute the cleavage profile over a single interval.
 
@@ -200,6 +201,7 @@ def cleavage_profile(
         max_length=max_length,
         intersect_policy="any",
         reference_file=reference_file,
+        single_end=single_end,
     )
 
     positions = np.arange(adj_start, adj_stop)
@@ -243,6 +245,7 @@ def multi_cleavage_profile(
     fraction_low: int | None = None,
     fraction_high: int | None = None,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> str:
     """Compute cleavage profiles over intervals in a (sorted) BED file.
 
@@ -364,6 +367,7 @@ def multi_cleavage_profile(
         count * [fraction_low],
         count * [fraction_high],
         count * [reference_file],
+        count * [single_end],
     )
 
     if verbose:

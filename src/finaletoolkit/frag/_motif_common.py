@@ -535,6 +535,7 @@ def _genome_window_args(
     negative_strand,
     quality_threshold,
     verbose,
+    single_end=False,
 ) -> list[tuple]:
     """Build per-1Mb-window argument tuples covering every contig."""
     intervals = []
@@ -555,6 +556,7 @@ def _genome_window_args(
                     None,
                     quality_threshold,
                     verbose - 2 if verbose > 2 else 0,
+                    single_end,
                 )
             )
         intervals.append(
@@ -572,6 +574,7 @@ def _genome_window_args(
                 None,
                 quality_threshold,
                 verbose - 2 if verbose > 2 else 0,
+                single_end,
             )
         )
     return intervals
@@ -645,6 +648,7 @@ def aggregate_interval_motifs(
     workers,
     verbose,
     read_desc,
+    single_end=False,
 ):
     """Fan interval args out to ``region_dict_star`` and build a class instance."""
     intervals_tuples = parse_intervals_arg(intervals)
@@ -663,6 +667,7 @@ def aggregate_interval_motifs(
             None,
             quality_threshold,
             verbose - 2 if verbose > 2 else 0,
+            single_end,
         )
         for chrom, start, stop, *_ in intervals_tuples
     ]

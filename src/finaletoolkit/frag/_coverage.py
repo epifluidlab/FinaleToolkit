@@ -62,6 +62,7 @@ def single_coverage(
     quality_threshold: int = 30,
     verbose: bool | int = False,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> CoverageResult:
     """Estimate fragment coverage over a single region.
 
@@ -91,6 +92,9 @@ def single_coverage(
         Print timing information.
     reference_file : str or Path, optional
         Reference genome (required for CRAM).
+    single_end : bool, optional
+        Treat BAM/CRAM input as a single-end library (default ``False``).
+        See :func:`finaletoolkit.utils.frag_generator`.
 
     Returns
     -------
@@ -125,6 +129,7 @@ def single_coverage(
         max_length=max_length,
         intersect_policy=intersect_policy,
         reference_file=reference_file,
+        single_end=single_end,
     )
     for _ in frags:
         coverage += 1
@@ -155,6 +160,7 @@ def coverage(
     workers: int = 1,
     verbose: Union[bool, int] = False,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> list[CoverageResult]:
     """Estimate fragment coverage over every interval in a BED file.
 
@@ -183,6 +189,9 @@ def coverage(
         Print timing/config information.
     reference_file : str or Path, optional
         Reference genome (required for CRAM).
+    single_end : bool, optional
+        Treat BAM/CRAM input as a single-end library (default ``False``).
+        See :func:`finaletoolkit.utils.frag_generator`.
 
     Returns
     -------
@@ -223,6 +232,7 @@ def coverage(
                     "quality_threshold": quality_threshold,
                     "verbose": verbose,
                     "reference_file": reference_file,
+                    "single_end": single_end,
                 },
             )
 
@@ -240,6 +250,7 @@ def coverage(
             quality_threshold=quality_threshold,
             verbose=max(0, verbose - 1),
             reference_file=reference_file,
+            single_end=single_end,
         )
         coverages = pool.imap(
             partial(_single_coverage_star, partial_single_coverage),

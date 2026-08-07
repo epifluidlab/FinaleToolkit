@@ -62,6 +62,7 @@ def region_end_motifs(
     output_file: str | None = None,
     quality_threshold: int = MIN_QUALITY,
     verbose: bool | int = False,
+    single_end: bool = False,
 ) -> dict:
     """Count 5' end-motif k-mers for fragments in a region.
 
@@ -116,6 +117,7 @@ def region_end_motifs(
         input_file,
         reference_file=refseq_file,
         quality_threshold=quality_threshold,
+        single_end=single_end,
     ) as wrapper:
         frag_ends = wrapper.fetch(contig, start, stop)
 
@@ -209,6 +211,7 @@ def end_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
+    single_end: bool = False,
 ) -> EndMotifFreqs:
     """Compute genome-wide 5' end-motif frequencies (Zhou et al., 2023).
 
@@ -270,6 +273,7 @@ def end_motifs(
         negative_strand,
         quality_threshold,
         verbose,
+        single_end,
     )
 
     results = aggregate_genome_motifs(
@@ -308,6 +312,7 @@ def interval_end_motifs(
     verbose: bool | int = False,
     fraction_low: int | None = None,
     fraction_high: int | None = None,
+    single_end: bool = False,
 ) -> EndMotifsIntervals:
     """Compute interval-stratified 5' end-motif frequencies.
 
@@ -372,6 +377,7 @@ def interval_end_motifs(
         workers,
         verbose,
         "Reading intervals",
+        single_end,
     )
 
     write_motif_freqs(results, output_file)

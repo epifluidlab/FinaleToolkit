@@ -185,6 +185,7 @@ def _frag_length_stats(
     quality_threshold: int,
     verbose: Union[bool, int],
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> FragLengthStats:
     """Compute fragment-length statistics for a single interval."""
     frag_gen = frag_generator(
@@ -198,6 +199,7 @@ def _frag_length_stats(
         intersect_policy,
         verbose,
         reference_file=reference_file,
+        single_end=single_end,
     )
     frag_len_dict = _distribution_from_gen(frag_gen)
 
@@ -346,6 +348,7 @@ def frag_length_bins(
     histogram_path: str | None = None,
     verbose: Union[bool, int] = False,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> tuple[np.ndarray, list]:
     """Bin fragment lengths and optionally write a TSV table or histogram.
 
@@ -377,6 +380,9 @@ def frag_length_bins(
         Print timing/config information.
     reference_file : str or Path, optional
         Reference genome (required for CRAM).
+    single_end : bool, optional
+        Treat BAM/CRAM input as a single-end library (default ``False``).
+        See :func:`finaletoolkit.utils.frag_generator`.
 
     Returns
     -------
@@ -416,6 +422,7 @@ def frag_length_bins(
         intersect_policy,
         verbose,
         reference_file=reference_file,
+        single_end=single_end,
     )
 
     frag_len_dict = _distribution_from_gen(frag_gen)
@@ -520,6 +527,7 @@ def frag_length_intervals(
     workers: int = 1,
     verbose: Union[bool, int] = False,
     reference_file: str | Path | None = None,
+    single_end: bool = False,
 ) -> list[FragLengthStats]:
     """Compute per-interval fragment-length statistics over a BED file.
 
@@ -545,6 +553,9 @@ def frag_length_intervals(
         Print timing/config information.
     reference_file : str or Path, optional
         Reference genome (required for CRAM).
+    single_end : bool, optional
+        Treat BAM/CRAM input as a single-end library (default ``False``).
+        See :func:`finaletoolkit.utils.frag_generator`.
 
     Returns
     -------
@@ -584,6 +595,7 @@ def frag_length_intervals(
             quality_threshold=quality_threshold,
             verbose=verbose,
             reference_file=reference_file,
+            single_end=single_end,
         )
 
         results = pool.map(
