@@ -3,14 +3,23 @@ Tests for finaletoolkit.cli._dispatch
 
 Covers the pure, CRAM-independent logic: strand-flag translation, the
 input-file-absent/BAM-without-reference fast paths through
-``_validate_inputs``, and ``run``'s param-filtering/dispatch mechanics. The
+``_validate_inputs``, and ``run``'s parameter-mapping/dispatch mechanics. The
 CRAM+reference contig-validation branch (which needs real alignment/reference
 files) is already exercised by the filter-file tests in test_cli.py.
+
+``TestEveryCommandIsFullyWired`` walks the command registry and is the guard
+that keeps a CLI option from being added without a matching argument on the
+function it dispatches to.
 """
+
+import importlib
+from inspect import getfullargspec
 
 import pytest
 
 from finaletoolkit.cli._dispatch import _translate_strand, _validate_inputs, run
+from finaletoolkit.cli.commands import COMMAND_TARGETS, COMMANDS
+from finaletoolkit.exceptions import UnmappedParameterError
 
 
 class TestTranslateStrand:
@@ -65,11 +74,17 @@ def _stub_kwargs(**kwargs):
 
 
 class TestRun:
-    def test_filters_params_to_function_signature(self):
-        result = run(
-            __name__, "_stub_add", {"a": 1, "b": 2, "unrelated_cli_only_key": "x"}
-        )
-        assert result == 3
+    def test_unmapped_param_raises(self):
+        """A parameter with no matching argument must fail loudly, not vanish."""
+        with pytest.raises(UnmappedParameterError, match="unrelated_cli_only_key"):
+            run(
+                __name__,
+                "_stub_add",
+                {"a": 1, "b": 2, "unrelated_cli_only_key": "x"},
+            )
+
+    def test_exact_params_dispatch(self):
+        assert run(__name__, "_stub_add", {"a": 1, "b": 2}) == 3
 
     def test_uses_function_defaults_for_missing_params(self):
         result = run(__name__, "_stub_add", {"a": 5})
@@ -84,3 +99,41 @@ class TestRun:
             __name__, "_stub_kwargs", {"strand": "reverse", "a": 1}
         )
         assert result == {"a": 1, "both_strands": False, "negative_strand": True}
+
+
+def _cli_param_names(command) -> set[str]:
+    """Click param names for ``command``, with ``--strand`` expanded."""
+    names = {param.name for param in command.params}
+    if "strand" in names:
+        names.discard("strand")
+        names |= {"both_strands", "negative_strand"}
+    return names
+
+
+class TestEveryCommandIsFullyWired:
+    """Every CLI option must reach the function its command dispatches to.
+
+    ``run`` raises on an unmapped parameter, but that only fires when the
+    command is actually invoked with real inputs. Walking the registry here
+    catches the mistake at test time instead.
+    """
+
+    @pytest.mark.parametrize("name", sorted(COMMAND_TARGETS))
+    def test_no_unmapped_params(self, name):
+        command = {c.name: c for c in COMMANDS}[name]
+        module, func = COMMAND_TARGETS[name]
+        function = getattr(importlib.import_module(module), func)
+
+        spec = getfullargspec(function)
+        if spec.varkw is not None:
+            pytest.skip(f"{func} accepts **kwargs")
+
+        accepted = set(spec.args) | set(spec.kwonlyargs)
+        unmapped = sorted(_cli_param_names(command) - accepted)
+        assert not unmapped, (
+            f"'{name}' passes {unmapped} to {module}.{func}(), which has no "
+            "such argument. Add the argument, or drop the option."
+        )
+
+    def test_registry_and_commands_agree(self):
+        assert {c.name for c in COMMANDS} == set(COMMAND_TARGETS)

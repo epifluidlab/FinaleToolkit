@@ -64,6 +64,16 @@ class OutOfBoundsError(InvalidInputError, IndexError):
     """
 
 
+class UnmappedParameterError(FinaleToolkitError, TypeError):
+    """Raised when a CLI parameter has no argument on its dispatch target.
+
+    A wiring mistake rather than bad user input: an option was added to a
+    command without a matching argument on the implementing function (or the
+    argument was removed).  Subclasses :class:`TypeError` because that is what
+    calling the function with the extra keyword would otherwise raise.
+    """
+
+
 __all__ = [
     "FinaleToolkitError",
     "InvalidInputError",
@@ -73,4 +83,5 @@ __all__ = [
     "ContigNotFoundError",
     "ContigMismatchError",
     "OutOfBoundsError",
+    "UnmappedParameterError",
 ]
