@@ -1,0 +1,127 @@
+# Builds the container image defined in the repository root Dockerfile,
+# runs the test suite inside it, and publishes to GitHub Container Registry.
+#
+# The image is a release artifact alongside the PyPI wheel published by
+# python-publish.yml, and is tagged from the same git tags.
+
+name: Docker image
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required to push to GHCR. Pull requests from forks get a read-only
+      # token, which is why the push step below is gated on the event type.
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history + tags, needed by setuptools-scm to derive the version
+
+      # .git is excluded from the Docker build context, so setuptools-scm
+      # cannot derive the version inside the container. Resolve it here and
+      # pass it in as a build arg, exactly as docker/build.sh does locally.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Resolve package version
+        id: version
+        run: |
+          python -m pip install --quiet setuptools-scm
+          version="$(python -m setuptools_scm)"
+          if [ -z "$version" ] || [ "${version#0.0.0.dev0}" != "$version" ]; then
+            echo "::error::setuptools-scm produced no usable version ('$version'); check that the checkout has full history and tags (fetch-depth: 0)"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $version"
+
+      # GHCR rejects uppercase image names, and this repository is
+      # "epifluidlab/FinaleToolkit". metadata-action lowercases internally, but
+      # deriving it explicitly keeps the value correct wherever it is referenced.
+      - name: Derive lowercase image name
+        id: image
+        run: |
+          echo "name=$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: test
+          load: true          # into the local daemon so the next step can run it
+          tags: finaletoolkit:test
+          build-args: |
+            SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Running the suite inside the image proves the packaged environment is
+      # correct, not merely that the package imports. tests/ is excluded from
+      # the build context, so it is mounted at run time.
+      - name: Run test suite inside the image
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/tests:/app/tests:ro" \
+            --entrypoint pytest \
+            finaletoolkit:test -q
+
+      - name: Smoke-test the CLI entry point
+        run: |
+          docker run --rm --entrypoint finaletoolkit finaletoolkit:test --version
+          docker run --rm --entrypoint finaletoolkit finaletoolkit:test --help > /dev/null
+
+      - name: Log in to ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Derive image tags
+        if: github.event_name != 'pull_request'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=raw,value=main,enable={{is_default_branch}}
+            type=sha,format=long
+
+      # Rebuilds the runtime target. The heavy layers are shared with the test
+      # image above and come from the buildx cache, so this is cheap.
+      - name: Build and push runtime image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runtime
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
