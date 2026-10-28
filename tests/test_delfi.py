@@ -367,6 +367,30 @@ def test_cli_merge_size_must_be_positive(request, tmp_path, size):
     assert '--merge-size' in result.output
 
 
+def test_merge_bins_whole_contig(delfi_100kb_bins):
+    """Without gap annotations (arm == contig), contigs merge 5'->3'."""
+    bins = delfi_100kb_bins.assign(contig='chr1', arm='chr1')
+    merged = delfi_merge_bins(bins, window_size=1_000_000)
+    assert merged.shape[0] == bins.shape[0] // 10
+    assert (merged['contig'] == 'chr1').all()
+    assert (merged['arm'] == 'chr1').all()
+    assert merged['start'].iloc[0] == bins['start'].iloc[0]
+    assert merged['stop'].iloc[0] == bins['stop'].iloc[9]
+    assert merged['short'].iloc[0] == bins['short'].iloc[:10].sum()
+
+
+def test_delfi_merges_without_gap_file(request):
+    """Merging used to silently return no rows when gap_file was None."""
+    common = dict(_delfi_inputs(request), gap_file=None, remove_nocov=False)
+    unmerged = delfi(**common, merge_bins=False)
+    merged = delfi(**common, window_size=1_000_000)
+    expected = delfi_merge_bins(
+        unmerged, window_size=1_000_000, bin_size=100_000)
+    assert merged.shape[0] == unmerged.shape[0] // 10 > 0
+    assert (merged['contig'] == 'chr1').all()
+    pd.testing.assert_frame_equal(merged, expected)
+
+
 # --------------------------------------------------------------------------- #
 # gap_file resolution (-g/--gap-file)
 # --------------------------------------------------------------------------- #

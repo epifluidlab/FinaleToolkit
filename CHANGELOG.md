@@ -30,6 +30,10 @@ and this project adheres to
   read as a file path and failed with "hg19 not found." A path to an existing
   file still takes precedence, and `gap_file` now also accepts
   `pathlib.Path`.
+- `delfi` without a gap file (no `-g`) now merges bins per contig instead of
+  silently returning no rows: bins are labeled by contig rather than arm, and
+  `delfi_merge_bins` only recognized p/q arm labels. Output with a gap file
+  is unchanged.
 
 ## [1.1.0] - 2026-07-23
 

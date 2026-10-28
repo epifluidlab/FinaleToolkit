@@ -112,9 +112,10 @@ def _resolve_bin_size(bins: pd.DataFrame, window_size: int) -> _BinLayout:
     return _BinLayout(bin_size, inclusive, keep)
 
 
-def _aggregate_chunk(chunk: pd.DataFrame, arm: str, include_corrected: bool) -> tuple:
+def _aggregate_chunk(
+    chunk: pd.DataFrame, contig: str, arm: str, include_corrected: bool
+) -> tuple:
     """Aggregate one chunk of bins into a single merged-bin record."""
-    contig = arm[:-1]
     record = [
         contig,
         chunk["start"].min(),
@@ -153,12 +154,14 @@ def delfi_merge_bins(
     count, so a window may span more than ``window_size`` bp where bins were
     removed (gaps, blacklist). p-arms are aggregated 5'->3'; q-arms are
     aggregated 3'->5' and then reversed. Partial chunks at arm ends are
-    dropped.
+    dropped. Without gap annotations (``arm`` equal to ``contig``), each
+    contig is aggregated 5'->3' as a whole.
 
     Parameters
     ----------
     hundred_kb_bins : pandas.DataFrame
-        Uniform bins with an ``arm`` column and DELFI feature columns. When
+        Uniform bins with ``contig`` and ``arm`` columns and DELFI feature
+        columns. When
         ``gc_corrected`` is ``True`` the ``*_corrected`` columns must be
         present.
     gc_corrected : bool, optional
@@ -202,12 +205,18 @@ def delfi_merge_bins(
 
     for arm in hundred_kb_bins["arm"].unique():
         arm_bins = hundred_kb_bins[hundred_kb_bins["arm"] == arm].reset_index()
-        if "p" in arm:
+        # delfi labels bins with their contig when no gap file is given.
+        whole_contig = (arm_bins["contig"] == arm).all()
+        # Arm labels drop the "chr" prefix (e.g. "1p"); keep that output.
+        contig = arm if whole_contig else arm[:-1]
+        if whole_contig or "p" in arm:
             for i in range(0, arm_bins.shape[0], bins_per_window):
                 chunk = arm_bins.loc[i : i + bins_per_window - 1, :]
                 if chunk.shape[0] < bins_per_window:
                     continue
-                merged_bins.append(_aggregate_chunk(chunk, arm, gc_corrected))
+                merged_bins.append(
+                    _aggregate_chunk(chunk, contig, arm, gc_corrected)
+                )
         elif "q" in arm:
             reversed_bins: list[tuple] = []
             # Stop at -1 (not 0) so the chunk ending at row 0 is reachable
@@ -216,7 +225,9 @@ def delfi_merge_bins(
                 chunk = arm_bins.loc[i - (bins_per_window - 1) : i, :]
                 if chunk.shape[0] < bins_per_window:
                     continue
-                reversed_bins.append(_aggregate_chunk(chunk, arm, gc_corrected))
+                reversed_bins.append(
+                    _aggregate_chunk(chunk, contig, arm, gc_corrected)
+                )
             merged_bins.extend(reversed(reversed_bins))
         del arm_bins
 
