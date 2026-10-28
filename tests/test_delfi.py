@@ -4,6 +4,7 @@ finaletoolkit.frag.delfi_merge_bins, finaletoolkit.frag.delfi, and
 finaletoolkit.frag.delfi_gc_correct.
 """
 
+import numpy as np
 import pytest
 
 import pandas as pd
@@ -13,6 +14,7 @@ from click.testing import CliRunner
 from finaletoolkit.cli.main_cli import main_cli
 from finaletoolkit.frag import delfi_merge_bins
 from finaletoolkit.frag import delfi
+from finaletoolkit.frag._delfi import _resolve_gaps
 from finaletoolkit.frag._delfi_merge_bins import _resolve_bin_size
 from finaletoolkit.genome.gaps import GenomeGaps
 from finaletoolkit.utils import frag_generator
@@ -341,14 +343,10 @@ def _cli_delfi_args(request, tmp_path):
     # reference lacks.
     inputs = _delfi_inputs(request)
     frag_gz = _bam_to_fragfile(inputs['input_file'], tmp_path / 'frags.frag')
-    gaps_bed = tmp_path / 'gaps.bed'
-    with open(gaps_bed, 'w') as fh:
-        for contig, start, stop, kind in inputs['gap_file'].gaps.tolist():
-            fh.write(f'{contig}\t{start}\t{stop}\t{kind}\n')
     return [
         'delfi', str(frag_gz), str(inputs['chrom_sizes']),
         inputs['reference_file'], str(inputs['bins_file']),
-        '-b', str(inputs['blacklist_file']), '-g', str(gaps_bed),
+        '-b', str(inputs['blacklist_file']), '-g', 'hg19',
         '--no-remove-nocov', '-o', str(tmp_path / 'delfi.tsv'),
     ]
 
@@ -367,3 +365,38 @@ def test_cli_merge_size_must_be_positive(request, tmp_path, size):
         _cli_delfi_args(request, tmp_path) + ['--merge-size', size])
     assert result.exit_code == 2
     assert '--merge-size' in result.output
+
+
+# --------------------------------------------------------------------------- #
+# gap_file resolution (-g/--gap-file)
+# --------------------------------------------------------------------------- #
+
+@pytest.mark.parametrize('name,factory', [
+    ('hg19', GenomeGaps.ucsc_hg19),
+    ('b37', GenomeGaps.b37),
+    ('human_g1k_v37', GenomeGaps.b37),
+    ('hg38', GenomeGaps.hg38),
+    ('GRCh38', GenomeGaps.hg38),
+])
+def test_resolve_gaps_genome_name(name, factory):
+    np.testing.assert_array_equal(_resolve_gaps(name).gaps, factory().gaps)
+
+
+@pytest.mark.parametrize('as_path', [False, True])
+def test_resolve_gaps_bed_file(tmp_path, as_path):
+    bed = tmp_path / 'gaps.bed'
+    GenomeGaps.ucsc_hg19().to_bed(bed)
+    gaps = _resolve_gaps(bed if as_path else str(bed))
+    np.testing.assert_array_equal(gaps.gaps, GenomeGaps.ucsc_hg19().gaps)
+
+
+def test_resolve_gaps_existing_file_wins_over_name(tmp_path, monkeypatch):
+    """A file literally named like a genome is read as a file."""
+    monkeypatch.chdir(tmp_path)
+    GenomeGaps.b37().to_bed('hg19')
+    np.testing.assert_array_equal(_resolve_gaps('hg19').gaps, GenomeGaps.b37().gaps)
+
+
+def test_resolve_gaps_unknown():
+    with pytest.raises(FileNotFoundError, match='known genome name'):
+        _resolve_gaps('not-a-genome')

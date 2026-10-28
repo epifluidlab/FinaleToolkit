@@ -5,6 +5,7 @@ larger windows (100kb->5Mb by default).
 """
 from __future__ import annotations
 
+import os
 import time
 import warnings
 from collections import defaultdict
@@ -163,8 +164,8 @@ def delfi(
         BED of regions to ignore.
     gap_file : str or GenomeGaps, optional
         Telomere/centromere annotations: a BED4 file, a genome name
-        (``"b37"``/``"hg19"``/``"hg38"``/``"GRCh38"``), or a
-        :class:`~finaletoolkit.genome.GenomeGaps`.
+        (``"hg19"``/``"b37"``/``"human_g1k_v37"``/``"hg38"``/``"GRCh38"``),
+        or a :class:`~finaletoolkit.genome.GenomeGaps`.
     output_file : str, optional
         Output BED/`.bed.gz`/`.tsv`/`.csv` path, or ``"-"`` for stdout.
     no_gc_correct : bool, optional
@@ -397,14 +398,35 @@ def delfi(
     return final_bins
 
 
+# Genome names accepted for ``gap_file`` (same names as ``gap-bed``).
+_NAMED_GAPS = {
+    "hg19": GenomeGaps.ucsc_hg19,
+    "b37": GenomeGaps.b37,
+    "human_g1k_v37": GenomeGaps.b37,
+    "hg38": GenomeGaps.hg38,
+    "GRCh38": GenomeGaps.hg38,
+}
+
+
 def _resolve_gaps(gap_file) -> GenomeGaps | None:
-    """Coerce the ``gap_file`` argument into a :class:`GenomeGaps` or ``None``."""
+    """Coerce the ``gap_file`` argument into a :class:`GenomeGaps` or ``None``.
+
+    A string or path is read as a gap BED file if it exists, else looked up
+    as a genome name in ``_NAMED_GAPS``.
+    """
     if gap_file is None:
         return None
-    if isinstance(gap_file, str):
-        return GenomeGaps(gap_file)
     if isinstance(gap_file, GenomeGaps):
         return gap_file
+    if isinstance(gap_file, (str, os.PathLike)):
+        if os.path.exists(gap_file):
+            return GenomeGaps(gap_file)
+        if str(gap_file) in _NAMED_GAPS:
+            return _NAMED_GAPS[str(gap_file)]()
+        raise FileNotFoundError(
+            f"gap_file {str(gap_file)!r} is neither an existing file nor a "
+            f"known genome name ({', '.join(_NAMED_GAPS)})."
+        )
     raise TypeError(f"{type(gap_file)} is not accepted type for gap_file")
 
 

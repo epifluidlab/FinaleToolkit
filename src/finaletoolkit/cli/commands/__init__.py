@@ -430,8 +430,8 @@ def adjust_wps(**params):
     "gap_file",
     metavar="GAPS",
     help='Telomere/centromere annotations: a BED4 file (4th column '
-    '"centromere"/"telomere"/"short arm") or a genome name '
-    "(hg19/b37/hg38/GRCh38).",
+    '"centromere"/"telomere"/"short_arm") or a genome name '
+    "(hg19/b37/human_g1k_v37/hg38/GRCh38).",
 )
 @output_option("Output file (.bed, .bed.gz, .tsv, or .csv).")
 @click.option(

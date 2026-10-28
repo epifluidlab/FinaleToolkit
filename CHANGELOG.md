@@ -25,6 +25,11 @@ and this project adheres to
   `--no-merge-bins` runs are not validated. `--merge-size` must be positive.
 - `delfi_merge_bins` no longer drops the first bin of each q-arm when each
   merged window is a single bin.
+- `delfi -g`/`delfi(gap_file=...)` accepts a genome name again (`hg19`,
+  `b37`, `human_g1k_v37`, `hg38`, `GRCh38`), as documented. It had been
+  read as a file path and failed with "hg19 not found." A path to an existing
+  file still takes precedence, and `gap_file` now also accepts
+  `pathlib.Path`.
 
 ## [1.1.0] - 2026-07-23
 
