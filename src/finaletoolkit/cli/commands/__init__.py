@@ -445,8 +445,9 @@ def adjust_wps(**params):
     "remove-nocov",
     "remove_nocov",
     True,
-    "Remove the two hg19 regions with no coverage (use --no-remove-nocov for "
-    "non-hg19 reference genomes).",
+    "Remove the two hg19 regions with no coverage. They are removed by row "
+    "position, so use --no-remove-nocov unless BINS are the original hg19 HiC "
+    "bins with -g hg19 and all autosomes.",
 )
 @bool_flag(
     "merge-bins",

@@ -43,6 +43,44 @@ and the associated tissue of origin.
 
 :Commands: ``delfi``
 
+**Bins.** To replicate the original study, use the 100kb hg19 HiC A/B
+compartment bins the DELFI scripts load:
+`hic_compartments_100kb_ebv_2014.txt
+<https://github.com/Jfortin1/HiC_AB_Compartments/blob/master/data/hic_compartments_100kb_ebv_2014.txt>`_
+(Fortin & Hansen 2015). That file is space-delimited with an uncommented
+header, so convert it to a tab-delimited BED with a ``#`` header first:
+
+.. code-block:: console
+
+   $ curl -sL https://raw.githubusercontent.com/Jfortin1/HiC_AB_Compartments/master/data/hic_compartments_100kb_ebv_2014.txt \
+       | awk 'BEGIN{OFS="\t"} NR==1{$1="#"$1} {$1=$1; print}' > hic_100kb.bed
+
+Any BED of uniform bins also works. When bins are merged (the default), every
+bin must be the same size and ``--merge-size`` (default 5Mb) must be a multiple
+of it; a shorter last bin on a contig, as ``bedtools makewindows`` produces, is
+dropped with a warning. Bins are merged by count (``merge size / bin size``
+bins per window) within each chromosome arm, so a window can span more than
+``--merge-size`` where bins were removed. Without a gap file (``-g``), arms are
+unknown and each contig is merged as a whole.
+
+**Coordinates.** Both half-open BED bins (``stop - start = 100000``) and
+end-inclusive bins (``stop - start = 99999``, as in the HiC file above) are
+accepted, and the bin size is inferred accordingly. FinaleToolkit reads bin
+coordinates as written (0-based, half-open). The original R scripts read the
+HiC file as 1-based and closed, so each bin there covers 1 bp earlier and
+1 bp more than it does here (``chr1 700000 799999`` is ``[699999, 799999)``
+in R and ``[700000, 799999)`` in FinaleToolkit). The effect on fragment
+counts is negligible, but results will not match the R output to the
+fragment.
+
+**No-coverage bins.** ``--remove-nocov`` (on by default) drops the two bins the
+original scripts found to have no coverage. They are identified by **row
+position** (the 8,780th and 13,665th bins left after gap and arm filtering),
+exactly as in the original scripts, so the option is only meaningful with the
+HiC bins above, the hg19 gap file (``-g hg19``), and all autosomes in
+``CHROM_SIZES``. With any other bins file, reference, or subset of
+chromosomes it removes two arbitrary bins; pass ``--no-remove-nocov``.
+
 End and breakpoint motifs
 -------------------------
 
