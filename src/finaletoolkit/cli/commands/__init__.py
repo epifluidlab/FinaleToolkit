@@ -466,6 +466,15 @@ def adjust_wps(**params):
     help="Size of merged bins in bp. Must be a multiple of the (uniform) "
     "size of the input bins.",
 )
+@click.option(
+    "--strict-merge-size",
+    "strict_window_size",
+    is_flag=True,
+    default=False,
+    help="Merge into windows exactly --merge-size wide, rather than a fixed "
+    "number of consecutive bins (the original DELFI method), which can span "
+    "more where bins overlapping gaps were removed.",
+)
 @min_mapq_option(30)
 @threads_option()
 @verbose_option()

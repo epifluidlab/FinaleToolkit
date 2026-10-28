@@ -144,6 +144,7 @@ def delfi(
     remove_nocov: bool = True,
     merge_bins: bool = True,
     window_size: int = 5000000,
+    strict_window_size: bool = False,
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union[int, bool] = False,
@@ -191,6 +192,11 @@ def delfi(
     window_size : int, optional
         Merge window size in bp (default 5,000,000). Must be a multiple of
         the bin size; only used when ``merge_bins`` is ``True``.
+    strict_window_size : bool, optional
+        Merge into windows exactly ``window_size`` bp wide instead of
+        ``window_size // bin_size`` consecutive remaining bins (default
+        ``False``, matching the original DELFI scripts). See
+        :func:`delfi_merge_bins`.
     quality_threshold : int, optional
         Minimum mapping quality (default 30).
     workers : int, optional
@@ -213,6 +219,7 @@ def delfi(
         blacklist_file: {blacklist_file}
         output_file: {output_file}
         window_size: {window_size}
+        strict_window_size: {strict_window_size}
         no_gc_correct: {no_gc_correct}
         gc_correct: {gc_correct} (overrides no_gc_correct if set)
         remove_nocov: {remove_nocov}
@@ -388,6 +395,7 @@ def delfi(
             verbose=verbose,
             window_size=window_size,
             bin_size=bin_size,
+            strict_window_size=strict_window_size,
         )
     else:
         final_bins = gc_corrected

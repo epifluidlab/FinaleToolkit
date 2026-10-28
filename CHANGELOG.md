@@ -9,6 +9,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+- `delfi --strict-merge-size` (`strict_window_size=True` on `delfi` and
+  `delfi_merge_bins`) merges bins into windows exactly `--merge-size` wide.
+  By default, windows hold a fixed number of consecutive remaining bins, as
+  in the original DELFI scripts, so they span more than `--merge-size` where
+  bins overlapping gaps were removed. With the flag, such windows keep their
+  span but aggregate fewer bins. Off by default; existing output is
+  unchanged.
+
 ### Fixed
 - `delfi --merge-size` (`delfi(window_size=...)`) now takes effect.
   Previously it was ignored and bins were always merged 50 at a time

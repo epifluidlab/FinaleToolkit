@@ -392,6 +392,97 @@ def test_delfi_merges_without_gap_file(request):
 
 
 # --------------------------------------------------------------------------- #
+# Fixed-span merging (--strict-merge-size / strict_window_size)
+# --------------------------------------------------------------------------- #
+
+def _feature_bins(arm, n, size=100, inclusive=False, drop=(), contig='chr1'):
+    """``n`` adjacent bins on ``arm`` with unit features, minus ``drop``."""
+    rows = [
+        (contig, start, stop, arm, 1.0, 2.0, 0.5, 3, 0.5)
+        for i, (_, start, stop) in enumerate(_tiled(contig, n, size, inclusive))
+        if i not in drop
+    ]
+    return pd.DataFrame(rows, columns=[
+        'contig', 'start', 'stop', 'arm', 'short', 'long', 'gc', 'num_frags',
+        'ratio'])
+
+
+@pytest.mark.parametrize('inclusive', [False, True])
+def test_strict_merge_matches_count_without_removed_bins(inclusive):
+    """With no bins removed, fixed-span and fixed-count merging agree."""
+    bins = pd.concat([_feature_bins('1p', 10, inclusive=inclusive),
+                      _feature_bins('1q', 10, inclusive=inclusive)])
+    kwargs = dict(gc_corrected=False, window_size=300, bin_size=100)
+    pd.testing.assert_frame_equal(
+        delfi_merge_bins(bins, strict_window_size=True, **kwargs),
+        delfi_merge_bins(bins, **kwargs))
+
+
+@pytest.mark.parametrize('inclusive', [False, True])
+def test_strict_merge_p_arm_keeps_span(inclusive):
+    """Removed bins shrink a window's counts, not widen its span."""
+    bins = _feature_bins('1p', 10, inclusive=inclusive, drop={1, 3, 4, 5})
+    merged = delfi_merge_bins(bins, gc_corrected=False, window_size=300,
+                              bin_size=100, strict_window_size=True)
+    # bins 0-2 -> [0, 300), 3-5 removed entirely, 6-8 -> [600, 900); bin 9
+    # is a partial window and is dropped.
+    assert merged['start'].tolist() == [0, 600]
+    assert merged['stop'].tolist() == ([299, 899] if inclusive else [300, 900])
+    assert merged['num_frags'].tolist() == [3 * 2, 3 * 3]
+    # The count-based default instead stretches windows over removed bins.
+    by_count = delfi_merge_bins(bins, gc_corrected=False, window_size=300,
+                                bin_size=100)
+    assert by_count['start'].tolist() == [0, 700]
+
+
+def test_strict_merge_q_arm_anchored_at_end():
+    """q-arm windows tile back from the last bin; the partial one is first."""
+    bins = _feature_bins('1q', 10, drop={8})
+    merged = delfi_merge_bins(bins, gc_corrected=False, window_size=300,
+                              bin_size=100, strict_window_size=True)
+    assert merged['start'].tolist() == [100, 400, 700]
+    assert merged['stop'].tolist() == [400, 700, 1000]
+    assert merged['num_frags'].tolist() == [9, 9, 6]
+
+
+def test_strict_merge_whole_contig():
+    bins = _feature_bins('chr1', 7, drop={0})
+    merged = delfi_merge_bins(bins, gc_corrected=False, window_size=300,
+                              bin_size=100, strict_window_size=True)
+    # Anchored at the first remaining bin (100); [700, ...) is partial.
+    assert merged['start'].tolist() == [100, 400]
+    assert (merged['contig'] == 'chr1').all()
+
+
+def test_strict_merge_real_bins(delfi_100kb_bins):
+    merged = delfi_merge_bins(delfi_100kb_bins, window_size=1_000_000,
+                              strict_window_size=True)
+    assert ((merged['stop'] - merged['start']) == 999_999).all()
+    by_count = delfi_merge_bins(delfi_100kb_bins, window_size=1_000_000)
+    # Gap-removed bins make the count-based windows wider than 1Mb.
+    assert ((by_count['stop'] - by_count['start']) > 999_999).any()
+
+
+def test_delfi_strict_window_size_reaches_merge(request):
+    common = dict(_delfi_inputs(request), remove_nocov=False)
+    unmerged = delfi(**common, merge_bins=False)
+    expected = delfi_merge_bins(unmerged, window_size=1_000_000,
+                                bin_size=100_000, strict_window_size=True)
+    merged = delfi(**common, window_size=1_000_000, strict_window_size=True)
+    pd.testing.assert_frame_equal(merged, expected)
+    assert ((merged['stop'] - merged['start']) == 999_999).all()
+
+
+def test_cli_strict_merge_size(request, tmp_path):
+    args = _cli_delfi_args(request, tmp_path)
+    result = CliRunner().invoke(
+        main_cli, args + ['--merge-size', '1000000', '--strict-merge-size'])
+    assert result.exit_code == 0, result.output
+    out = pd.read_csv(tmp_path / 'delfi.tsv', sep='\t')
+    assert ((out['stop'] - out['start']) == 999_999).all()
+
+
+# --------------------------------------------------------------------------- #
 # gap_file resolution (-g/--gap-file)
 # --------------------------------------------------------------------------- #
 

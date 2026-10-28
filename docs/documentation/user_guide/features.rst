@@ -72,13 +72,33 @@ hg38 (requires ``bedtools``), which also writes the autosome-only
        -g hg38 --no-remove-nocov -o delfi.tsv
 
 The final ``awk`` drops the shorter last bin of each chromosome (``delfi``
-would otherwise drop it with a warning). When bins are merged (the default), every
-bin must be the same size and ``--merge-size`` (default 5Mb) must be a multiple
-of it; a shorter last bin on a contig, as ``bedtools makewindows`` produces, is
-dropped with a warning. Bins are merged by count (``merge size / bin size``
-bins per window) within each chromosome arm, so a window can span more than
-``--merge-size`` where bins were removed. Without a gap file (``-g``), arms are
-unknown and each contig is merged as a whole.
+would otherwise drop it with a warning).
+
+**Merging.** When bins are merged (the default), every bin must be the same
+size and ``--merge-size`` (default 5Mb) must be a multiple of it; a shorter
+last bin on a contig, as ``bedtools makewindows`` produces, is dropped with a
+warning. Merging happens within each chromosome arm, counting from the
+telomere: p-arms from their first bin, q-arms from their last. Partial
+windows at the centromere end are dropped. Without a gap file (``-g``), arms
+are unknown and each contig is merged as a whole, from its first bin.
+
+Bins that overlap any gap annotation are removed before merging, including
+small contig, scaffold, and clone gaps, not just centromeres and telomeres.
+(The blacklist, ``-b``, removes fragments, not bins.) How merging treats
+those holes depends on ``--strict-merge-size``:
+
+- **By count (default).** Each window holds ``merge size / bin size``
+  consecutive remaining bins (50 x 100kb by default), as in the original
+  DELFI scripts. Every window aggregates the same number of bins, but a
+  window spans more than ``--merge-size`` where bins were removed (e.g. a
+  "5Mb" window covering 5.2Mb of genome).
+- **By span** (``--strict-merge-size``, ``strict_window_size=True``). Each
+  window covers exactly ``--merge-size`` of genome and aggregates whichever
+  bins remain inside it, so windows with removed bins have lower summed
+  counts (``short``, ``long``, ``num_frags``) than full ones. Ratios and GC
+  are averaged per bin, so their scale is unaffected, though they rest on
+  fewer bins. Windows with no remaining bins are
+  omitted. This departs from the original method.
 
 **Coordinates.** Both half-open BED bins (``stop - start = 100000``) and
 end-inclusive bins (``stop - start = 99999``, as in the HiC file above) are

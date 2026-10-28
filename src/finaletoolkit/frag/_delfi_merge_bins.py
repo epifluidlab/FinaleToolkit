@@ -139,6 +139,53 @@ def _aggregate_chunk(
     return tuple(record)
 
 
+def _fixed_span_windows(
+    arm_bins: pd.DataFrame,
+    contig: str,
+    arm: str,
+    forward: bool,
+    window_size: int,
+    bin_size: int,
+    include_corrected: bool,
+) -> list[tuple]:
+    """Aggregate one arm's bins into windows exactly ``window_size`` wide.
+
+    Windows tile the arm from its first bin (``forward``) or back from its
+    last bin, and each bin goes to the window containing its start. Windows
+    keep their full span even when bins inside them were removed; windows
+    left with no bins, and the partial window at the far end, are dropped.
+    """
+    starts = arm_bins["start"].to_numpy(dtype=np.int64)
+    # End-inclusive bins have stop = start + bin_size - 1; report windows in
+    # the same convention.
+    stop_offset = bin_size - int(arm_bins["stop"].iloc[0] - starts[0])
+    if forward:
+        anchor = int(starts.min())
+        index = (starts - anchor) // window_size
+        n_windows = (int(starts.max()) + bin_size - anchor) // window_size
+    else:
+        anchor = int(starts.max()) + bin_size
+        index = (anchor - (starts + bin_size)) // window_size
+        n_windows = (anchor - int(starts.min())) // window_size
+
+    windows = []
+    for k in np.unique(index[index < n_windows]):
+        record = list(
+            _aggregate_chunk(
+                arm_bins.loc[index == k], contig, arm, include_corrected
+            )
+        )
+        window_start = (
+            anchor + k * window_size if forward
+            else anchor - (k + 1) * window_size
+        )
+        record[1] = window_start
+        record[2] = window_start + window_size - stop_offset
+        windows.append(tuple(record))
+    windows.sort(key=lambda record: record[1])
+    return windows
+
+
 def delfi_merge_bins(
     hundred_kb_bins: pd.DataFrame,
     gc_corrected: bool = True,
@@ -146,24 +193,28 @@ def delfi_merge_bins(
     *,
     window_size: int = 5000000,
     bin_size: int | None = None,
+    strict_window_size: bool = False,
 ) -> pd.DataFrame:
     """Merge uniform DELFI bins into non-overlapping windows per arm.
 
-    Each window holds ``window_size // bin_size`` consecutive bins (50 x 100kb
-    = 5Mb by default). As in the original DELFI scripts, bins are grouped by
-    count, so a window may span more than ``window_size`` bp where bins were
-    removed (gaps, blacklist). p-arms are aggregated 5'->3'; q-arms are
-    aggregated 3'->5' and then reversed. Partial chunks at arm ends are
-    dropped. Without gap annotations (``arm`` equal to ``contig``), each
-    contig is aggregated 5'->3' as a whole.
+    By default each window holds ``window_size // bin_size`` consecutive
+    bins (50 x 100kb = 5Mb by default). As in the original DELFI scripts,
+    bins are grouped by count, so a window may span more than ``window_size``
+    bp where bins were removed (e.g. for overlapping a gap). With
+    ``strict_window_size=True``, windows instead span exactly ``window_size``
+    bp and hold however many bins remain inside them.
+
+    p-arms are aggregated 5'->3'; q-arms are aggregated 3'->5' and then
+    reversed. Partial windows at arm ends are dropped. Without gap
+    annotations (``arm`` equal to ``contig``), each contig is aggregated
+    5'->3' as a whole.
 
     Parameters
     ----------
     hundred_kb_bins : pandas.DataFrame
         Uniform bins with ``contig`` and ``arm`` columns and DELFI feature
-        columns. When
-        ``gc_corrected`` is ``True`` the ``*_corrected`` columns must be
-        present.
+        columns. When ``gc_corrected`` is ``True`` the ``*_corrected``
+        columns must be present.
     gc_corrected : bool, optional
         Whether the input carries GC-corrected columns to aggregate (default
         ``True``).  Unlike the original implementation this flag is honored, so
@@ -177,6 +228,12 @@ def delfi_merge_bins(
         Size of the input bins in bp. If omitted, it is inferred from the
         ``start``/``stop`` columns, accepting half-open or end-inclusive
         coordinates; short bins at contig ends are dropped with a warning.
+    strict_window_size : bool, optional
+        Merge into windows exactly ``window_size`` bp wide instead of a fixed
+        number of bins (default ``False``, matching the original DELFI
+        scripts). Windows where bins were removed then aggregate fewer bins,
+        so their summed counts are lower; windows with no remaining bins are
+        omitted. Bins are assigned to windows by their start coordinate.
 
     Returns
     -------
@@ -209,7 +266,19 @@ def delfi_merge_bins(
         whole_contig = (arm_bins["contig"] == arm).all()
         # Arm labels drop the "chr" prefix (e.g. "1p"); keep that output.
         contig = arm if whole_contig else arm[:-1]
-        if whole_contig or "p" in arm:
+        if strict_window_size and (whole_contig or "p" in arm or "q" in arm):
+            merged_bins.extend(
+                _fixed_span_windows(
+                    arm_bins,
+                    contig,
+                    arm,
+                    whole_contig or "p" in arm,
+                    window_size,
+                    bin_size,
+                    gc_corrected,
+                )
+            )
+        elif whole_contig or "p" in arm:
             for i in range(0, arm_bins.shape[0], bins_per_window):
                 chunk = arm_bins.loc[i : i + bins_per_window - 1, :]
                 if chunk.shape[0] < bins_per_window:
