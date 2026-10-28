@@ -8,9 +8,12 @@ import pytest
 
 import pandas as pd
 import pysam
+from click.testing import CliRunner
 
+from finaletoolkit.cli.main_cli import main_cli
 from finaletoolkit.frag import delfi_merge_bins
 from finaletoolkit.frag import delfi
+from finaletoolkit.frag._delfi_merge_bins import _resolve_bin_size
 from finaletoolkit.genome.gaps import GenomeGaps
 from finaletoolkit.utils import frag_generator
 
@@ -167,4 +170,200 @@ def test_fragfile_input(request, tmp_path):
     bam_total = bam_result['num_frags'].sum()
     frag_total = frag_parallel['num_frags'].sum()
     assert abs(frag_total - bam_total) / bam_total < 0.01
-    
+
+
+# --------------------------------------------------------------------------- #
+# Merge window size (--merge-size / window_size) and bin-size validation
+# --------------------------------------------------------------------------- #
+
+def _bins(rows):
+    """Build a contig/start/stop DataFrame from ``(contig, start, stop)``."""
+    return pd.DataFrame(rows, columns=['contig', 'start', 'stop'])
+
+
+def _tiled(contig, n, size, inclusive=False, offset=0):
+    """``n`` adjacent bins of ``size`` bp, half-open or end-inclusive."""
+    return [
+        (contig, offset + i * size,
+         offset + (i + 1) * size - (1 if inclusive else 0))
+        for i in range(n)
+    ]
+
+
+@pytest.mark.parametrize('inclusive', [False, True])
+def test_resolve_bin_size_conventions(inclusive):
+    """Half-open and end-inclusive (Cristiano HiC style) bins are accepted."""
+    bins = _bins(_tiled('chr1', 5, 100, inclusive) + _tiled('chr2', 3, 100, inclusive))
+    layout = _resolve_bin_size(bins, 500)
+    assert layout.bin_size == 100
+    assert layout.inclusive == inclusive
+    assert layout.keep.all()
+
+
+def test_resolve_bin_size_canonical_bins_file(request):
+    """The DELFI HiC bins fixture is 100kb end-inclusive."""
+    bins_file = request.path.parent / 'data' / 'delfi' / 'hg19.hic.chr1.6Mb.txt'
+    bins = pd.read_csv(bins_file, sep='\t', comment='#', usecols=[0, 1, 2],
+                       names=['contig', 'start', 'stop'])
+    layout = _resolve_bin_size(bins, 5_000_000)
+    assert (layout.bin_size, layout.inclusive) == (100_000, True)
+
+
+@pytest.mark.parametrize('inclusive', [False, True])
+def test_resolve_bin_size_drops_short_last_bin(inclusive):
+    """A short final bin per contig is flagged for removal, not an error."""
+    rows = _tiled('chr1', 4, 100, inclusive) + [('chr1', 400, 450)]
+    rows += _tiled('chr2', 2, 100, inclusive) + [('chr2', 200, 230)]
+    layout = _resolve_bin_size(_bins(rows), 200)
+    assert layout.bin_size == 100
+    assert layout.keep.tolist() == [True] * 4 + [False] + [True] * 2 + [False]
+
+
+@pytest.mark.parametrize('rows', [
+    # a short bin in the middle of a contig
+    _tiled('chr1', 2, 100) + [('chr1', 200, 250)] + _tiled('chr1', 2, 100, offset=250),
+    # a last bin longer than the rest
+    _tiled('chr1', 3, 100) + [('chr1', 300, 450)],
+    # every contig has a single bin, of different sizes
+    [('chr1', 0, 100), ('chr2', 0, 200)],
+], ids=['short-middle', 'long-last', 'singletons'])
+def test_resolve_bin_size_non_uniform(rows):
+    with pytest.raises(ValueError, match='same size'):
+        _resolve_bin_size(_bins(rows), 1000)
+
+
+def test_resolve_bin_size_mixed_convention():
+    # Same widths, but one gap of 0 (half-open) and one of 1 (inclusive).
+    rows = [('chr1', 0, 100), ('chr1', 100, 200), ('chr1', 201, 301)]
+    with pytest.raises(ValueError, match='mix half-open'):
+        _resolve_bin_size(_bins(rows), 300)
+
+
+@pytest.mark.parametrize('window_size', [250, 50, 0, -100])
+def test_resolve_bin_size_window_not_multiple(window_size):
+    with pytest.raises(ValueError, match='window'):
+        _resolve_bin_size(_bins(_tiled('chr1', 5, 100)), window_size)
+
+
+def test_resolve_bin_size_empty():
+    with pytest.raises(ValueError, match='no bins'):
+        _resolve_bin_size(_bins([]), 100)
+
+
+@pytest.fixture
+def delfi_100kb_bins(request):
+    path = request.path.parent / 'data' / 'delfi' / 'test_delfi_100kb.csv'
+    return pd.read_csv(path, dtype={'contig': str, 'start': int, 'stop': int})
+
+
+def test_merge_bins_window_size(delfi_100kb_bins):
+    """window_size controls how many bins are merged per window."""
+    merged = delfi_merge_bins(delfi_100kb_bins, window_size=1_000_000)
+    for arm, n_merged in (('1p', 1182 // 10), ('1q', 1006 // 10)):
+        arm_bins = delfi_100kb_bins[delfi_100kb_bins['arm'] == arm]
+        arm_merged = merged[merged['arm'] == arm]
+        assert arm_merged.shape[0] == n_merged
+        # p-arms are merged from the first bin, q-arms from the last.
+        if arm == '1p':
+            first = arm_bins.iloc[:10]
+            assert arm_merged['start'].iloc[0] == first['start'].iloc[0]
+            assert arm_merged['stop'].iloc[0] == first['stop'].iloc[-1]
+            assert arm_merged['short'].iloc[0] == first['short'].sum()
+        else:
+            last = arm_bins.iloc[-10:]
+            assert arm_merged['start'].iloc[-1] == last['start'].iloc[0]
+            assert arm_merged['stop'].iloc[-1] == last['stop'].iloc[-1]
+            assert arm_merged['short'].iloc[-1] == last['short'].sum()
+
+
+def test_merge_bins_explicit_bin_size_matches_inferred(delfi_100kb_bins):
+    inferred = delfi_merge_bins(delfi_100kb_bins, window_size=2_000_000)
+    explicit = delfi_merge_bins(
+        delfi_100kb_bins, window_size=2_000_000, bin_size=100_000)
+    pd.testing.assert_frame_equal(inferred, explicit)
+
+
+def test_merge_bins_one_bin_per_window(delfi_100kb_bins):
+    """window_size == bin size keeps every bin (incl. the first q-arm bin)."""
+    merged = delfi_merge_bins(delfi_100kb_bins, window_size=100_000)
+    assert merged.shape[0] == delfi_100kb_bins.shape[0]
+    assert (merged['start'].to_numpy() == delfi_100kb_bins['start'].to_numpy()).all()
+
+
+@pytest.mark.parametrize('kwargs', [
+    dict(window_size=150_000),
+    dict(window_size=150_000, bin_size=100_000),
+    dict(window_size=1_000_000, bin_size=0),
+])
+def test_merge_bins_invalid_window(delfi_100kb_bins, kwargs):
+    with pytest.raises(ValueError, match='multiple of the bin size'):
+        delfi_merge_bins(delfi_100kb_bins, **kwargs)
+
+
+def _write_bins(rows, path):
+    with open(path, 'w') as fh:
+        for contig, start, stop in rows:
+            fh.write(f'{contig}\t{start}\t{stop}\n')
+    return path
+
+
+def test_delfi_window_size_reaches_merge(request):
+    """delfi(window_size=...) merges the same bins as delfi_merge_bins."""
+    common = dict(_delfi_inputs(request), remove_nocov=False)
+    unmerged = delfi(**common, merge_bins=False)
+    expected = delfi_merge_bins(
+        unmerged, window_size=1_000_000, bin_size=100_000)
+    merged = delfi(**common, window_size=1_000_000)
+    assert merged.shape[0] > delfi(**common).shape[0]
+    pd.testing.assert_frame_equal(merged, expected)
+
+
+def test_delfi_rejects_non_uniform_bins(request, tmp_path):
+    bins = _write_bins(
+        _tiled('1', 3, 100_000) + [('1', 300_000, 350_000)]
+        + _tiled('1', 3, 100_000, offset=350_000),
+        tmp_path / 'bins.bed')
+    common = dict(_delfi_inputs(request), bins_file=bins)
+    with pytest.raises(ValueError, match='same size'):
+        delfi(**common)
+    # Uniformity is only required when merging.
+    delfi(**common, merge_bins=False, no_gc_correct=True, remove_nocov=False)
+
+
+def test_delfi_rejects_window_not_multiple(request):
+    with pytest.raises(ValueError, match='multiple of the bin size'):
+        delfi(**_delfi_inputs(request), window_size=1_250_000)
+
+
+def _cli_delfi_args(request, tmp_path):
+    # Fragment-file input: the CLI's BAM-vs-reference contig check would
+    # reject the fixture BAM, whose header lists contigs the chr1-only
+    # reference lacks.
+    inputs = _delfi_inputs(request)
+    frag_gz = _bam_to_fragfile(inputs['input_file'], tmp_path / 'frags.frag')
+    gaps_bed = tmp_path / 'gaps.bed'
+    with open(gaps_bed, 'w') as fh:
+        for contig, start, stop, kind in inputs['gap_file'].gaps.tolist():
+            fh.write(f'{contig}\t{start}\t{stop}\t{kind}\n')
+    return [
+        'delfi', str(frag_gz), str(inputs['chrom_sizes']),
+        inputs['reference_file'], str(inputs['bins_file']),
+        '-b', str(inputs['blacklist_file']), '-g', str(gaps_bed),
+        '--no-remove-nocov', '-o', str(tmp_path / 'delfi.tsv'),
+    ]
+
+
+def test_cli_merge_size(request, tmp_path):
+    args = _cli_delfi_args(request, tmp_path)
+    result = CliRunner().invoke(main_cli, args + ['--merge-size', '1000000'])
+    assert result.exit_code == 0, result.output
+    assert pd.read_csv(tmp_path / 'delfi.tsv', sep='\t').shape[0] == 5
+
+
+@pytest.mark.parametrize('size', ['0', '-5'])
+def test_cli_merge_size_must_be_positive(request, tmp_path, size):
+    result = CliRunner().invoke(
+        main_cli,
+        _cli_delfi_args(request, tmp_path) + ['--merge-size', size])
+    assert result.exit_code == 2
+    assert '--merge-size' in result.output

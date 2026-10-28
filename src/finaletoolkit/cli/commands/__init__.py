@@ -452,7 +452,8 @@ def adjust_wps(**params):
     "merge-bins",
     "merge_bins",
     True,
-    "Merge input bins to 5Mb (use --no-merge-bins to keep the input bins).",
+    "Merge input bins into --merge-size windows (use --no-merge-bins to keep "
+    "the input bins).",
 )
 @click.option(
     "--merge-size",
@@ -460,8 +461,9 @@ def adjust_wps(**params):
     metavar="BP",
     default=5000000,
     show_default=True,
-    type=int,
-    help="Target size of merged genomic intervals.",
+    type=click.IntRange(min=1),
+    help="Size of merged bins in bp. Must be a multiple of the (uniform) "
+    "size of the input bins.",
 )
 @min_mapq_option(30)
 @threads_option()

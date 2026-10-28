@@ -1,6 +1,7 @@
 """
 DELFI fragmentation feature (Cristiano et al., 2019): short/long fragment
-ratios per genomic bin, with optional GC correction and 100kb->5Mb merging.
+ratios per genomic bin, with optional GC correction and merging of bins into
+larger windows (100kb->5Mb by default).
 """
 from __future__ import annotations
 
@@ -16,7 +17,10 @@ import pandas
 from tqdm import tqdm
 
 from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
-from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
+from finaletoolkit.frag._delfi_merge_bins import (
+    _resolve_bin_size,
+    delfi_merge_bins,
+)
 from finaletoolkit.genome.gaps import GenomeGaps
 from finaletoolkit.io.alignment import AlignmentWrapper
 from finaletoolkit.io.reference import ReferenceWrapper
@@ -171,9 +175,12 @@ def delfi(
         Remove the two hg19 no-coverage windows of Cristiano et al. (default
         ``True``).  Disable for non-hg19 references.
     merge_bins : bool, optional
-        Merge 100kb bins to 5Mb (default ``True``).
+        Merge bins into ``window_size`` windows (default ``True``). Requires
+        uniform bins in ``bins_file`` (half-open or end-inclusive); short
+        bins at contig ends are dropped with a warning.
     window_size : int, optional
-        Merge window size in bp (default 5,000,000).
+        Merge window size in bp (default 5,000,000). Must be a multiple of
+        the bin size; only used when ``merge_bins`` is ``True``.
     quality_threshold : int, optional
         Minimum mapping quality (default 30).
     workers : int, optional
@@ -234,6 +241,20 @@ def delfi(
 
     if verbose:
         stderr.write(f"{bins.shape[0]} bins read from file.\n")
+
+    # Validate before the (slow) per-bin computation so bad input fails fast.
+    if merge_bins:
+        layout = _resolve_bin_size(bins, window_size)
+        bins = bins.loc[layout.keep]
+        bin_size = layout.bin_size
+        if verbose:
+            stderr.write(
+                f"{bin_size} bp "
+                f"{'end-inclusive' if layout.inclusive else 'half-open'} "
+                f"bins; merging {window_size // bin_size} bins per window.\n"
+            )
+
+    if verbose:
         stderr.write("Filtering gaps...\n")
 
     if gaps is not None:
@@ -351,7 +372,13 @@ def delfi(
     if merge_bins:
         if verbose:
             stderr.write("Merging bins...\n")
-        final_bins = delfi_merge_bins(gc_corrected, gc_correct, verbose=verbose)
+        final_bins = delfi_merge_bins(
+            gc_corrected,
+            gc_correct,
+            verbose=verbose,
+            window_size=window_size,
+            bin_size=bin_size,
+        )
     else:
         final_bins = gc_corrected
 

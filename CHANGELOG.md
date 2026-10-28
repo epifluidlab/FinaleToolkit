@@ -9,6 +9,23 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+- `delfi --merge-size` (`delfi(window_size=...)`) now takes effect.
+  Previously it was ignored and bins were always merged 50 at a time
+  (100kb -> 5Mb). Bins are now merged `window_size // bin_size` at a time,
+  and `delfi_merge_bins` gains keyword-only `window_size` and `bin_size`
+  arguments (the bin size is inferred from the bins when omitted). Default
+  output is unchanged.
+- When merging, `delfi`/`delfi_merge_bins` now check that bins are a uniform
+  size that evenly divides the merge window, and raise a `ValueError`
+  otherwise. Both half-open BED bins and end-inclusive bins (such as the
+  Cristiano et al. HiC compartment bins, where `stop - start = 99999`) are
+  accepted, and the detected convention is logged. A shorter final bin on
+  a contig (as from `bedtools makewindows`) is dropped with a warning.
+  `--no-merge-bins` runs are not validated. `--merge-size` must be positive.
+- `delfi_merge_bins` no longer drops the first bin of each q-arm when each
+  merged window is a single bin.
+
 ## [1.1.0] - 2026-07-23
 
 ### Added
