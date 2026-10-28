@@ -158,11 +158,13 @@ def delfi(
         ``.chrom.sizes`` file (autosomes only to match the original scripts).
     bins_file : str
         BED of bins. To match the original methodology, use the 100kb hg19
-        HiC compartment bins (``hic_compartments_100kb_ebv_2014.txt`` from
-        Jfortin1/HiC_AB_Compartments, converted to tab-delimited with a
-        ``#`` header). Coordinates are read as written (0-based, half-open),
-        whereas the original R scripts read that file as 1-based, so bins
-        here sit 1 bp later than in the original.
+        HiC compartment bins, ``hic_compartments_100kb_ebv_2014.txt`` from
+        `HiC_AB_Compartments <https://github.com/Jfortin1/HiC_AB_Compartments>`_,
+        converted to tab-delimited with a ``#`` header (see
+        :ref:`DELFI bins <delfi-bins>` for the command). Coordinates are read
+        as written (0-based, half-open), whereas the original R scripts read
+        that file as 1-based, so bins here sit 1 bp later than in the
+        original.
     reference_file : str
         Reference genome (``.2bit`` or FASTA; FASTA required for CRAM input).
     blacklist_file : str, optional
@@ -181,7 +183,7 @@ def delfi(
         Remove the two hg19 no-coverage windows of Cristiano et al. (default
         ``True``). They are removed by row position, so this is only correct
         with the HiC bins above, hg19 gaps, and all autosomes; disable it
-        otherwise.
+        otherwise (see :ref:`DELFI bins <delfi-bins>`).
     merge_bins : bool, optional
         Merge bins into ``window_size`` windows (default ``True``). Requires
         uniform bins in ``bins_file`` (half-open or end-inclusive); short

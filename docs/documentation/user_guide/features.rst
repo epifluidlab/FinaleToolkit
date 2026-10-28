@@ -43,10 +43,13 @@ and the associated tissue of origin.
 
 :Commands: ``delfi``
 
+.. _delfi-bins:
+
 **Bins.** To replicate the original study, use the 100kb hg19 HiC A/B
 compartment bins the DELFI scripts load:
 `hic_compartments_100kb_ebv_2014.txt
 <https://github.com/Jfortin1/HiC_AB_Compartments/blob/master/data/hic_compartments_100kb_ebv_2014.txt>`_
+from `HiC_AB_Compartments <https://github.com/Jfortin1/HiC_AB_Compartments>`_
 (Fortin & Hansen 2015). That file is space-delimited with an uncommented
 header, so convert it to a tab-delimited BED with a ``#`` header first:
 
@@ -55,7 +58,21 @@ header, so convert it to a tab-delimited BED with a ``#`` header first:
    $ curl -sL https://raw.githubusercontent.com/Jfortin1/HiC_AB_Compartments/master/data/hic_compartments_100kb_ebv_2014.txt \
        | awk 'BEGIN{OFS="\t"} NR==1{$1="#"$1} {$1=$1; print}' > hic_100kb.bed
 
-Any BED of uniform bins also works. When bins are merged (the default), every
+Any BED of uniform bins also works. For example, 100kb autosomal bins for
+hg38 (requires ``bedtools``), which also writes the autosome-only
+``CHROM_SIZES`` file to pass to ``delfi``:
+
+.. code-block:: console
+
+   $ curl -s https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes \
+       | awk '$1 ~ /^chr([1-9]|1[0-9]|2[0-2])$/' | sort -k1.4,1n > hg38.autosomes.chrom.sizes
+   $ bedtools makewindows -g hg38.autosomes.chrom.sizes -w 100000 \
+       | awk '$3 - $2 == 100000' > hg38_100kb_bins.bed
+   $ finaletoolkit delfi sample.bam hg38.autosomes.chrom.sizes hg38.2bit hg38_100kb_bins.bed \
+       -g hg38 --no-remove-nocov -o delfi.tsv
+
+The final ``awk`` drops the shorter last bin of each chromosome (``delfi``
+would otherwise drop it with a warning). When bins are merged (the default), every
 bin must be the same size and ``--merge-size`` (default 5Mb) must be a multiple
 of it; a shorter last bin on a contig, as ``bedtools makewindows`` produces, is
 dropped with a warning. Bins are merged by count (``merge size / bin size``

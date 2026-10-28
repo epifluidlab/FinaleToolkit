@@ -44,6 +44,27 @@ def _suppress_click_arguments(ctx):
 
 _sphinx_click_ext._format_arguments = _suppress_click_arguments
 
+
+# Docs-only additions to a command's description. Added here rather than in
+# the Click help text so that Sphinx roles don't show up raw in ``--help``.
+_CLICK_DESCRIPTION_NOTES = {
+    "delfi": [
+        "See :ref:`DELFI bins <delfi-bins>` for which BINS file to use, how "
+        "to convert the original HiC bins into a usable BED, and when to pass "
+        "``--no-remove-nocov``.",
+    ],
+}
+
+
+def _add_click_description_notes(app, ctx, lines):
+    notes = _CLICK_DESCRIPTION_NOTES.get(ctx.command.name)
+    if notes:
+        lines.extend(["", *notes])
+
+
+def setup(app):
+    app.connect("sphinx-click-process-description", _add_click_description_notes)
+
 # NumPy-style docstrings.
 napoleon_numpy_docstring = True
 napoleon_google_docstring = False
