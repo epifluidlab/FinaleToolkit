@@ -19,6 +19,15 @@ and this project adheres to
   unchanged.
 
 ### Fixed
+- `end-motifs`, `interval-end-motifs`, `breakpoint-motifs`, and
+  `interval-breakpoint-motifs` apply `--min-length`/`--max-length` again
+  (`min_length`/`max_length` in the API, `fraction_low`/`fraction_high` on
+  `region_end_motifs`/`region_breakpoint_motifs`). Since v0.12.0 these
+  bounds were silently ignored and every fragment was counted. **Default
+  output changes**: the documented default `min_length=50` now takes
+  effect, matching v0.11 and earlier. `region_end_motifs` also accepts
+  `fraction_low=None` instead of raising `TypeError`. Reported by Ludvig
+  Olsen.
 - `delfi --merge-size` (`delfi(window_size=...)`) now takes effect.
   Previously it was ignored and bins were always merged 50 at a time
   (100kb -> 5Mb). Bins are now merged `window_size // bin_size` at a time,

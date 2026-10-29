@@ -9,8 +9,11 @@ import difflib
 
 import numpy as np
 import pytest
+from click.testing import CliRunner
 
+from finaletoolkit.cli.main_cli import main_cli
 from finaletoolkit.frag import end_motifs, EndMotifFreqs, EndMotifsIntervals, interval_end_motifs
+from finaletoolkit.frag import region_breakpoint_motifs, region_end_motifs
 from finaletoolkit.utils import gen_kmers
 
 class TestGenomewideEndMotifs:
@@ -245,3 +248,76 @@ class TestRegionalMDSMillerMadow:
         motifs = EndMotifsIntervals([(("12", 0, 100, "."), kmers)], 4, 30)
         (_, score), = motifs.motif_diversity_score(miller_madow=True)
         assert np.isnan(score)
+
+class TestFragmentLengthFilter:
+    """min/max length bounds reach the per-region counters (issue: they were
+    silently ignored after the AlignmentWrapper refactor in v0.12.0).
+
+    ``12.3444.b37.bam`` holds 17 fragments, 121-205 bp; 8 are 150-170 bp and
+    two are exactly 161 bp. With both strands, each fragment adds two ends.
+    """
+
+    REGION = ('12', 34_000_000, 35_000_000)
+
+    @staticmethod
+    def _files(request):
+        data = request.path.parent / 'data'
+        return str(data / '12.3444.b37.bam'), str(data / 'b37.chr12.2bit')
+
+    @pytest.mark.parametrize('low, high, n_frags', [
+        (None, None, 17),
+        (150, 170, 8),
+        (161, 161, 2),  # bounds are inclusive
+        (300, None, 0),
+    ])
+    def test_region_end_motifs(self, request, low, high, n_frags):
+        bam, ref = self._files(request)
+        counts = region_end_motifs(
+            bam, *self.REGION, ref, fraction_low=low, fraction_high=high,
+            quality_threshold=0)
+        assert sum(counts.values()) == 2 * n_frags
+
+    @pytest.mark.parametrize('low, high, n_frags', [
+        (10, 600, 17),
+        (150, 170, 8),
+        (300, None, 0),
+    ])
+    def test_region_breakpoint_motifs(self, request, low, high, n_frags):
+        bam, ref = self._files(request)
+        counts = region_breakpoint_motifs(
+            bam, *self.REGION, ref, fraction_low=low, fraction_high=high,
+            quality_threshold=0)
+        assert sum(counts.values()) == 2 * n_frags
+
+    def test_interval_end_motifs(self, request):
+        bam, ref = self._files(request)
+        motifs = interval_end_motifs(
+            bam, ref, [(*self.REGION, 'all')], min_length=150,
+            max_length=170, quality_threshold=0)
+        (_, counts), = motifs.intervals
+        assert sum(counts.values()) == 16
+
+    def test_genomewide_end_motifs(self, request):
+        bam, ref = self._files(request)
+        motifs = end_motifs(
+            bam, ref, min_length=161, max_length=161, quality_threshold=0)
+        # Two fragments -> four ends, so every frequency is a multiple of 1/4.
+        freqs = np.array(motifs.frequencies())
+        assert freqs.sum() == pytest.approx(1)
+        assert freqs * 4 == pytest.approx(np.round(freqs * 4))
+
+    def test_cli_max_length(self, request, tmp_path):
+        # Fragment file: the BAM header has contigs missing from the chr12-only
+        # reference, which the CLI rejects. Same 17 fragments.
+        _, ref = self._files(request)
+        frags = str(request.path.parent / 'data' / '12.3444.b37.frag.gz')
+        intervals = tmp_path / 'all.bed'
+        intervals.write_text('\t'.join(map(str, self.REGION)) + '\tall\n')
+        out = tmp_path / 'out.tsv'
+        result = CliRunner().invoke(main_cli, [
+            'interval-end-motifs', frags, ref, str(intervals), '-q', '0',
+            '--max-length', '170', '-o', str(out)])
+        assert result.exit_code == 0, result.output
+        motifs = EndMotifsIntervals.from_file(str(out), 0, '\t', 0)
+        # 150-170 bp plus 121, 135, 137, 147 bp -> 12 fragments.
+        assert motifs.total_counts == [24]

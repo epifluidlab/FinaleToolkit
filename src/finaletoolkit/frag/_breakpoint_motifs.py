@@ -23,6 +23,7 @@ from ._motif_common import (
     _MotifsIntervals,
     aggregate_genome_motifs,
     aggregate_interval_motifs,
+    region_fragments,
     resolve_motif_aliases,
     write_motif_freqs,
 )
@@ -116,7 +117,9 @@ def region_breakpoint_motifs(
         reference_file=refseq_file,
         quality_threshold=quality_threshold,
     ) as wrapper:
-        frag_ends = wrapper.fetch(contig, start, stop)
+        frag_ends = region_fragments(
+            wrapper, contig, start, stop, fraction_low, fraction_high
+        )
 
         kmer_list = gen_kmers(k, "ACGT")
         breakpoint_motif_counts = dict(zip(kmer_list, 4**k * [0]))
