@@ -430,8 +430,8 @@ def adjust_wps(**params):
     "gap_file",
     metavar="GAPS",
     help='Telomere/centromere annotations: a BED4 file (4th column '
-    '"centromere"/"telomere"/"short arm") or a genome name '
-    "(hg19/b37/hg38/GRCh38).",
+    '"centromere"/"telomere"/"short_arm") or a genome name '
+    "(hg19/b37/human_g1k_v37/hg38/GRCh38).",
 )
 @output_option("Output file (.bed, .bed.gz, .tsv, or .csv).")
 @click.option(
@@ -445,14 +445,16 @@ def adjust_wps(**params):
     "remove-nocov",
     "remove_nocov",
     True,
-    "Remove the two hg19 regions with no coverage (use --no-remove-nocov for "
-    "non-hg19 reference genomes).",
+    "Remove the two hg19 regions with no coverage. They are removed by row "
+    "position, so use --no-remove-nocov unless BINS are the original hg19 HiC "
+    "bins with -g hg19 and all autosomes.",
 )
 @bool_flag(
     "merge-bins",
     "merge_bins",
     True,
-    "Merge input bins to 5Mb (use --no-merge-bins to keep the input bins).",
+    "Merge input bins into --merge-size windows (use --no-merge-bins to keep "
+    "the input bins).",
 )
 @click.option(
     "--merge-size",
@@ -460,8 +462,18 @@ def adjust_wps(**params):
     metavar="BP",
     default=5000000,
     show_default=True,
-    type=int,
-    help="Target size of merged genomic intervals.",
+    type=click.IntRange(min=1),
+    help="Size of merged bins in bp. Must be a multiple of the (uniform) "
+    "size of the input bins.",
+)
+@click.option(
+    "--strict-merge-size",
+    "strict_window_size",
+    is_flag=True,
+    default=False,
+    help="Merge into windows exactly --merge-size wide, rather than a fixed "
+    "number of consecutive bins (the original DELFI method), which can span "
+    "more where bins overlapping gaps were removed.",
 )
 @min_mapq_option(30)
 @threads_option()

@@ -9,6 +9,41 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+- `delfi --strict-merge-size` (`strict_window_size=True` on `delfi` and
+  `delfi_merge_bins`) merges bins into windows exactly `--merge-size` wide.
+  By default, windows hold a fixed number of consecutive remaining bins, as
+  in the original DELFI scripts, so they span more than `--merge-size` where
+  bins overlapping gaps were removed. With the flag, such windows keep their
+  span but aggregate fewer bins. Off by default; existing output is
+  unchanged.
+
+### Fixed
+- `delfi --merge-size` (`delfi(window_size=...)`) now takes effect.
+  Previously it was ignored and bins were always merged 50 at a time
+  (100kb -> 5Mb). Bins are now merged `window_size // bin_size` at a time,
+  and `delfi_merge_bins` gains keyword-only `window_size` and `bin_size`
+  arguments (the bin size is inferred from the bins when omitted). Default
+  output is unchanged.
+- When merging, `delfi`/`delfi_merge_bins` now check that bins are a uniform
+  size that evenly divides the merge window, and raise a `ValueError`
+  otherwise. Both half-open BED bins and end-inclusive bins (such as the
+  Cristiano et al. HiC compartment bins, where `stop - start = 99999`) are
+  accepted, and the detected convention is logged. A shorter final bin on
+  a contig (as from `bedtools makewindows`) is dropped with a warning.
+  `--no-merge-bins` runs are not validated. `--merge-size` must be positive.
+- `delfi_merge_bins` no longer drops the first bin of each q-arm when each
+  merged window is a single bin.
+- `delfi -g`/`delfi(gap_file=...)` accepts a genome name again (`hg19`,
+  `b37`, `human_g1k_v37`, `hg38`, `GRCh38`), as documented. It had been
+  read as a file path and failed with "hg19 not found." A path to an existing
+  file still takes precedence, and `gap_file` now also accepts
+  `pathlib.Path`.
+- `delfi` without a gap file (no `-g`) now merges bins per contig instead of
+  silently returning no rows: bins are labeled by contig rather than arm, and
+  `delfi_merge_bins` only recognized p/q arm labels. Output with a gap file
+  is unchanged.
+
 ## [1.1.0] - 2026-07-23
 
 ### Added

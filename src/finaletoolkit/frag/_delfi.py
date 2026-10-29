@@ -1,9 +1,11 @@
 """
 DELFI fragmentation feature (Cristiano et al., 2019): short/long fragment
-ratios per genomic bin, with optional GC correction and 100kb->5Mb merging.
+ratios per genomic bin, with optional GC correction and merging of bins into
+larger windows (100kb->5Mb by default).
 """
 from __future__ import annotations
 
+import os
 import time
 import warnings
 from collections import defaultdict
@@ -16,7 +18,10 @@ import pandas
 from tqdm import tqdm
 
 from finaletoolkit.frag._delfi_gc_correct import delfi_gc_correct
-from finaletoolkit.frag._delfi_merge_bins import delfi_merge_bins
+from finaletoolkit.frag._delfi_merge_bins import (
+    _resolve_bin_size,
+    delfi_merge_bins,
+)
 from finaletoolkit.genome.gaps import GenomeGaps
 from finaletoolkit.io.alignment import AlignmentWrapper
 from finaletoolkit.io.reference import ReferenceWrapper
@@ -139,6 +144,7 @@ def delfi(
     remove_nocov: bool = True,
     merge_bins: bool = True,
     window_size: int = 5000000,
+    strict_window_size: bool = False,
     quality_threshold: int = 30,
     workers: int = 1,
     verbose: Union[int, bool] = False,
@@ -152,15 +158,22 @@ def delfi(
     chrom_sizes : str
         ``.chrom.sizes`` file (autosomes only to match the original scripts).
     bins_file : str
-        BED of bins (100kb to match the original methodology).
+        BED of bins. To match the original methodology, use the 100kb hg19
+        HiC compartment bins, ``hic_compartments_100kb_ebv_2014.txt`` from
+        `HiC_AB_Compartments <https://github.com/Jfortin1/HiC_AB_Compartments>`_,
+        converted to tab-delimited with a ``#`` header (see
+        :ref:`DELFI bins <delfi-bins>` for the command). Coordinates are read
+        as written (0-based, half-open), whereas the original R scripts read
+        that file as 1-based, so bins here sit 1 bp later than in the
+        original.
     reference_file : str
         Reference genome (``.2bit`` or FASTA; FASTA required for CRAM input).
     blacklist_file : str, optional
         BED of regions to ignore.
     gap_file : str or GenomeGaps, optional
         Telomere/centromere annotations: a BED4 file, a genome name
-        (``"b37"``/``"hg19"``/``"hg38"``/``"GRCh38"``), or a
-        :class:`~finaletoolkit.genome.GenomeGaps`.
+        (``"hg19"``/``"b37"``/``"human_g1k_v37"``/``"hg38"``/``"GRCh38"``),
+        or a :class:`~finaletoolkit.genome.GenomeGaps`.
     output_file : str, optional
         Output BED/`.bed.gz`/`.tsv`/`.csv` path, or ``"-"`` for stdout.
     no_gc_correct : bool, optional
@@ -169,11 +182,21 @@ def delfi(
         Deprecated; overrides ``no_gc_correct`` when set.
     remove_nocov : bool, optional
         Remove the two hg19 no-coverage windows of Cristiano et al. (default
-        ``True``).  Disable for non-hg19 references.
+        ``True``). They are removed by row position, so this is only correct
+        with the HiC bins above, hg19 gaps, and all autosomes; disable it
+        otherwise (see :ref:`DELFI bins <delfi-bins>`).
     merge_bins : bool, optional
-        Merge 100kb bins to 5Mb (default ``True``).
+        Merge bins into ``window_size`` windows (default ``True``). Requires
+        uniform bins in ``bins_file`` (half-open or end-inclusive); short
+        bins at contig ends are dropped with a warning.
     window_size : int, optional
-        Merge window size in bp (default 5,000,000).
+        Merge window size in bp (default 5,000,000). Must be a multiple of
+        the bin size; only used when ``merge_bins`` is ``True``.
+    strict_window_size : bool, optional
+        Merge into windows exactly ``window_size`` bp wide instead of
+        ``window_size // bin_size`` consecutive remaining bins (default
+        ``False``, matching the original DELFI scripts). See
+        :func:`delfi_merge_bins`.
     quality_threshold : int, optional
         Minimum mapping quality (default 30).
     workers : int, optional
@@ -196,6 +219,7 @@ def delfi(
         blacklist_file: {blacklist_file}
         output_file: {output_file}
         window_size: {window_size}
+        strict_window_size: {strict_window_size}
         no_gc_correct: {no_gc_correct}
         gc_correct: {gc_correct} (overrides no_gc_correct if set)
         remove_nocov: {remove_nocov}
@@ -234,6 +258,20 @@ def delfi(
 
     if verbose:
         stderr.write(f"{bins.shape[0]} bins read from file.\n")
+
+    # Validate before the (slow) per-bin computation so bad input fails fast.
+    if merge_bins:
+        layout = _resolve_bin_size(bins, window_size)
+        bins = bins.loc[layout.keep]
+        bin_size = layout.bin_size
+        if verbose:
+            stderr.write(
+                f"{bin_size} bp "
+                f"{'end-inclusive' if layout.inclusive else 'half-open'} "
+                f"bins; merging {window_size // bin_size} bins per window.\n"
+            )
+
+    if verbose:
         stderr.write("Filtering gaps...\n")
 
     if gaps is not None:
@@ -351,7 +389,14 @@ def delfi(
     if merge_bins:
         if verbose:
             stderr.write("Merging bins...\n")
-        final_bins = delfi_merge_bins(gc_corrected, gc_correct, verbose=verbose)
+        final_bins = delfi_merge_bins(
+            gc_corrected,
+            gc_correct,
+            verbose=verbose,
+            window_size=window_size,
+            bin_size=bin_size,
+            strict_window_size=strict_window_size,
+        )
     else:
         final_bins = gc_corrected
 
@@ -370,14 +415,35 @@ def delfi(
     return final_bins
 
 
+# Genome names accepted for ``gap_file`` (same names as ``gap-bed``).
+_NAMED_GAPS = {
+    "hg19": GenomeGaps.ucsc_hg19,
+    "b37": GenomeGaps.b37,
+    "human_g1k_v37": GenomeGaps.b37,
+    "hg38": GenomeGaps.hg38,
+    "GRCh38": GenomeGaps.hg38,
+}
+
+
 def _resolve_gaps(gap_file) -> GenomeGaps | None:
-    """Coerce the ``gap_file`` argument into a :class:`GenomeGaps` or ``None``."""
+    """Coerce the ``gap_file`` argument into a :class:`GenomeGaps` or ``None``.
+
+    A string or path is read as a gap BED file if it exists, else looked up
+    as a genome name in ``_NAMED_GAPS``.
+    """
     if gap_file is None:
         return None
-    if isinstance(gap_file, str):
-        return GenomeGaps(gap_file)
     if isinstance(gap_file, GenomeGaps):
         return gap_file
+    if isinstance(gap_file, (str, os.PathLike)):
+        if os.path.exists(gap_file):
+            return GenomeGaps(gap_file)
+        if str(gap_file) in _NAMED_GAPS:
+            return _NAMED_GAPS[str(gap_file)]()
+        raise FileNotFoundError(
+            f"gap_file {str(gap_file)!r} is neither an existing file nor a "
+            f"known genome name ({', '.join(_NAMED_GAPS)})."
+        )
     raise TypeError(f"{type(gap_file)} is not accepted type for gap_file")
 
 
