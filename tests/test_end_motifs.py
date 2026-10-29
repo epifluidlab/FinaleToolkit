@@ -321,3 +321,45 @@ class TestFragmentLengthFilter:
         motifs = EndMotifsIntervals.from_file(str(out), 0, '\t', 0)
         # 150-170 bp plus 121, 135, 137, 147 bp -> 12 fragments.
         assert motifs.total_counts == [24]
+
+
+class TestMidpointMembership:
+    """A fragment belongs to a region only if its midpoint lies in
+    ``[start, stop)``, as before the v0.12.0 AlignmentWrapper refactor.
+
+    Five fragments overlap 12:34443118-34443538; the last (34443483-34443660,
+    midpoint 34443571) has its midpoint past the end. A split at 34443200
+    cuts through the first two fragments (and their read1 alignments, which
+    is what a BAM index query matches on).
+    """
+
+    @staticmethod
+    def _files(request):
+        data = request.path.parent / 'data'
+        return str(data / '12.3444.b37.bam'), str(data / 'b37.chr12.2bit')
+
+    def test_overlap_without_midpoint_is_excluded(self, request):
+        bam, ref = self._files(request)
+        counts = region_end_motifs(
+            bam, '12', 34443118, 34443538, ref, quality_threshold=0)
+        assert sum(counts.values()) == 2 * 4
+
+    @pytest.mark.parametrize('input_name', [
+        '12.3444.b37.bam', '12.3444.b37.frag.gz',
+    ])
+    @pytest.mark.parametrize('region_motifs', [
+        region_end_motifs, region_breakpoint_motifs,
+    ])
+    def test_adjacent_regions_partition_fragments(
+        self, request, region_motifs, input_name
+    ):
+        _, ref = self._files(request)
+        frags = str(request.path.parent / 'data' / input_name)
+
+        def total(start, stop):
+            return sum(region_motifs(
+                frags, '12', start, stop, ref, quality_threshold=0).values())
+
+        whole = total(34443118, 34443700)
+        assert whole == 2 * 5
+        assert total(34443118, 34443200) + total(34443200, 34443700) == whole

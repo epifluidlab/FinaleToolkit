@@ -28,6 +28,14 @@ and this project adheres to
   effect, matching v0.11 and earlier. `region_end_motifs` also accepts
   `fraction_low=None` instead of raising `TypeError`. Reported by Ludvig
   Olsen.
+- The same four motif commands count a fragment in a region only if its
+  midpoint lies in that region, as in v0.11 and earlier. Since v0.12.0 any
+  fragment overlapping the region was counted (for BAM/CRAM, any whose read1
+  alignment overlapped), so fragments straddling a boundary were counted in
+  both neighboring 1 Mb windows by `end-motifs`/`breakpoint-motifs`, and in
+  every overlapping interval by the `interval-*` commands. **Output
+  changes**, mostly for intervals: a fragment overlapping a region whose
+  midpoint lies outside it is no longer counted there.
 - `delfi --merge-size` (`delfi(window_size=...)`) now takes effect.
   Previously it was ignored and bins were always merged 50 at a time
   (100kb -> 5Mb). Bins are now merged `window_size // bin_size` at a time,
