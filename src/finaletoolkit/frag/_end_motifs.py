@@ -25,6 +25,7 @@ from ._motif_common import (
     _MotifsIntervals,
     aggregate_genome_motifs,
     aggregate_interval_motifs,
+    region_fragments,
     resolve_motif_aliases,
     write_motif_freqs,
 )
@@ -105,7 +106,7 @@ def region_end_motifs(
         raise ValueError("Cannot have both both_strands and negative_strand.")
 
     # fraction_low < k breaks py2bit sequence queries.
-    if fraction_low < k:
+    if fraction_low is not None and fraction_low < k:
         warnings.warn(
             f"fraction_low={fraction_low} < k={k}, which may cause errors. "
             "Automatically setting fraction_low=k."
@@ -117,7 +118,9 @@ def region_end_motifs(
         reference_file=refseq_file,
         quality_threshold=quality_threshold,
     ) as wrapper:
-        frag_ends = wrapper.fetch(contig, start, stop)
+        frag_ends = region_fragments(
+            wrapper, contig, start, stop, fraction_low, fraction_high
+        )
 
         kmer_list = gen_kmers(k, "ACGT")
         end_motif_counts = dict(zip(kmer_list, 4**k * [0]))
