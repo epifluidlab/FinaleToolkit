@@ -22,6 +22,7 @@ from tqdm import tqdm
 
 import finaletoolkit.frag as pkg_data
 from finaletoolkit.utils import gen_kmers
+from finaletoolkit.utils._comparison import _none_geq, _none_leq
 
 # Path to the Zhou et al. (2023) end-motif f-profiles bundled with the package.
 FPROFILE_PATH = files(pkg_data) / "data" / "end_motif_f_profiles.tsv"
@@ -136,6 +137,31 @@ def resolve_motif_aliases(
         raise ValueError("fraction_high and max_length cannot both be specified")
 
     return min_length, max_length
+
+
+def region_fragments(
+    wrapper,
+    contig: str,
+    start: int,
+    stop: int,
+    min_length: int | None,
+    max_length: int | None,
+) -> Iterator:
+    """Yield fragments whose midpoint lies in ``[start, stop)`` and whose
+    length is within inclusive bounds.
+
+    Matches :func:`~finaletoolkit.utils.frag_generator` with its default
+    ``intersect_policy="midpoint"``: each fragment belongs to exactly one of
+    a set of adjacent windows, so genome-wide sums don't double count
+    fragments straddling a boundary. ``None`` disables a length bound.
+    """
+    for frag in wrapper.fetch(contig, start, stop):
+        if not start <= (frag.start + frag.stop) // 2 < stop:
+            continue
+        if _none_geq(frag.length, min_length) and _none_leq(
+            frag.length, max_length
+        ):
+            yield frag
 
 
 class _MotifFreqs:
